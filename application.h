@@ -49,7 +49,7 @@ struct Application
 
         Image image("cat_life.jpg");
 
-        Painter painter(nullptr);
+        Painter painter(display.surface());
         painter.drawImage(image, 0, 0);
         display.update();
 
