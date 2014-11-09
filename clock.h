@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdint.h>
 #include <SDL2/SDL.h>
 
 #include "log.h"
@@ -16,7 +15,7 @@ struct Clock
     /**
      * Time/frequency/duration data types.
      */
-    typedef int64_t Time;
+    typedef long long Time;
 
     /**
      * Conversion constants.
@@ -92,7 +91,7 @@ struct Clock
      */
     static void sleep(Time time)
     {
-        SDL_Delay(uint32_t(time));
+        SDL_Delay((unsigned int) time);
     }
 
 private:
