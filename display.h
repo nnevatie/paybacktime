@@ -6,6 +6,7 @@
 
 #include "image.h"
 #include "clock.h"
+#include "log.h"
 
 namespace hc
 {
@@ -44,6 +45,9 @@ struct Display
 
             return true;
         }
+        else
+            HCLOG(Warn) << "Window already open.";
+
         return false;
     }
 
@@ -54,6 +58,9 @@ struct Display
             SDL_DestroyWindow(window_);
             return true;
         }
+        else
+            HCLOG(Warn) << "Window not open.";
+
         return false;
     }
 
