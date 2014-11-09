@@ -18,8 +18,7 @@ struct Application
 {
     Application()
     {
-        HCTIME("App life");
-        HCLOG(Info) << "begin";
+        HCTIME("Construct");
 
         // Init SDL
         if (SDL_Init(SDL_INIT_VIDEO))
@@ -33,7 +32,7 @@ struct Application
 
     ~Application()
     {
-        HCLOG(Info) << "end";
+        HCTIME("Clean up");
 
         // Clean up SDL image
         IMG_Quit();
