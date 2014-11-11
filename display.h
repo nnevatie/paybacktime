@@ -4,7 +4,6 @@
 
 #include <SDL2/SDL.h>
 
-#include "image.h"
 #include "clock.h"
 #include "log.h"
 
