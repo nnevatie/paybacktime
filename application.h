@@ -10,6 +10,7 @@
 #include "image.h"
 #include "clock.h"
 #include "log.h"
+#include "sdf_primitives.h"
 
 namespace hc
 {
@@ -51,6 +52,11 @@ struct Application
         Painter painter(display.surface());
         painter.drawImage(image, 0, 0);
         display.update();
+
+        const sdf::Sphere sphere(1.f);
+        HCLOG(Info) << "Sphere d: " << sphere(glm::vec3(0, 0, 0));
+        HCLOG(Info) << "Sphere d: " << sphere(glm::vec3(1, 0, 0));
+        HCLOG(Info) << "Sphere d: " << sphere(glm::vec3(2, 0, 0));
 
         bool running = true;
         while (running)
