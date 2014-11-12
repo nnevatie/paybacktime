@@ -54,9 +54,15 @@ struct Application
         display.update();
 
         const sdf::Sphere sphere(1.f);
-        HCLOG(Info) << "Sphere d: " << sphere(glm::vec3(0, 0, 0));
-        HCLOG(Info) << "Sphere d: " << sphere(glm::vec3(1, 0, 0));
-        HCLOG(Info) << "Sphere d: " << sphere(glm::vec3(2, 0, 0));
+        HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});
+        HCLOG(Info) << "Sphere d: " << sphere({1, 0, 0});
+        HCLOG(Info) << "Sphere d: " << sphere({2, 0, 0});
+
+        const sdf::Box box({2, 1, 1});
+        HCLOG(Info) << "Box d: " << box({0, 0, 0});
+        HCLOG(Info) << "Box d: " << box({1, 0, 0});
+        HCLOG(Info) << "Box d: " << box({2, 0, 0});
+        HCLOG(Info) << "Box d: " << box({3, 0, 0});
 
         bool running = true;
         while (running)
