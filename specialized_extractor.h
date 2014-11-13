@@ -1,5 +1,8 @@
 #pragma once
 
+#include <sstream>
+
+#include "geometry.h"
 #include "sdf_primitives.h"
 #include "clock.h"
 
@@ -9,9 +12,10 @@ namespace hc
 namespace SpecializedExtractor
 {
 
-void extract(const sdf::Sphere& /*sphere*/)
+Geometry extract(const sdf::Sphere& sphere)
 {
-    HCTIME("Extract sphere");
+    HCTIME(str(std::stringstream() << "Extract sphere, r: " << sphere.r));
+    return {};
 }
 
 } // namespace SpecializedExtractor

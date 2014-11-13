@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #define HCSOURCE() \
     hc::SourceLocation(__FILE__, __FUNCTION__, __LINE__)
 
@@ -17,5 +19,11 @@ struct SourceLocation
     const char* func_;
     const int   line_;
 };
+
+
+std::string str(const std::ostream& ostr)
+{
+    return static_cast<const std::ostringstream&>(ostr).str();
+}
 
 }  // namespace
