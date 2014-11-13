@@ -10,7 +10,9 @@
 #include "image.h"
 #include "clock.h"
 #include "log.h"
+
 #include "sdf_primitives.h"
+#include "specialized_extractor.h"
 
 namespace hc
 {
@@ -63,6 +65,8 @@ struct Application
         HCLOG(Info) << "Box d: " << box({1, 0, 0});
         HCLOG(Info) << "Box d: " << box({2, 0, 0});
         HCLOG(Info) << "Box d: " << box({3, 0, 0});
+
+        SpecializedExtractor::extract(sphere);
 
         bool running = true;
         while (running)
