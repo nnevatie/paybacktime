@@ -66,7 +66,7 @@ struct Application
         HCLOG(Info) << "Box d: " << box({2, 0, 0});
         HCLOG(Info) << "Box d: " << box({3, 0, 0});
 
-        SpecializedExtractor::extract(sphere);
+        ReferenceExtractor::extract(sphere);
 
         bool running = true;
         while (running)

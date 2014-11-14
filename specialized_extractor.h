@@ -9,7 +9,7 @@
 namespace hc
 {
 
-namespace SpecializedExtractor
+namespace ReferenceExtractor
 {
 
 Geometry extract(const sdf::Sphere& sphere)
