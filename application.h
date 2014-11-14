@@ -12,7 +12,7 @@
 #include "log.h"
 
 #include "sdf_primitives.h"
-#include "specialized_extractor.h"
+#include "reference_extractor.h"
 
 namespace hc
 {
