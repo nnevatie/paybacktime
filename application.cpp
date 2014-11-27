@@ -7,7 +7,6 @@
 
 #include "display.h"
 #include "painter.h"
-#include "image.h"
 #include "clock.h"
 #include "log.h"
 
