@@ -4,14 +4,17 @@ project(highcaliber)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wpedantic")
 
 set(SOURCE_FILES
-    application.h
-    clock.h
-    common.h
-    display.h
-    image.h
-    painter.h
-    log.h
-    main.cpp)
+    main.cpp
+    application.cpp
+    display.cpp
+    painter.cpp
+    image.cpp
+    common.cpp
+    clock.cpp
+    log.cpp
+    sdf_primitives.cpp
+    reference_extractor.cpp
+    )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/projects/highcaliber_build")
 

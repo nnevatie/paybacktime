@@ -21,17 +21,8 @@ struct Logger
         Fatal
     };
 
-    inline Logger(Priority priority, const SourceLocation& source) :
-        priority_(priority)
-    {
-        std::cout << priorityName(priority) << "|" <<
-            source.file_ << ":" << source.line_ << ":" << source.func_ << ": ";
-    }
-
-    inline ~Logger()
-    {
-        std::cout << std::endl;
-    }
+    Logger(Priority priority, const SourceLocation& source);
+    ~Logger();
 
     template<typename T> inline Logger& operator<<(const T& t)
     {
@@ -44,17 +35,6 @@ struct Logger
         std::cout << func;
         return *this;
     }
-
-private:
-    static inline const char* priorityName(Priority priority)
-    {
-        const char* priorityNames[] =
-            {"DEBUG ", "INFO ", "WARN ", "ERROR", "FATAL"};
-
-        return priorityNames[priority];
-    };
-
-    Priority priority_;
 };
 
 } // namespace

@@ -1,14 +1,9 @@
 #pragma once
 
-#include <SDL2/SDL.h>
-
-#include "log.h"
+#include "common.h"
 
 namespace hc
 {
-
-#define HCTIME(description)    \
-    hc::ScopedClock scopedClock_(HCSOURCE(), description)
 
 struct Clock
 {
@@ -25,95 +20,53 @@ struct Clock
     /**
      * Constructs a clock.
      */
-    Clock() : t0_(0), t1_(0)
-    {
-        start();
-    }
+    Clock();
 
     /**
      * Restarts the clock.
      */
-    void start()
-    {
-        t0_ = ticks();
-    }
+    void start();
 
     /**
      * Stops the clock and returns elapsed time (us).
      */
-    double stop()
-    {
-        t1_ = ticks();
-        return us();
-    }
+    double stop();
 
-    double us() const
-    {
-        return double(t1_ - t0_) * US_IN_S / frequency();
-    }
-
-    double ms() const
-    {
-        return us() / 1000;
-    }
-
-    double s() const
-    {
-        return us() / 1000000;
-    }
+    double us() const;
+    double ms() const;
+    double s() const;
 
     /**
      * Returns the clock's frequency.
      */
-    static Time frequency()
-    {
-        return SDL_GetPerformanceFrequency();
-    }
+    static Time frequency();
 
     /**
      * Returns the current tick count.
      */
-    static Time ticks()
-    {
-        return SDL_GetPerformanceCounter();
-    }
+    static Time ticks();
 
     /**
      * Returns the current time (us).
      */
-    static Time now()
-    {
-        return ticks() * US_IN_S / frequency();
-    }
-
+    static Time now();
     /**
      * Sleep for given time (ms).
      */
-    static void sleep(Time time)
-    {
-        SDL_Delay((unsigned int) time);
-    }
+    static void sleep(Time time);
 
 private:
 
     Time t0_, t1_;
 };
 
+#define HCTIME(description)    \
+    hc::ScopedClock scopedClock_(HCSOURCE(), description)
+
 struct ScopedClock
 {
-    inline ScopedClock(const SourceLocation& source, const std::string& message) :
-        source_(source),
-        message_(message)
-    {
-    }
-
-    inline ~ScopedClock()
-    {
-        clock_.stop();
-        Logger(Logger::Info, source_)
-            << (message_.length() > 0 ? (message_ + " ") : "")
-            << clock_.us() << " " << "us";
-    }
+    ScopedClock(const SourceLocation& source, const std::string& message);
+    ~ScopedClock();
 
 private:
     Clock clock_;

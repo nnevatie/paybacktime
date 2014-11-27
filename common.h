@@ -10,20 +10,13 @@ namespace hc
 
 struct SourceLocation
 {
-    inline SourceLocation(const char* file, const char* func, int line) :
-        file_(file), func_(func), line_(line)
-    {
-    }
+    SourceLocation(const char* file, const char* func, int line);
 
-    const char* file_;
-    const char* func_;
-    const int   line_;
+    const char* file;
+    const char* func;
+    const int   line;
 };
 
-
-std::string str(const std::ostream& ostr)
-{
-    return static_cast<const std::ostringstream&>(ostr).str();
-}
+std::string str(const std::ostream& ostr);
 
 }  // namespace
