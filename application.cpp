@@ -4,6 +4,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_opengl.h>
 
 #include "display.h"
 #include "painter.h"
@@ -46,11 +47,12 @@ bool Application::run()
     hc::Display display("High Caliber", 800, 640);
     display.open();
 
+    /*
     Image image("cat_life.jpg");
-
     Painter painter(display.surface());
     painter.drawImage(image, 0, 0);
     display.update();
+    */
 
     const sdf::Sphere sphere(1.f);
     HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});
@@ -64,6 +66,10 @@ bool Application::run()
     HCLOG(Info) << "Box d: " << box({3, 0, 0});
 
     ReferenceExtractor::extract(sphere);
+
+    glClearColor(1.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    display.swap();
 
     bool running = true;
     while (running)
