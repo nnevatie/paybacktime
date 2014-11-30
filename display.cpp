@@ -10,7 +10,8 @@ Display::Display(const std::string& title, int width, int height) :
     title_(title),
     width_(width),
     height_(height),
-    window_(nullptr)
+    window_(nullptr),
+    glContext_(nullptr)
 {
 }
 
@@ -29,6 +30,7 @@ bool Display::open()
     HCTIME("");
     if (!window_)
     {
+        // Create window
         window_ = SDL_CreateWindow(title_.c_str(),
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
@@ -36,6 +38,11 @@ bool Display::open()
             height_,
             SDL_WINDOW_OPENGL);
 
+        // Create OpenGL context
+        // TODO: Define requested version/profile
+        glContext_ = SDL_GL_CreateContext(window_);
+
+        // TODO: Check return values
         return true;
     }
     else
@@ -48,6 +55,7 @@ bool Display::close()
 {
     if (window_)
     {
+        SDL_GL_DeleteContext(glContext_);
         SDL_DestroyWindow(window_);
         return true;
     }
@@ -60,6 +68,16 @@ bool Display::close()
 bool Display::update()
 {
     return !SDL_UpdateWindowSurface(window_);
+}
+
+bool Display::swap()
+{
+    if (window_)
+    {
+        SDL_GL_SwapWindow(window_);
+        return true;
+    }
+    return false;
 }
 
 } // namespace

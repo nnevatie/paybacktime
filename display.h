@@ -10,7 +10,6 @@ namespace hc
 struct Display
 {
     Display(const std::string& title, int width, int height);
-
     ~Display();
 
     SDL_Surface* surface() const;
@@ -18,6 +17,7 @@ struct Display
     bool open();
     bool close();
     bool update();
+    bool swap();
 
 private:
 
@@ -26,6 +26,7 @@ private:
     int height_;
 
     SDL_Window* window_;
+    SDL_GLContext glContext_;
 };
 
 } // namespace
