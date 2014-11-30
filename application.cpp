@@ -14,6 +14,8 @@
 #include "sdf_primitives.h"
 #include "reference_extractor.h"
 
+#include "gl_buffers.h"
+
 namespace hc
 {
 
@@ -67,7 +69,7 @@ bool Application::run()
 
     ReferenceExtractor::extract(sphere);
 
-    glClearColor(1.0, 0.0, 0.0, 1.0);
+    glClearColor(1.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     display.swap();
 

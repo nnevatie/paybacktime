@@ -14,6 +14,7 @@ set(SOURCE_FILES
     log.cpp
     sdf_primitives.cpp
     reference_extractor.cpp
+    gl_buffers.cpp
     )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/projects/highcaliber_build")
