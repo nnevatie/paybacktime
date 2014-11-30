@@ -27,6 +27,7 @@ target_link_libraries(highcaliber
                       SDL2main
                       SDL2
                       SDL2_image
+                      opengl32
                       )
 
 add_custom_command(TARGET highcaliber PRE_BUILD
