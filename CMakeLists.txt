@@ -28,6 +28,7 @@ target_link_libraries(highcaliber
                       SDL2main
                       SDL2
                       SDL2_image
+                      glew32
                       opengl32
                       )
 
