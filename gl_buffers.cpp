@@ -12,8 +12,8 @@ namespace
 
 GLenum bufferTarget(Buffer::Type type)
 {
-    return type == Buffer::Type::Vertex ? GL_ARRAY_BUFFER_ARB :
-                                          GL_ELEMENT_ARRAY_BUFFER_ARB;
+    return type == Buffer::Type::Vertex ? GL_ARRAY_BUFFER :
+                                          GL_ELEMENT_ARRAY_BUFFER;
 }
 
 GLenum bufferUsage(Buffer::Usage usage)
@@ -41,6 +41,7 @@ Buffer::Buffer(Buffer::Type type) :
 
 Buffer::~Buffer()
 {
+    dealloc();
 }
 
 bool Buffer::alloc(const void* data, int size)
@@ -51,16 +52,26 @@ bool Buffer::alloc(const void* data, int size)
     glGenBuffers(1, &id);
     glBindBuffer(target, id);
     glBufferData(target, size, data, bufferUsage(usage));
-    glGetBufferParameterivARB(target, GL_BUFFER_SIZE_ARB, &allocated);
+    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &allocated);
 
     if(allocated != size)
     {
         HCLOG(Warn) << "Could not alloc " << size << " bytes.";
-        glDeleteBuffersARB(1, &id);
-        id = 0;
+        dealloc();
         return false;
     }
     return true;
+}
+
+bool Buffer::dealloc()
+{
+    if (id)
+    {
+        glDeleteBuffers(1, &id);
+        id = 0;
+        return true;
+    }
+    return false;
 }
 
 } // namespace gl

@@ -27,6 +27,8 @@ struct Buffer
 
     bool alloc(const void* data, int size);
 
+    bool dealloc();
+
     Type type;
     Usage usage;
 
