@@ -67,7 +67,7 @@ bool Application::run()
     HCLOG(Info) << "Box d: " << box({2, 0, 0});
     HCLOG(Info) << "Box d: " << box({3, 0, 0});
 
-    ReferenceExtractor::extract(sphere);
+    const Geometry boxGeometry = ReferenceExtractor::extract(box);
 
     glClearColor(1.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);

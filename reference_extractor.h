@@ -10,6 +10,7 @@ namespace ReferenceExtractor
 {
 
 Geometry extract(const sdf::Sphere& sphere);
+Geometry extract(const sdf::Box& box);
 
 } // namespace SpecializedExtractor
 } // namespace
