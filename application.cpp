@@ -14,7 +14,7 @@
 #include "sdf_primitives.h"
 #include "reference_extractor.h"
 
-#include "gl_buffers.h"
+#include "gl_mesh.h"
 
 namespace hc
 {
@@ -68,6 +68,7 @@ bool Application::run()
     HCLOG(Info) << "Box d: " << box({3, 0, 0});
 
     const Geometry boxGeometry = ReferenceExtractor::extract(box);
+    const gl::Mesh mesh(boxGeometry);
 
     glClearColor(1.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);

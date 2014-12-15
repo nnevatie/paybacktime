@@ -17,21 +17,19 @@ struct Buffer
 
     enum class Usage
     {
-        StaticDraw,
+        StaticDraw
         DynamicDraw,
         StreamDraw
-    };
+    };,
 
     Buffer(Type type);
     ~Buffer();
 
     bool alloc(const void* data, int size);
-
     bool dealloc();
 
-    Type type;
-    Usage usage;
-
+    Type   type;
+    Usage  usage;
     GLuint id;
 };
 
