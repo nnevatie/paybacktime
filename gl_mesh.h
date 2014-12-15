@@ -11,6 +11,9 @@ namespace gl
 struct Mesh
 {
     Mesh(const Geometry& geometry);
+
+    Buffer vertices,
+           indices;
 };
 
 } // namespace gl

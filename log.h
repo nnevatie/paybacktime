@@ -5,7 +5,7 @@
 #include "common.h"
 
 #define HCLOG(priority)    \
-    hc::Logger(Logger::priority, HCSOURCE())
+    hc::Logger(hc::Logger::priority, HCSOURCE())
 
 namespace hc
 {
