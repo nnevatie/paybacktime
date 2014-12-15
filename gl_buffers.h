@@ -17,10 +17,10 @@ struct Buffer
 
     enum class Usage
     {
-        StaticDraw
+        StaticDraw,
         DynamicDraw,
         StreamDraw
-    };,
+    };
 
     Buffer(Type type);
     ~Buffer();
