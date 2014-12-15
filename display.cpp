@@ -1,3 +1,5 @@
+#include <GL/glew.h>
+
 #include "display.h"
 
 #include "clock.h"
@@ -40,10 +42,11 @@ bool Display::open()
 
         // Create OpenGL context
         // TODO: Define requested version/profile
+        //       and check return value
         glContext_ = SDL_GL_CreateContext(window_);
 
-        // TODO: Check return values
-        return true;
+        // Init GLEW
+        return glewInit() == GLEW_OK;
     }
     else
         HCLOG(Warn) << "Window already open.";
