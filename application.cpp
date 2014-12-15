@@ -61,7 +61,7 @@ bool Application::run()
     HCLOG(Info) << "Sphere d: " << sphere({1, 0, 0});
     HCLOG(Info) << "Sphere d: " << sphere({2, 0, 0});
 
-    const sdf::Box box({2, 1, 1});
+    const sdf::Box box({0.5, 0.5, 0.5});
     HCLOG(Info) << "Box d: " << box({0, 0, 0});
     HCLOG(Info) << "Box d: " << box({1, 0, 0});
     HCLOG(Info) << "Box d: " << box({2, 0, 0});
@@ -70,13 +70,24 @@ bool Application::run()
     const Geometry boxGeometry = ReferenceExtractor::extract(box);
     const gl::Mesh mesh(boxGeometry);
 
-    glClearColor(1.f, 0.f, 0.f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    display.swap();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -10.0, 10.0);
 
+    float a = 0;
     bool running = true;
     while (running)
     {
+        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslatef(0, 0, 5);
+        glRotatef(a, 0.25, 0.5, 1);
+        mesh.render();
+        display.swap();
+        a += 0.1f;
+
         SDL_Event e;
         while (SDL_PollEvent(&e))
         {

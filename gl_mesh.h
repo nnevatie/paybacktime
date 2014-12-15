@@ -12,6 +12,8 @@ struct Mesh
 {
     Mesh(const Geometry& geometry);
 
+    void render() const;
+
     Buffer vertices,
            indices;
 };

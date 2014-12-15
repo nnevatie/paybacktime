@@ -30,12 +30,12 @@ Geometry extract(const sdf::Box& box)
             {-v.x, -v.y,  v.z},
             { v.x, -v.y,  v.z},
             { v.x,  v.y,  v.z},
-            {-v.x, -v.y,  v.z},
+            {-v.x,  v.y,  v.z},
             // Back
             {-v.x, -v.y, -v.z},
             { v.x, -v.y, -v.z},
             { v.x,  v.y, -v.z},
-            {-v.x, -v.y, -v.z}
+            {-v.x,  v.y, -v.z}
         },
         // Indices
         {

@@ -35,13 +35,34 @@ GLenum bufferUsage(Buffer::Usage usage)
 Buffer::Buffer(Buffer::Type type) :
     type(type),
     usage(Usage::StaticDraw),
-    id(0)
+    id(0),
+    size(0)
 {
 }
 
 Buffer::~Buffer()
 {
     dealloc();
+}
+
+bool Buffer::bind() const
+{
+    if (id)
+    {
+        glBindBuffer(bufferTarget(type), id);
+        return true;
+    }
+    return false;
+}
+
+bool Buffer::unbind() const
+{
+    if (id)
+    {
+        glBindBuffer(bufferTarget(type), 0);
+        return true;
+    }
+    return false;
 }
 
 bool Buffer::alloc(const void* data, int size)
@@ -60,6 +81,8 @@ bool Buffer::alloc(const void* data, int size)
         dealloc();
         return false;
     }
+
+    this->size = size;
     return true;
 }
 
