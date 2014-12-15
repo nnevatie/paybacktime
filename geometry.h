@@ -9,8 +9,11 @@ namespace hc
 
 struct Geometry
 {
-    std::vector<glm::vec3>      vertices;
-    std::vector<unsigned short> indices;
+    typedef glm::vec3 Vertex;
+    typedef unsigned short Index;
+
+    std::vector<Vertex> vertices;
+    std::vector<Index>  indices;
 };
 
 } // namespace
