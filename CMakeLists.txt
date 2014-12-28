@@ -15,6 +15,7 @@ set(SOURCE_FILES
     sdf_primitives.cpp
     reference_extractor.cpp
     gl_buffers.cpp
+    gl_shaders.cpp
     gl_mesh.cpp
     )
 

@@ -15,6 +15,7 @@
 #include "reference_extractor.h"
 
 #include "gl_mesh.h"
+#include "gl_shaders.h"
 
 namespace hc
 {
