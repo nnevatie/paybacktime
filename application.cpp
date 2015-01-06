@@ -47,7 +47,7 @@ Application::~Application()
 
 bool Application::run()
 {
-    hc::Display display("High Caliber", 800, 640);
+    Display display("High Caliber", 800, 640);
     display.open();
 
     /*
@@ -56,6 +56,8 @@ bool Application::run()
     painter.drawImage(image, 0, 0);
     display.update();
     */
+
+    gl::Shader shader(filesystem::path("cat_life.jpg"));
 
     const sdf::Sphere sphere(1.f);
     HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});
