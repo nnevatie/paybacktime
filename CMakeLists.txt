@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 2.8.4)
 project(highcaliber)
 
+# Installer macro
+macro(install_files src dest)
+    message(STATUS "Installing files ${src} -> ${dest}")
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/${src} $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest})
+endmacro(install_files)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wpedantic")
 
 set(SOURCE_FILES
@@ -47,8 +56,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/projects/highcaliber_build")
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-#set_target_properties(highcaliber PROPERTIES LINK_FLAGS "-mwindows")
-
 target_link_libraries(${PROJECT_NAME}
                       ${SYS_LIBS}
                       ${BOOST_LIBS}
@@ -56,6 +63,5 @@ target_link_libraries(${PROJECT_NAME}
                       ${OPENGL_LIBS}
                       )
 
-add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                   ${CMAKE_SOURCE_DIR}/external $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+install_files(external .)
+install_files(data data)

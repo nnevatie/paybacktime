@@ -72,7 +72,8 @@ Shader::Shader(Type type, const filesystem::path& path) :
 {
 }
 
-ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders)
+ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders) :
+    shaders(shaders)
 {
 }
 

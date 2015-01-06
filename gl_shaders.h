@@ -31,6 +31,8 @@ private:
 struct ShaderProgram
 {
     ShaderProgram(const std::vector<Shader>& shaders);
+
+    std::vector<Shader> shaders;
 };
 
 } // namespace gl

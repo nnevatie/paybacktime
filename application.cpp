@@ -51,13 +51,14 @@ bool Application::run()
     display.open();
 
     /*
-    Image image("cat_life.jpg");
+    Image image("data/cat_life.jpg");
     Painter painter(display.surface());
     painter.drawImage(image, 0, 0);
     display.update();
     */
 
-    gl::Shader shader(gl::Shader::Type::Vertex, filesystem::path("cat_life.jpg"));
+    gl::Shader vs(gl::Shader::Type::Vertex,   filesystem::path("data/passthrough.vs"));
+    gl::Shader fs(gl::Shader::Type::Fragment, filesystem::path("data/constant.fs"));
 
     const sdf::Sphere sphere(1.f);
     HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});
