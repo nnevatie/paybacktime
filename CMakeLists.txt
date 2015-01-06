@@ -19,21 +19,43 @@ set(SOURCE_FILES
     gl_mesh.cpp
     )
 
+# System dependencies
+set(SYS_LIBS
+    mingw32
+    )
+
+# Boost dependencies
+set(BOOST_LIBS
+    boost_system
+    boost_filesystem
+    )
+
+# SDL dependencies
+set(SDL_LIBS
+    SDL2main
+    SDL2
+    SDL2_image
+    )
+
+# OpenGL dependencies
+set(OPENGL_LIBS
+    glew32
+    opengl32
+    )
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/projects/highcaliber_build")
 
-add_executable(highcaliber ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 #set_target_properties(highcaliber PROPERTIES LINK_FLAGS "-mwindows")
 
-target_link_libraries(highcaliber
-                      mingw32
-                      SDL2main
-                      SDL2
-                      SDL2_image
-                      glew32
-                      opengl32
+target_link_libraries(${PROJECT_NAME}
+                      ${SYS_LIBS}
+                      ${BOOST_LIBS}
+                      ${SDL_LIBS}
+                      ${OPENGL_LIBS}
                       )
 
-add_custom_command(TARGET highcaliber PRE_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                   ${CMAKE_SOURCE_DIR}/external $<TARGET_FILE_DIR:highcaliber>)
+                   ${CMAKE_SOURCE_DIR}/external $<TARGET_FILE_DIR:${PROJECT_NAME}>)
