@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <GL/gl.h>
+#include "file_system.h"
 
 namespace hc
 {
@@ -12,18 +12,12 @@ namespace gl
 
 struct Shader
 {
-
+    Shader(const std::string& s);
+    Shader(const filesystem::path& path);
 
 private:
-    struct Data
-    {
-        Data(GLenum shaderType);
-        ~Data();
-
-        GLuint id;
-    };
-
-    std::shared_ptr<Data> data;
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 struct ShaderProgram
