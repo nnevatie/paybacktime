@@ -21,6 +21,6 @@ struct SourceLocation
 
 std::string str(const std::ostream& ostr);
 
-std::string read(const filesystem::path& path, bool binary = true);
+std::string readFile(const filesystem::path& path, bool binary = true);
 
 }  // namespace

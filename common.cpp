@@ -16,7 +16,7 @@ std::string str(const std::ostream& ostr)
     return static_cast<const std::ostringstream&>(ostr).str();
 }
 
-std::string read(const filesystem::path& path, bool binary)
+std::string readFile(const filesystem::path& path, bool binary)
 {
     HCTIME(__FUNCTION__);
 

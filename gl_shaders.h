@@ -12,8 +12,16 @@ namespace gl
 
 struct Shader
 {
-    Shader(const std::string& s);
-    Shader(const filesystem::path& path);
+    enum class Type
+    {
+        Vertex,
+        Fragment,
+        Geometry,
+        Compute
+    };
+
+    Shader(Type type, const std::string& s);
+    Shader(Type type, const filesystem::path& path);
 
 private:
     struct Data;

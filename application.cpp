@@ -57,7 +57,7 @@ bool Application::run()
     display.update();
     */
 
-    gl::Shader shader(filesystem::path("cat_life.jpg"));
+    gl::Shader shader(gl::Shader::Type::Vertex, filesystem::path("cat_life.jpg"));
 
     const sdf::Sphere sphere(1.f);
     HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});
