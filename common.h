@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "file_system.h"
+
 #define HCSOURCE() \
     hc::SourceLocation(__FILE__, __FUNCTION__, __LINE__)
 
@@ -18,5 +20,7 @@ struct SourceLocation
 };
 
 std::string str(const std::ostream& ostr);
+
+std::string read(const filesystem::path& path, bool binary = true);
 
 }  // namespace

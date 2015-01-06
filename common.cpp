@@ -1,5 +1,8 @@
 #include "common.h"
 
+#include "log.h"
+#include "clock.h"
+
 namespace hc
 {
 
@@ -11,6 +14,22 @@ SourceLocation::SourceLocation(const char* file, const char* func, int line) :
 std::string str(const std::ostream& ostr)
 {
     return static_cast<const std::ostringstream&>(ostr).str();
+}
+
+std::string read(const filesystem::path& path, bool binary)
+{
+    HCTIME(__FUNCTION__);
+
+    std::ifstream ifs(path.string().c_str(), std::ios::in |
+                     (binary ? std::ios::binary : std::ios_base::openmode(0)));
+
+    const int size = filesystem::file_size(path);
+    HCLOG(Info) << "file size " << size << " bytes";
+
+    std::string buffer(size, 0);
+    ifs.read(&buffer[0], size);
+
+    return buffer;
 }
 
 }  // namespace
