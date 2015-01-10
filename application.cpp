@@ -17,7 +17,6 @@
 
 #include "gl_mesh.h"
 #include "gl_shaders.h"
-#include "gl_uniforms.h"
 
 namespace hc
 {
