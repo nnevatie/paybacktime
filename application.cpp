@@ -4,7 +4,8 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_opengl.h>
+
+#include <glm/vec4.hpp>
 
 #include "display.h"
 #include "painter.h"
@@ -16,6 +17,7 @@
 
 #include "gl_mesh.h"
 #include "gl_shaders.h"
+#include "gl_uniforms.h"
 
 namespace hc
 {
@@ -60,7 +62,7 @@ bool Application::run()
     gl::Shader vs(gl::Shader::Type::Vertex,   filesystem::path("data/passthrough.vs"));
     gl::Shader fs(gl::Shader::Type::Fragment, filesystem::path("data/constant.fs"));
     gl::ShaderProgram sp({vs, fs});
-    sp.bind();
+    sp.bind().setUniform("in_color", glm::vec4(1.0, 0.0, 0.0, 1.0));
 
     const sdf::Sphere sphere(1.f);
     HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});

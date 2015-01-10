@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 #include "file_system.h"
 
@@ -37,7 +37,10 @@ struct ShaderProgram
     ShaderProgram(const std::vector<Shader>& shaders);
     ~ShaderProgram();
 
-    void bind() const;
+    ShaderProgram& bind();
+
+    template<typename T>
+    ShaderProgram& setUniform(const char* name, const T& v);
 
     GLuint id;
     std::vector<Shader> shaders;

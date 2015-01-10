@@ -91,9 +91,10 @@ ShaderProgram::~ShaderProgram()
     glDeleteProgram(id);
 }
 
-void ShaderProgram::bind() const
+ShaderProgram& ShaderProgram::bind()
 {
     glUseProgram(id);
+    return *this;
 }
 
 } // namespace gl
