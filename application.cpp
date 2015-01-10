@@ -60,6 +60,7 @@ bool Application::run()
     gl::Shader vs(gl::Shader::Type::Vertex,   filesystem::path("data/passthrough.vs"));
     gl::Shader fs(gl::Shader::Type::Fragment, filesystem::path("data/constant.fs"));
     gl::ShaderProgram sp({vs, fs});
+    sp.bind();
 
     const sdf::Sphere sphere(1.f);
     HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});

@@ -1,6 +1,6 @@
-#include "gl_shaders.h"
-
 #include <GL/glew.h>
+
+#include "gl_shaders.h"
 
 #include "common.h"
 #include "log.h"
@@ -61,7 +61,6 @@ struct Shader::Data
     std::string source;
 };
 
-
 Shader::Shader(Type type, const std::string& s) :
     d(new Data(type, s))
 {
@@ -72,9 +71,29 @@ Shader::Shader(Type type, const filesystem::path& path) :
 {
 }
 
+GLuint Shader::id() const
+{
+    return d->id;
+}
+
 ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders) :
     shaders(shaders)
 {
+    id = glCreateProgram();
+    for (const Shader& shader : shaders)
+        glAttachShader(id, shader.id());
+
+    glLinkProgram(id);
+}
+
+ShaderProgram::~ShaderProgram()
+{
+    glDeleteProgram(id);
+}
+
+void ShaderProgram::bind() const
+{
+    glUseProgram(id);
 }
 
 } // namespace gl

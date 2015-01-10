@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include <GL/gl.h>
+
 #include "file_system.h"
 
 namespace hc
@@ -23,6 +25,8 @@ struct Shader
     Shader(Type type, const std::string& s);
     Shader(Type type, const filesystem::path& path);
 
+    GLuint id() const;
+
 private:
     struct Data;
     std::shared_ptr<Data> d;
@@ -31,7 +35,11 @@ private:
 struct ShaderProgram
 {
     ShaderProgram(const std::vector<Shader>& shaders);
+    ~ShaderProgram();
 
+    void bind() const;
+
+    GLuint id;
     std::vector<Shader> shaders;
 };
 
