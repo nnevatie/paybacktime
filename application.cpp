@@ -91,7 +91,7 @@ bool Application::run()
 
         sp.bind()
             .setUniform("in_matrix", mvp)
-            .setUniform("in_color", glm::vec4(0.2f, 0.4f, 0.7f, 1.f));
+            .setUniform("in_color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
