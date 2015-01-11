@@ -6,6 +6,8 @@
 #include <SDL2/SDL_image.h>
 
 #include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "display.h"
 #include "painter.h"
@@ -58,10 +60,9 @@ bool Application::run()
     display.update();
     */
 
-    gl::Shader vs(gl::Shader::Type::Vertex,   filesystem::path("data/passthrough.vs"));
-    gl::Shader fs(gl::Shader::Type::Fragment, filesystem::path("data/constant.fs"));
+    gl::Shader vs(gl::Shader::Type::Vertex,   filesystem::path("data/simple.vs"));
+    gl::Shader fs(gl::Shader::Type::Fragment, filesystem::path("data/screenspace.fs"));
     gl::ShaderProgram sp({vs, fs});
-    sp.bind().setUniform("in_color", glm::vec4(1.0, 0.0, 0.0, 1.0));
 
     const sdf::Sphere sphere(1.f);
     HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});
@@ -77,23 +78,27 @@ bool Application::run()
     const Geometry boxGeometry = ReferenceExtractor::extract(box);
     const gl::Mesh mesh(boxGeometry);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -10.0, 10.0);
-
     float a = 0;
     bool running = true;
     while (running)
     {
+        glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 6.f);
+        glm::mat4 view  = glm::translate(glm::mat4(),
+                                         glm::vec3(0.0f, 0.0f, -2.5f));
+
+        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(1.f, 1.f, 0.f));
+        glm::mat4 mvp = proj * view * model;
+
+        sp.bind()
+            .setUniform("in_matrix", mvp)
+            .setUniform("in_color", glm::vec4(0.2f, 0.4f, 0.7f, 1.f));
+
         glClearColor(0.f, 0.f, 0.f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        glTranslatef(0, 0, 5);
-        glRotatef(a, 0.25, 0.5, 1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         mesh.render();
         display.swap();
-        a += 0.1f;
+        a += 0.005f;
 
         SDL_Event e;
         while (SDL_PollEvent(&e))

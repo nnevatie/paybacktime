@@ -1,7 +1,8 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <glm/vec4.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace hc
 {
@@ -12,7 +13,17 @@ template<>
 ShaderProgram& ShaderProgram::setUniform<glm::vec4>(
     const char* name, const glm::vec4& v)
 {
-    glUniform4f(glGetUniformLocation(id, name), v[0], v[1], v[2], v[3]);
+    glUniform4fv(glGetUniformLocation(id, name),
+                 1, glm::value_ptr(v));
+    return *this;
+}
+
+template<>
+ShaderProgram& ShaderProgram::setUniform<glm::mat4>(
+    const char* name, const glm::mat4& v)
+{
+    glUniformMatrix4fv(glGetUniformLocation(id, name),
+                       1, GL_FALSE, glm::value_ptr(v));
     return *this;
 }
 

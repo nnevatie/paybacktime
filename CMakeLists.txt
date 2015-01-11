@@ -4,7 +4,6 @@ project(highcaliber)
 # Installer macro
 macro(install_files src dest)
     message(STATUS "Installing files ${src} -> ${dest}")
-
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                        COMMAND ${CMAKE_COMMAND} -E copy_directory
                        ${CMAKE_SOURCE_DIR}/${src} $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest})

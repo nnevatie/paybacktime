@@ -1,6 +1,7 @@
 #version 130
 
 uniform vec4 in_color;
+
 out vec4 out_color;
 
 void main()

@@ -18,10 +18,8 @@ Mesh::Mesh(const Geometry& geometry) :
 
 void Mesh::render() const
 {
-    glDisable(GL_CULL_FACE);
-    glClearDepth(0.0f);
-    glDepthFunc(GL_LEQUAL);
-
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glEnableClientState(GL_VERTEX_ARRAY);
 
     vertices.bind();
