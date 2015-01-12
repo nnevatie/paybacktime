@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 2.8.4)
 project(highcaliber)
 
-# Installer macro
+# Installer target/macro
+add_custom_target(install_files_target COMMENT "Installing files...")
 macro(install_files src dest)
     message(STATUS "Installing files ${src} -> ${dest}")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    add_custom_command(TARGET install_files_target POST_BUILD
                        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/${src} $<TARGET_FILE_DIR:${PROJECT_NAME}>/${dest})
+                       ${CMAKE_SOURCE_DIR}/${src} ${DEPLOY_DIR}/${dest})
 endmacro(install_files)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wpedantic")
@@ -51,7 +52,8 @@ set(OPENGL_LIBS
     opengl32
     )
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/projects/highcaliber_build")
+set(DEPLOY_DIR /projects/highcaliber_build)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${DEPLOY_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
@@ -64,3 +66,5 @@ target_link_libraries(${PROJECT_NAME}
 
 install_files(external .)
 install_files(data data)
+
+add_dependencies(${PROJECT_NAME} install_files_target)
