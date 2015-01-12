@@ -60,9 +60,17 @@ bool Application::run()
     display.update();
     */
 
-    gl::Shader vs(gl::Shader::Type::Vertex,   filesystem::path("data/simple.vs"));
-    gl::Shader fs(gl::Shader::Type::Fragment, filesystem::path("data/screenspace.fs"));
-    gl::ShaderProgram sp({vs, fs});
+    gl::Shader vsSimple(gl::Shader::Type::Vertex,
+                        filesystem::path("data/simple.vs"));
+
+    gl::Shader fsScreenspace(gl::Shader::Type::Fragment,
+                             filesystem::path("data/screenspace.fs"));
+
+    gl::Shader fsConstant(gl::Shader::Type::Fragment,
+                          filesystem::path("data/constant.fs"));
+
+    gl::ShaderProgram fillProgram({vsSimple, fsScreenspace});
+    gl::ShaderProgram wireProgram({vsSimple, fsConstant});
 
     const sdf::Sphere sphere(1.f);
     HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});
@@ -78,6 +86,8 @@ bool Application::run()
     const Geometry boxGeometry = ReferenceExtractor::extract(box);
     const gl::Mesh mesh(boxGeometry);
 
+    glEnable(GL_CULL_FACE);
+
     float a = 0;
     bool running = true;
     while (running)
@@ -86,17 +96,26 @@ bool Application::run()
         glm::mat4 view  = glm::translate(glm::mat4(),
                                          glm::vec3(0.0f, 0.0f, -2.0f));
 
-        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(1.f, 1.f, 0.f));
+        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(1.f, 0.5f, 0.1f));
         glm::mat4 mvp = proj * view * model;
-
-        sp.bind()
-            .setUniform("in_matrix", mvp)
-            .setUniform("in_color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        fillProgram.bind()
+            .setUniform("in_matrix", mvp)
+            .setUniform("in_color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
+
+        glEnable(GL_DEPTH_TEST);
         mesh.render();
+
+        wireProgram.bind()
+            .setUniform("in_matrix", mvp)
+            .setUniform("in_color", glm::vec4(1.0f, 1.0f, 1.0f, 1.f));
+
+        glDisable(GL_DEPTH_TEST);
+        mesh.render(gl::Mesh::RenderType::Lines);
+
         display.swap();
         a += 0.005f;
 

@@ -16,11 +16,11 @@ Mesh::Mesh(const Geometry& geometry) :
                   int(sizeof(Geometry::Index) * geometry.indices.size()));
 }
 
-void Mesh::render() const
+void Mesh::render(RenderType type) const
 {
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
     glEnableClientState(GL_VERTEX_ARRAY);
+
+    glPolygonMode(GL_FRONT, type == RenderType::Triangles ? GL_FILL : GL_LINE);
 
     vertices.bind();
     glVertexPointer(3, GL_FLOAT, 0, 0);
