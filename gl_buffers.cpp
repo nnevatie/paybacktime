@@ -27,7 +27,6 @@ GLenum bufferUsage(Buffer::Usage usage)
         case Buffer::Usage::StreamDraw:
             return GL_STREAM_DRAW;
     }
-    return 0;
 }
 
 }

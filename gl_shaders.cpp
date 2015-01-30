@@ -21,7 +21,6 @@ namespace
             case Shader::Type::Geometry: return GL_GEOMETRY_SHADER;
             case Shader::Type::Compute:  return GL_COMPUTE_SHADER;
         }
-        return 0;
     }
 }
 

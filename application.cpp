@@ -9,6 +9,8 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "file_system.h"
+
 #include "display.h"
 #include "painter.h"
 #include "clock.h"
