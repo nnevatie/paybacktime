@@ -10,7 +10,7 @@ namespace hc
 struct Image
 {
     Image();
-    Image(const Image& /*image*/);
+    Image(const Image& image);
     Image(const std::string& filename);
     ~Image();
 
