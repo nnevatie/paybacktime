@@ -18,6 +18,7 @@ set(SOURCE_FILES
     display.cpp
     painter.cpp
     image.cpp
+    image_cube.cpp
     common.cpp
     clock.cpp
     log.cpp
