@@ -18,6 +18,7 @@
 
 #include "sdf_primitives.h"
 #include "reference_extractor.h"
+#include "image_cube.h"
 
 #include "gl_mesh.h"
 #include "gl_shaders.h"
@@ -55,6 +56,11 @@ bool Application::run()
     Display display("High Caliber", 800, 640);
     display.open();
 
+    Image image("data/cat_life.jpg");
+    ImageCube cube(
+        {image, image, image, image, image, image}
+    );
+
     gl::Shader vsSimple(gl::Shader::Type::Vertex,
                         filesystem::path("data/simple.vs"));
 
@@ -68,11 +74,6 @@ bool Application::run()
     gl::ShaderProgram wireProgram({vsSimple, fsConstant});
 
     const sdf::Box box({0.5, 0.5, 0.5});
-    HCLOG(Info) << "Box d: " << box({0, 0, 0});
-    HCLOG(Info) << "Box d: " << box({1, 0, 0});
-    HCLOG(Info) << "Box d: " << box({2, 0, 0});
-    HCLOG(Info) << "Box d: " << box({3, 0, 0});
-
     const Geometry boxGeometry = ReferenceExtractor::extract(box);
     const gl::Mesh mesh(boxGeometry);
 
