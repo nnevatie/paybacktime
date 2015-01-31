@@ -55,13 +55,6 @@ bool Application::run()
     Display display("High Caliber", 800, 640);
     display.open();
 
-    /*
-    Image image("data/cat_life.jpg");
-    Painter painter(display.surface());
-    painter.drawImage(image, 0, 0);
-    display.update();
-    */
-
     gl::Shader vsSimple(gl::Shader::Type::Vertex,
                         filesystem::path("data/simple.vs"));
 
@@ -73,11 +66,6 @@ bool Application::run()
 
     gl::ShaderProgram fillProgram({vsSimple, fsScreenspace});
     gl::ShaderProgram wireProgram({vsSimple, fsConstant});
-
-    const sdf::Sphere sphere(1.f);
-    HCLOG(Info) << "Sphere d: " << sphere({0, 0, 0});
-    HCLOG(Info) << "Sphere d: " << sphere({1, 0, 0});
-    HCLOG(Info) << "Sphere d: " << sphere({2, 0, 0});
 
     const sdf::Box box({0.5, 0.5, 0.5});
     HCLOG(Info) << "Box d: " << box({0, 0, 0});
