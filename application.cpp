@@ -18,6 +18,7 @@
 
 #include "sdf_primitives.h"
 #include "reference_extractor.h"
+#include "mc_extractor.h"
 #include "image_cube.h"
 
 #include "gl_mesh.h"
@@ -74,7 +75,7 @@ bool Application::run()
     gl::ShaderProgram wireProgram({vsSimple, fsConstant});
 
     const sdf::Box box({0.5, 0.5, 0.5});
-    const Geometry boxGeometry = ReferenceExtractor::extract(box);
+    const Geometry boxGeometry = McExtractor::extract(box);
     const gl::Mesh mesh(boxGeometry);
 
     glEnable(GL_CULL_FACE);
@@ -88,7 +89,7 @@ bool Application::run()
                                          glm::vec3(0.0f, 0.0f, -2.0f));
 
         glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(1.f, 0.5f, 0.1f));
-        glm::mat4 mvp = proj * view * model;
+        glm::mat4 mvp   = proj * view * model;
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
