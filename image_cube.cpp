@@ -3,8 +3,8 @@
 namespace hc
 {
 
-ImageCube::ImageCube(const Sides&& sides) :
-    sides(std::move(sides))
+ImageCube::ImageCube(const Sides& sides) :
+    sides(sides)
 {
 }
 
