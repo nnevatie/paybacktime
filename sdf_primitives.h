@@ -2,6 +2,8 @@
 
 #include <glm/vec3.hpp>
 
+#include "geometry.h"
+
 namespace hc
 {
 namespace sdf
@@ -12,6 +14,7 @@ struct Sphere
 {
     Sphere(float r);
     float operator()(const glm::vec3& p) const;
+    BoundingBox boundingBox() const;
 
     float r;
 };
@@ -21,6 +24,7 @@ struct Box
 {
     Box(const glm::vec3& b);
     float operator()(const glm::vec3& p) const;
+    BoundingBox boundingBox() const;
 
     glm::vec3 b;
 };

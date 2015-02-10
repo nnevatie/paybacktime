@@ -7,6 +7,8 @@
 namespace hc
 {
 
+typedef std::pair<glm::vec3, glm::vec3> BoundingBox;
+
 struct Geometry
 {
     typedef glm::vec3 Vertex;
