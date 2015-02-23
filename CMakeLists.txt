@@ -23,7 +23,7 @@ set(SOURCE_FILES
     clock.cpp
     log.cpp
     sdf_primitives.cpp
-    reference_extractor.cpp
+    ref_mesher.cpp
     gl_buffers.cpp
     gl_shaders.cpp
     gl_mesh.cpp

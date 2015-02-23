@@ -17,8 +17,8 @@
 #include "log.h"
 
 #include "sdf_primitives.h"
-#include "reference_extractor.h"
-#include "mc_extractor.h"
+#include "ref_mesher.h"
+#include "mc_mesher.h"
 #include "image_cube.h"
 
 #include "gl_mesh.h"
@@ -75,7 +75,8 @@ bool Application::run()
     gl::ShaderProgram wireProgram({vsSimple, fsConstant});
 
     const sdf::Box box({0.5, 0.5, 0.5});
-    const Geometry boxGeometry = McExtractor::extract(box);
+    //const Geometry boxGeometry = McMesher::geometry(box);
+    const Geometry boxGeometry = RefMesher::geometry(box);
     const gl::Mesh mesh(boxGeometry);
 
     glEnable(GL_CULL_FACE);

@@ -1,4 +1,4 @@
-#include "reference_extractor.h"
+#include "ref_mesher.h"
 
 #include <sstream>
 
@@ -9,16 +9,16 @@
 namespace hc
 {
 
-namespace ReferenceExtractor
+namespace RefMesher
 {
 
-Geometry extract(const sdf::Sphere& sphere)
+Geometry geometry(const sdf::Sphere& sphere)
 {
     HCTIME(str(std::stringstream() << "Extract sphere, r: " << sphere.r));
     return {};
 }
 
-Geometry extract(const sdf::Box& box)
+Geometry geometry(const sdf::Box& box)
 {
     HCTIME(str(std::stringstream() << "Extract box, b: " << glm::length(box.b)));
     const glm::vec3& v = box.b;

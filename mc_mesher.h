@@ -6,15 +6,15 @@
 namespace hc
 {
 
-namespace McExtractor
+namespace McMesher
 {
 
 template <typename T>
-Geometry extract(const T& sdf)
+Geometry geometry(const T& sdf)
 {
     Geometry geometry;
     return geometry;
 }
 
-} // namespace McExtractor
+} // namespace McMesher
 } // namespace
