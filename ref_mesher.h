@@ -5,7 +5,6 @@
 
 namespace hc
 {
-
 namespace RefMesher
 {
 

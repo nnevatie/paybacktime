@@ -74,9 +74,9 @@ bool Application::run()
     gl::ShaderProgram fillProgram({vsSimple, fsScreenspace});
     gl::ShaderProgram wireProgram({vsSimple, fsConstant});
 
-    const sdf::Box box({0.5, 0.5, 0.5});
-    //const Geometry boxGeometry = McMesher::geometry(box);
-    const Geometry boxGeometry = RefMesher::geometry(box);
+    const sdf::Box box({0.5f, 0.5f, 0.5f});
+    const Geometry boxGeometry = McMesher::geometry(box, 0.1f);
+    //const Geometry boxGeometry = RefMesher::geometry(box);
     const gl::Mesh mesh(boxGeometry);
 
     glEnable(GL_CULL_FACE);
