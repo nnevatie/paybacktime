@@ -17,9 +17,9 @@
 #include "log.h"
 
 #include "sdf_primitives.h"
+
 #include "ref_mesher.h"
-#include "mc_mesher.h"
-#include "image_cube.h"
+#include "image_mesher.h"
 
 #include "gl_mesh.h"
 #include "gl_shaders.h"
@@ -58,9 +58,6 @@ bool Application::run()
     display.open();
 
     Image image("data/cat_life.jpg");
-    ImageCube cube(
-        {image, image, image, image, image, image}
-    );
 
     gl::Shader vsSimple(gl::Shader::Type::Vertex,
                         filesystem::path("data/simple.vs"));
@@ -75,9 +72,11 @@ bool Application::run()
     gl::ShaderProgram wireProgram({vsSimple, fsConstant});
 
     const sdf::Box box({0.5f, 0.5f, 0.5f});
-    const Geometry boxGeometry = McMesher::geometry(box, 0.1f);
-    //const Geometry boxGeometry = RefMesher::geometry(box);
+    const Geometry boxGeometry = RefMesher::geometry(box);
     const gl::Mesh mesh(boxGeometry);
+
+    const Geometry imgGeometry = ImageMesher::geometry(image, 5.f);
+    const gl::Mesh imgMesh(imgGeometry);
 
     glEnable(GL_CULL_FACE);
 

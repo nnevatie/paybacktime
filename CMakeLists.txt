@@ -19,6 +19,7 @@ set(SOURCE_FILES
     painter.cpp
     image.cpp
     image_cube.cpp
+    image_mesher.cpp
     common.cpp
     clock.cpp
     log.cpp
@@ -56,7 +57,7 @@ set(OPENGL_LIBS
 set(DEPLOY_DIR /projects/highcaliber_build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${DEPLOY_DIR})
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} image_mesher.h image_mesher.cpp)
 
 target_link_libraries(${PROJECT_NAME}
                       ${SYS_LIBS}
