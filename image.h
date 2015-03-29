@@ -1,8 +1,9 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
-#include <SDL2/SDL_image.h>
+#include <SDL2/SDL.h>
 
 namespace hc
 {
@@ -10,15 +11,13 @@ namespace hc
 struct Image
 {
     Image();
-    Image(const Image& image);
     Image(const std::string& filename);
-    ~Image();
 
     SDL_Surface* surface() const;
 
 private:
-
-    SDL_Surface* surface_;
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace

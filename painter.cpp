@@ -16,7 +16,7 @@ Painter::Painter(SDL_Surface* surface) :
 
 bool Painter::drawImage(const Image &image, int x, int y)
 {
-    HCTIME("time");
+    //HCTIME("time");
     SDL_Rect dstRect = {x, y, 0, 0};
     return !SDL_BlitSurface(image.surface(), nullptr, surface_, &dstRect);
 }
