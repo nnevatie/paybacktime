@@ -12,8 +12,9 @@ struct Mesh
 {
     enum class RenderType
     {
-        Triangles,
-        Lines
+        Points,
+        Lines,
+        Triangles
     };
 
     Mesh(const Geometry& geometry);

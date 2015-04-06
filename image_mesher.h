@@ -8,7 +8,7 @@ namespace hc
 namespace ImageMesher
 {
 
-Geometry geometry(const Image& image, float interval);
+Geometry geometry(const Image& image, float interval = 1.f);
 
 } // namespace ImageMesher
 } // namespace

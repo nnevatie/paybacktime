@@ -57,8 +57,6 @@ bool Application::run()
     Display display("High Caliber", 800, 640);
     display.open();
 
-    Image image("data/cat_life.jpg");
-
     gl::Shader vsSimple(gl::Shader::Type::Vertex,
                         filesystem::path("data/simple.vs"));
 
@@ -71,12 +69,15 @@ bool Application::run()
     gl::ShaderProgram fillProgram({vsSimple, fsScreenspace});
     gl::ShaderProgram wireProgram({vsSimple, fsConstant});
 
+    /*
     const sdf::Box box({0.5f, 0.5f, 0.5f});
     const Geometry boxGeometry = RefMesher::geometry(box);
     const gl::Mesh mesh(boxGeometry);
+    */
 
-    const Geometry imgGeometry = ImageMesher::geometry(image, 5.f);
-    const gl::Mesh imgMesh(imgGeometry);
+    const Image image("data/box_front.png", 1);
+    const Geometry imgGeometry = ImageMesher::geometry(image);
+    const gl::Mesh mesh(imgGeometry);
 
     glEnable(GL_CULL_FACE);
 
@@ -106,7 +107,8 @@ bool Application::run()
             .setUniform("in_color", glm::vec4(1.0f, 1.0f, 1.0f, 1.f));
 
         glDisable(GL_DEPTH_TEST);
-        mesh.render(gl::Mesh::RenderType::Lines);
+        glPointSize(3.f);
+        mesh.render(gl::Mesh::RenderType::Points);
 
         display.swap();
         a += 0.005f;

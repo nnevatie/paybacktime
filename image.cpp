@@ -25,12 +25,33 @@ Image::Image() :
 {
 }
 
-Image::Image(const std::string& filename) :
+Image::Image(const std::string& filename, int depth) :
     d(new Data {})
 {
     HCTIME(__FUNCTION__);
-    d->bits = stbi_load(filename.c_str(), &d->width, &d->height, &d->depth, 0);
+    d->bits = stbi_load(filename.c_str(),
+                        &d->width, &d->height, &d->depth, depth);
     d->stride = d->width * d->depth;
+}
+
+Image::operator bool() const
+{
+    return d && d->width && d->height;
+}
+
+Rect<int> Image::rect() const
+{
+    return Rect<int>(0, 0, d->width, d->height);
+}
+
+int Image::depth() const
+{
+    return d->depth;
+}
+
+unsigned char* Image::bits() const
+{
+    return d->bits;
 }
 
 SDL_Surface* Image::surface() const

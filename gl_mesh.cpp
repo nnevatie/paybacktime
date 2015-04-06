@@ -20,7 +20,10 @@ void Mesh::render(RenderType type) const
 {
     glEnableClientState(GL_VERTEX_ARRAY);
 
-    glPolygonMode(GL_FRONT, type == RenderType::Triangles ? GL_FILL : GL_LINE);
+    const GLenum mode = type == RenderType::Points ? GL_POINT :
+                        type == RenderType::Lines  ? GL_LINE : GL_FILL;
+
+    glPolygonMode(GL_FRONT, mode);
 
     vertices.bind();
     glVertexPointer(3, GL_FLOAT, 0, 0);

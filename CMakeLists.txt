@@ -57,7 +57,7 @@ set(OPENGL_LIBS
 set(DEPLOY_DIR /projects/highcaliber_build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${DEPLOY_DIR})
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} image_mesher.h image_mesher.cpp)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} image_mesher.h image_mesher.cpp rect.h)
 
 target_link_libraries(${PROJECT_NAME}
                       ${SYS_LIBS}
