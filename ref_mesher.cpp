@@ -20,7 +20,7 @@ Geometry geometry(const sdf::Sphere& sphere)
 
 Geometry geometry(const sdf::Box& box)
 {
-    HCTIME(str(std::stringstream() << "Extract box, b: " << glm::length(box.b)));
+    HCTIME(str(std::stringstream() << "Extract box, b: " << glm::length<float>(box.b)));
     const glm::vec3& v = box.b;
     return
     {

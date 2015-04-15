@@ -17,7 +17,16 @@ struct Image::Data
         depth,
         stride;
 
-    unsigned char* bits;
+    uint8_t* bits;
+
+    Data() : width(), height(), depth(), stride(), bits()
+    {
+    }
+
+    virtual ~Data()
+    {
+        delete bits;
+    }
 };
 
 Image::Image() :
@@ -49,7 +58,12 @@ int Image::depth() const
     return d->depth;
 }
 
-unsigned char* Image::bits() const
+int Image::stride() const
+{
+    return d->stride;
+}
+
+const uint8_t* Image::bits() const
 {
     return d->bits;
 }

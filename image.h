@@ -18,9 +18,11 @@ struct Image
     operator bool() const;
 
     Rect<int> rect() const;
-    int depth() const;
 
-    unsigned char* bits() const;
+    int depth() const;
+    int stride() const;
+
+    const uint8_t* bits() const;
     SDL_Surface* surface() const;
 
 private:
