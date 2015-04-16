@@ -7,17 +7,30 @@ namespace hc
 namespace ImageMesher
 {
 
+namespace
+{
+
+struct Block
+{
+    BoundingBox bounds;
+};
+
+}
+
 Geometry geometry(const Image& image, float interval)
 {
     const Rect<int>             rect   = image.rect();
     const uint8_t* __restrict__ bits   = image.bits();
     const int                   stride = image.stride();
 
-    for (int y = rect.y; y < rect.y + rect.h; ++y)
+    for (float fy = rect.y; fy < rect.y + rect.h; fy += interval)
     {
-        const uint8_t* row = (const uint8_t*) (bits + y * stride);
-        for (int x = rect.x; x < rect.x + rect.w; ++x)
+        const int        y = int(fy + 0.5f);
+        const uint8_t* row = bits + y * stride;
+
+        for (float fx = rect.x; fx < rect.x + rect.w; fx += interval)
         {
+            const int     x = int(fx + 0.5f);
             const uint8_t p = row[x];
             HCLOG(Info) << x << ", " << y << ": " << int(p);
         }

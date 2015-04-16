@@ -14,7 +14,7 @@ struct Sphere
 {
     Sphere(float r);
     float operator()(const glm::vec3& p) const;
-    BoundingBox boundingBox() const;
+    BoundingBox bounds() const;
 
     float r;
 };
@@ -24,7 +24,7 @@ struct Box
 {
     Box(const glm::vec3& b);
     float operator()(const glm::vec3& p) const;
-    BoundingBox boundingBox() const;
+    BoundingBox bounds() const;
 
     glm::vec3 b;
 };

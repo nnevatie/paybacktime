@@ -14,7 +14,7 @@ float Sphere::operator()(const glm::vec3& p) const
     return glm::length<float>(p) - r;
 }
 
-BoundingBox Sphere::boundingBox() const
+BoundingBox Sphere::bounds() const
 {
     return BoundingBox {{-r, -r, -r},
                         { r,  r,  r}};
@@ -29,7 +29,7 @@ float Box::operator()(const glm::vec3& p) const
            glm::length<float>(glm::max(d, 0.f));
 }
 
-BoundingBox Box::boundingBox() const
+BoundingBox Box::bounds() const
 {
     return BoundingBox {{-b.x, -b.y, -b.z},
                         { b.x,  b.y,  b.z}};
