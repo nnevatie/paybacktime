@@ -70,7 +70,7 @@ bool Application::run()
     gl::ShaderProgram wireProgram({vsSimple, fsConstant});
 
     /*
-    const sdf::Box box({0.5f, 0.5f, 0.5f});
+    const sdf::Box box({16.f, 16.f, 16.f});
     const Geometry boxGeometry = RefMesher::geometry(box);
     const gl::Mesh mesh(boxGeometry);
     */
@@ -85,11 +85,11 @@ bool Application::run()
     bool running = true;
     while (running)
     {
-        glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 6.f);
+        glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 100.f);
         glm::mat4 view  = glm::translate(glm::mat4(),
-                                         glm::vec3(0.0f, 0.0f, -2.0f));
+                                         glm::vec3(-8.0f, -2.0f, -40.0f));
 
-        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(1.f, 0.5f, 0.1f));
+        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(0.5f, 0.5f, 1.f));
         glm::mat4 mvp   = proj * view * model;
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -100,15 +100,16 @@ bool Application::run()
             .setUniform("in_color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
         glEnable(GL_DEPTH_TEST);
+        glPolygonOffset(0, 0);
         mesh.render();
 
         wireProgram.bind()
             .setUniform("in_matrix", mvp)
             .setUniform("in_color", glm::vec4(1.0f, 1.0f, 1.0f, 1.f));
 
-        glDisable(GL_DEPTH_TEST);
-        glPointSize(3.f);
-        mesh.render(gl::Mesh::RenderType::Points);
+        //glDisable(GL_DEPTH_TEST);
+        glPointSize(2.f);
+        mesh.render(gl::Mesh::RenderType::Lines);
 
         display.swap();
         a += 0.005f;
