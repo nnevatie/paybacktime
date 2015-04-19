@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 
 #include <glm/vec3.hpp>
 
@@ -12,10 +13,18 @@ typedef std::pair<glm::vec3, glm::vec3> BoundingBox;
 struct Geometry
 {
     typedef glm::vec3 Vertex;
-    typedef unsigned short Index;
+    typedef uint16_t  Index;
 
     std::vector<Vertex> vertices;
     std::vector<Index>  indices;
+
+    friend std::ostream& operator<<(std::ostream& out, const Geometry& geometry)
+    {
+        out << "Geometry[vertices: " << geometry.vertices.size()
+            << ", triangles: " << geometry.indices.size() / 3 << "]";
+
+        return out;
+    }
 };
 
 } // namespace
