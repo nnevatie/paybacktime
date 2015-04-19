@@ -24,6 +24,11 @@ struct Block
 
     BoundingBox bounds;
 
+    operator bool() const
+    {
+        return std::abs(bounds.first.z - bounds.second.z) > 0;
+    }
+
     friend std::ostream& operator<<(std::ostream& out, const Block& block)
     {
         out << glm::to_string(block.bounds.first) << ", "
@@ -32,6 +37,61 @@ struct Block
         return out;
     }
 };
+
+bool append(Geometry* geometry, const Block& block)
+{
+    if (geometry && block)
+    {
+        const glm::vec3& c0 = block.bounds.first;
+        const glm::vec3& c1 = block.bounds.second;
+        const int ib        = geometry->vertices.size();
+
+        const glm::vec3 vertices[] =
+        {
+            // Front
+            {c0.x, c0.y, c0.z},
+            {c1.x, c0.y, c0.z},
+            {c1.x, c1.y, c0.z},
+            {c0.x, c1.y, c0.z},
+            // Back
+            {c0.x, c0.y, c1.z},
+            {c1.x, c0.y, c1.z},
+            {c1.x, c1.y, c1.z},
+            {c0.x, c1.y, c1.z}
+
+        };
+        geometry->vertices.insert(geometry->vertices.end(),
+                                  std::begin(vertices), std::end(vertices));
+
+        typedef uint16_t index;
+        const uint16_t indices[] =
+        {
+            // Front
+            index(ib + 0), index(ib + 1), index(ib + 2),
+            index(ib + 2), index(ib + 3), index(ib + 0),
+            // Top
+            index(ib + 3), index(ib + 2), index(ib + 6),
+            index(ib + 6), index(ib + 7), index(ib + 3),
+            // Back
+            index(ib + 7), index(ib + 6), index(ib + 5),
+            index(ib + 5), index(ib + 4), index(ib + 7),
+            // Bottom
+            index(ib + 4), index(ib + 5), index(ib + 1),
+            index(ib + 1), index(ib + 0), index(ib + 4),
+            // Left
+            index(ib + 4), index(ib + 0), index(ib + 3),
+            index(ib + 3), index(ib + 7), index(ib + 4),
+            // Right
+            index(ib + 1), index(ib + 5), index(ib + 6),
+            index(ib + 6), index(ib + 2), index(ib + 1)
+        };
+        geometry->indices.insert(geometry->indices.end(),
+                                 std::begin(indices), std::end(indices));
+
+        return true;
+    }
+    return false;
+}
 
 }
 
@@ -68,11 +128,15 @@ Geometry geometry(const Image& image, float interval)
             const Block block(c0, c1);
             blocks.push_back(block);
 
-            HCLOG(Info) << x << ", " << y << ": " << int(p) << ", " << block;
+            //HCLOG(Info) << x << ", " << y << ": " << int(p) << ", " << block;
         }
     }
 
     Geometry geometry;
+    for (const Block& block : blocks)
+        append(&geometry, block);
+
+    HCLOG(Info) << geometry;
     return geometry;
 }
 
