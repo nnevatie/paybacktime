@@ -87,7 +87,6 @@ bool append(Geometry* geometry, const Block& block)
         };
         geometry->indices.insert(geometry->indices.end(),
                                  std::begin(indices), std::end(indices));
-
         return true;
     }
     return false;
