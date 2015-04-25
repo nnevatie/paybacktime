@@ -22,6 +22,16 @@ Display::~Display()
     close();
 }
 
+int Display::width() const
+{
+    return width_;
+}
+
+int Display::height() const
+{
+    return height_;
+}
+
 SDL_Surface* Display::surface() const
 {
     return SDL_GetWindowSurface(window_);

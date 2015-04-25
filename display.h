@@ -12,6 +12,9 @@ struct Display
     Display(const std::string& title, int width, int height);
     ~Display();
 
+    int width() const;
+    int height() const;
+
     SDL_Surface* surface() const;
 
     bool open();
