@@ -24,6 +24,8 @@
 #include "gl_mesh.h"
 #include "gl_shaders.h"
 
+#include "render_stats.h"
+
 namespace hc
 {
 
@@ -54,7 +56,7 @@ Application::~Application()
 
 bool Application::run()
 {
-    Display display("High Caliber", 800, 640);
+    Display display("High Caliber", 1280, 720);
     display.open();
 
     gl::Shader vsSimple(gl::Shader::Type::Vertex,
@@ -71,20 +73,24 @@ bool Application::run()
 
     /*
     const sdf::Box box({16.f, 16.f, 16.f});
-    const Geometry boxGeometry = RefMesher::geometry(box);
+    const Geometry geom = RefMesher::geometry(box);
     const gl::Mesh mesh(boxGeometry);
     */
 
     const Image image("data/box_front.png", 1);
-    const Geometry imgGeometry = ImageMesher::geometry(image);
-    const gl::Mesh mesh(imgGeometry);
+    const Geometry geom = ImageMesher::geometry(image);
+    const gl::Mesh mesh(geom);
 
     glEnable(GL_CULL_FACE);
 
     float a = 0;
     bool running = true;
+
+    RenderStats stats;
     while (running)
     {
+        Clock clock;
+
         glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 100.f);
         glm::mat4 view  = glm::translate(glm::mat4(),
                                          glm::vec3(-8.0f, -2.0f, -40.0f));
@@ -110,6 +116,11 @@ bool Application::run()
         //glDisable(GL_DEPTH_TEST);
         glPointSize(2.f);
         mesh.render(gl::Mesh::RenderType::Lines);
+
+        stats.accumulate(clock.stop(), geom.vertices.size(),
+                                       geom.indices.size() / 3);
+
+        stats.render(display.width(), display.height());
 
         display.swap();
         a += 0.005f;
