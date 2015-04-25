@@ -21,6 +21,7 @@ set(SOURCE_FILES
     gl_buffers.cpp
     gl_shaders.cpp
     gl_mesh.cpp
+    render_stats.cpp
     nanovg.c
     )
 
