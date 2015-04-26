@@ -13,7 +13,7 @@ struct RenderStats
     ~RenderStats();
 
     void accumulate(float frameTime, int vertexCount, int triangleCount);
-    void render(int width, int height, float scale = 1.f);
+    void render();
 
 private:
     NVGcontext* vg;
