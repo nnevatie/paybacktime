@@ -18,6 +18,12 @@ struct Geometry
     std::vector<Vertex> vertices;
     std::vector<Index>  indices;
 
+    Geometry() {}
+
+    Geometry(const std::vector<Vertex>& vertices,
+             const std::vector<Index>&  indices) :
+        vertices(vertices), indices(indices) {}
+
     friend std::ostream& operator<<(std::ostream& out, const Geometry& geometry)
     {
         out << "Geometry[vertices: " << geometry.vertices.size()
