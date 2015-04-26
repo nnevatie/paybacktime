@@ -65,11 +65,10 @@ bool Application::run()
     gl::Shader fsScreenspace(gl::Shader::Type::Fragment,
                              filesystem::path("data/screenspace.fs"));
 
-    gl::Shader fsConstant(gl::Shader::Type::Fragment,
-                          filesystem::path("data/constant.fs"));
+    gl::Shader gsWireframe(gl::Shader::Type::Geometry,
+                           filesystem::path("data/wireframe.gs"));
 
-    gl::ShaderProgram fillProgram({vsSimple, fsScreenspace});
-    gl::ShaderProgram wireProgram({vsSimple, fsConstant});
+    gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
     /*
     const sdf::Box box({16.f, 16.f, 16.f});
@@ -95,32 +94,24 @@ bool Application::run()
         glm::mat4 view  = glm::translate(glm::mat4(),
                                          glm::vec3(-8.0f, -2.0f, -40.0f));
 
-        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(0.5f, 0.5f, 1.f));
+        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(0.0f, 0.1f, 0.1f));
         glm::mat4 mvp   = proj * view * model;
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
-        fillProgram.bind()
+        wireProgram.bind()
+            .setUniform("winSize", glm::vec2(display.width(), display.height()))
             .setUniform("in_matrix", mvp)
             .setUniform("in_color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
-        glEnable(GL_DEPTH_TEST);
-        glPolygonOffset(0, 0);
         mesh.render();
-
-        wireProgram.bind()
-            .setUniform("in_matrix", mvp)
-            .setUniform("in_color", glm::vec4(1.0f, 1.0f, 1.0f, 1.f));
-
-        //glDisable(GL_DEPTH_TEST);
-        glPointSize(2.f);
-        mesh.render(gl::Mesh::RenderType::Lines);
 
         stats.accumulate(clock.stop(), geom.vertices.size(),
                                        geom.indices.size() / 3);
 
-        stats.render(display.width(), display.height());
+        stats.render();
 
         display.swap();
         a += 0.005f;
