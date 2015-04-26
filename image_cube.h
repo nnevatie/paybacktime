@@ -1,6 +1,7 @@
 #pragma once
 
-#include <array>
+#include <utility>
+#include <vector>
 
 #include "image.h"
 
@@ -9,12 +10,16 @@ namespace hc
 
 struct ImageCube
 {
-    typedef std::array<Image, 6> Sides;
+    enum class Side
+    {
+        Front, Back, Left,  Right, Top, Bottom
+    };
 
-    ImageCube(const Sides& sides);
+    typedef std::pair<Side, Image> SideImage;
 
-    // Front, back, left, right, top, bottom
-    Sides sides;
+    ImageCube(const std::vector<SideImage>& sides);
+
+    std::vector<SideImage> sides;
 };
 
 } // namespace

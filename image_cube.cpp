@@ -3,7 +3,7 @@
 namespace hc
 {
 
-ImageCube::ImageCube(const Sides& sides) :
+ImageCube::ImageCube(const std::vector<ImageCube::SideImage>& sides) :
     sides(sides)
 {
 }
