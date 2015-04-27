@@ -1,6 +1,7 @@
 #include "image_mesher.h"
 
-#include <iostream>
+#include <array>
+
 #include <glm/ext.hpp>
 
 #include "clock.h"
@@ -18,12 +19,14 @@ struct Heightfield
 {
     Heightfield(int width, int height) :
         width(width), height(height),
+        interval(1.f),
         values(width * height, 0.f)
     {
     }
 
     Heightfield(const Image& image, float interval = 1.f) :
         width(image.rect().w / interval), height(image.rect().h / interval),
+        interval(interval),
         values(width * height)
     {
         const Rect<int>             rect   = image.rect();
@@ -47,7 +50,14 @@ struct Heightfield
         }
     }
 
-    int width, height;
+    bool operator()(int x, int y, int z) const
+    {
+        return values.at(y * width + x) >= z;
+    }
+
+    int   width, height;
+    float interval;
+
     std::vector<float> values;
 };
 
@@ -58,13 +68,14 @@ Geometry meshHeightfield(const Heightfield& hfield)
     geometry.indices.reserve(hfield.values.size() * 12);
 
     const float* __restrict__ data = hfield.values.data();
+    const float               size = hfield.interval;
 
     for (int y = 0; y < hfield.height; ++y)
         for (int x = 0; x < hfield.width; ++x)
         {
             const float h      = data[y * hfield.width + x];
-            const glm::vec3 c0 = {x + 0, y + 0, 0.f};
-            const glm::vec3 c1 = {x + 1, y + 1, h};
+            const glm::vec3 c0 = {x * size  + 0, y * size  + 0, 0.f};
+            const glm::vec3 c1 = {x * size  + size , y * size  + size , h};
             const int ib       = geometry.vertices.size();
 
             const glm::vec3 vertices[] =
@@ -112,6 +123,13 @@ Geometry meshHeightfield(const Heightfield& hfield)
     return geometry;
 }
 
+template <typename V>
+Geometry meshGreedy(const V& volume, const std::array<int, 3>& dims)
+{
+    Geometry geometry;
+    return geometry;
+}
+
 }
 
 Geometry geometry(const Image& image, float interval)
@@ -119,6 +137,7 @@ Geometry geometry(const Image& image, float interval)
     HCTIME("emit geom");
     Heightfield hfield(image, interval);
     return meshHeightfield(hfield);
+    //return meshGreedy(hfield, {hfield.width, hfield.height, hfield.width});
 }
 
 } // namespace ImageMesher
