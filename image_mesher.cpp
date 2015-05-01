@@ -52,7 +52,7 @@ struct Heightfield
 
     bool operator()(int x, int y, int z) const
     {
-        return values.at(y * width + x) >= z;
+        return values.at(y * width + x) > z;
     }
 
     int   width, height;
@@ -124,9 +124,104 @@ Geometry meshHeightfield(const Heightfield& hfield)
 }
 
 template <typename V>
-Geometry meshGreedy(const V& volume, const std::array<int, 3>& dims)
+Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims)
 {
     Geometry geometry;
+    for (int d = 0; d < 3; ++d)
+    {
+        const int u = (d + 1) % 3;
+        const int v = (d + 2) % 3;
+
+        int x[3] = {0};
+        int q[3] = {0};
+        int mask[dims[u] * dims[v]];
+        int n;
+
+        q[d] = 1;
+        for (x[d] = -1; x[d] < dims[d];)
+        {
+            // Determine mask
+            n = 0;
+            for (x[v] = 0; x[v] < dims[v]; ++x[v])
+                for (x[u] = 0; x[u] < dims[u]; ++x[u])
+                {
+                    mask[n++] = (0 <= x[d] ?
+                                  vol(x[0], x[1], x[2]) : 0) !=
+                                 (x[d] < dims[d] - 1 ?
+                                  vol(x[0] + q[0], x[1] + q[1], x[2] + q[2]) : 0);
+                }
+
+            ++x[d];
+            n = 0;
+
+            for (int j = 0; j < dims[v]; ++j)
+                for (int i = 0; i < dims[u];)
+                {
+                    if (mask[n])
+                    {
+                        // Dimensions
+                        int w = 0, h = 0;
+                        // Compute width
+                        for (w = 1; mask[n + w] && i + w < dims[u]; ++w)
+                        {}
+                        // Compute height
+                        for (h = 1; j + h < dims[v]; ++h)
+                            for (int k = 0; k < w; ++k)
+                                if (!mask[n + k + h * dims[u]])
+                                    goto dims_done;
+                        dims_done:
+
+                        x[u] = i;
+                        x[v] = j;
+
+                        // Emit quad
+                        int du[3] = {0};
+                        int dv[3] = {0};
+                        du[u]     = w;
+                        dv[v]     = h;
+
+                        const int ib = geometry.vertices.size();
+                        const glm::vec3 vertices[] =
+                        {
+                            {x[0], x[1], x[2]},
+                            {x[0] + du[0], x[1] + du[1], x[2] + du[2]},
+                            {x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],
+                             x[2] + du[2] + dv[2]},
+                            {x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]},
+                        };
+                        geometry.vertices.insert(geometry.vertices.end(),
+                                                 std::begin(vertices),
+                                                 std::end(vertices));
+
+                        typedef uint16_t index;
+                        const uint16_t indices[] = {index(ib + 0),
+                                                    index(ib + 1),
+                                                    index(ib + 2),
+                                                    index(ib + 2),
+                                                    index(ib + 3),
+                                                    index(ib + 0)};
+
+                        geometry.indices.insert(geometry.indices.end(),
+                                                std::begin(indices),
+                                                std::end(indices));
+
+                        // Clear mask
+                        for (int l = 0; l < h; ++l)
+                            for (int k = 0; k < w; ++k)
+                                mask[n + k + l * dims[u]] = 0;
+
+                        // Increment counters
+                        i += w;
+                        n += w;
+                    }
+                    else
+                    {
+                        ++i;
+                        ++n;
+                    }
+                }
+        }
+    }
     return geometry;
 }
 
@@ -136,8 +231,8 @@ Geometry geometry(const Image& image, float interval)
 {
     HCTIME("emit geom");
     Heightfield hfield(image, interval);
-    return meshHeightfield(hfield);
-    //return meshGreedy(hfield, {hfield.width, hfield.height, hfield.width});
+    //return meshHeightfield(hfield);
+    return meshGreedy(hfield, {hfield.width, hfield.height, hfield.width});
 }
 
 } // namespace ImageMesher
