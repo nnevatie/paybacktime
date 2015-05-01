@@ -77,7 +77,7 @@ bool Application::run()
     */
 
     const Image image("data/box_front.png", 1);
-    const Geometry geom = ImageMesher::geometry(image, 1);
+    const Geometry geom = ImageMesher::geometry(image, 1.f);
     const gl::Mesh mesh(geom);
 
     glEnable(GL_CULL_FACE);
