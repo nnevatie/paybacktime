@@ -32,7 +32,8 @@ struct Heightfield
         const Rect<int>             rect   = image.rect();
         const uint8_t* __restrict__ bits   = image.bits();
         const int                   stride = image.stride();
-        const float                 depth  = std::min(rect.w, rect.h) / 255.f;
+        const float                 depth  = std::min(rect.w, rect.h) /
+                                            (interval * 255.f);
 
         for (int sy = 0; sy < height; ++sy)
         {
@@ -68,14 +69,14 @@ Geometry meshHeightfield(const Heightfield& hfield)
     geometry.indices.reserve(hfield.values.size() * 12);
 
     const float* __restrict__ data = hfield.values.data();
-    const float               size = hfield.interval;
+    const float              scale = hfield.interval;
 
     for (int y = 0; y < hfield.height; ++y)
         for (int x = 0; x < hfield.width; ++x)
         {
             const float h      = data[y * hfield.width + x];
-            const glm::vec3 c0 = {x * size  + 0, y * size  + 0, 0.f};
-            const glm::vec3 c1 = {x * size  + size , y * size  + size , h};
+            const glm::vec3 c0 = {x * scale + 0,     y * scale + 0,     0.f};
+            const glm::vec3 c1 = {x * scale + scale, y * scale + scale, h};
             const int ib       = geometry.vertices.size();
 
             const glm::vec3 vertices[] =
@@ -124,7 +125,7 @@ Geometry meshHeightfield(const Heightfield& hfield)
 }
 
 template <typename V>
-Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims)
+Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims, float s = 1.f)
 {
     Geometry geometry;
     for (int d = 0; d < 3; ++d)
@@ -180,15 +181,17 @@ Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims)
                         du[u]     = w;
                         dv[v]     = h;
 
-                        const int ib = geometry.vertices.size();
+                        typedef glm::vec3 v3;
                         const glm::vec3 vertices[] =
                         {
-                            {x[0], x[1], x[2]},
-                            {x[0] + du[0], x[1] + du[1], x[2] + du[2]},
-                            {x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],
-                             x[2] + du[2] + dv[2]},
-                            {x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]},
+                            s * v3(x[0], x[1], x[2]),
+                            s * v3(x[0] + du[0], x[1] + du[1], x[2] + du[2]),
+                            s * v3(x[0] + du[0] + dv[0],
+                                   x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),
+                            s * v3(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]),
                         };
+
+                        const int ib = geometry.vertices.size();
                         geometry.vertices.insert(geometry.vertices.end(),
                                                  std::begin(vertices),
                                                  std::end(vertices));
@@ -230,9 +233,10 @@ Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims)
 Geometry geometry(const Image& image, float interval)
 {
     HCTIME("emit geom");
-    Heightfield hfield(image, interval);
-    //return meshHeightfield(hfield);
-    return meshGreedy(hfield, {hfield.width, hfield.height, hfield.width});
+    const Heightfield hfield(image, interval);
+    return meshGreedy(hfield,
+                     {hfield.width, hfield.height, hfield.width},
+                      hfield.interval);
 }
 
 } // namespace ImageMesher
