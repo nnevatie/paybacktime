@@ -77,15 +77,16 @@ bool Application::run()
     */
 
     const Image image("data/box_front.png", 1);
-    const Geometry geom = ImageMesher::geometry(image);
+    const Geometry geom = ImageMesher::geometry(image, 1);
     const gl::Mesh mesh(geom);
 
     glEnable(GL_CULL_FACE);
 
+    RenderStats stats;
+
     float a = 0;
     bool running = true;
 
-    RenderStats stats;
     while (running)
     {
         Clock clock;
@@ -94,7 +95,7 @@ bool Application::run()
         glm::mat4 view  = glm::translate(glm::mat4(),
                                          glm::vec3(-8.0f, -2.0f, -40.0f));
 
-        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(0.0f, 0.1f, 0.1f));
+        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(0.0f, 0.5f, 0.9f));
         glm::mat4 mvp   = proj * view * model;
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -114,6 +115,7 @@ bool Application::run()
         stats.render();
 
         display.swap();
+
         a += 0.005f;
 
         SDL_Event e;
