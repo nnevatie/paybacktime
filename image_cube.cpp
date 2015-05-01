@@ -44,6 +44,7 @@ ImageCube::ImageCube(const std::string& filename, int depth)
     };
 
     // Find fallbacks
+    // TODO: Clone images
     for (int i = 0; i < 6; ++i)
         if (!sideImages[i].image)
             for (int f = 0; f < 5; ++f)

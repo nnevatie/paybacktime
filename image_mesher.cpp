@@ -17,6 +17,10 @@ namespace
 
 struct Heightfield
 {
+    Heightfield() : width(0), height(0), depth(0), interval(0)
+    {
+    }
+
     Heightfield(int width, int height) :
         width(width), height(height), depth(0),
         interval(1.f),
@@ -24,9 +28,9 @@ struct Heightfield
     {
     }
 
-    Heightfield(const Image& image, float interval = 1.f) :
+    Heightfield(const Image& image, int depth, float interval = 1.f) :
         width(image.rect().w / interval), height(image.rect().h / interval),
-        depth(std::min(width, height)),
+        depth(depth),
         interval(interval),
         values(width * height)
     {
@@ -75,12 +79,23 @@ struct Cubefield
         depth(imageCube.depth()   / interval),
         interval(interval)
     {
+        const int depths[6] = {depth, depth, width, width, height, height};
+        for (int i = 0; i < 6; ++i)
+            hfields[i] = Heightfield(imageCube.sides[i], depths[i], interval);
     }
 
     bool operator()(int x, int y, int z) const
     {
-        return false;
+        return hfields[0](x,             y,             z) &&
+               hfields[1](x,             y, depth - z - 1) &&
+               hfields[2](depth - z - 1, y,             x) &&
+               hfields[3](z,             y, width - x - 1) &&
+               hfields[4](x,             z,             y) &&
+               hfields[5](x,             z,             y);
     }
+
+    // Front, back, left, right, top, bottom
+    Heightfield hfields[6];
 
     int   width, height, depth;
     float interval;
@@ -259,7 +274,8 @@ Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims, float s = 1.f)
 Geometry geometry(const Image& image, float interval)
 {
     HCTIME("image geom");
-    const Heightfield hfield(image, interval);
+    const Heightfield hfield(image, std::min(image.rect().w,
+                                             image.rect().h), interval);
     return meshGreedy(hfield,
                      {hfield.width, hfield.height, hfield.depth},
                       interval);
