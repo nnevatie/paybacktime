@@ -10,16 +10,20 @@ namespace hc
 
 struct ImageCube
 {
-    enum class Side
+    enum Side
     {
-        Front, Back, Left,  Right, Top, Bottom
+        Front, Back, Left, Right, Top, Bottom
     };
 
-    typedef std::pair<Side, Image> SideImage;
+    ImageCube(const std::string& filename, int depth = 0);
 
-    ImageCube(const std::vector<SideImage>& sides);
+    const Image& side(Side s) const;
 
-    std::vector<SideImage> sides;
+    int width() const;
+    int height() const;
+    int depth() const;
+
+    std::vector<Image> sides;
 };
 
 } // namespace

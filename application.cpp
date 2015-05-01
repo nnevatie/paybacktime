@@ -17,6 +17,7 @@
 #include "log.h"
 
 #include "sdf_primitives.h"
+#include "image_cube.h"
 
 #include "ref_mesher.h"
 #include "image_mesher.h"
@@ -68,7 +69,7 @@ bool Application::run()
     gl::Shader gsWireframe(gl::Shader::Type::Geometry,
                            filesystem::path("data/wireframe.gs"));
 
-    gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
+    gl::ShaderProgram wireProgram({vsSimple, /*gsWireframe,*/ fsScreenspace});
 
     /*
     const sdf::Box box({16.f, 16.f, 16.f});
@@ -76,8 +77,10 @@ bool Application::run()
     const gl::Mesh mesh(boxGeometry);
     */
 
-    const Image image("data/box_front.png", 1);
-    const Geometry geom = ImageMesher::geometry(image, 1.f);
+    const ImageCube imageCube("data/wall_*.png", 1);
+    //const Image image("data/wall_front.png", 1);
+
+    const Geometry geom = ImageMesher::geometry(imageCube, 1.f);
     const gl::Mesh mesh(geom);
 
     glEnable(GL_CULL_FACE);

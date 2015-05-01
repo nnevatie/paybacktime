@@ -18,7 +18,7 @@ namespace
 struct Heightfield
 {
     Heightfield(int width, int height) :
-        width(width), height(height),
+        width(width), height(height), depth(0),
         interval(1.f),
         values(width * height, 0.f)
     {
@@ -26,14 +26,14 @@ struct Heightfield
 
     Heightfield(const Image& image, float interval = 1.f) :
         width(image.rect().w / interval), height(image.rect().h / interval),
+        depth(std::min(width, height)),
         interval(interval),
         values(width * height)
     {
         const Rect<int>             rect   = image.rect();
         const uint8_t* __restrict__ bits   = image.bits();
         const int                   stride = image.stride();
-        const float                 depth  = std::min(rect.w, rect.h) /
-                                            (interval * 255.f);
+        const float                 scale  = depth / 255.f;
 
         for (int sy = 0; sy < height; ++sy)
         {
@@ -46,20 +46,44 @@ struct Heightfield
                 const int fx            = int(rect.x + sx * interval);
                 const int x             = int(fx);
                 const int p             = row[x];
-                values[sy * width + sx] = p * depth;
+                values[sy * width + sx] = p * scale;
             }
         }
     }
 
-    bool operator()(int x, int y, int z) const
+    float value(int x, int y, int z) const
     {
-        return values.at(y * width + x) > z;
+        return values.at(y * width + x);
     }
 
-    int   width, height;
+    bool operator()(int x, int y, int z) const
+    {
+        return value(x, y, z) > z;
+    }
+
+    int   width, height, depth;
     float interval;
 
     std::vector<float> values;
+};
+
+struct Cubefield
+{
+    Cubefield(const ImageCube& imageCube, float interval = 1.f) :
+        width(imageCube.width()   / interval),
+        height(imageCube.height() / interval),
+        depth(imageCube.depth()   / interval),
+        interval(interval)
+    {
+    }
+
+    bool operator()(int x, int y, int z) const
+    {
+        return false;
+    }
+
+    int   width, height, depth;
+    float interval;
 };
 
 Geometry meshHeightfield(const Heightfield& hfield)
@@ -135,10 +159,11 @@ Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims, float s = 1.f)
 
         int x[3] = {0};
         int q[3] = {0};
+        q[d]     = 1;
+
         int mask[dims[u] * dims[v]];
         int n;
 
-        q[d] = 1;
         for (x[d] = -1; x[d] < dims[d];)
         {
             // Determine mask
@@ -146,10 +171,11 @@ Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims, float s = 1.f)
             for (x[v] = 0; x[v] < dims[v]; ++x[v])
                 for (x[u] = 0; x[u] < dims[u]; ++x[u])
                 {
-                    mask[n++] = (0 <= x[d] ?
-                                  vol(x[0], x[1], x[2]) : 0) !=
-                                 (x[d] < dims[d] - 1 ?
-                                  vol(x[0] + q[0], x[1] + q[1], x[2] + q[2]) : 0);
+                    const int v0 = 0 <= x[d] ? vol(x[0], x[1], x[2]) : 0;
+                    const int v1 = x[d] < dims[d] - 1 ? vol(
+                                   x[0] + q[0], x[1] + q[1], x[2] + q[2]) : 0;
+
+                    mask[n++] = v0 != v1;
                 }
 
             ++x[d];
@@ -232,11 +258,20 @@ Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims, float s = 1.f)
 
 Geometry geometry(const Image& image, float interval)
 {
-    HCTIME("emit geom");
+    HCTIME("image geom");
     const Heightfield hfield(image, interval);
     return meshGreedy(hfield,
-                     {hfield.width, hfield.height, hfield.width},
-                      hfield.interval);
+                     {hfield.width, hfield.height, hfield.depth},
+                      interval);
+}
+
+Geometry geometry(const ImageCube& imageCube, float interval)
+{
+    HCTIME("cube geom");
+    const Cubefield cfield(imageCube, interval);
+    return meshGreedy(cfield,
+                     {cfield.width, cfield.height, cfield.depth},
+                      interval);
 }
 
 } // namespace ImageMesher
