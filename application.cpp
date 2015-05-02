@@ -69,7 +69,7 @@ bool Application::run()
     gl::Shader gsWireframe(gl::Shader::Type::Geometry,
                            filesystem::path("data/wireframe.gs"));
 
-    gl::ShaderProgram wireProgram({vsSimple, /*gsWireframe,*/ fsScreenspace});
+    gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
     /*
     const sdf::Box box({16.f, 16.f, 16.f});
@@ -77,7 +77,7 @@ bool Application::run()
     const gl::Mesh mesh(boxGeometry);
     */
 
-    const ImageCube imageCube("data/wall_*.png", 1);
+    const ImageCube imageCube("data/box.*.png", 1);
     //const Image image("data/wall_front.png", 1);
 
     const Geometry geom = ImageMesher::geometry(imageCube, 1.f);
@@ -96,9 +96,9 @@ bool Application::run()
 
         glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 200.f);
         glm::mat4 view  = glm::translate(glm::mat4(),
-                                         glm::vec3(-8.0f, -2.0f, -100.0f));
+                                         glm::vec3(-8.0f, -2.0f, -50.0f));
 
-        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(0.0f, 0.5f, 0.9f));
+        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(1.0f, 0.5f, 0.9f));
         glm::mat4 mvp   = proj * view * model;
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
