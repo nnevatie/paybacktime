@@ -86,12 +86,12 @@ struct Cubefield
 
     bool operator()(int x, int y, int z) const
     {
-        return hfields[0](x,             y,             z) &&
-               hfields[1](x,             y, depth - z - 1) &&
-               hfields[2](depth - z - 1, y,             x) &&
-               hfields[3](z,             y, width - x - 1) &&
-               hfields[4](x,             z,             y) &&
-               hfields[5](x,             z,             y);
+        return hfields[0](x,             y,              z) &&
+               hfields[1](x,             y,  depth - z - 1) &&
+               hfields[2](depth - z - 1, y,              x) &&
+               hfields[3](z,             y,  width - x - 1) &&
+               hfields[4](x,             z,              y) &&
+               hfields[5](x, depth - z - 1, height - y - 1);
     }
 
     // Front, back, left, right, top, bottom
