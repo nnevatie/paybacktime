@@ -24,6 +24,7 @@ void Mesh::render(RenderType type) const
                         type == RenderType::Lines  ? GL_LINE : GL_FILL;
 
     glPolygonMode(GL_FRONT, mode);
+    glPolygonMode(GL_BACK,  mode);
 
     vertices.bind();
     glVertexPointer(3, GL_FLOAT, 0, 0);
