@@ -55,14 +55,14 @@ struct Heightfield
         }
     }
 
-    float value(int x, int y, int z) const
+    float value(int x, int y) const
     {
         return values.at(y * width + x);
     }
 
     bool operator()(int x, int y, int z) const
     {
-        return value(x, y, z) > z;
+        return value(x, y) > z;
     }
 
     int   width, height, depth;
@@ -291,5 +291,5 @@ Geometry geometry(const ImageCube& imageCube, float interval)
 }
 
 } // namespace ImageMesher
-} // namespace
+} // namespace hc
 
