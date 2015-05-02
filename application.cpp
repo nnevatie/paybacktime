@@ -80,7 +80,7 @@ bool Application::run()
     const ImageCube imageCube("data/box.*.png", 1);
     //const Image image("data/wall_front.png", 1);
 
-    const Geometry geom = ImageMesher::geometry(imageCube, 1.f);
+    const Geometry geom = ImageMesher::geometry(imageCube);
     const gl::Mesh mesh(geom);
 
     glEnable(GL_CULL_FACE);
