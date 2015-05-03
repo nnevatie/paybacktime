@@ -71,23 +71,17 @@ bool Application::run()
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
-    /*
-    const sdf::Box box({16.f, 16.f, 16.f});
-    const Geometry geom = RefMesher::geometry(box);
-    const gl::Mesh mesh(boxGeometry);
-    */
+    //const ImageCube geomSrc("data/box.*.png", 1);
+    const Image geomSrc("data/box.front.png", 1);
 
-    const ImageCube imageCube("data/stair.*.png", 1);
-    //const Image image("data/wall_front.png", 1);
-
-    const Geometry geom = ImageMesher::geometry(imageCube);
+    const Geometry geom = ImageMesher::geometry(geomSrc);
     const gl::Mesh mesh(geom);
 
     glEnable(GL_CULL_FACE);
 
     RenderStats stats;
 
-    float a = 0;
+    float a = 1.2;
     bool running = true;
 
     while (running)
@@ -96,7 +90,7 @@ bool Application::run()
 
         glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 200.f);
         glm::mat4 view  = glm::translate(glm::mat4(),
-                                         glm::vec3(-10.0f, -0.0f, -40.0f));
+                                         glm::vec3(-8.0f, -2.0f, -40.0f));
 
         glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(1.0f, 0.5f, 0.9f));
         glm::mat4 mvp   = proj * view * model;
@@ -119,7 +113,7 @@ bool Application::run()
 
         display.swap();
 
-        a += 0.005f;
+        //a += 0.005f;
 
         SDL_Event e;
         while (SDL_PollEvent(&e))
