@@ -164,8 +164,11 @@ Geometry meshHeightfield(const Heightfield& hfield)
 }
 
 template <typename V>
-Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims, float s = 1.f)
+Geometry meshGreedy(const V& vol)
 {
+    const std::array<int, 3>& dims = {vol.width, vol.height, vol.depth};
+    const float                  s =  vol.interval;
+
     Geometry geometry;
     for (int d = 0; d < 3; ++d)
     {
@@ -271,23 +274,88 @@ Geometry meshGreedy(const V& vol, const std::array<int, 3>& dims, float s = 1.f)
 
 }
 
+void emitBox(Geometry* g, const glm::vec3& v0, const glm::vec3& v1)
+{
+    const glm::vec3 vertices[] =
+    {
+        // Front
+        {v0.x, v0.y, v1.z},
+        {v1.x, v0.y, v1.z},
+        {v1.x, v1.y, v1.z},
+        {v0.x, v1.y, v1.z},
+        // Back
+        {v0.x, v0.y, v0.z},
+        {v1.x, v0.y, v0.z},
+        {v1.x, v1.y, v0.z},
+        {v0.x, v1.y, v0.z}
+    };
+
+    const uint16_t ib = g->vertices.size();
+    g->vertices.insert(g->vertices.end(),
+                       std::begin(vertices),
+                       std::end(vertices));
+
+    typedef uint16_t index;
+    const uint16_t indices[] = {// Front
+                                index(ib + 0), index(ib + 1), index(ib + 2),
+                                index(ib + 2), index(ib + 3), index(ib + 0),
+                                // Top
+                                index(ib + 3), index(ib + 2), index(ib + 6),
+                                index(ib + 6), index(ib + 7), index(ib + 3),
+                                // Back
+                                index(ib + 7), index(ib + 6), index(ib + 5),
+                                index(ib + 5), index(ib + 4), index(ib + 7),
+                                // Bottom
+                                index(ib + 4), index(ib + 5), index(ib + 1),
+                                index(ib + 1), index(ib + 0), index(ib + 4),
+                                // Left
+                                index(ib + 4), index(ib + 0), index(ib + 3),
+                                index(ib + 3), index(ib + 7), index(ib + 4),
+                                // Right
+                                index(ib + 1), index(ib + 5), index(ib + 6),
+                                index(ib + 6), index(ib + 2), index(ib + 1)};
+
+    g->indices.insert(g->indices.end(),
+                      std::begin(indices),
+                      std::end(indices));
+}
+
+template <typename V>
+Geometry meshCubes(const V& vol)
+{
+    const std::array<int, 3>& dims = {vol.width, vol.height, vol.depth};
+    const float                  s =  vol.interval;
+
+    Geometry geometry;
+    geometry.vertices.reserve(dims[0] * dims[1] * dims[2] * 8);
+    geometry.indices.reserve(dims[0] * dims[1] * dims[2] * 36);
+
+    for (int z = 0; z < dims[2]; ++z)
+        for (int y = 0; y < dims[1]; ++y)
+            for (int x = 0; x < dims[0]; ++x)
+                if (vol(x, y, z))
+                    emitBox(&geometry, glm::vec3(x, y, z) * s,
+                                       glm::vec3(x + 1, y + 1, z + 1) * s);
+
+    return geometry;
+}
+
 Geometry geometry(const Image& image, float interval)
 {
     HCTIME("image geom");
     const Heightfield hfield(image, std::min(image.rect().w,
                                              image.rect().h), interval);
-    return meshGreedy(hfield,
-                     {hfield.width, hfield.height, hfield.depth},
-                      interval);
+
+    return meshCubes(hfield);
+    //return meshGreedy(hfield);
 }
 
 Geometry geometry(const ImageCube& imageCube, float interval)
 {
     HCTIME("cube geom");
     const Cubefield cfield(imageCube, interval);
-    return meshGreedy(cfield,
-                     {cfield.width, cfield.height, cfield.depth},
-                      interval);
+    return meshCubes(cfield);
+    //return meshGreedy(cfield);
 }
 
 } // namespace ImageMesher

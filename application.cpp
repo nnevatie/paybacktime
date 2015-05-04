@@ -72,7 +72,7 @@ bool Application::run()
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
     //const ImageCube geomSrc("data/box.*.png", 1);
-    const Image geomSrc("data/box.front.png", 1);
+    const Image geomSrc("data/stair.top.png", 1);
 
     const Geometry geom = ImageMesher::geometry(geomSrc);
     const gl::Mesh mesh(geom);
