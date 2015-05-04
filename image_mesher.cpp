@@ -57,7 +57,8 @@ struct Heightfield
 
     float value(int x, int y) const
     {
-        return values.at(y * width + x);
+        return x >= 0 && x < width && y >= 0 && y < height ?
+               values.at(y * width + x) : 0;
     }
 
     bool operator()(int x, int y, int z) const
@@ -321,6 +322,20 @@ void emitBox(Geometry* g, const glm::vec3& v0, const glm::vec3& v1)
 }
 
 template <typename V>
+bool visible(const V& vol, int x, int y, int z)
+{
+    return  vol(x + 0, y + 0, z + 0) &&
+            (
+            !vol(x - 1, y + 0, z + 0) ||
+            !vol(x + 1, y + 0, z + 0) ||
+            !vol(x + 0, y - 1, z + 0) ||
+            !vol(x + 0, y + 1, z + 0) ||
+            !vol(x + 0, y + 0, z - 1) ||
+            !vol(x + 0, y + 0, z + 1)
+            );
+}
+
+template <typename V>
 Geometry meshCubes(const V& vol)
 {
     const std::array<int, 3>& dims = {vol.width, vol.height, vol.depth};
@@ -333,9 +348,11 @@ Geometry meshCubes(const V& vol)
     for (int z = 0; z < dims[2]; ++z)
         for (int y = 0; y < dims[1]; ++y)
             for (int x = 0; x < dims[0]; ++x)
-                if (vol(x, y, z))
+                if (visible(vol, x, y, z))
+                {
                     emitBox(&geometry, glm::vec3(x, y, z) * s,
                                        glm::vec3(x + 1, y + 1, z + 1) * s);
+                }
 
     return geometry;
 }
