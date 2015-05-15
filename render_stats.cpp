@@ -47,6 +47,7 @@ void RenderStats::render()
     nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
 
     float timeMs = frameTime.mean() * 0.001f;
+
     nvgText(vg, 10, 20, str(std::stringstream()
                             << std::fixed << std::setprecision(1)
                             << "Time: " << timeMs << " ms").c_str(), 0);
@@ -58,6 +59,13 @@ void RenderStats::render()
                             << "Vertices: " << vertexCount).c_str(), 0);
     nvgText(vg, 140, 40, str(std::stringstream()
                             << "Triangles: " << triangleCount).c_str(), 0);
+
+    int geomKb = 0.001 * (vertexCount * 3 * sizeof(float) +
+                          triangleCount * 3 * sizeof(uint16_t));
+
+    nvgText(vg, 10, 60, str(std::stringstream()
+                            << "Geometry: ~" << geomKb << " KB").c_str(), 0);
+
 
     nvgEndFrame(vg);
 }

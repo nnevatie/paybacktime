@@ -23,8 +23,10 @@ void Mesh::render(RenderType type) const
     const GLenum mode = type == RenderType::Points ? GL_POINT :
                         type == RenderType::Lines  ? GL_LINE : GL_FILL;
 
-    glPolygonMode(GL_FRONT, mode);
-    glPolygonMode(GL_BACK,  mode);
+    glPolygonMode(GL_FRONT_AND_BACK, mode);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     vertices.bind();
     glVertexPointer(3, GL_FLOAT, 0, 0);

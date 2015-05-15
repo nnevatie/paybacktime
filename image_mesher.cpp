@@ -4,6 +4,8 @@
 
 #include <glm/ext.hpp>
 
+#include "sn_mesher.h"
+
 #include "clock.h"
 #include "log.h"
 
@@ -14,6 +16,96 @@ namespace ImageMesher
 
 namespace
 {
+
+void emitBox(Geometry* g, const Box& box)
+{
+    const uint16_t ib = g->vertices.size();
+    g->vertices.insert(g->vertices.end(),
+                       box.begin(),
+                       box.end());
+
+    typedef uint16_t index;
+    const uint16_t indices[] = {// Front
+                                index(ib + 0), index(ib + 1), index(ib + 2),
+                                index(ib + 2), index(ib + 3), index(ib + 0),
+                                // Top
+                                index(ib + 3), index(ib + 2), index(ib + 6),
+                                index(ib + 6), index(ib + 7), index(ib + 3),
+                                // Back
+                                index(ib + 7), index(ib + 6), index(ib + 5),
+                                index(ib + 5), index(ib + 4), index(ib + 7),
+                                // Bottom
+                                index(ib + 4), index(ib + 5), index(ib + 1),
+                                index(ib + 1), index(ib + 0), index(ib + 4),
+                                // Left
+                                index(ib + 4), index(ib + 0), index(ib + 3),
+                                index(ib + 3), index(ib + 7), index(ib + 4),
+                                // Right
+                                index(ib + 1), index(ib + 5), index(ib + 6),
+                                index(ib + 6), index(ib + 2), index(ib + 1)};
+
+    g->indices.insert(g->indices.end(),
+                      std::begin(indices),
+                      std::end(indices));
+}
+
+template <typename V>
+bool visible(const V& vol, int x, int y, int z)
+{
+    return  vol(x + 0, y + 0, z + 0) &&
+            (
+            !vol(x - 1, y + 0, z + 0) ||
+            !vol(x + 1, y + 0, z + 0) ||
+            !vol(x + 0, y - 1, z + 0) ||
+            !vol(x + 0, y + 1, z + 0) ||
+            !vol(x + 0, y + 0, z - 1) ||
+            !vol(x + 0, y + 0, z + 1)
+            );
+}
+
+Box box(const glm::vec3& v0, const glm::vec3& v1)
+{
+    return
+    {{
+        // Front
+        {v0.x, v0.y, v1.z},
+        {v1.x, v0.y, v1.z},
+        {v1.x, v1.y, v1.z},
+        {v0.x, v1.y, v1.z},
+        // Back
+        {v0.x, v0.y, v0.z},
+        {v1.x, v0.y, v0.z},
+        {v1.x, v1.y, v0.z},
+        {v0.x, v1.y, v0.z}
+    }};
+}
+
+template <typename V>
+Box box(const V& vol, int x, int y, int z)
+{
+    int c[8][3] =
+    {
+        // Front
+        {x + 0, y + 0, z + 1},
+        {x + 1, y + 0, z + 1},
+        {x + 1, y + 1, z + 1},
+        {x + 0, y + 1, z + 1},
+        // Back
+        {x + 0, y + 0, z + 0},
+        {x + 1, y + 0, z + 0},
+        {x + 1, y + 1, z + 0},
+        {x + 0, y + 1, z + 0}
+    };
+
+    const float s = vol.interval;
+    glm::vec3 v[8];
+    for (int i = 0; i < 8; ++i)
+        v[i] = glm::vec3(c[i][0], c[i][1], c[i][2]) * s;
+
+    Box box;
+    std::copy(std::begin(v), std::end(v), box.begin());
+    return box;
+}
 
 struct Heightfield
 {
@@ -55,13 +147,13 @@ struct Heightfield
         }
     }
 
-    float value(int x, int y) const
+    inline float value(int x, int y) const
     {
         return x >= 0 && x < width && y >= 0 && y < height ?
                values.at(y * width + x) : 0;
     }
 
-    bool operator()(int x, int y, int z) const
+    inline bool operator()(int x, int y, int z) const
     {
         return value(x, y) > z;
     }
@@ -87,12 +179,12 @@ struct Cubefield
 
     bool operator()(int x, int y, int z) const
     {
-        return hfields[0](x,             y,              z) &&
-               hfields[1](x,             y,  depth - z - 1) &&
-               hfields[2](depth - z - 1, y,              x) &&
-               hfields[3](z,             y,  width - x - 1) &&
-               hfields[4](x,             z,              y) &&
-               hfields[5](x, depth - z - 1, height - y - 1);
+        return hfields[0](x, y,              z) &&
+               hfields[1](x, y,  depth - z - 1) &&
+               hfields[2](z, y,              x) &&
+               hfields[3](z, y,  width - x - 1) &&
+               hfields[4](x, z,              y) &&
+               hfields[5](x, z, height - y - 1);
     }
 
     // Front, back, left, right, top, bottom
@@ -170,7 +262,12 @@ Geometry meshGreedy(const V& vol)
     const std::array<int, 3>& dims = {vol.width, vol.height, vol.depth};
     const float                  s =  vol.interval;
 
+    const int allocEstimate = (dims[0] / 4) * (dims[1] / 4) * (dims[2] / 4);
+
     Geometry geometry;
+    geometry.vertices.reserve(allocEstimate);
+    geometry.indices.reserve(allocEstimate);
+
     for (int d = 0; d < 3; ++d)
     {
         const int u = (d + 1) % 3;
@@ -180,7 +277,7 @@ Geometry meshGreedy(const V& vol)
         int q[3] = {0};
         q[d]     = 1;
 
-        int mask[dims[u] * dims[v]];
+        char mask[dims[u] * dims[v]];
         int n;
 
         for (x[d] = -1; x[d] < dims[d];)
@@ -190,11 +287,9 @@ Geometry meshGreedy(const V& vol)
             for (x[v] = 0; x[v] < dims[v]; ++x[v])
                 for (x[u] = 0; x[u] < dims[u]; ++x[u])
                 {
-                    const int v0 = 0 <= x[d] ? vol(x[0], x[1], x[2]) : 0;
-                    const int v1 = x[d] < dims[d] - 1 ? vol(
-                                   x[0] + q[0], x[1] + q[1], x[2] + q[2]) : 0;
-
-                    mask[n++] = v0 != v1;
+                    const int v0 = vol(x[0], x[1], x[2]);
+                    const int v1 = vol(x[0] + q[0], x[1] + q[1], x[2] + q[2]);
+                    mask[n++] = v0 - v1;
                 }
 
             ++x[d];
@@ -203,7 +298,8 @@ Geometry meshGreedy(const V& vol)
             for (int j = 0; j < dims[v]; ++j)
                 for (int i = 0; i < dims[u];)
                 {
-                    if (mask[n])
+                    const int m = mask[n];
+                    if (m)
                     {
                         // Dimensions
                         int w = 0, h = 0;
@@ -223,8 +319,17 @@ Geometry meshGreedy(const V& vol)
                         // Emit quad
                         int du[3] = {0};
                         int dv[3] = {0};
-                        du[u]     = w;
-                        dv[v]     = h;
+
+                        if (m > 0)
+                        {
+                            du[u] = w;
+                            dv[v] = h;
+                        }
+                        else
+                        {
+                            dv[u] = w;
+                            du[v] = h;
+                        }
 
                         typedef glm::vec3 v3;
                         const glm::vec3 vertices[] =
@@ -275,66 +380,6 @@ Geometry meshGreedy(const V& vol)
 
 }
 
-void emitBox(Geometry* g, const glm::vec3& v0, const glm::vec3& v1)
-{
-    const glm::vec3 vertices[] =
-    {
-        // Front
-        {v0.x, v0.y, v1.z},
-        {v1.x, v0.y, v1.z},
-        {v1.x, v1.y, v1.z},
-        {v0.x, v1.y, v1.z},
-        // Back
-        {v0.x, v0.y, v0.z},
-        {v1.x, v0.y, v0.z},
-        {v1.x, v1.y, v0.z},
-        {v0.x, v1.y, v0.z}
-    };
-
-    const uint16_t ib = g->vertices.size();
-    g->vertices.insert(g->vertices.end(),
-                       std::begin(vertices),
-                       std::end(vertices));
-
-    typedef uint16_t index;
-    const uint16_t indices[] = {// Front
-                                index(ib + 0), index(ib + 1), index(ib + 2),
-                                index(ib + 2), index(ib + 3), index(ib + 0),
-                                // Top
-                                index(ib + 3), index(ib + 2), index(ib + 6),
-                                index(ib + 6), index(ib + 7), index(ib + 3),
-                                // Back
-                                index(ib + 7), index(ib + 6), index(ib + 5),
-                                index(ib + 5), index(ib + 4), index(ib + 7),
-                                // Bottom
-                                index(ib + 4), index(ib + 5), index(ib + 1),
-                                index(ib + 1), index(ib + 0), index(ib + 4),
-                                // Left
-                                index(ib + 4), index(ib + 0), index(ib + 3),
-                                index(ib + 3), index(ib + 7), index(ib + 4),
-                                // Right
-                                index(ib + 1), index(ib + 5), index(ib + 6),
-                                index(ib + 6), index(ib + 2), index(ib + 1)};
-
-    g->indices.insert(g->indices.end(),
-                      std::begin(indices),
-                      std::end(indices));
-}
-
-template <typename V>
-bool visible(const V& vol, int x, int y, int z)
-{
-    return  vol(x + 0, y + 0, z + 0) &&
-            (
-            !vol(x - 1, y + 0, z + 0) ||
-            !vol(x + 1, y + 0, z + 0) ||
-            !vol(x + 0, y - 1, z + 0) ||
-            !vol(x + 0, y + 1, z + 0) ||
-            !vol(x + 0, y + 0, z - 1) ||
-            !vol(x + 0, y + 0, z + 1)
-            );
-}
-
 template <typename V>
 Geometry meshCubes(const V& vol)
 {
@@ -350,8 +395,9 @@ Geometry meshCubes(const V& vol)
             for (int x = 0; x < dims[0]; ++x)
                 if (visible(vol, x, y, z))
                 {
-                    emitBox(&geometry, glm::vec3(x, y, z) * s,
-                                       glm::vec3(x + 1, y + 1, z + 1) * s);
+                    //emitBox(&geometry, box(vol, x, y, z));
+                    emitBox(&geometry, box(glm::vec3(x, y, z) * s,
+                                           glm::vec3(x + 1, y + 1, z + 1) * s));
                 }
 
     return geometry;
@@ -363,16 +409,15 @@ Geometry geometry(const Image& image, float interval)
     const Heightfield hfield(image, std::min(image.rect().w,
                                              image.rect().h), interval);
 
-    return meshCubes(hfield);
-    //return meshGreedy(hfield);
+    return meshGreedy(hfield);
 }
 
 Geometry geometry(const ImageCube& imageCube, float interval)
 {
     HCTIME("cube geom");
     const Cubefield cfield(imageCube, interval);
-    return meshCubes(cfield);
-    //return meshGreedy(cfield);
+
+    return meshGreedy(cfield);
 }
 
 } // namespace ImageMesher

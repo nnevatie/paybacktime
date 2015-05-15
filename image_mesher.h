@@ -14,4 +14,3 @@ Geometry geometry(const ImageCube& imageCube, float interval = 1.f);
 
 } // namespace ImageMesher
 } // namespace hc
-

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <vector>
 #include <iostream>
 
@@ -8,6 +9,7 @@
 namespace hc
 {
 
+typedef std::array<glm::vec3, 8>        Box;
 typedef std::pair<glm::vec3, glm::vec3> BoundingBox;
 
 struct Geometry

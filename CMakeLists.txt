@@ -4,6 +4,11 @@ project(highcaliber)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
     -std=c++11 -Wall -Wno-unused-function")
 
+set(HEADER_FILES
+    mc_mesher.h
+    sn_mesher.h
+    )
+
 set(SOURCE_FILES
     main.cpp
     application.cpp
@@ -49,7 +54,7 @@ set(OPENGL_LIBS
     opengl32
     )
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME}
                       ${SYS_LIBS}
