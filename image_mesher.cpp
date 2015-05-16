@@ -68,15 +68,15 @@ Box box(const glm::vec3& v0, const glm::vec3& v1)
     return
     {{
         // Front
-        {v0.x, v0.y, v1.z},
-        {v1.x, v0.y, v1.z},
-        {v1.x, v1.y, v1.z},
-        {v0.x, v1.y, v1.z},
+        {v0.x, v0.y, v1.z, 1},
+        {v1.x, v0.y, v1.z, 1},
+        {v1.x, v1.y, v1.z, 1},
+        {v0.x, v1.y, v1.z, 1},
         // Back
-        {v0.x, v0.y, v0.z},
-        {v1.x, v0.y, v0.z},
-        {v1.x, v1.y, v0.z},
-        {v0.x, v1.y, v0.z}
+        {v0.x, v0.y, v0.z, 1},
+        {v1.x, v0.y, v0.z, 1},
+        {v1.x, v1.y, v0.z, 1},
+        {v0.x, v1.y, v0.z, 1}
     }};
 }
 
@@ -98,9 +98,9 @@ Box box(const V& vol, int x, int y, int z)
     };
 
     const float s = vol.interval;
-    glm::vec3 v[8];
+    glm::vec4 v[8];
     for (int i = 0; i < 8; ++i)
-        v[i] = glm::vec3(c[i][0], c[i][1], c[i][2]) * s;
+        v[i] = glm::vec4(c[i][0], c[i][1], c[i][2], 1) * s;
 
     Box box;
     std::copy(std::begin(v), std::end(v), box.begin());
@@ -211,18 +211,18 @@ Geometry meshHeightfield(const Heightfield& hfield)
             const glm::vec3 c1 = {x * scale + scale, y * scale + scale, h};
             const int ib       = geometry.vertices.size();
 
-            const glm::vec3 vertices[] =
+            const glm::vec4 vertices[] =
             {
                 // Front
-                {c0.x, c0.y, c0.z},
-                {c1.x, c0.y, c0.z},
-                {c1.x, c1.y, c0.z},
-                {c0.x, c1.y, c0.z},
+                {c0.x, c0.y, c0.z, 1},
+                {c1.x, c0.y, c0.z, 1},
+                {c1.x, c1.y, c0.z, 1},
+                {c0.x, c1.y, c0.z, 1},
                 // Back
-                {c0.x, c0.y, c1.z},
-                {c1.x, c0.y, c1.z},
-                {c1.x, c1.y, c1.z},
-                {c0.x, c1.y, c1.z}
+                {c0.x, c0.y, c1.z, 1},
+                {c1.x, c0.y, c1.z, 1},
+                {c1.x, c1.y, c1.z, 1},
+                {c0.x, c1.y, c1.z, 1}
 
             };
             geometry.vertices.insert(geometry.vertices.end(),
@@ -304,12 +304,12 @@ Geometry meshGreedy(const V& vol)
                         // Dimensions
                         int w = 0, h = 0;
                         // Compute width
-                        for (w = 1; mask[n + w] && i + w < dims[u]; ++w)
+                        for (w = 1; m == mask[n + w] && i + w < dims[u]; ++w)
                         {}
                         // Compute height
                         for (h = 1; j + h < dims[v]; ++h)
                             for (int k = 0; k < w; ++k)
-                                if (!mask[n + k + h * dims[u]])
+                                if (m != mask[n + k + h * dims[u]])
                                     goto dims_done;
                         dims_done:
 
@@ -331,14 +331,14 @@ Geometry meshGreedy(const V& vol)
                             du[v] = h;
                         }
 
-                        typedef glm::vec3 v3;
-                        const glm::vec3 vertices[] =
+                        typedef glm::vec4 v4;
+                        const v4 vertices[] =
                         {
-                            s * v3(x[0], x[1], x[2]),
-                            s * v3(x[0] + du[0], x[1] + du[1], x[2] + du[2]),
-                            s * v3(x[0] + du[0] + dv[0],
-                                   x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),
-                            s * v3(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]),
+                            s * v4(x[0], x[1], x[2], 0),
+                            s * v4(x[0] + du[0], x[1] + du[1], x[2] + du[2], 1),
+                            s * v4(x[0] + du[0] + dv[0],
+                                   x[1] + du[1] + dv[1], x[2] + du[2] + dv[2], 1),
+                            s * v4(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2], 1),
                         };
 
                         const int ib = geometry.vertices.size();

@@ -88,7 +88,7 @@ Geometry geometry(const V& vol)
 
                 int edgeMask  = edgeTable.edges[mask];
                 int edgeCount = 0;
-                float v[3]    = {0, 0, 0};
+                float v[4]    = {0, 0, 0, 1};
 
                 // For every edge of the cube
                 for (int i = 0; i < 12; ++i)
@@ -133,7 +133,7 @@ Geometry geometry(const V& vol)
                 // Add vertex to buffer,
                 // store pointer to vertex index in buffer
                 buffer[m] = geom.vertices.size();
-                geom.vertices.push_back({v[0], v[1], v[2]});
+                geom.vertices.push_back({v[0], v[1], v[2], v[3]});
 
                 // Now we need to add faces together,
                 // to do this we just loop over 3 basis components

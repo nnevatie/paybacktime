@@ -29,7 +29,7 @@ void Mesh::render(RenderType type) const
     glCullFace(GL_BACK);
 
     vertices.bind();
-    glVertexPointer(3, GL_FLOAT, 0, 0);
+    glVertexPointer(4, GL_FLOAT, 0, 0);
 
     indices.bind();
     glDrawElements(GL_TRIANGLES,

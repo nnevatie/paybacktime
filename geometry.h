@@ -4,17 +4,17 @@
 #include <vector>
 #include <iostream>
 
-#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 namespace hc
 {
 
-typedef std::array<glm::vec3, 8>        Box;
-typedef std::pair<glm::vec3, glm::vec3> BoundingBox;
+typedef std::array<glm::vec4, 8>        Box;
+typedef std::pair<glm::vec4, glm::vec4> BoundingBox;
 
 struct Geometry
 {
-    typedef glm::vec3 Vertex;
+    typedef glm::vec4 Vertex;
     typedef uint16_t  Index;
 
     std::vector<Vertex> vertices;

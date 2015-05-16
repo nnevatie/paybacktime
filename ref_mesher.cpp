@@ -27,15 +27,15 @@ Geometry geometry(const sdf::Box& box)
         // Vertices
         {
             // Front
-            {-v.x, -v.y,  v.z},
-            { v.x, -v.y,  v.z},
-            { v.x,  v.y,  v.z},
-            {-v.x,  v.y,  v.z},
+            {-v.x, -v.y,  v.z, 1},
+            { v.x, -v.y,  v.z, 1},
+            { v.x,  v.y,  v.z, 1},
+            {-v.x,  v.y,  v.z, 1},
             // Back
-            {-v.x, -v.y, -v.z},
-            { v.x, -v.y, -v.z},
-            { v.x,  v.y, -v.z},
-            {-v.x,  v.y, -v.z}
+            {-v.x, -v.y, -v.z, 1},
+            { v.x, -v.y, -v.z, 1},
+            { v.x,  v.y, -v.z, 1},
+            {-v.x,  v.y, -v.z, 1}
         },
         // Indices
         {

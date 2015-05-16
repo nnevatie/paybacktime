@@ -16,8 +16,8 @@ float Sphere::operator()(const glm::vec3& p) const
 
 BoundingBox Sphere::bounds() const
 {
-    return BoundingBox {{-r, -r, -r},
-                        { r,  r,  r}};
+    return BoundingBox {{-r, -r, -r, 1},
+                        { r,  r,  r, 1}};
 }
 
 Box::Box(const glm::vec3& b) : b(b) {}
@@ -31,8 +31,8 @@ float Box::operator()(const glm::vec3& p) const
 
 BoundingBox Box::bounds() const
 {
-    return BoundingBox {{-b.x, -b.y, -b.z},
-                        { b.x,  b.y,  b.z}};
+    return BoundingBox {{-b.x, -b.y, -b.z, 1},
+                        { b.x,  b.y,  b.z, 1}};
 }
 
 } // namespace sdf

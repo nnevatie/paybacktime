@@ -71,7 +71,7 @@ bool Application::run()
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
-    const ImageCube geomSrc("data/floor.*.png", 1);
+    const ImageCube geomSrc("data/box.*.png", 1);
 
     const Geometry geom = ImageMesher::geometry(geomSrc);
     const gl::Mesh mesh(geom);
@@ -87,7 +87,7 @@ bool Application::run()
 
         glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 400.f);
         glm::mat4 view  = glm::translate(glm::mat4(),
-                                         glm::vec3(-8.0f, -2.0f, -80.0f));
+                                         glm::vec3(-8.0f, -2.0f, -40.0f));
 
         glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(1.0f, 0.5f, 0.9f));
         glm::mat4 mvp   = proj * view * model;
@@ -97,9 +97,9 @@ bool Application::run()
         glEnable(GL_DEPTH_TEST);
 
         wireProgram.bind()
-            .setUniform("winSize", glm::vec2(display.width(), display.height()))
-            .setUniform("in_matrix", mvp)
-            .setUniform("in_color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
+            .setUniform("transform", mvp)
+            .setUniform("winSize",   glm::vec2(display.width(), display.height()))
+            .setUniform("color",     glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
         mesh.render();
 
