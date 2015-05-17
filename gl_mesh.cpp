@@ -25,17 +25,29 @@ void Mesh::render(RenderType type) const
 
     glPolygonMode(GL_FRONT_AND_BACK, mode);
 
-    glEnable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
     vertices.bind();
-    glVertexPointer(4, GL_FLOAT, 0, 0);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    const int stride  = sizeof(GLfloat) * 8;
+    glVertexPointer(3,   GL_FLOAT, stride, 0);
+    glNormalPointer(     GL_FLOAT, stride, (float*) (sizeof(float) * 3));
+    glTexCoordPointer(2, GL_FLOAT, stride, (float*) (sizeof(float) * 6));
 
     indices.bind();
     glDrawElements(GL_TRIANGLES,
-                   indices.size / int(sizeof(GLushort)),
+                   indices.size / int(sizeof(Geometry::Index)),
                    GL_UNSIGNED_SHORT,
                    0);
+
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
 
     vertices.unbind();
     indices.unbind();

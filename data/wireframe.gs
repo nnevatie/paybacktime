@@ -6,13 +6,12 @@ layout(triangle_strip, max_vertices = 3) out;
 
 uniform vec2 winSize;
 
-layout (location = 0) in float vertexAoIn[];
+in vec3 normalV[];
+in vec2 uvV[];
 
-layout (location = 0)
-out float vertexAo;
-
-layout (location = 1)
-out vec3 dist;
+out vec3 normalG;
+out vec2 uvG;
+out vec3 distG;
 
 void main(void)
 {
@@ -26,18 +25,21 @@ void main(void)
 
     float area = abs(v1.x * v2.y - v1.y * v2.x);
 
-    vertexAo    = vertexAoIn[0];
-    dist        = vec3(area / length(v0), 0, 0);
+    normalG     = normalV[0];
+    uvG         = uvV[0];
+    distG       = vec3(area / length(v0), 0, 0);
     gl_Position = gl_in[0].gl_Position;
     EmitVertex();
 
-    vertexAo    = vertexAoIn[1];
-    dist        = vec3(0, area / length(v1), 0);
+    normalG     = normalV[1];
+    uvG         = uvV[1];
+    distG       = vec3(0, area / length(v1), 0);
     gl_Position = gl_in[1].gl_Position;
     EmitVertex();
 
-    vertexAo    = vertexAoIn[2];
-    dist        = vec3(0, 0, area / length(v2));
+    normalG     = normalV[2];
+    uvG         = uvV[2];
+    distG       = vec3(0, 0, area / length(v2));
     gl_Position = gl_in[2].gl_Position;
     EmitVertex();
 

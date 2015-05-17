@@ -3,13 +3,16 @@
 
 uniform mat4 transform;
 
-in vec4 posAo;
+in vec3 position;
+in vec3 normal;
+in vec2 uv;
 
-layout (location = 0)
-out float vertexAo;
+out vec3 normalV;
+out vec2 uvV;
 
 void main()
 {
-    vertexAo    = posAo.w;
-    gl_Position = transform * vec4(posAo.xyz, 1);
+    normalV     = normal;
+    uvV         = uv;
+    gl_Position = transform * vec4(position.xyz, 1);
 }

@@ -20,22 +20,23 @@ Geometry geometry(const sdf::Sphere& sphere)
 
 Geometry geometry(const sdf::Box& box)
 {
-    HCTIME(str(std::stringstream() << "Extract box, b: " << glm::length<float>(box.b)));
+    HCTIME(str(std::stringstream() << "Extract box, b: "
+                                   << glm::length<float>(box.b)));
     const glm::vec3& v = box.b;
     return
     {
         // Vertices
         {
             // Front
-            {-v.x, -v.y,  v.z, 1},
-            { v.x, -v.y,  v.z, 1},
-            { v.x,  v.y,  v.z, 1},
-            {-v.x,  v.y,  v.z, 1},
+            {-v.x, -v.y,  v.z},
+            { v.x, -v.y,  v.z},
+            { v.x,  v.y,  v.z},
+            {-v.x,  v.y,  v.z},
             // Back
-            {-v.x, -v.y, -v.z, 1},
-            { v.x, -v.y, -v.z, 1},
-            { v.x,  v.y, -v.z, 1},
-            {-v.x,  v.y, -v.z, 1}
+            {-v.x, -v.y, -v.z},
+            { v.x, -v.y, -v.z},
+            { v.x,  v.y, -v.z},
+            {-v.x,  v.y, -v.z}
         },
         // Indices
         {
