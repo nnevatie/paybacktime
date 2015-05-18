@@ -1,17 +1,28 @@
 #version 150
-#extension GL_ARB_separate_shader_objects : enable
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
+// Uniforms
 uniform vec2 winSize;
 
-in vec3 normalV[];
-in vec2 uvV[];
+// Input
+in Block
+{
+    vec3 normal;
+    vec2 uv;
+    vec3 dist;
+}
+input[];
 
-out vec3 normalG;
-out vec2 uvG;
-out vec3 distG;
+// Output
+out Block
+{
+    vec3 normal;
+    vec2 uv;
+    vec3 dist;
+}
+output;
 
 void main(void)
 {
@@ -25,22 +36,22 @@ void main(void)
 
     float area = abs(v1.x * v2.y - v1.y * v2.x);
 
-    normalG     = normalV[0];
-    uvG         = uvV[0];
-    distG       = vec3(area / length(v0), 0, 0);
-    gl_Position = gl_in[0].gl_Position;
+    output.normal = input[0].normal;
+    output.uv     = input[0].uv;
+    output.dist   = vec3(area / length(v0), 0, 0);
+    gl_Position   = gl_in[0].gl_Position;
     EmitVertex();
 
-    normalG     = normalV[1];
-    uvG         = uvV[1];
-    distG       = vec3(0, area / length(v1), 0);
+    output.normal = input[1].normal;
+    output.uv     = input[1].uv;
+    output.dist   = vec3(0, area / length(v1), 0);
     gl_Position = gl_in[1].gl_Position;
     EmitVertex();
 
-    normalG     = normalV[2];
-    uvG         = uvV[2];
-    distG       = vec3(0, 0, area / length(v2));
-    gl_Position = gl_in[2].gl_Position;
+    output.normal = input[2].normal;
+    output.uv     = input[2].uv;
+    output.dist   = vec3(0, 0, area / length(v2));
+    gl_Position   = gl_in[2].gl_Position;
     EmitVertex();
 
     EndPrimitive();

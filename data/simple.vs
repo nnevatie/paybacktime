@@ -1,18 +1,25 @@
 #version 150
-#extension GL_ARB_separate_shader_objects : enable
 
+// Uniforms
 uniform mat4 transform;
 
+// Input
 in vec3 position;
 in vec3 normal;
 in vec2 uv;
 
-out vec3 normalV;
-out vec2 uvV;
+// Output
+out Block
+{
+    vec3 normal;
+    vec2 uv;
+    vec3 dist;
+}
+output;
 
 void main()
 {
-    normalV     = normal;
-    uvV         = uv;
-    gl_Position = transform * vec4(position.xyz, 1);
+    output.normal = normal;
+    output.uv     = uv;
+    gl_Position   = transform * vec4(position.xyz, 1);
 }
