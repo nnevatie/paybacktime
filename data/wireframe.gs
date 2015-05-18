@@ -11,7 +11,7 @@ in Block
 {
     vec3 normal;
     vec2 uv;
-    vec3 dist;
+    vec3 bc;
 }
 input[];
 
@@ -20,7 +20,7 @@ out Block
 {
     vec3 normal;
     vec2 uv;
-    vec3 dist;
+    vec3 bc;
 }
 output;
 
@@ -38,19 +38,19 @@ void main(void)
 
     output.normal = input[0].normal;
     output.uv     = input[0].uv;
-    output.dist   = vec3(area / length(v0), 0, 0);
+    output.bc     = vec3(area / length(v0), 0, 0);
     gl_Position   = gl_in[0].gl_Position;
     EmitVertex();
 
     output.normal = input[1].normal;
     output.uv     = input[1].uv;
-    output.dist   = vec3(0, area / length(v1), 0);
-    gl_Position = gl_in[1].gl_Position;
+    output.bc     = vec3(0, area / length(v1), 0);
+    gl_Position   = gl_in[1].gl_Position;
     EmitVertex();
 
     output.normal = input[2].normal;
     output.uv     = input[2].uv;
-    output.dist   = vec3(0, 0, area / length(v2));
+    output.bc     = vec3(0, 0, area / length(v2));
     gl_Position   = gl_in[2].gl_Position;
     EmitVertex();
 

@@ -13,7 +13,7 @@ out Block
 {
     vec3 normal;
     vec2 uv;
-    vec3 dist;
+    vec3 bc;
 }
 output;
 
@@ -21,5 +21,6 @@ void main()
 {
     output.normal = normal;
     output.uv     = uv;
+    output.bc     = vec3(1.0);
     gl_Position   = transform * vec4(position.xyz, 1);
 }
