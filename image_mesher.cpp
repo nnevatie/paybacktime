@@ -137,7 +137,6 @@ struct Heightfield
             const int                     y = int(fy);
             const uint8_t* __restrict__ row = bits + y * stride;
 
-            #pragma omp simd
             for (int sx = 0; sx < width; ++sx)
             {
                 const int fx            = int(rect.x + sx * interval);
@@ -369,7 +368,6 @@ Geometry meshGreedy(const V& vol)
                                                 std::end(indices));
 
                         // Clear mask
-                        #pragma omp simd
                         for (int l = 0; l < h; ++l)
                             for (int k = 0; k < w; ++k)
                                 mask[n + k + l * dims[u]] = 0;
@@ -395,7 +393,6 @@ template <typename V>
 Geometry meshCubes(const V& vol)
 {
     const std::array<int, 3>& dims = {vol.width, vol.height, vol.depth};
-    const float                  s =  vol.interval;
 
     Geometry geometry;
     geometry.vertices.reserve(dims[0] * dims[1] * dims[2] * 8);
@@ -405,11 +402,7 @@ Geometry meshCubes(const V& vol)
         for (int y = 0; y < dims[1]; ++y)
             for (int x = 0; x < dims[0]; ++x)
                 if (visible(vol, x, y, z))
-                {
-                    //emitBox(&geometry, box(vol, x, y, z));
-                    emitBox(&geometry, box(glm::vec3(x, y, z) * s,
-                                           glm::vec3(x + 1, y + 1, z + 1) * s));
-                }
+                    emitBox(&geometry, box(vol, x, y, z));
 
     return geometry;
 }
@@ -420,7 +413,8 @@ Geometry geometry(const Image& image, float interval)
     const Heightfield hfield(image, std::min(image.rect().w,
                                              image.rect().h), interval);
 
-    return meshGreedy(hfield);
+    //return meshGreedy(hfield);
+    return meshCubes(hfield);
 }
 
 Geometry geometry(const ImageCube& imageCube, float interval)
@@ -428,7 +422,8 @@ Geometry geometry(const ImageCube& imageCube, float interval)
     HCTIME("cube geom");
     const Cubefield cfield(imageCube, interval);
 
-    return meshGreedy(cfield);
+    //return meshGreedy(cfield);
+    return meshCubes(cfield);
 }
 
 } // namespace ImageMesher
