@@ -17,6 +17,140 @@ namespace ImageMesher
 namespace
 {
 
+struct Heightfield
+{
+    Heightfield() : width(0), height(0), depth(0), interval(0)
+    {
+    }
+
+    Heightfield(int width, int height) :
+        width(width), height(height), depth(0),
+        interval(1.f),
+        values(width * height, 0.f)
+    {
+    }
+
+    Heightfield(const Image& image, int depth, float interval = 1.f) :
+        width(image.rect().w / interval), height(image.rect().h / interval),
+        depth(depth),
+        interval(interval),
+        values(width * height)
+    {
+        const Rect<int>             rect   = image.rect();
+        const uint8_t* __restrict__ bits   = image.bits();
+        const int                   stride = image.stride();
+
+        for (int sy = 0; sy < height; ++sy)
+        {
+            const float                  fy = rect.y + sy * interval;
+            const int                     y = int(fy);
+            const uint8_t* __restrict__ row = bits + y * stride;
+
+            for (int sx = 0; sx < width; ++sx)
+            {
+                const int fx            = int(rect.x + sx * interval);
+                const int x             = int(fx);
+                const int p             = row[x];
+                values[sy * width + sx] = float(p) / depth + 0.5f;
+            }
+        }
+    }
+
+    inline int f(int x, int y) const
+    {
+        return x >= 0 && x < width && y >= 0 && y < height ?
+               values.at(y * width + x) : 0;
+    }
+
+    inline int g(int /*axis*/, int x, int y, int z) const
+    {
+        const int vc = f(x, y);
+        if (vc - z > 1) return 0;
+
+        const int v[8] =
+        {
+            vc - f(x - 1, y - 1),
+            vc - f(x + 0, y - 1),
+            vc - f(x + 1, y - 1),
+            vc - f(x - 1, y + 0),
+            vc - f(x + 1, y + 0),
+            vc - f(x - 1, y + 1),
+            vc - f(x + 0, y + 1),
+            vc - f(x + 1, y + 1)
+        };
+
+        const float e = 4.f;
+        #define collapsed(i) (v[i] > 0 && v[i] < e)
+
+        int gradient = 0;
+        if (collapsed(0) || collapsed(1) || collapsed(3))
+            gradient |= 0x01;
+        if (collapsed(1) || collapsed(2) || collapsed(4))
+            gradient |= 0x02;
+        if (collapsed(3) || collapsed(5) || collapsed(6))
+            gradient |= 0x04;
+        if (collapsed(4) || collapsed(6) || collapsed(7))
+            gradient |= 0x08;
+
+        #undef collapsed
+        return gradient;
+    }
+
+    inline bool operator()(int x, int y, int z) const
+    {
+        return f(x, y) > z;
+    }
+
+    int   width, height, depth;
+    float interval;
+
+    std::vector<int> values;
+};
+
+struct Cubefield
+{
+    Cubefield(const ImageCube& imageCube, float interval = 1.f) :
+        width(imageCube.width()   / interval),
+        height(imageCube.height() / interval),
+        depth(imageCube.depth()   / interval),
+        interval(interval)
+    {
+        const int depths[6] = {depth, depth, width, width, height, height};
+        for (int i = 0; i < 6; ++i)
+            hfields[i] = Heightfield(imageCube.sides[i], depths[i], interval);
+    }
+
+    inline int g(int axis, int x, int y, int z) const
+    {
+        const int c[6][3] =
+        {
+            {x, y,              z},
+            {x, y,  depth - z - 1},
+            {z, y,              x},
+            {z, y,  width - x - 1},
+            {x, z,              y},
+            {x, z, height - y - 1}
+        };
+        return hfields[axis].g(axis, c[axis][0], c[axis][1], c[axis][2]);
+    }
+
+    inline bool operator()(int x, int y, int z) const
+    {
+        return hfields[0](x, y,              z) &&
+               hfields[1](x, y,  depth - z - 1) &&
+               hfields[2](z, y,              x) &&
+               hfields[3](z, y,  width - x - 1) &&
+               hfields[4](x, z,              y) &&
+               hfields[5](x, z, height - y - 1);
+    }
+
+    // Front, back, left, right, top, bottom
+    Heightfield hfields[6];
+
+    int   width, height, depth;
+    float interval;
+};
+
 void emitBox(Geometry* g, const Box& box)
 {
     const uint16_t ib = g->vertices.size();
@@ -52,6 +186,7 @@ void emitBox(Geometry* g, const Box& box)
 template <typename V>
 bool visible(const V& vol, int x, int y, int z)
 {
+    return vol(x + 0, y + 0, z + 0);
     return  vol(x + 0, y + 0, z + 0) &&
             (
             !vol(x - 1, y + 0, z + 0) ||
@@ -83,6 +218,7 @@ Box box(const glm::vec3& v0, const glm::vec3& v1)
 template <typename V>
 Box box(const V& vol, int x, int y, int z)
 {
+    const float s = vol.interval;
     int c[8][3] =
     {
         // Front
@@ -97,102 +233,50 @@ Box box(const V& vol, int x, int y, int z)
         {x + 0, y + 1, z + 0}
     };
 
-    const float s = vol.interval;
-    glm::vec3 v[8];
+    int g = vol.g(0, x, y, z);
+    if (g & 0x01) c[0][2] = z;
+    if (g & 0x02) c[1][2] = z;
+    if (g & 0x04) c[3][2] = z;
+    if (g & 0x08) c[2][2] = z;
+
+    g = vol.g(1, x, y, z);
+    if (g & 0x01) c[4][2] = z + 1;
+    if (g & 0x02) c[5][2] = z + 1;
+    if (g & 0x04) c[7][2] = z + 1;
+    if (g & 0x08) c[6][2] = z + 1;
+
+    g = vol.g(2, x, y, z);
+    if (g & 0x01) c[5][0] = x;
+    if (g & 0x02) c[1][0] = x;
+    if (g & 0x04) c[6][0] = x;
+    if (g & 0x08) c[2][0] = x;
+
+    g = vol.g(3, x, y, z);
+    if (g & 0x01) c[4][0] = x + 1;
+    if (g & 0x02) c[0][0] = x + 1;
+    if (g & 0x04) c[7][0] = x + 1;
+    if (g & 0x08) c[3][0] = x + 1;
+
+    g = vol.g(4, x, y, z);
+    if (g & 0x01) c[7][1] = y;
+    if (g & 0x02) c[6][1] = y;
+    if (g & 0x04) c[3][1] = y;
+    if (g & 0x08) c[2][1] = y;
+
+    g = vol.g(5, x, y, z);
+    if (g & 0x01) c[4][1] = y + 1;
+    if (g & 0x02) c[5][1] = y + 1;
+    if (g & 0x04) c[0][1] = y + 1;
+    if (g & 0x08) c[1][1] = y + 1;
+
+    glm::vec3 vertices[8];
     for (int i = 0; i < 8; ++i)
-        v[i] = glm::vec3(c[i][0], c[i][1], c[i][2]) * s;
+        vertices[i] = glm::vec3(c[i][0], c[i][1], c[i][2]) * s;
 
     Box box;
-    std::copy(std::begin(v), std::end(v), box.begin());
+    std::copy(std::begin(vertices), std::end(vertices), box.begin());
     return box;
 }
-
-struct Heightfield
-{
-    Heightfield() : width(0), height(0), depth(0), interval(0)
-    {
-    }
-
-    Heightfield(int width, int height) :
-        width(width), height(height), depth(0),
-        interval(1.f),
-        values(width * height, 0.f)
-    {
-    }
-
-    Heightfield(const Image& image, int depth, float interval = 1.f) :
-        width(image.rect().w / interval), height(image.rect().h / interval),
-        depth(depth),
-        interval(interval),
-        values(width * height)
-    {
-        const Rect<int>             rect   = image.rect();
-        const uint8_t* __restrict__ bits   = image.bits();
-        const int                   stride = image.stride();
-        const float                 scale  = depth / 255.f;
-
-        for (int sy = 0; sy < height; ++sy)
-        {
-            const float                  fy = rect.y + sy * interval;
-            const int                     y = int(fy);
-            const uint8_t* __restrict__ row = bits + y * stride;
-
-            for (int sx = 0; sx < width; ++sx)
-            {
-                const int fx            = int(rect.x + sx * interval);
-                const int x             = int(fx);
-                const int p             = row[x];
-                values[sy * width + sx] = p * scale;
-            }
-        }
-    }
-
-    inline float value(int x, int y) const
-    {
-        return x >= 0 && x < width && y >= 0 && y < height ?
-               values.at(y * width + x) : 0;
-    }
-
-    inline bool operator()(int x, int y, int z) const
-    {
-        return value(x, y) > z;
-    }
-
-    int   width, height, depth;
-    float interval;
-
-    std::vector<float> values;
-};
-
-struct Cubefield
-{
-    Cubefield(const ImageCube& imageCube, float interval = 1.f) :
-        width(imageCube.width()   / interval),
-        height(imageCube.height() / interval),
-        depth(imageCube.depth()   / interval),
-        interval(interval)
-    {
-        const int depths[6] = {depth, depth, width, width, height, height};
-        for (int i = 0; i < 6; ++i)
-            hfields[i] = Heightfield(imageCube.sides[i], depths[i], interval);
-    }
-
-    bool operator()(int x, int y, int z) const
-    {
-        return hfields[0](x, y,              z) &&
-               hfields[1](x, y,  depth - z - 1) &&
-               hfields[2](z, y,              x) &&
-               hfields[3](z, y,  width - x - 1) &&
-               hfields[4](x, z,              y) &&
-               hfields[5](x, z, height - y - 1);
-    }
-
-    // Front, back, left, right, top, bottom
-    Heightfield hfields[6];
-
-    int   width, height, depth;
-    float interval;
-};
 
 Geometry meshHeightfield(const Heightfield& hfield)
 {
@@ -200,8 +284,8 @@ Geometry meshHeightfield(const Heightfield& hfield)
     geometry.vertices.reserve(hfield.values.size() * 8);
     geometry.indices.reserve(hfield.values.size() * 12);
 
-    const float* __restrict__ data = hfield.values.data();
-    const float              scale = hfield.interval;
+    const int* __restrict__     data = hfield.values.data();
+    const float                scale = hfield.interval;
 
     for (int y = 0; y < hfield.height; ++y)
         for (int x = 0; x < hfield.width; ++x)
@@ -387,8 +471,6 @@ Geometry meshGreedy(const V& vol)
     return geometry;
 }
 
-}
-
 template <typename V>
 Geometry meshCubes(const V& vol)
 {
@@ -406,6 +488,8 @@ Geometry meshCubes(const V& vol)
 
     return geometry;
 }
+
+} // namespace
 
 Geometry geometry(const Image& image, float interval)
 {
