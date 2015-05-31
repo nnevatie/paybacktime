@@ -132,6 +132,7 @@ struct Cubefield
             {x, z, height - y - 1}
         };
         int gradient = 0;
+
         for (int i = 0; i < 6; ++i)
             gradient |= hfields[i].g(c[i][0], c[i][1], c[i][2]) << (i << 2);
 
@@ -284,7 +285,7 @@ Geometry meshGreedy(const V& vol)
         int q[3] = {0};
         q[d]     = 1;
 
-        char mask[dims[u] * dims[v]];
+        int64_t mask[dims[u] * dims[v]];
 
         for (x[d] = -1; x[d] < dims[d];)
         {
@@ -293,9 +294,13 @@ Geometry meshGreedy(const V& vol)
             for (x[v] = 0; x[v] < dims[v]; ++x[v])
                 for (x[u] = 0; x[u] < dims[u]; ++x[u])
                 {
-                    const int v0 = vol(x[0], x[1], x[2]);
-                    const int v1 = vol(x[0] + q[0], x[1] + q[1], x[2] + q[2]);
-                    mask[n++] = v0 - v1;
+                    const int c0[3] = {x[0],        x[1],        x[2]};
+                    const int c1[3] = {x[0] + q[0], x[1] + q[1], x[2] + q[2]};
+                    const int v0    = vol(c0[0], c0[1], c0[2]);
+                    const int v1    = vol(c1[0], c1[1], c1[2]);
+                    const int g0    = v0 || v1 ? vol.g(c0[0], c0[1], c0[2]) : 0;
+                    const int g1    = v0 || v1 ? vol.g(c1[0], c1[1], c1[2]) : 0;
+                    mask[n++]       = (int64_t(g0 - g1) << 32) | (v0 - v1);
                 }
 
             ++x[d];
@@ -304,7 +309,7 @@ Geometry meshGreedy(const V& vol)
             for (int j = 0; j < dims[v]; ++j)
                 for (int i = 0; i < dims[u];)
                 {
-                    const int m = mask[n];
+                    const int64_t m = mask[n];
                     if (m)
                     {
                         // Dimensions
@@ -343,15 +348,12 @@ Geometry meshGreedy(const V& vol)
                             s * v3(x[0],
                                    x[1],
                                    x[2]),
-
                             s * v3(x[0] + du[0],
                                    x[1] + du[1],
                                    x[2] + du[2]),
-
                             s * v3(x[0] + du[0] + dv[0],
                                    x[1] + du[1] + dv[1],
                                    x[2] + du[2] + dv[2]),
-
                             s * v3(x[0] + dv[0],
                                    x[1] + dv[1],
                                    x[2] + dv[2])
