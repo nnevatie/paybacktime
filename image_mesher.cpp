@@ -133,7 +133,7 @@ struct Cubefield
         };
         int gradient = 0;
         for (int i = 0; i < 6; ++i)
-            gradient |= hfields[i].g(c[i][0], c[i][1], c[i][2]) << (4 * i);
+            gradient |= hfields[i].g(c[i][0], c[i][1], c[i][2]) << (i << 2);
 
         return gradient;
     }
@@ -357,18 +357,18 @@ Geometry meshGreedy(const V& vol)
                                    x[2] + dv[2])
                         };
 
-                        const int ib = geometry.vertices.size();
+                        const Geometry::Index ib = geometry.vertices.size();
                         geometry.vertices.insert(geometry.vertices.end(),
                                                  std::begin(vertices),
                                                  std::end(vertices));
 
                         geometry.indices.insert(geometry.indices.end(),
-                                               {ib + 0u,
-                                                ib + 1u,
-                                                ib + 2u,
-                                                ib + 2u,
-                                                ib + 3u,
-                                                ib + 0u});
+                                               {ib + 0,
+                                                ib + 1,
+                                                ib + 2,
+                                                ib + 2,
+                                                ib + 3,
+                                                ib + 0});
 
                         // Clear mask
                         for (int l = 0; l < h; ++l)
