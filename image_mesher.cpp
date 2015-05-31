@@ -51,7 +51,8 @@ struct Heightfield
                 const int fx            = int(rect.x + sx * interval);
                 const int x             = int(fx);
                 const int p             = row[x];
-                values[sy * width + sx] = float(p) / depth + 0.5f;
+                const float v           = std::pow(float(p) / 255.f, 0.45f);
+                values[sy * width + sx] = v * depth;
             }
         }
     }
@@ -62,7 +63,7 @@ struct Heightfield
                values.at(y * width + x) : 0;
     }
 
-    inline int g(int /*axis*/, int x, int y, int z) const
+    inline int g(int x, int y, int z) const
     {
         const int vc = f(x, y);
         if (vc - z > 1) return 0;
@@ -79,8 +80,8 @@ struct Heightfield
             vc - f(x + 1, y + 1)
         };
 
-        const float e = 4.f;
-        #define collapsed(i) (v[i] > 0 && v[i] < e)
+        const float e = depth / 2.f;
+        auto collapsed = [&](int i) {return v[i] > 0 && v[i] < e;};
 
         int gradient = 0;
         if (collapsed(0) || collapsed(1) || collapsed(3))
@@ -92,7 +93,6 @@ struct Heightfield
         if (collapsed(4) || collapsed(6) || collapsed(7))
             gradient |= 0x08;
 
-        #undef collapsed
         return gradient;
     }
 
@@ -120,7 +120,7 @@ struct Cubefield
             hfields[i] = Heightfield(imageCube.sides[i], depths[i], interval);
     }
 
-    inline int g(int axis, int x, int y, int z) const
+    inline int g(int x, int y, int z) const
     {
         const int c[6][3] =
         {
@@ -131,7 +131,12 @@ struct Cubefield
             {x, z,              y},
             {x, z, height - y - 1}
         };
-        return hfields[axis].g(axis, c[axis][0], c[axis][1], c[axis][2]);
+
+        int gradient = 0;
+        for (int i = 0; i < 6; ++i)
+            gradient |= hfields[0].g(c[i][0], c[i][1], c[i][2]) << (4 * i);
+
+        return gradient;
     }
 
     inline bool operator()(int x, int y, int z) const
@@ -218,125 +223,50 @@ Box box(const glm::vec3& v0, const glm::vec3& v1)
 template <typename V>
 Box box(const V& vol, int x, int y, int z)
 {
-    const float s = vol.interval;
-    int c[8][3] =
+    const int  g = vol.g(x, y, z);
+    const auto d = [=](int c, int s) {return bool(g & (c << s));};
+    const int c[8][3] =
     {
         // Front
-        {x + 0, y + 0, z + 1},
-        {x + 1, y + 0, z + 1},
-        {x + 1, y + 1, z + 1},
-        {x + 0, y + 1, z + 1},
+        {x +  d(0x02, 12), y +  d(0x04, 20), z + !d(0x01, 0)},
+        {x + !d(0x02,  8), y +  d(0x08, 20), z + !d(0x02, 0)},
+        {x + !d(0x08,  8), y + !d(0x08, 16), z + !d(0x08, 0)},
+        {x +  d(0x08, 12), y + !d(0x04, 16), z + !d(0x04, 0)},
         // Back
-        {x + 0, y + 0, z + 0},
-        {x + 1, y + 0, z + 0},
-        {x + 1, y + 1, z + 0},
-        {x + 0, y + 1, z + 0}
+        {x +  d(0x01, 12), y +  d(0x01, 20), z +  d(0x01, 4)},
+        {x + !d(0x01,  8), y +  d(0x02, 20), z +  d(0x02, 4)},
+        {x + !d(0x04,  8), y + !d(0x02, 16), z +  d(0x08, 4)},
+        {x +  d(0x04, 12), y + !d(0x01, 16), z +  d(0x04, 4)}
     };
-
-    int g = vol.g(0, x, y, z);
-    if (g & 0x01) c[0][2] = z;
-    if (g & 0x02) c[1][2] = z;
-    if (g & 0x04) c[3][2] = z;
-    if (g & 0x08) c[2][2] = z;
-
-    g = vol.g(1, x, y, z);
-    if (g & 0x01) c[4][2] = z + 1;
-    if (g & 0x02) c[5][2] = z + 1;
-    if (g & 0x04) c[7][2] = z + 1;
-    if (g & 0x08) c[6][2] = z + 1;
-
-    g = vol.g(2, x, y, z);
-    if (g & 0x01) c[5][0] = x;
-    if (g & 0x02) c[1][0] = x;
-    if (g & 0x04) c[6][0] = x;
-    if (g & 0x08) c[2][0] = x;
-
-    g = vol.g(3, x, y, z);
-    if (g & 0x01) c[4][0] = x + 1;
-    if (g & 0x02) c[0][0] = x + 1;
-    if (g & 0x04) c[7][0] = x + 1;
-    if (g & 0x08) c[3][0] = x + 1;
-
-    g = vol.g(4, x, y, z);
-    if (g & 0x01) c[7][1] = y;
-    if (g & 0x02) c[6][1] = y;
-    if (g & 0x04) c[3][1] = y;
-    if (g & 0x08) c[2][1] = y;
-
-    g = vol.g(5, x, y, z);
-    if (g & 0x01) c[4][1] = y + 1;
-    if (g & 0x02) c[5][1] = y + 1;
-    if (g & 0x04) c[0][1] = y + 1;
-    if (g & 0x08) c[1][1] = y + 1;
-
-    glm::vec3 vertices[8];
-    for (int i = 0; i < 8; ++i)
-        vertices[i] = glm::vec3(c[i][0], c[i][1], c[i][2]) * s;
-
-    Box box;
-    std::copy(std::begin(vertices), std::end(vertices), box.begin());
-    return box;
+    const float s = vol.interval;
+    return
+    {
+        glm::vec3(c[0][0], c[0][1], c[0][2]) * s,
+        glm::vec3(c[1][0], c[1][1], c[1][2]) * s,
+        glm::vec3(c[2][0], c[2][1], c[2][2]) * s,
+        glm::vec3(c[3][0], c[3][1], c[3][2]) * s,
+        glm::vec3(c[4][0], c[4][1], c[4][2]) * s,
+        glm::vec3(c[5][0], c[5][1], c[5][2]) * s,
+        glm::vec3(c[6][0], c[6][1], c[6][2]) * s,
+        glm::vec3(c[7][0], c[7][1], c[7][2]) * s,
+    };
 }
 
-Geometry meshHeightfield(const Heightfield& hfield)
+template <typename V>
+Geometry meshCubes(const V& vol)
 {
+    const std::array<int, 3>& dims = {vol.width, vol.height, vol.depth};
+
     Geometry geometry;
-    geometry.vertices.reserve(hfield.values.size() * 8);
-    geometry.indices.reserve(hfield.values.size() * 12);
+    geometry.vertices.reserve(dims[0] * dims[1] * dims[2] * 8);
+    geometry.indices.reserve(dims[0] * dims[1] * dims[2] * 36);
 
-    const int* __restrict__     data = hfield.values.data();
-    const float                scale = hfield.interval;
+    for (int z = 0; z < dims[2]; ++z)
+        for (int y = 0; y < dims[1]; ++y)
+            for (int x = 0; x < dims[0]; ++x)
+                if (visible(vol, x, y, z))
+                    emitBox(&geometry, box(vol, x, y, z));
 
-    for (int y = 0; y < hfield.height; ++y)
-        for (int x = 0; x < hfield.width; ++x)
-        {
-            const float h      = data[y * hfield.width + x];
-            const glm::vec3 c0 = {x * scale + 0,     y * scale + 0,     0.f};
-            const glm::vec3 c1 = {x * scale + scale, y * scale + scale, h};
-            const int ib       = geometry.vertices.size();
-
-            const Geometry::Vertex vertices[] =
-            {
-                // Front
-                {c0.x, c0.y, c0.z},
-                {c1.x, c0.y, c0.z},
-                {c1.x, c1.y, c0.z},
-                {c0.x, c1.y, c0.z},
-                // Back
-                {c0.x, c0.y, c1.z},
-                {c1.x, c0.y, c1.z},
-                {c1.x, c1.y, c1.z},
-                {c0.x, c1.y, c1.z}
-
-            };
-            geometry.vertices.insert(geometry.vertices.end(),
-                                     std::begin(vertices), std::end(vertices));
-
-            typedef uint16_t index;
-            const uint16_t indices[] =
-            {
-                // Front
-                index(ib + 0), index(ib + 1), index(ib + 2),
-                index(ib + 2), index(ib + 3), index(ib + 0),
-                // Top
-                index(ib + 3), index(ib + 2), index(ib + 6),
-                index(ib + 6), index(ib + 7), index(ib + 3),
-                // Back
-                index(ib + 7), index(ib + 6), index(ib + 5),
-                index(ib + 5), index(ib + 4), index(ib + 7),
-                // Bottom
-                index(ib + 4), index(ib + 5), index(ib + 1),
-                index(ib + 1), index(ib + 0), index(ib + 4),
-                // Left
-                index(ib + 4), index(ib + 0), index(ib + 3),
-                index(ib + 3), index(ib + 7), index(ib + 4),
-                // Right
-                index(ib + 1), index(ib + 5), index(ib + 6),
-                index(ib + 6), index(ib + 2), index(ib + 1)
-            };
-            geometry.indices.insert(geometry.indices.end(),
-                                    std::begin(indices), std::end(indices));
-        }
     return geometry;
 }
 
@@ -468,24 +398,6 @@ Geometry meshGreedy(const V& vol)
                 }
         }
     }
-    return geometry;
-}
-
-template <typename V>
-Geometry meshCubes(const V& vol)
-{
-    const std::array<int, 3>& dims = {vol.width, vol.height, vol.depth};
-
-    Geometry geometry;
-    geometry.vertices.reserve(dims[0] * dims[1] * dims[2] * 8);
-    geometry.indices.reserve(dims[0] * dims[1] * dims[2] * 36);
-
-    for (int z = 0; z < dims[2]; ++z)
-        for (int y = 0; y < dims[1]; ++y)
-            for (int x = 0; x < dims[0]; ++x)
-                if (visible(vol, x, y, z))
-                    emitBox(&geometry, box(vol, x, y, z));
-
     return geometry;
 }
 

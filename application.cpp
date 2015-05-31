@@ -71,7 +71,7 @@ bool Application::run()
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
-    const ImageCube geomSrc("data/box.*.png", 1);
+    const ImageCube geomSrc("data/floor.*.png", 1);
     //const Image geomSrc("data/floor.top.png", 1);
 
     const Geometry geom = ImageMesher::geometry(geomSrc);
@@ -110,7 +110,7 @@ bool Application::run()
         stats.render();
         display.swap();
 
-        a += 0.005f;
+        //a += 0.005f;
 
         SDL_Event e;
         while (SDL_PollEvent(&e))
