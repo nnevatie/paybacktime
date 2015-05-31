@@ -131,10 +131,9 @@ struct Cubefield
             {x, z,              y},
             {x, z, height - y - 1}
         };
-
         int gradient = 0;
         for (int i = 0; i < 6; ++i)
-            gradient |= hfields[0].g(c[i][0], c[i][1], c[i][2]) << (4 * i);
+            gradient |= hfields[i].g(c[i][0], c[i][1], c[i][2]) << (4 * i);
 
         return gradient;
     }

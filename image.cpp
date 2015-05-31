@@ -37,7 +37,6 @@ Image::Image() :
 Image::Image(const std::string& filename, int depth) :
     d(new Data {})
 {
-    HCTIME(__FUNCTION__);
     d->bits = stbi_load(filename.c_str(),
                         &d->width, &d->height, &d->depth, depth);
     d->stride = d->width * d->depth;
