@@ -163,43 +163,38 @@ void emitBox(Geometry* g, const Box& box)
                        box.end());
 
     typedef uint16_t index;
-    const uint16_t indices[] = {// Front
-                                index(ib + 0), index(ib + 1), index(ib + 2),
-                                index(ib + 2), index(ib + 3), index(ib + 0),
-                                // Top
-                                index(ib + 3), index(ib + 2), index(ib + 6),
-                                index(ib + 6), index(ib + 7), index(ib + 3),
-                                // Back
-                                index(ib + 7), index(ib + 6), index(ib + 5),
-                                index(ib + 5), index(ib + 4), index(ib + 7),
-                                // Bottom
-                                index(ib + 4), index(ib + 5), index(ib + 1),
-                                index(ib + 1), index(ib + 0), index(ib + 4),
-                                // Left
-                                index(ib + 4), index(ib + 0), index(ib + 3),
-                                index(ib + 3), index(ib + 7), index(ib + 4),
-                                // Right
-                                index(ib + 1), index(ib + 5), index(ib + 6),
-                                index(ib + 6), index(ib + 2), index(ib + 1)};
-
     g->indices.insert(g->indices.end(),
-                      std::begin(indices),
-                      std::end(indices));
+        {index(ib + 0), index(ib + 1), index(ib + 2),
+         index(ib + 2), index(ib + 3), index(ib + 0),
+         // Top
+         index(ib + 3), index(ib + 2), index(ib + 6),
+         index(ib + 6), index(ib + 7), index(ib + 3),
+         // Back
+         index(ib + 7), index(ib + 6), index(ib + 5),
+         index(ib + 5), index(ib + 4), index(ib + 7),
+         // Bottom
+         index(ib + 4), index(ib + 5), index(ib + 1),
+         index(ib + 1), index(ib + 0), index(ib + 4),
+         // Left
+         index(ib + 4), index(ib + 0), index(ib + 3),
+         index(ib + 3), index(ib + 7), index(ib + 4),
+         // Right
+         index(ib + 1), index(ib + 5), index(ib + 6),
+         index(ib + 6), index(ib + 2), index(ib + 1)});
 }
 
 template <typename V>
 bool visible(const V& vol, int x, int y, int z)
 {
-    return vol(x + 0, y + 0, z + 0);
-    return  vol(x + 0, y + 0, z + 0) &&
-            (
-            !vol(x - 1, y + 0, z + 0) ||
-            !vol(x + 1, y + 0, z + 0) ||
-            !vol(x + 0, y - 1, z + 0) ||
-            !vol(x + 0, y + 1, z + 0) ||
-            !vol(x + 0, y + 0, z - 1) ||
-            !vol(x + 0, y + 0, z + 1)
-            );
+    return vol(x + 0, y + 0, z + 0) &&
+           (
+           !vol(x - 1, y + 0, z + 0) ||
+           !vol(x + 1, y + 0, z + 0) ||
+           !vol(x + 0, y - 1, z + 0) ||
+           !vol(x + 0, y + 1, z + 0) ||
+           !vol(x + 0, y + 0, z - 1) ||
+           !vol(x + 0, y + 0, z + 1)
+           );
 }
 
 Box box(const glm::vec3& v0, const glm::vec3& v1)
