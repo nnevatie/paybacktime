@@ -26,7 +26,7 @@ struct Geometry
         Vertex(float x, float y, float z) : p(x, y, z) {}
     };
 
-    typedef uint16_t Index;
+    typedef uint32_t Index;
 
     std::vector<Vertex> vertices;
     std::vector<Index>  indices;

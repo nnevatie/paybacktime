@@ -159,36 +159,25 @@ Geometry geometry(const V& vol)
 
                     // Remember to flip orientation
                     // depending on the sign of the corner
-                    typedef uint16_t index;
                     if (mask & 1)
                     {
-                        const uint16_t indices[] =
-                        {
-                            index(buffer[m]),
-                            index(buffer[m - du]),
-                            index(buffer[m - dv]),
-                            index(buffer[m - dv]),
-                            index(buffer[m - du]),
-                            index(buffer[m - du - dv])
-                        };
                         geom.indices.insert(geom.indices.end(),
-                                            std::begin(indices),
-                                            std::end(indices));
+                                           {buffer[m],
+                                            buffer[m - du],
+                                            buffer[m - dv],
+                                            buffer[m - dv],
+                                            buffer[m - du],
+                                            buffer[m - du - dv]});
                     }
                     else
                     {
-                        const uint16_t indices[] =
-                        {
-                            index(buffer[m]),
-                            index(buffer[m - dv]),
-                            index(buffer[m - du]),
-                            index(buffer[m - du]),
-                            index(buffer[m - dv]),
-                            index(buffer[m - du - dv])
-                        };
                         geom.indices.insert(geom.indices.end(),
-                                            std::begin(indices),
-                                            std::end(indices));
+                                           {buffer[m],
+                                            buffer[m - dv],
+                                            buffer[m - du],
+                                            buffer[m - du],
+                                            buffer[m - dv],
+                                            buffer[m - du - dv]});
                     }
                 }
             }

@@ -157,30 +157,29 @@ struct Cubefield
 
 void emitBox(Geometry* g, const Box& box)
 {
-    const uint16_t ib = g->vertices.size();
+    const Geometry::Index ib = g->vertices.size();
     g->vertices.insert(g->vertices.end(),
                        box.begin(),
                        box.end());
 
-    typedef uint16_t index;
     g->indices.insert(g->indices.end(),
-        {index(ib + 0), index(ib + 1), index(ib + 2),
-         index(ib + 2), index(ib + 3), index(ib + 0),
+        {ib + 0, ib + 1, ib + 2,
+         ib + 2, ib + 3, ib + 0,
          // Top
-         index(ib + 3), index(ib + 2), index(ib + 6),
-         index(ib + 6), index(ib + 7), index(ib + 3),
+         ib + 3, ib + 2, ib + 6,
+         ib + 6, ib + 7, ib + 3,
          // Back
-         index(ib + 7), index(ib + 6), index(ib + 5),
-         index(ib + 5), index(ib + 4), index(ib + 7),
+         ib + 7, ib + 6, ib + 5,
+         ib + 5, ib + 4, ib + 7,
          // Bottom
-         index(ib + 4), index(ib + 5), index(ib + 1),
-         index(ib + 1), index(ib + 0), index(ib + 4),
+         ib + 4, ib + 5, ib + 1,
+         ib + 1, ib + 0, ib + 4,
          // Left
-         index(ib + 4), index(ib + 0), index(ib + 3),
-         index(ib + 3), index(ib + 7), index(ib + 4),
+         ib + 4, ib + 0, ib + 3,
+         ib + 3, ib + 7, ib + 4,
          // Right
-         index(ib + 1), index(ib + 5), index(ib + 6),
-         index(ib + 6), index(ib + 2), index(ib + 1)});
+         ib + 1, ib + 5, ib + 6,
+         ib + 6, ib + 2, ib + 1});
 }
 
 template <typename V>
@@ -363,17 +362,13 @@ Geometry meshGreedy(const V& vol)
                                                  std::begin(vertices),
                                                  std::end(vertices));
 
-                        typedef uint16_t index;
-                        const uint16_t indices[] = {index(ib + 0),
-                                                    index(ib + 1),
-                                                    index(ib + 2),
-                                                    index(ib + 2),
-                                                    index(ib + 3),
-                                                    index(ib + 0)};
-
                         geometry.indices.insert(geometry.indices.end(),
-                                                std::begin(indices),
-                                                std::end(indices));
+                                               {ib + 0u,
+                                                ib + 1u,
+                                                ib + 2u,
+                                                ib + 2u,
+                                                ib + 3u,
+                                                ib + 0u});
 
                         // Clear mask
                         for (int l = 0; l < h; ++l)
@@ -403,8 +398,8 @@ Geometry geometry(const Image& image, float interval)
     const Heightfield hfield(image, std::min(image.rect().w,
                                              image.rect().h), interval);
 
-    //return meshGreedy(hfield);
-    return meshCubes(hfield);
+    return meshGreedy(hfield);
+    //return meshCubes(hfield);
 }
 
 Geometry geometry(const ImageCube& imageCube, float interval)
@@ -412,8 +407,8 @@ Geometry geometry(const ImageCube& imageCube, float interval)
     HCTIME("cube geom");
     const Cubefield cfield(imageCube, interval);
 
-    //return meshGreedy(cfield);
-    return meshCubes(cfield);
+    return meshGreedy(cfield);
+    //return meshCubes(cfield);
 }
 
 } // namespace ImageMesher

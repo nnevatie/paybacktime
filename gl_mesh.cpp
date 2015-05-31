@@ -42,7 +42,7 @@ void Mesh::render(RenderType type) const
     indices.bind();
     glDrawElements(GL_TRIANGLES,
                    indices.size / int(sizeof(Geometry::Index)),
-                   GL_UNSIGNED_SHORT,
+                   GL_UNSIGNED_INT,
                    0);
 
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
