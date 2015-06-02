@@ -214,42 +214,49 @@ Box box(const glm::vec3& v0, const glm::vec3& v1)
     }};
 }
 
+void collapseConstants(int cc[8][3], int g)
+{
+    const auto d = [=](int c, int s) {return bool(g & (c << s));};
+    int c[8][3] =
+    {
+        // Front
+        { d(0x02, 12),  d(0x04, 20), !d(0x01, 0)},
+        {!d(0x02,  8),  d(0x08, 20), !d(0x02, 0)},
+        {!d(0x08,  8), !d(0x08, 16), !d(0x08, 0)},
+        { d(0x08, 12), !d(0x04, 16), !d(0x04, 0)},
+        // Back
+        { d(0x01, 12),  d(0x01, 20),  d(0x01, 4)},
+        {!d(0x01,  8),  d(0x02, 20),  d(0x02, 4)},
+        {!d(0x04,  8), !d(0x02, 16),  d(0x08, 4)},
+        { d(0x04, 12), !d(0x01, 16),  d(0x04, 4)}
+    };
+    std::copy(&c[0][0], &c[0][0] + 8 * 3, &cc[0][0]);
+}
+
 template <typename V>
 Box box(const V& vol, int x, int y, int z)
 {
-    const int  g = vol.g(x, y, z);
-    const auto d = [=](int c, int s) {return bool(g & (c << s));};
-    const int c[8][3] =
-    {
-        // Front
-        {x +  d(0x02, 12), y +  d(0x04, 20), z + !d(0x01, 0)},
-        {x + !d(0x02,  8), y +  d(0x08, 20), z + !d(0x02, 0)},
-        {x + !d(0x08,  8), y + !d(0x08, 16), z + !d(0x08, 0)},
-        {x +  d(0x08, 12), y + !d(0x04, 16), z + !d(0x04, 0)},
-        // Back
-        {x +  d(0x01, 12), y +  d(0x01, 20), z +  d(0x01, 4)},
-        {x + !d(0x01,  8), y +  d(0x02, 20), z +  d(0x02, 4)},
-        {x + !d(0x04,  8), y + !d(0x02, 16), z +  d(0x08, 4)},
-        {x +  d(0x04, 12), y + !d(0x01, 16), z +  d(0x04, 4)}
-    };
+    int c[8][3];
+    collapseConstants(c, vol.g(x, y, z));
+
     const float s = vol.interval;
     return
     {
-        glm::vec3(c[0][0], c[0][1], c[0][2]) * s,
-        glm::vec3(c[1][0], c[1][1], c[1][2]) * s,
-        glm::vec3(c[2][0], c[2][1], c[2][2]) * s,
-        glm::vec3(c[3][0], c[3][1], c[3][2]) * s,
-        glm::vec3(c[4][0], c[4][1], c[4][2]) * s,
-        glm::vec3(c[5][0], c[5][1], c[5][2]) * s,
-        glm::vec3(c[6][0], c[6][1], c[6][2]) * s,
-        glm::vec3(c[7][0], c[7][1], c[7][2]) * s,
+        glm::vec3(x + c[0][0], y + c[0][1], z + c[0][2]) * s,
+        glm::vec3(x + c[1][0], y + c[1][1], z + c[1][2]) * s,
+        glm::vec3(x + c[2][0], y + c[2][1], z + c[2][2]) * s,
+        glm::vec3(x + c[3][0], y + c[3][1], z + c[3][2]) * s,
+        glm::vec3(x + c[4][0], y + c[4][1], z + c[4][2]) * s,
+        glm::vec3(x + c[5][0], y + c[5][1], z + c[5][2]) * s,
+        glm::vec3(x + c[6][0], y + c[6][1], z + c[6][2]) * s,
+        glm::vec3(x + c[7][0], y + c[7][1], z + c[7][2]) * s,
     };
 }
 
 template <typename V>
 Geometry meshCubes(const V& vol)
 {
-    const std::array<int, 3>& dims = {vol.width, vol.height, vol.depth};
+    const int dims[3] = {vol.width, vol.height, vol.depth};
 
     Geometry geometry;
     geometry.vertices.reserve(dims[0] * dims[1] * dims[2] * 8);
@@ -267,14 +274,47 @@ Geometry meshCubes(const V& vol)
 template <typename V>
 Geometry meshGreedy(const V& vol)
 {
-    const std::array<int, 3>& dims = {vol.width, vol.height, vol.depth};
-    const float                  s =  vol.interval;
+    struct Cell
+    {
+        int v, g;
+    };
 
-    const int allocEstimate = (dims[0] / 4) * (dims[1] / 4) * (dims[2] / 4);
+    struct Mask
+    {
+        int d, g0, g1;
+
+        operator==(const Mask& mask) const
+        {
+            return d == mask.d && g0 == mask.g0 && g1 == mask.g1;
+        }
+        operator!=(const Mask& mask) const
+        {
+            return !operator==(mask);
+        }
+    };
+
+    // Dimensions
+    const int dims[3] = {vol.width, vol.height, vol.depth};
+
+    // Inside-check
+    const auto in = [&](const int c[3], const int d[3])
+    {return c[0] >= 0    && c[1] >= 0    && c[2] >= 0 &&
+            c[0] <  d[0] && c[1] <  d[1] && c[2] <  d[2];};
+
+    Cell cells[dims[0]][dims[1]][dims[2]];
+    for (int z = 0; z < dims[2]; ++z)
+        for (int y = 0; y < dims[1]; ++y)
+            for (int x = 0; x < dims[0]; ++x)
+            {
+                int v = vol(x, y, z);
+                cells[x][y][z].v = v;
+                cells[x][y][z].g = v ? vol.g(x, y, z) : 0;
+            }
 
     Geometry geometry;
-    geometry.vertices.reserve(allocEstimate);
-    geometry.indices.reserve(allocEstimate);
+    const int reserveSize = (dims[0] / 4) * (dims[1] / 4) * (dims[2] / 4);
+    geometry.vertices.reserve(reserveSize);
+    geometry.indices.reserve(reserveSize);
 
     for (int d = 0; d < 3; ++d)
     {
@@ -285,7 +325,7 @@ Geometry meshGreedy(const V& vol)
         int q[3] = {0};
         q[d]     = 1;
 
-        int64_t mask[dims[u] * dims[v]];
+        Mask mask[dims[u] * dims[v]];
 
         for (x[d] = -1; x[d] < dims[d];)
         {
@@ -296,11 +336,11 @@ Geometry meshGreedy(const V& vol)
                 {
                     const int c0[3] = {x[0],        x[1],        x[2]};
                     const int c1[3] = {x[0] + q[0], x[1] + q[1], x[2] + q[2]};
-                    const int v0    = vol(c0[0], c0[1], c0[2]);
-                    const int v1    = vol(c1[0], c1[1], c1[2]);
-                    const int g0    = v0 || v1 ? vol.g(c0[0], c0[1], c0[2]) : 0;
-                    const int g1    = v0 || v1 ? vol.g(c1[0], c1[1], c1[2]) : 0;
-                    mask[n++]       = (int64_t(g0 - g1) << 32) | (v0 - v1);
+                    const int v0    = in(c0, dims) ? cells[c0[0]][c0[1]][c0[2]].v : 0;
+                    const int v1    = in(c1, dims) ? cells[c1[0]][c1[1]][c1[2]].v : 0;
+                    const int g0    = v0 ? cells[c0[0]][c0[1]][c0[2]].g : 0;
+                    const int g1    = v1 ? cells[c1[0]][c1[1]][c1[2]].g : 0;
+                    mask[n++]       = {v0 - v1, g0, g1};
                 }
 
             ++x[d];
@@ -309,8 +349,8 @@ Geometry meshGreedy(const V& vol)
             for (int j = 0; j < dims[v]; ++j)
                 for (int i = 0; i < dims[u];)
                 {
-                    const int64_t m = mask[n];
-                    if (m)
+                    const Mask m = mask[n];
+                    if (m.d)
                     {
                         // Dimensions
                         int w = 0, h = 0;
@@ -331,7 +371,7 @@ Geometry meshGreedy(const V& vol)
                         int du[3] = {0};
                         int dv[3] = {0};
 
-                        if (m > 0)
+                        if (m.d)
                         {
                             du[u] = w;
                             dv[v] = h;
@@ -343,6 +383,7 @@ Geometry meshGreedy(const V& vol)
                         }
 
                         typedef glm::vec3 v3;
+                        const float s = vol.interval;
                         const Geometry::Vertex vertices[] =
                         {
                             s * v3(x[0],
@@ -375,7 +416,7 @@ Geometry meshGreedy(const V& vol)
                         // Clear mask
                         for (int l = 0; l < h; ++l)
                             for (int k = 0; k < w; ++k)
-                                mask[n + k + l * dims[u]] = 0;
+                                mask[n + k + l * dims[u]] = {};
 
                         // Increment counters
                         i += w;

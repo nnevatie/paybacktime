@@ -110,7 +110,7 @@ bool Application::run()
         stats.render();
         display.swap();
 
-        //a += 0.005f;
+        a += 0.001f;
 
         SDL_Event e;
         while (SDL_PollEvent(&e))
