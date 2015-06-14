@@ -164,7 +164,8 @@ void emitBox(Geometry* g, const Box& box)
                        box.end());
 
     g->indices.insert(g->indices.end(),
-        {ib + 0, ib + 1, ib + 2,
+        {// Front
+         ib + 0, ib + 1, ib + 2,
          ib + 2, ib + 3, ib + 0,
          // Top
          ib + 3, ib + 2, ib + 6,
@@ -181,6 +182,52 @@ void emitBox(Geometry* g, const Box& box)
          // Right
          ib + 1, ib + 5, ib + 6,
          ib + 6, ib + 2, ib + 1});
+}
+
+void emitBoxFace(Geometry* g, int a, int c[8][3], int x,  int y,  int z,
+                                                  int sx, int sy, int sz)
+{
+    const Geometry::Index ib = g->vertices.size();
+    const int i[6][4] =
+    {
+        {3, 7, 4, 0},
+        {6, 2, 1, 5},
+        {4, 5, 1, 0},
+        {7, 3, 2, 6},
+        {7, 6, 5, 4},
+        {0, 1, 2, 3}
+    };
+
+    typedef glm::vec3 v;
+    //if (a == 3)
+    {
+    g->vertices.insert(g->vertices.end(), {
+    v(x + (c[i[a][0]][0] * sx), y + (c[i[a][0]][1] * sy), z + (c[i[a][0]][2] * sz)),
+    v(x + (c[i[a][1]][0] * sx), y + (c[i[a][1]][1] * sy), z + (c[i[a][1]][2] * sz)),
+    v(x + (c[i[a][2]][0] * sx), y + (c[i[a][2]][1] * sy), z + (c[i[a][2]][2] * sz)),
+    v(x + (c[i[a][3]][0] * sx), y + (c[i[a][3]][1] * sy), z + (c[i[a][3]][2] * sz))});
+    g->indices.insert(g->indices.end(),
+        {ib + 0, ib + 1, ib + 2, ib + 2, ib + 3, ib + 0});
+    }
+}
+
+void collapseConstants(int cc[8][3], int g)
+{
+    const auto d = [=](int c, int s) {return bool(g & (c << s));};
+    int c[8][3] =
+    {
+        // Front
+        { d(0x02, 12),  d(0x04, 20), !d(0x01, 0)},
+        {!d(0x02,  8),  d(0x08, 20), !d(0x02, 0)},
+        {!d(0x08,  8), !d(0x08, 16), !d(0x08, 0)},
+        { d(0x08, 12), !d(0x04, 16), !d(0x04, 0)},
+        // Back
+        { d(0x01, 12),  d(0x01, 20),  d(0x01, 4)},
+        {!d(0x01,  8),  d(0x02, 20),  d(0x02, 4)},
+        {!d(0x04,  8), !d(0x02, 16),  d(0x08, 4)},
+        { d(0x04, 12), !d(0x01, 16),  d(0x04, 4)}
+    };
+    std::copy(&c[0][0], &c[0][0] + 8 * 3, &cc[0][0]);
 }
 
 template <typename V>
@@ -212,25 +259,6 @@ Box box(const glm::vec3& v0, const glm::vec3& v1)
         {v1.x, v1.y, v0.z},
         {v0.x, v1.y, v0.z}
     }};
-}
-
-void collapseConstants(int cc[8][3], int g)
-{
-    const auto d = [=](int c, int s) {return bool(g & (c << s));};
-    int c[8][3] =
-    {
-        // Front
-        { d(0x02, 12),  d(0x04, 20), !d(0x01, 0)},
-        {!d(0x02,  8),  d(0x08, 20), !d(0x02, 0)},
-        {!d(0x08,  8), !d(0x08, 16), !d(0x08, 0)},
-        { d(0x08, 12), !d(0x04, 16), !d(0x04, 0)},
-        // Back
-        { d(0x01, 12),  d(0x01, 20),  d(0x01, 4)},
-        {!d(0x01,  8),  d(0x02, 20),  d(0x02, 4)},
-        {!d(0x04,  8), !d(0x02, 16),  d(0x08, 4)},
-        { d(0x04, 12), !d(0x01, 16),  d(0x04, 4)}
-    };
-    std::copy(&c[0][0], &c[0][0] + 8 * 3, &cc[0][0]);
 }
 
 template <typename V>
@@ -306,7 +334,7 @@ Geometry meshGreedy(const V& vol)
         for (int y = 0; y < dims[1]; ++y)
             for (int x = 0; x < dims[0]; ++x)
             {
-                int v = vol(x, y, z);
+                const int v = vol(x, y, z);
                 cells[x][y][z].v = v;
                 cells[x][y][z].g = v ? vol.g(x, y, z) : 0;
             }
@@ -321,8 +349,8 @@ Geometry meshGreedy(const V& vol)
         const int u = (d + 1) % 3;
         const int v = (d + 2) % 3;
 
-        int x[3] = {0};
-        int q[3] = {0};
+        int x[3] = {};
+        int q[3] = {};
         q[d]     = 1;
 
         Mask mask[dims[u] * dims[v]];
@@ -368,50 +396,19 @@ Geometry meshGreedy(const V& vol)
                         x[v] = j;
 
                         // Emit quad
-                        int du[3] = {0};
-                        int dv[3] = {0};
+                        int cc[8][3];
+                        collapseConstants(cc, m.d > 0 ? m.g0 : m.g1);
 
-                        if (m.d)
-                        {
-                            du[u] = w;
-                            dv[v] = h;
-                        }
-                        else
-                        {
-                            dv[u] = w;
-                            du[v] = h;
-                        }
+                        int c[3] = {x[0], x[1], x[2]};
+                        if (m.d > 0) --c[d];
 
-                        typedef glm::vec3 v3;
-                        const float s = vol.interval;
-                        const Geometry::Vertex vertices[] =
-                        {
-                            s * v3(x[0],
-                                   x[1],
-                                   x[2]),
-                            s * v3(x[0] + du[0],
-                                   x[1] + du[1],
-                                   x[2] + du[2]),
-                            s * v3(x[0] + du[0] + dv[0],
-                                   x[1] + du[1] + dv[1],
-                                   x[2] + du[2] + dv[2]),
-                            s * v3(x[0] + dv[0],
-                                   x[1] + dv[1],
-                                   x[2] + dv[2])
-                        };
+                        int s[3] = {1, 1, 1};
+                        s[u] = w;
+                        s[v] = h;
 
-                        const Geometry::Index ib = geometry.vertices.size();
-                        geometry.vertices.insert(geometry.vertices.end(),
-                                                 std::begin(vertices),
-                                                 std::end(vertices));
-
-                        geometry.indices.insert(geometry.indices.end(),
-                                               {ib + 0,
-                                                ib + 1,
-                                                ib + 2,
-                                                ib + 2,
-                                                ib + 3,
-                                                ib + 0});
+                        const int axis = d * 2 + (m.d > 0 ? 1 : 0);
+                        emitBoxFace(&geometry, axis, cc, c[0], c[1], c[2],
+                                                         s[0], s[1], s[2]);
 
                         // Clear mask
                         for (int l = 0; l < h; ++l)

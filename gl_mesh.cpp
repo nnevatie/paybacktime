@@ -25,7 +25,7 @@ void Mesh::render(RenderType type) const
 
     glPolygonMode(GL_FRONT_AND_BACK, mode);
 
-    glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
     vertices.bind();

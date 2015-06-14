@@ -71,11 +71,13 @@ bool Application::run()
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
+    /*
     const ImageCube geomSrc("data/floor.*.png", 1);
     //const Image geomSrc("data/floor.top.png", 1);
 
     const Geometry geom = ImageMesher::geometry(geomSrc);
     const gl::Mesh mesh(geom);
+    */
 
     RenderStats stats;
 
@@ -85,6 +87,10 @@ bool Application::run()
     while (running)
     {
         Clock clock;
+
+        const ImageCube geomSrc("data/cracks.*.png", 1);
+        const Geometry geom = ImageMesher::geometry(geomSrc);
+        const gl::Mesh mesh(geom);
 
         glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 400.f);
         glm::mat4 view  = glm::translate(glm::mat4(),
