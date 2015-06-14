@@ -80,7 +80,7 @@ struct Heightfield
             vc - f(x + 1, y + 1)
         };
 
-        const float e = depth / 2.f;
+        const float e  = depth / 2.f;
         auto collapsed = [&](int i) {return v[i] > 0 && v[i] < e;};
 
         int gradient = 0;
@@ -360,7 +360,7 @@ Geometry meshGreedy(const V& vol)
             // Determine mask
             int n = 0;
             for (x[v] = 0; x[v] < dims[v]; ++x[v])
-                for (x[u] = 0; x[u] < dims[u]; ++x[u])
+                for (x[u] = 0; x[u] < dims[u]; ++x[u], ++n)
                 {
                     const int c0[3] = {x[0],        x[1],        x[2]};
                     const int c1[3] = {x[0] + q[0], x[1] + q[1], x[2] + q[2]};
@@ -368,7 +368,9 @@ Geometry meshGreedy(const V& vol)
                     const int v1    = in(c1, dims) ? cells[c1[0]][c1[1]][c1[2]].v : 0;
                     const int g0    = v0 ? cells[c0[0]][c0[1]][c0[2]].g : 0;
                     const int g1    = v1 ? cells[c1[0]][c1[1]][c1[2]].g : 0;
-                    mask[n++]       = {v0 - v1, g0, g1};
+                    const int d     = v0 > 0 && v1 > 0 && g1 != g0 ?
+                                      g1 - g0 : v0 - v1;
+                    mask[n]         = {d, g0, g1};
                 }
 
             ++x[d];
