@@ -184,10 +184,9 @@ void emitBox(Geometry* g, const Box& box)
          ib + 6, ib + 2, ib + 1});
 }
 
-void emitBoxFace(Geometry* g, int a, int c[8][3], int x,  int y,  int z,
-                                                  int sx, int sy, int sz)
+void emitBoxFace(Geometry* g, float s, int a, int c[8][3], int x,  int y,  int z,
+                                                           int sx, int sy, int sz)
 {
-    const Geometry::Index ib = g->vertices.size();
     const int i[6][4] =
     {
         {3, 7, 4, 0},
@@ -197,18 +196,26 @@ void emitBoxFace(Geometry* g, int a, int c[8][3], int x,  int y,  int z,
         {7, 6, 5, 4},
         {0, 1, 2, 3}
     };
+    const Geometry::Index ib = g->vertices.size();
 
     typedef glm::vec3 v;
-    //if (a == 3)
+    g->vertices.insert(g->vertices.end(),
     {
-    g->vertices.insert(g->vertices.end(), {
-    v(x + (c[i[a][0]][0] * sx), y + (c[i[a][0]][1] * sy), z + (c[i[a][0]][2] * sz)),
-    v(x + (c[i[a][1]][0] * sx), y + (c[i[a][1]][1] * sy), z + (c[i[a][1]][2] * sz)),
-    v(x + (c[i[a][2]][0] * sx), y + (c[i[a][2]][1] * sy), z + (c[i[a][2]][2] * sz)),
-    v(x + (c[i[a][3]][0] * sx), y + (c[i[a][3]][1] * sy), z + (c[i[a][3]][2] * sz))});
+        s * v(x + (c[i[a][0]][0] * sx),
+              y + (c[i[a][0]][1] * sy),
+              z + (c[i[a][0]][2] * sz)),
+        s * v(x + (c[i[a][1]][0] * sx),
+              y + (c[i[a][1]][1] * sy),
+              z + (c[i[a][1]][2] * sz)),
+        s * v(x + (c[i[a][2]][0] * sx),
+              y + (c[i[a][2]][1] * sy),
+              z + (c[i[a][2]][2] * sz)),
+        s * v(x + (c[i[a][3]][0] * sx),
+              y + (c[i[a][3]][1] * sy),
+              z + (c[i[a][3]][2] * sz))
+    });
     g->indices.insert(g->indices.end(),
         {ib + 0, ib + 1, ib + 2, ib + 2, ib + 3, ib + 0});
-    }
 }
 
 void collapseConstants(int cc[8][3], int g)
@@ -242,23 +249,6 @@ bool visible(const V& vol, int x, int y, int z)
            !vol(x + 0, y + 0, z - 1) ||
            !vol(x + 0, y + 0, z + 1)
            );
-}
-
-Box box(const glm::vec3& v0, const glm::vec3& v1)
-{
-    return
-    {{
-        // Front
-        {v0.x, v0.y, v1.z},
-        {v1.x, v0.y, v1.z},
-        {v1.x, v1.y, v1.z},
-        {v0.x, v1.y, v1.z},
-        // Back
-        {v0.x, v0.y, v0.z},
-        {v1.x, v0.y, v0.z},
-        {v1.x, v1.y, v0.z},
-        {v0.x, v1.y, v0.z}
-    }};
 }
 
 template <typename V>
@@ -409,8 +399,9 @@ Geometry meshGreedy(const V& vol)
                         s[v] = h;
 
                         const int axis = d * 2 + (m.d > 0 ? 1 : 0);
-                        emitBoxFace(&geometry, axis, cc, c[0], c[1], c[2],
-                                                         s[0], s[1], s[2]);
+                        emitBoxFace(&geometry, vol.interval,
+                                    axis, cc, c[0], c[1], c[2],
+                                              s[0], s[1], s[2]);
 
                         // Clear mask
                         for (int l = 0; l < h; ++l)
@@ -438,7 +429,7 @@ Geometry geometry(const Image& image, float interval)
 {
     HCTIME("image geom");
     const Heightfield hfield(image, std::min(image.rect().w,
-                                             image.rect().h), interval);
+                                             image.rect().h) / interval, interval);
 
     return meshGreedy(hfield);
     //return meshCubes(hfield);
