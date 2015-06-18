@@ -12,18 +12,39 @@ namespace gl
 {
 namespace
 {
-    GLenum shaderType(Shader::Type type)
+
+GLenum shaderType(Shader::Type type)
+{
+    switch (type)
     {
-        switch (type)
-        {
-            case Shader::Type::Vertex:   return GL_VERTEX_SHADER;
-            case Shader::Type::Fragment: return GL_FRAGMENT_SHADER;
-            case Shader::Type::Geometry: return GL_GEOMETRY_SHADER;
-            case Shader::Type::Compute:  return GL_COMPUTE_SHADER;
-        }
-        return 0;
+        case Shader::Type::Vertex:   return GL_VERTEX_SHADER;
+        case Shader::Type::Fragment: return GL_FRAGMENT_SHADER;
+        case Shader::Type::Geometry: return GL_GEOMETRY_SHADER;
+        case Shader::Type::Compute:  return GL_COMPUTE_SHADER;
     }
+    return 0;
 }
+
+Shader::Type typeFromExt(const filesystem::path& path)
+{
+    typedef std::pair<std::string, Shader::Type> Type;
+    const Type types[] =
+    {
+        {".vs", Shader::Type::Vertex},
+        {".fs", Shader::Type::Fragment},
+        {".gs", Shader::Type::Geometry},
+        {".cs", Shader::Type::Compute}
+    };
+    for (const Type& type : types)
+        if (path.extension().string()        == type.first ||
+            path.stem().extension().string() == type.first)
+            return type.second;
+
+    throw std::runtime_error("Cannot determine shader "
+                             "type for path: " + path.string());
+}
+
+} // namespace
 
 struct Shader::Data
 {
@@ -69,6 +90,11 @@ Shader::Shader(Type type, const std::string& s) :
 
 Shader::Shader(Type type, const filesystem::path& path) :
     d(new Data(type, readFile(path)))
+{
+}
+
+Shader::Shader(const filesystem::path& path) :
+    d(new Data(typeFromExt(path), readFile(path)))
 {
 }
 

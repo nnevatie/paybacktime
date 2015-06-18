@@ -60,14 +60,9 @@ bool Application::run()
     Display display("High Caliber", 1280, 720);
     display.open();
 
-    gl::Shader vsSimple(gl::Shader::Type::Vertex,
-                        filesystem::path("shaders/simple.vs.glsl"));
-
-    gl::Shader fsScreenspace(gl::Shader::Type::Fragment,
-                             filesystem::path("shaders/screenspace.fs.glsl"));
-
-    gl::Shader gsWireframe(gl::Shader::Type::Geometry,
-                           filesystem::path("shaders/wireframe.gs.glsl"));
+    gl::Shader vsSimple(filesystem::path("shaders/simple.vs.glsl"));
+    gl::Shader fsScreenspace(filesystem::path("shaders/screenspace.fs.glsl"));
+    gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 

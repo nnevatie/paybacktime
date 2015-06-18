@@ -24,6 +24,7 @@ struct Shader
 
     Shader(Type type, const std::string& s);
     Shader(Type type, const filesystem::path& path);
+    Shader(const filesystem::path& path);
 
     GLuint id() const;
 
