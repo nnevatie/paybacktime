@@ -31,6 +31,14 @@ set(SOURCE_FILES
     nanovg.c
     )
 
+set(SHADER_FILES
+    shaders/simple.vs
+    shaders/passthrough.vs
+    shaders/constant.fs
+    shaders/screenspace.fs
+    shaders/wireframe.gs
+    )
+
 # System dependencies
 set(SYS_LIBS
     mingw32
@@ -55,7 +63,7 @@ set(OPENGL_LIBS
     opengl32
     )
 
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES})
 
 target_link_libraries(${PROJECT_NAME}
                       ${SYS_LIBS}
@@ -72,6 +80,13 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
 # Binaries
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION .)
+
+# Shaders
+file(GLOB shader_files
+    "shaders/*")
+
+install(FILES ${shader_files}
+        DESTINATION shaders)
 
 # Runtime
 file(GLOB runtime_files

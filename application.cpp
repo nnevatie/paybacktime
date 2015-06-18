@@ -61,23 +61,19 @@ bool Application::run()
     display.open();
 
     gl::Shader vsSimple(gl::Shader::Type::Vertex,
-                        filesystem::path("data/simple.vs"));
+                        filesystem::path("shaders/simple.vs"));
 
     gl::Shader fsScreenspace(gl::Shader::Type::Fragment,
-                             filesystem::path("data/screenspace.fs"));
+                             filesystem::path("shaders/screenspace.fs"));
 
     gl::Shader gsWireframe(gl::Shader::Type::Geometry,
-                           filesystem::path("data/wireframe.gs"));
+                           filesystem::path("shaders/wireframe.gs"));
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
-    /*
     const ImageCube geomSrc("data/floor.*.png", 1);
-    //const Image geomSrc("data/floor.top.png", 1);
-
     const Geometry geom = ImageMesher::geometry(geomSrc);
     const gl::Mesh mesh(geom);
-    */
 
     RenderStats stats;
 
@@ -87,10 +83,6 @@ bool Application::run()
     while (running)
     {
         Clock clock;
-
-        const ImageCube geomSrc("data/cracks.*.png", 1);
-        const Geometry geom = ImageMesher::geometry(geomSrc);
-        const gl::Mesh mesh(geom);
 
         glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 400.f);
         glm::mat4 view  = glm::translate(glm::mat4(),
