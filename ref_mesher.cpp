@@ -14,14 +14,14 @@ namespace RefMesher
 
 Geometry geometry(const sdf::Sphere& sphere)
 {
-    HCTIME(str(std::stringstream() << "Extract sphere, r: " << sphere.r));
+    HCTIME("Extract sphere, r: " + std::to_string(sphere.r));
     return {};
 }
 
 Geometry geometry(const sdf::Box& box)
 {
-    HCTIME(str(std::stringstream() << "Extract box, b: "
-                                   << glm::length<float>(box.b)));
+    HCTIME("Extract box, b: " + std::to_string(glm::length<float>(box.b)));
+
     const glm::vec3& v = box.b;
     return
     {
