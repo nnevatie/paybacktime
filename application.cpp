@@ -61,13 +61,13 @@ bool Application::run()
     display.open();
 
     gl::Shader vsSimple(gl::Shader::Type::Vertex,
-                        filesystem::path("shaders/simple.vs"));
+                        filesystem::path("shaders/simple.vs.glsl"));
 
     gl::Shader fsScreenspace(gl::Shader::Type::Fragment,
-                             filesystem::path("shaders/screenspace.fs"));
+                             filesystem::path("shaders/screenspace.fs.glsl"));
 
     gl::Shader gsWireframe(gl::Shader::Type::Geometry,
-                           filesystem::path("shaders/wireframe.gs"));
+                           filesystem::path("shaders/wireframe.gs.glsl"));
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 

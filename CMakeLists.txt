@@ -32,11 +32,11 @@ set(SOURCE_FILES
     )
 
 set(SHADER_FILES
-    shaders/simple.vs
-    shaders/passthrough.vs
-    shaders/constant.fs
-    shaders/screenspace.fs
-    shaders/wireframe.gs
+    shaders/simple.vs.glsl
+    shaders/passthrough.vs.glsl
+    shaders/constant.fs.glsl
+    shaders/screenspace.fs.glsl
+    shaders/wireframe.gs.glsl
     )
 
 # System dependencies
