@@ -15,14 +15,19 @@ namespace
 
 GLenum shaderType(Shader::Type type)
 {
-    switch (type)
+    const std::array<GLenum, 4> types =
     {
-        case Shader::Type::Vertex:   return GL_VERTEX_SHADER;
-        case Shader::Type::Fragment: return GL_FRAGMENT_SHADER;
-        case Shader::Type::Geometry: return GL_GEOMETRY_SHADER;
-        case Shader::Type::Compute:  return GL_COMPUTE_SHADER;
-    }
-    return 0;
+        GL_VERTEX_SHADER,
+        GL_FRAGMENT_SHADER,
+        GL_GEOMETRY_SHADER,
+        GL_COMPUTE_SHADER
+    };
+    const int index = int(type);
+
+    if (index < 0 || index >= int(types.size()))
+        throw std::runtime_error("Invalid shader type " + std::to_string(index));
+
+    return types.at(index);
 }
 
 Shader::Type typeFromExt(const filesystem::path& path)
