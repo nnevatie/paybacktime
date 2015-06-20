@@ -2,9 +2,26 @@ cmake_minimum_required(VERSION 2.8.4)
 project(highcaliber)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
-    -std=c++11 -Wall -Wno-unused-function -fopenmp -funroll-loops")
+    -std=c++11 -Wall -Wno-unused-function -fopenmp")
 
 set(HEADER_FILES
+    application.h
+    display.h
+    painter.h
+    image.h
+    image_cube.h
+    image_mesher.h
+    common.h
+    clock.h
+    log.h
+    sdf_primitives.h
+    ref_mesher.h
+    image_mesher.h
+    gl_buffers.h
+    gl_shaders.h
+    gl_mesh.h
+    gl_fbo.h
+    render_stats.h
     geometry.h
     mc_mesher.h
     sn_mesher.h
@@ -27,6 +44,7 @@ set(SOURCE_FILES
     gl_buffers.cpp
     gl_shaders.cpp
     gl_mesh.cpp
+    gl_fbo.cpp
     render_stats.cpp
     nanovg.c
     )

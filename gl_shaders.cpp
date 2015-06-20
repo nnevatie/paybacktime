@@ -78,6 +78,7 @@ struct Shader::Data
             throw std::runtime_error("Shader compilation error");
         }
     }
+
     ~Data()
     {
         glDeleteShader(id);

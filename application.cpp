@@ -24,6 +24,7 @@
 
 #include "gl_mesh.h"
 #include "gl_shaders.h"
+#include "gl_fbo.h"
 
 #include "render_stats.h"
 
@@ -66,7 +67,11 @@ bool Application::run()
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
-    const ImageCube geomSrc("data/cracks.*.png", 1);
+    gl::Fbo fbo;
+    fbo.bind();
+    fbo.unbind();
+
+    const ImageCube geomSrc("data/floor.*.png", 1);
     const Geometry geom = ImageMesher::geometry(geomSrc);
     const gl::Mesh mesh(geom);
 
