@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "gl_texture.h"
+
 namespace hc
 {
 namespace gl
@@ -9,9 +11,19 @@ namespace gl
 
 struct Fbo
 {
+    enum class Attachment
+    {
+        Color,
+        Depth,
+        Stencil,
+        DepthStencil
+    };
+
     Fbo();
 
     Fbo& bind();
+
+    Fbo& attach(const Texture& texture, Attachment attachment, int index = 0);
 
     static bool unbind();
 

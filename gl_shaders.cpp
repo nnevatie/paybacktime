@@ -25,7 +25,8 @@ GLenum shaderType(Shader::Type type)
     const int index = int(type);
 
     if (index < 0 || index >= int(types.size()))
-        throw std::runtime_error("Invalid shader type " + std::to_string(index));
+        throw std::runtime_error("Invalid shader type " +
+                                 std::to_string(index));
 
     return types.at(index);
 }

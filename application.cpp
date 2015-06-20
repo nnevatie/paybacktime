@@ -24,6 +24,7 @@
 
 #include "gl_mesh.h"
 #include "gl_shaders.h"
+#include "gl_texture.h"
 #include "gl_fbo.h"
 
 #include "render_stats.h"
@@ -67,8 +68,13 @@ bool Application::run()
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
+    gl::Texture texture;
+    texture.alloc(256, 256);
+
     gl::Fbo fbo;
-    fbo.bind();
+    fbo.bind()
+       .attach(texture, gl::Fbo::Attachment::Color);
+
     fbo.unbind();
 
     const ImageCube geomSrc("data/floor.*.png", 1);
