@@ -73,9 +73,31 @@ bool Texture::unbind()
     return true;
 }
 
-Texture& Texture::alloc(int width, int height, const GLvoid* data)
+Texture& Texture::alloc(const std::vector<int> &dim,
+                        GLint internalFormat, GLenum format, const GLvoid* data)
 {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    return alloc(0, dim, internalFormat, format, data);
+}
+
+Texture& Texture::alloc(int level, const std::vector<int>& dim,
+                        GLint internalFormat, GLenum format, const GLvoid* data)
+{
+    const GLenum type = GL_UNSIGNED_BYTE;
+
+    if (d->target == GL_TEXTURE_1D && dim.size() > 0)
+        glTexImage1D(GL_TEXTURE_1D,
+                     level, internalFormat,
+                     dim[0], 0, format, type , data);
+    else
+    if (d->target == GL_TEXTURE_2D && dim.size() > 1)
+        glTexImage2D(GL_TEXTURE_2D,
+                     level, internalFormat,
+                     dim[0], dim[1], 0, format, type , data);
+    else
+    if (d->target == GL_TEXTURE_3D && dim.size() > 2)
+        glTexImage3D(GL_TEXTURE_3D,
+                     level, internalFormat,
+                     dim[0], dim[1], dim[2], 0, format, type , data);
     return *this;
 }
 

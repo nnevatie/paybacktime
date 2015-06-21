@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "image.h"
 
@@ -29,7 +30,12 @@ struct Texture
 
     bool unbind();
 
-    Texture& alloc(int width, int height, const GLvoid* data = 0);
+    Texture& alloc(const std::vector<int>& dim,
+                   GLint internalFormat, GLenum format, const GLvoid* data = 0);
+
+    Texture& alloc(int level, const std::vector<int>& dim,
+                   GLint internalFormat, GLenum format, const GLvoid* data = 0);
+
     Texture& alloc(const Image& image);
 
 private:

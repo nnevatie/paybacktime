@@ -69,7 +69,7 @@ bool Application::run()
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace});
 
     gl::Texture texture;
-    texture.alloc(256, 256);
+    texture.alloc({256, 256}, GL_RGB8, GL_RGB);
 
     gl::Fbo fbo;
     fbo.bind()
