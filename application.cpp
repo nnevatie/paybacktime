@@ -122,6 +122,7 @@ bool Application::run()
             .setUniform("color",     glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
         mesh.render();
+
         fbo.unbind();
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
