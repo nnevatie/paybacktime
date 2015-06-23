@@ -21,8 +21,7 @@ struct Mesh
 
     void render(RenderType type = RenderType::Triangles) const;
 
-    Buffer vertices,
-           indices;
+    Buffer vertices, indices;
 };
 
 } // namespace gl

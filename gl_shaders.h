@@ -35,7 +35,12 @@ private:
 
 struct ShaderProgram
 {
-    ShaderProgram(const std::vector<Shader>& shaders);
+    typedef std::pair<int, std::string> AttribLocation;
+
+    ShaderProgram(const std::vector<Shader>& shaders,
+                  const std::vector<AttribLocation>& attribs =
+                  std::vector<AttribLocation>());
+
     ~ShaderProgram();
 
     ShaderProgram& bind();

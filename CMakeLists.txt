@@ -19,6 +19,7 @@ set(HEADER_FILES
     sdf_primitives.h
     ref_mesher.h
     image_mesher.h
+    gl_uniforms.h
     gl_texture.h
     gl_buffers.h
     gl_shaders.h
@@ -50,6 +51,7 @@ set(SOURCE_FILES
     gl_mesh.cpp
     gl_fbo.cpp
     render_stats.cpp
+    geometry.cpp
     nanovg.c
     )
 
@@ -58,6 +60,7 @@ set(SHADER_FILES
     shaders/passthrough.vs.glsl
     shaders/constant.fs.glsl
     shaders/screenspace.fs.glsl
+    shaders/texture.fs.glsl
     shaders/wireframe.gs.glsl
     )
 

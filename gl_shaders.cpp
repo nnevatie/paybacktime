@@ -110,12 +110,15 @@ GLuint Shader::id() const
     return d->id;
 }
 
-ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders) :
+ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders, const std::vector<AttribLocation> &attribs) :
     shaders(shaders)
 {
     id = glCreateProgram();
     for (const Shader& shader : shaders)
         glAttachShader(id, shader.id());
+
+    for (const AttribLocation& attrib : attribs)
+        glBindAttribLocation(id, attrib.first, attrib.second.c_str());
 
     glLinkProgram(id);
 }

@@ -24,6 +24,9 @@ struct Geometry
         Vertex() {}
         Vertex(const glm::vec3& p) : p(p) {}
         Vertex(float x, float y, float z) : p(x, y, z) {}
+        Vertex(float x,  float y,  float z,
+               float nx, float ny, float nz,
+               float u,  float v) : p(x, y, z), n(nx, ny, nz), uv(u, v) {}
     };
 
     typedef uint32_t Index;
@@ -45,5 +48,8 @@ struct Geometry
         return out;
     }
 };
+
+Geometry squareGeometry(float halfWidth = 1.f);
+Geometry rectGeometry(float halfWidth = 1.f, float halfHeight = 1.f);
 
 } // namespace
