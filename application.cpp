@@ -32,6 +32,27 @@
 namespace hc
 {
 
+namespace
+{
+
+struct Ssao
+{
+    gl::Fbo fbo;
+    gl::Texture texColor, texNormal, texDepth;
+
+    Ssao& alloc(int width, int height)
+    {
+        auto fboSize = {width, height};
+        texColor.bind().alloc(fboSize, GL_RGB, GL_RGB);
+        texNormal.bind().alloc(fboSize, GL_RGB, GL_RGB);
+        texDepth.bind().alloc(fboSize, GL_DEPTH_COMPONENT32F,
+                                       GL_DEPTH_COMPONENT, GL_FLOAT);
+        return *this;
+    }
+};
+
+} // namespace
+
 Application::Application()
 {
     HCTIME("Construct");
@@ -67,30 +88,26 @@ bool Application::run()
     gl::Shader fsTexture(filesystem::path("shaders/texture.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
-    gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsScreenspace},
+    gl::ShaderProgram wireProgram({vsSimple, /*gsWireframe,*/ fsScreenspace},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     gl::ShaderProgram blitProgram({vsSimple, fsTexture},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    const ImageCube geomSrc("data/floor.*.png", 1);
+    const ImageCube geomSrc("data/box.*.png", 1);
     const Geometry geom = ImageMesher::geometry(geomSrc);
     const gl::Mesh mesh(geom);
 
     const Geometry rectGeom = squareGeometry();
     const gl::Mesh rectMesh(rectGeom);
 
-    auto fboSize = {display.width(), display.height()};
+    Ssao ssao;
+    ssao.alloc(display.width(), display.height());
 
-    gl::Texture txColor, txDepth;
-    txColor.bind().alloc(fboSize, GL_RGB, GL_RGB);
-    txDepth.bind().alloc(fboSize, GL_DEPTH_COMPONENT32F,
-                                  GL_DEPTH_COMPONENT, GL_FLOAT);
-
-    gl::Fbo fbo;
-    fbo.bind()
-       .attach(txColor, gl::Fbo::Attachment::Color)
-       .attach(txDepth, gl::Fbo::Attachment::Depth)
+    ssao.fbo.bind()
+       .attach(ssao.texColor,  gl::Fbo::Attachment::Color, 0)
+       .attach(ssao.texNormal, gl::Fbo::Attachment::Color, 1)
+       .attach(ssao.texDepth,  gl::Fbo::Attachment::Depth)
        .unbind();
 
     RenderStats stats;
@@ -101,45 +118,44 @@ bool Application::run()
     while (running)
     {
         Clock clock;
+        {
+            Binder<gl::Fbo> binder(ssao.fbo);
 
-        fbo.bind();
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-        glClearColor(0.f, 0.f, 0.f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_TEST);
 
-        glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 400.f);
-        glm::mat4 view  = glm::translate(glm::mat4(),
-                                         glm::vec3(-8.0f, -2.0f, -40.0f));
+            glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 400.f);
+            glm::mat4 view  = glm::translate({},
+                                             glm::vec3(-8.0f, -2.0f, -40.0f));
 
-        glm::mat4 model = glm::rotate(glm::mat4(), a, glm::vec3(1.0f, 0.5f, 0.9f));
-        glm::mat4 mvp   = proj * view * model;
+            glm::mat4 model = glm::rotate({}, a, glm::vec3(1.0f, 0.5f, 0.9f));
+            glm::mat4 mvp   = proj * view * model;
 
-        wireProgram.bind()
-            .setUniform("transform", mvp)
-            .setUniform("winSize",   glm::vec2(display.width(), display.height()))
-            .setUniform("color",     glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
+            wireProgram.bind()
+                .setUniform("transform", mvp)
+                .setUniform("winSize",   glm::vec2(display.width(),
+                                                   display.height()))
+                .setUniform("color",     glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
-        mesh.render();
-
-        fbo.unbind();
+            mesh.render();
+        }
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
         blitProgram.bind().setUniform("transform", glm::mat4());
-
-        txColor.bind();
-        glActiveTexture(GL_TEXTURE0);
-
-        rectMesh.render();
-        txColor.unbind();
+        {
+            Binder<gl::Texture> binder(ssao.texColor);
+            glActiveTexture(GL_TEXTURE0);
+            rectMesh.render();
+        }
 
         stats.accumulate(clock.stop(), geom.vertices.size(),
                                        geom.indices.size() / 3);
-
         stats.render();
         display.swap();
 
