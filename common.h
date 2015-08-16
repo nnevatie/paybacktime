@@ -19,6 +19,20 @@ struct SourceLocation
     const int   line;
 };
 
+template <typename T>
+struct Binder
+{
+    Binder(T& obj) : obj(obj)
+    {
+        obj.bind();
+    }
+    ~Binder()
+    {
+        obj.unbind();
+    }
+    T& obj;
+};
+
 std::string str(const std::ostream& ostr);
 
 std::string readFile(const filesystem::path& path, bool binary = true);
