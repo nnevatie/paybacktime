@@ -63,6 +63,7 @@ set(SHADER_FILES
     shaders/passthrough.vs.glsl
     shaders/constant.fs.glsl
     shaders/screenspace.fs.glsl
+    shaders/phong.fs.glsl
     shaders/texture.fs.glsl
     shaders/wireframe.gs.glsl
     )
