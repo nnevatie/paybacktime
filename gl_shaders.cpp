@@ -54,7 +54,8 @@ Shader::Type typeFromExt(const filesystem::path& path)
 
 struct Shader::Data
 {
-    Data(Shader::Type type, const std::string& source) :
+    Data(Shader::Type type, const std::string& source,
+         const std::string& name = std::string()) :
         id(0),
         type(type),
         source(source)
@@ -75,7 +76,7 @@ struct Shader::Data
             std::string infoLog(logSize, 0);
             glGetShaderInfoLog(id, logSize, &logSize, &infoLog[0]);
 
-            HCLOG(Error) << infoLog;
+            HCLOG(Error) << (name.empty() ? infoLog : (name + ": " + infoLog));
             throw std::runtime_error("Shader compilation error");
         }
     }
@@ -96,12 +97,12 @@ Shader::Shader(Type type, const std::string& s) :
 }
 
 Shader::Shader(Type type, const filesystem::path& path) :
-    d(new Data(type, readFile(path)))
+    d(new Data(type, readFile(path), path.string()))
 {
 }
 
 Shader::Shader(const filesystem::path& path) :
-    d(new Data(typeFromExt(path), readFile(path)))
+    d(new Data(typeFromExt(path), readFile(path), path.string()))
 {
 }
 
