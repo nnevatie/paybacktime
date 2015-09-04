@@ -6,7 +6,7 @@ namespace
 const char* priorityName(hc::Logger::Priority priority)
 {
     const char* priorityNames[] =
-        {"DEBUG ", "INFO ", "WARN ", "ERROR", "FATAL"};
+        {"DEBUG", "INFO ", "WARN ", "ERROR", "FATAL"};
 
     return priorityNames[priority];
 }
