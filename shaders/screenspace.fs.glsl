@@ -10,7 +10,7 @@ in Block
     vec2 uv;
     vec3 bc;
 }
-input;
+ib;
 
 // Output
 out vec4 frag;
@@ -27,5 +27,5 @@ void main()
     vec3 n  = normalize(vec3(dFdx(gl_FragCoord.w), dFdy(gl_FragCoord.w), 1));
     vec3 l  = normalize(vec3(1, 10, 0));
     vec3 c  = vec3(color.xyz + 1000 * dot(n, l));
-    frag    = vec4(mix(c + 0.25, c, edge(input.bc)), color.a);
+    frag    = vec4(mix(c + 0.25, c, edge(ib.bc)), color.a);
 }

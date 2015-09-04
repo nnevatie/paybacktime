@@ -10,12 +10,12 @@ in Block
     vec2 uv;
     vec3 bc;
 }
-input;
+ib;
 
 // Output
 out vec4 frag;
 
 void main()
 {
-    frag = texture(tex, input.uv);
+    frag = texture(tex, ib.uv);
 }

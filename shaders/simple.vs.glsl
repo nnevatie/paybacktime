@@ -15,12 +15,12 @@ out Block
     vec2 uv;
     vec3 bc;
 }
-output;
+ob;
 
 void main()
 {
-    output.normal = normal;
-    output.uv     = uv;
-    output.bc     = vec3(1.0);
-    gl_Position   = transform * vec4(position.xyz, 1);
+    ob.normal = normal;
+    ob.uv     = uv;
+    ob.bc     = vec3(1.0);
+    gl_Position = transform * vec4(position.xyz, 1);
 }

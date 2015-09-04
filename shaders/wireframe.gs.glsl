@@ -13,7 +13,7 @@ in Block
     vec2 uv;
     vec3 bc;
 }
-input[];
+ib[];
 
 // Output
 out Block
@@ -22,7 +22,7 @@ out Block
     vec2 uv;
     vec3 bc;
 }
-output;
+ob;
 
 void main(void)
 {
@@ -36,21 +36,21 @@ void main(void)
 
     float area = abs(v1.x * v2.y - v1.y * v2.x);
 
-    output.normal = input[0].normal;
-    output.uv     = input[0].uv;
-    output.bc     = vec3(area / length(v0), 0, 0);
+    ob.normal = ib[0].normal;
+    ob.uv     = ib[0].uv;
+    ob.bc     = vec3(area / length(v0), 0, 0);
     gl_Position   = gl_in[0].gl_Position;
     EmitVertex();
 
-    output.normal = input[1].normal;
-    output.uv     = input[1].uv;
-    output.bc     = vec3(0, area / length(v1), 0);
+    ob.normal = ib[1].normal;
+    ob.uv     = ib[1].uv;
+    ob.bc     = vec3(0, area / length(v1), 0);
     gl_Position   = gl_in[1].gl_Position;
     EmitVertex();
 
-    output.normal = input[2].normal;
-    output.uv     = input[2].uv;
-    output.bc     = vec3(0, 0, area / length(v2));
+    ob.normal = ib[2].normal;
+    ob.uv     = ib[2].uv;
+    ob.bc     = vec3(0, 0, area / length(v2));
     gl_Position   = gl_in[2].gl_Position;
     EmitVertex();
 
