@@ -84,11 +84,12 @@ bool Application::run()
     display.open();
 
     gl::Shader vsSimple(filesystem::path("shaders/simple.vs.glsl"));
+    gl::Shader fsLambert(filesystem::path("shaders/lambert.fs.glsl"));
     gl::Shader fsScreenspace(filesystem::path("shaders/screenspace.fs.glsl"));
     gl::Shader fsTexture(filesystem::path("shaders/texture.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
-    gl::ShaderProgram wireProgram({vsSimple, /*gsWireframe,*/ fsScreenspace},
+    gl::ShaderProgram wireProgram({vsSimple, /*gsWireframe,*/ fsLambert},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     gl::ShaderProgram blitProgram({vsSimple, fsTexture},
@@ -132,13 +133,13 @@ bool Application::run()
                                              glm::vec3(-8.0f, -2.0f, -40.0f));
 
             glm::mat4 model = glm::rotate({}, a, glm::vec3(1.0f, 0.5f, 0.9f));
-            glm::mat4 mvp   = proj * view * model;
 
             wireProgram.bind()
-                .setUniform("transform", mvp)
-                .setUniform("winSize",   glm::vec2(display.width(),
-                                                   display.height()))
-                .setUniform("color",     glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
+                .setUniform("mv",    view * model)
+                .setUniform("mvp",   proj * view * model)
+                .setUniform("size",  glm::vec2(display.width(),
+                                               display.height()))
+                .setUniform("color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
             mesh.render();
         }
@@ -147,7 +148,7 @@ bool Application::run()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
-        blitProgram.bind().setUniform("transform", glm::mat4());
+        blitProgram.bind().setUniform("mvp", glm::mat4());
         {
             Binder<gl::Texture> binder(ssao.texColor);
             glActiveTexture(GL_TEXTURE0);
@@ -155,7 +156,7 @@ bool Application::run()
         }
 
         stats.accumulate(clock.stop(), geom.vertices.size(),
-                                       geom.indices.size() / 3);
+                                        geom.indices.size() / 3);
         stats.render();
         display.swap();
 
