@@ -199,23 +199,26 @@ void emitBoxFace(Geometry* g, float s, int a, int c[8][3], int x,  int y,  int z
     const Geometry::Index ib = g->vertices.size();
 
     typedef glm::vec3 v;
-    g->vertices.insert(g->vertices.end(),
-    {
-        s * v(x + (c[i[a][0]][0] * sx),
-              y + (c[i[a][0]][1] * sy),
-              z + (c[i[a][0]][2] * sz)),
-        s * v(x + (c[i[a][1]][0] * sx),
-              y + (c[i[a][1]][1] * sy),
-              z + (c[i[a][1]][2] * sz)),
-        s * v(x + (c[i[a][2]][0] * sx),
-              y + (c[i[a][2]][1] * sy),
-              z + (c[i[a][2]][2] * sz)),
-        s * v(x + (c[i[a][3]][0] * sx),
-              y + (c[i[a][3]][1] * sy),
-              z + (c[i[a][3]][2] * sz))
-    });
-    g->indices.insert(g->indices.end(),
-        {ib + 0, ib + 1, ib + 2, ib + 2, ib + 3, ib + 0});
+
+    const v va = s * v(x + (c[i[a][0]][0] * sx),
+                       y + (c[i[a][0]][1] * sy),
+                       z + (c[i[a][0]][2] * sz));
+    const v vb = s * v(x + (c[i[a][1]][0] * sx),
+                       y + (c[i[a][1]][1] * sy),
+                       z + (c[i[a][1]][2] * sz));
+    const v vc = s * v(x + (c[i[a][2]][0] * sx),
+                       y + (c[i[a][2]][1] * sy),
+                       z + (c[i[a][2]][2] * sz));
+    const v vd = s * v(x + (c[i[a][3]][0] * sx),
+                       y + (c[i[a][3]][1] * sy),
+                       z + (c[i[a][3]][2] * sz));
+
+    const v n = glm::normalize(glm::cross(vc - va, vb - va));
+
+    g->vertices.insert(g->vertices.end(), {{va, n}, {vb, n},
+                                           {vc, n}, {vd, n}});
+    g->indices.insert(g->indices.end(), {ib + 0, ib + 1, ib + 2,
+                                         ib + 2, ib + 3, ib + 0});
 }
 
 void collapseConstants(int cc[8][3], int g)
