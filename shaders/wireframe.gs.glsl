@@ -4,7 +4,7 @@ layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
 // Uniforms
-uniform vec2 winSize;
+uniform vec2 size;
 
 // Input
 in Block
@@ -26,9 +26,9 @@ ob;
 
 void main(void)
 {
-    vec2 p0 = winSize * gl_in[0].gl_Position.xy / gl_in[0].gl_Position.w;
-    vec2 p1 = winSize * gl_in[1].gl_Position.xy / gl_in[1].gl_Position.w;
-    vec2 p2 = winSize * gl_in[2].gl_Position.xy / gl_in[2].gl_Position.w;
+    vec2 p0 = size * gl_in[0].gl_Position.xy / gl_in[0].gl_Position.w;
+    vec2 p1 = size * gl_in[1].gl_Position.xy / gl_in[1].gl_Position.w;
+    vec2 p2 = size * gl_in[2].gl_Position.xy / gl_in[2].gl_Position.w;
 
     vec2 v0 = p2 - p1;
     vec2 v1 = p2 - p0;

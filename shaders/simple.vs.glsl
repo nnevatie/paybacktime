@@ -1,7 +1,7 @@
 #version 150
 
 // Uniforms
-uniform mat4 transform;
+uniform mat4 mvp;
 
 // Input
 in vec3 position;
@@ -19,8 +19,8 @@ ob;
 
 void main()
 {
-    ob.normal = normal;
-    ob.uv     = uv;
-    ob.bc     = vec3(1.0);
-    gl_Position = transform * vec4(position.xyz, 1);
+    ob.normal   = normal;
+    ob.uv       = uv;
+    ob.bc       = vec3(1.0);
+    gl_Position = mvp * vec4(position.xyz, 1);
 }
