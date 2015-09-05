@@ -33,7 +33,8 @@ GLenum textureTarget(Texture::Type type)
 
 struct Texture::Data
 {
-    Data(Texture::Type type) : id(0), target(textureTarget(type)), type(type)
+    explicit  Data(Texture::Type type) :
+        id(0), target(textureTarget(type)), type(type)
     {
         glGenTextures(1, &id);
     }

@@ -17,7 +17,7 @@ struct Mesh
         Triangles
     };
 
-    Mesh(const Geometry& geometry);
+    explicit Mesh(const Geometry& geometry);
 
     void render(RenderType type = RenderType::Triangles) const;
 

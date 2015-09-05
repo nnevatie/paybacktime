@@ -22,7 +22,7 @@ struct SourceLocation
 template <typename T>
 struct Binder
 {
-    Binder(T& obj) : obj(obj)
+    explicit Binder(T& obj) : obj(obj)
     {
         obj.bind();
     }

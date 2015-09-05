@@ -15,7 +15,7 @@ T stdev(T cnt, T sum, T ssq)
 template <typename Scalar>
 struct MovingAvg
 {
-    MovingAvg(int n) : sum(0), ssq(0)
+    explicit MovingAvg(int n) : sum(0), ssq(0)
     {
         q = boost::circular_buffer<int>(n);
     }

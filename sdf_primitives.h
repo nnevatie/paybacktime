@@ -12,7 +12,7 @@ namespace sdf
 // Sphere with radius r
 struct Sphere
 {
-    Sphere(float r);
+    explicit Sphere(float r);
     float operator()(const glm::vec3& p) const;
     BoundingBox bounds() const;
 
@@ -22,7 +22,7 @@ struct Sphere
 // Box with diagonal b
 struct Box
 {
-    Box(const glm::vec3& b);
+    explicit Box(const glm::vec3& b);
     float operator()(const glm::vec3& p) const;
     BoundingBox bounds() const;
 
