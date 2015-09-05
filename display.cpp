@@ -67,8 +67,8 @@ bool Display::open()
 
         // Log renderer info
         HCLOG(Debug) << "OpenGL vendor: '" << glGetString(GL_VENDOR)
-                     << "', renderer: '"  << glGetString(GL_RENDERER)
-                     << "', version: '"   << glGetString(GL_VERSION) << "'";
+                     << "', renderer: '"   << glGetString(GL_RENDERER)
+                     << "', version: '"    << glGetString(GL_VERSION) << "'";
 
         return glewStatus == GLEW_OK;
     }
