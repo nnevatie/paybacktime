@@ -42,6 +42,13 @@ bool Display::open()
     HCTIME("");
     if (!window_)
     {
+        // Log available video drivers
+        HCLOG(Debug) << "Video drivers:";
+        const int driverCount = SDL_GetNumVideoDrivers();
+        for (int i = 0; i < driverCount; ++i)
+            HCLOG(Debug) << "#" << (i + 1) << ": "
+                         << SDL_GetVideoDriver(i);
+
         // Create window
         window_ = SDL_CreateWindow(title_.c_str(),
             SDL_WINDOWPOS_UNDEFINED,
@@ -56,7 +63,14 @@ bool Display::open()
         glContext_ = SDL_GL_CreateContext(window_);
 
         // Init GLEW
-        return glewInit() == GLEW_OK;
+        const GLenum glewStatus = glewInit();
+
+        // Log renderer info
+        HCLOG(Debug) << "OpenGL vendor: '" << glGetString(GL_VENDOR)
+                     << "', renderer: '"  << glGetString(GL_RENDERER)
+                     << "', version: '"   << glGetString(GL_VERSION) << "'";
+
+        return glewStatus == GLEW_OK;
     }
     else
         HCLOG(Warn) << "Window already open.";
