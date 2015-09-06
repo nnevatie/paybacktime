@@ -95,7 +95,7 @@ bool Application::run()
     gl::ShaderProgram blitProgram({vsSimple, fsTexture},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    const ImageCube geomSrc("data/box.*.png", 1);
+    const ImageCube geomSrc("data/floor.*.png", 1);
     const Geometry geom = ImageMesher::geometry(geomSrc);
     const gl::Mesh mesh(geom);
 
@@ -122,7 +122,9 @@ bool Application::run()
         {
             Binder<gl::Fbo> binder(ssao.fbo);
 
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
+                                          GL_COLOR_ATTACHMENT1};
+            glDrawBuffers(2, drawBuffers);
 
             glClearColor(0.f, 0.f, 0.f, 1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -150,13 +152,13 @@ bool Application::run()
 
         blitProgram.bind().setUniform("mvp", glm::mat4());
         {
-            Binder<gl::Texture> binder(ssao.texColor);
+            Binder<gl::Texture> binder(ssao.texNormal);
             glActiveTexture(GL_TEXTURE0);
             rectMesh.render();
         }
 
         stats.accumulate(clock.stop(), geom.vertices.size(),
-                                        geom.indices.size() / 3);
+                                       geom.indices.size() / 3);
         stats.render();
         display.swap();
 
