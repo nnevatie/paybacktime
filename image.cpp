@@ -3,6 +3,8 @@
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 #include "clock.h"
 #include "log.h"
@@ -34,6 +36,16 @@ Image::Image() :
 {
 }
 
+Image::Image(int width, int height, int depth, int stride) :
+    d(new Data {})
+{
+    d->width  = width;
+    d->height = height;
+    d->depth  = depth;
+    d->stride = stride;
+    d->bits   = new uint8_t[height * stride];
+}
+
 Image::Image(const std::string& filename, int depth) :
     d(new Data {})
 {
@@ -62,6 +74,11 @@ int Image::stride() const
     return d->stride;
 }
 
+uint8_t *Image::bits()
+{
+    return d->bits;
+}
+
 const uint8_t* Image::bits() const
 {
     return d->bits;
@@ -71,7 +88,13 @@ SDL_Surface* Image::surface() const
 {
     return SDL_CreateRGBSurfaceFrom(
         d->bits, d->width, d->height, d->depth * 8, d->stride,
-        0x000000ff, 0x00ff0000, 0x0000ff00, 0xff000000);
+                0x000000ff, 0x00ff0000, 0x0000ff00, 0xff000000);
+}
+
+bool Image::write(const std::string& filename) const
+{
+    return !stbi_write_bmp(filename.c_str(),
+                           d->width, d->height, d->depth, d->bits);
 }
 
 } // namespace
