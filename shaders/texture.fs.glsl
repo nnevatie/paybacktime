@@ -13,9 +13,16 @@ in Block
 ib;
 
 // Output
-out vec4 frag;
+out vec4 color;
 
 void main()
 {
-    frag = texture(tex, ib.uv);
+    color = texture(tex, ib.uv);
+/*
+    float z = texture(tex, ib.uv).r;
+    float n = 0.01;
+    float f = 400.0;
+    float c = (2.0 * n) / (f + n - z * (f - n));
+    color   = vec4(c, c, c, 1);
+*/
 }
