@@ -51,8 +51,6 @@ void Mesh::render(RenderType type) const
 
     indices.unbind();
     vertices.unbind();
-
-    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 } // namespace gl
