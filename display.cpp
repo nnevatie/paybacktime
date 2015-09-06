@@ -107,4 +107,28 @@ bool Display::swap()
     return false;
 }
 
+Image Display::capture() const
+{
+    const int w = width();
+    const int h = height();
+    const int s = w * 4;
+
+    Image image(w, h, 4, s);
+    glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+
+    // Flip vertically
+    uint8_t  t[s];
+    uint8_t* b = image.bits();
+    for (int y = 0; y < h / 2; ++y)
+    {
+        uint8_t* r0 = b + y * s;
+        uint8_t* r1 = b + (h - y - 1) * s;
+        std::copy(r0, r0 + s, t);
+        std::copy(r1, r1 + s, r0);
+        std::copy(t,  t  + s, r1);
+    }
+
+    return image;
+}
+
 } // namespace

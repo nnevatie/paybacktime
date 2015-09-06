@@ -4,6 +4,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "image.h"
+
 namespace hc
 {
 
@@ -21,6 +23,8 @@ struct Display
     bool close();
     bool update();
     bool swap();
+
+    Image capture() const;
 
 private:
 
