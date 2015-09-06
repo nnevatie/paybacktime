@@ -162,6 +162,8 @@ bool Application::run()
         stats.render();
         display.swap();
 
+        display.capture().write("c:/temp/frame.bmp");
+
         a += 0.001f;
 
         SDL_Event e;
