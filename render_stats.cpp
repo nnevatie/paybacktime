@@ -6,7 +6,7 @@
 #include <GL/glew.h>
 
 #define NANOVG_GL2_IMPLEMENTATION
-#include "nanovg_gl.h"
+#include "ext/nanovg_gl.h"
 
 #include "geometry.h"
 #include "common.h"

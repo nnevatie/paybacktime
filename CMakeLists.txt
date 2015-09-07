@@ -55,7 +55,13 @@ set(SOURCE_FILES
     gl_fbo.cpp
     render_stats.cpp
     geometry.cpp
-    nanovg.c
+    )
+
+set(EXT_HEADER_FILES
+    )
+
+set(EXT_SOURCE_FILES
+    ext/nanovg.c
     )
 
 set(SHADER_FILES
@@ -93,7 +99,9 @@ set(OPENGL_LIBS
     opengl32
     )
 
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES})
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
+                               ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES}
+                               ${SHADER_FILES})
 
 target_link_libraries(${PROJECT_NAME}
                       ${SYS_LIBS}
