@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include <GL/glew.h>
+
 #include "image.h"
 
 namespace hc
