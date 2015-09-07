@@ -113,6 +113,7 @@ bool Application::run()
 
     RenderStats stats;
 
+    int f = 0;
     float a = 1.2;
     bool running = true;
 
@@ -152,17 +153,18 @@ bool Application::run()
 
         blitProgram.bind().setUniform("mvp", glm::mat4());
         {
-            Binder<gl::Texture> binder(ssao.texNormal);
+            Binder<gl::Texture> binder(ssao.texColor);
             glActiveTexture(GL_TEXTURE0);
             rectMesh.render();
         }
 
+        //display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");
+
         stats.accumulate(clock.stop(), geom.vertices.size(),
                                        geom.indices.size() / 3);
+
         stats.render();
         display.swap();
-
-        display.capture().write("c:/temp/frame.bmp");
 
         a += 0.001f;
 
