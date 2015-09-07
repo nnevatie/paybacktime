@@ -38,7 +38,7 @@ Shader::Type typeFromExt(const filesystem::path& path)
     {
         {".vs", Shader::Type::Vertex},
         {".fs", Shader::Type::Fragment},
-        {".gs", Shader::Type::Geometry},
+        {".gs", Shader::Type::Mesh},
         {".cs", Shader::Type::Compute}
     };
     for (const Type& type : types)

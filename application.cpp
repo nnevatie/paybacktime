@@ -75,12 +75,12 @@ bool Application::run()
     gl::ShaderProgram blitProgram({vsSimple, fsTexture},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    const ImageCube geomSrc("data/floor.*.png", 1);
-    const Geometry geom = ImageMesher::geometry(geomSrc);
-    const gl::Primitive primitive(geom);
+    const ImageCube meshSrc("data/floor.*.png", 1);
+    const Mesh mesh = ImageMesher::mesh(meshSrc);
+    const gl::Primitive primitive(mesh);
 
-    const Geometry rectGeom = squareGeometry();
-    const gl::Primitive rectPrimitive(rectGeom);
+    const Mesh rectMesh = squareMesh();
+    const gl::Primitive rectPrimitive(rectMesh);
 
     Ssao ssao(display.width(), display.height());
     ssao.fbo.bind()
@@ -138,8 +138,8 @@ bool Application::run()
 
         //display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");
 
-        stats.accumulate(clock.stop(), geom.vertices.size(),
-                                       geom.indices.size() / 3);
+        stats.accumulate(clock.stop(), mesh.vertices.size(),
+                                       mesh.indices.size() / 3);
 
         stats.render();
         display.swap();

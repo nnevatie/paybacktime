@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geometry.h"
+#include "mesh.h"
 #include "sdf_primitives.h"
 
 namespace hc
@@ -8,8 +8,8 @@ namespace hc
 namespace RefMesher
 {
 
-Geometry geometry(const sdf::Sphere& sphere);
-Geometry geometry(const sdf::Box& box);
+Mesh mesh(const sdf::Sphere& sphere);
+Mesh mesh(const sdf::Box& box);
 
 } // namespace RefMesher
 } // namespace

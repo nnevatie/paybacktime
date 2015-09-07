@@ -12,13 +12,13 @@ namespace hc
 namespace RefMesher
 {
 
-Geometry geometry(const sdf::Sphere& sphere)
+Mesh mesh(const sdf::Sphere& sphere)
 {
     HCTIME("Extract sphere, r: " + std::to_string(sphere.r));
     return {};
 }
 
-Geometry geometry(const sdf::Box& box)
+Mesh mesh(const sdf::Box& box)
 {
     HCTIME("Extract box, b: " + std::to_string(glm::length<float>(box.b)));
 

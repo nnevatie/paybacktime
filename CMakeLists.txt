@@ -30,7 +30,7 @@ set(HEADER_FILES
     gl_primitive.h
     gl_fbo.h
     render_stats.h
-    geometry.h
+    mesh.h
     mc_mesher.h
     sn_mesher.h
     ssao.h
@@ -56,7 +56,7 @@ set(SOURCE_FILES
     gl_primitive.cpp
     gl_fbo.cpp
     render_stats.cpp
-    geometry.cpp
+    mesh.cpp
     ssao.cpp
     )
 

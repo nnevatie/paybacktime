@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geometry.h"
+#include "mesh.h"
 #include "gl_buffers.h"
 
 namespace hc
@@ -17,7 +17,7 @@ struct Primitive
         Triangles
     };
 
-    explicit Primitive(const Geometry& geometry);
+    explicit Primitive(const Mesh& mesh);
 
     void render(RenderType type = RenderType::Triangles) const;
 

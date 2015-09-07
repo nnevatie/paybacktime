@@ -18,7 +18,7 @@ struct Shader
     {
         Vertex,
         Fragment,
-        Geometry,
+        Mesh,
         Compute
     };
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ext/mc_tables.h"
-#include "geometry.h"
+#include "mesh.h"
 #include "sdf_primitives.h"
 
 namespace hc
@@ -16,10 +16,10 @@ std::vector<glm::vec3> cellTriangles(const glm::vec3& origin, float r)
 }
 
 template <typename T>
-Geometry geometry(const T& sdf, float interval)
+Mesh mesh(const T& sdf, float interval)
 {
-    Geometry geometry;
-    return geometry;
+    Mesh mesh;
+    return mesh;
 }
 
 } // namespace McMesher

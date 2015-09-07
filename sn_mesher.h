@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geometry.h"
+#include "mesh.h"
 #include "log.h"
 
 namespace hc
@@ -51,7 +51,7 @@ struct EdgeTable
 static EdgeTable edgeTable;
 
 template <typename V>
-Geometry geometry(const V& vol)
+Mesh mesh(const V& vol)
 {
     const std::array<int, 3>& dims = {vol.width + 2, vol.height + 2, vol.depth + 2};
 
@@ -61,7 +61,7 @@ Geometry geometry(const V& vol)
 
     std::vector<int> buffer(r[2] * 2, 0);
 
-    Geometry geom;
+    Mesh geom;
 
     //March over the voxel grid
     int bufNo = 1;

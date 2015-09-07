@@ -8,7 +8,7 @@
 #define NANOVG_GL2_IMPLEMENTATION
 #include "ext/nanovg_gl.h"
 
-#include "geometry.h"
+#include "mesh.h"
 #include "common.h"
 
 namespace hc
@@ -61,8 +61,8 @@ void RenderStats::render()
     nvgText(vg, 140, 40, str(std::stringstream()
                             << "Triangles: " << triangleCount).c_str(), 0);
 
-    int geomKb = 0.001 * (vertexCount * sizeof(Geometry::Vertex) +
-                          triangleCount * 3 * sizeof(Geometry::Index));
+    int geomKb = 0.001 * (vertexCount * sizeof(Mesh::Vertex) +
+                          triangleCount * 3 * sizeof(Mesh::Index));
 
     nvgText(vg, 10, 60, str(std::stringstream()
                             << "Geometry: ~" << geomKb << " KB").c_str(), 0);

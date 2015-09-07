@@ -156,9 +156,9 @@ struct Cubefield
     float interval;
 };
 
-void emitBox(Geometry* g, const Box& box)
+void emitBox(Mesh* g, const Box& box)
 {
-    const Geometry::Index ib = g->vertices.size();
+    const Mesh::Index ib = g->vertices.size();
     g->vertices.insert(g->vertices.end(),
                        box.begin(),
                        box.end());
@@ -184,7 +184,7 @@ void emitBox(Geometry* g, const Box& box)
          ib + 6, ib + 2, ib + 1});
 }
 
-void emitBoxFace(Geometry* g, float s, int a, int c[8][3], int x,  int y,  int z,
+void emitBoxFace(Mesh* g, float s, int a, int c[8][3], int x,  int y,  int z,
                                                            int sx, int sy, int sz)
 {
     const int i[6][4] =
@@ -196,7 +196,7 @@ void emitBoxFace(Geometry* g, float s, int a, int c[8][3], int x,  int y,  int z
         {7, 6, 5, 4},
         {0, 1, 2, 3}
     };
-    const Geometry::Index ib = g->vertices.size();
+    const Mesh::Index ib = g->vertices.size();
 
     typedef glm::vec3 v;
 
@@ -275,25 +275,25 @@ Box box(const V& vol, int x, int y, int z)
 }
 
 template <typename V>
-Geometry meshCubes(const V& vol)
+Mesh meshCubes(const V& vol)
 {
     const int dims[3] = {vol.width, vol.height, vol.depth};
 
-    Geometry geometry;
-    geometry.vertices.reserve(dims[0] * dims[1] * dims[2] * 8);
-    geometry.indices.reserve(dims[0] * dims[1] * dims[2] * 36);
+    Mesh mesh;
+    mesh.vertices.reserve(dims[0] * dims[1] * dims[2] * 8);
+    mesh.indices.reserve(dims[0] * dims[1] * dims[2] * 36);
 
     for (int z = 0; z < dims[2]; ++z)
         for (int y = 0; y < dims[1]; ++y)
             for (int x = 0; x < dims[0]; ++x)
                 if (visible(vol, x, y, z))
-                    emitBox(&geometry, box(vol, x, y, z));
+                    emitBox(&mesh, box(vol, x, y, z));
 
-    return geometry;
+    return mesh;
 }
 
 template <typename V>
-Geometry meshGreedy(const V& vol)
+Mesh meshGreedy(const V& vol)
 {
     struct Cell
     {
@@ -332,10 +332,10 @@ Geometry meshGreedy(const V& vol)
                 cells[x][y][z].g = v ? vol.g(x, y, z) : 0;
             }
 
-    Geometry geometry;
+    Mesh mesh;
     const int reserveSize = (dims[0] / 4) * (dims[1] / 4) * (dims[2] / 4);
-    geometry.vertices.reserve(reserveSize);
-    geometry.indices.reserve(reserveSize);
+    mesh.vertices.reserve(reserveSize);
+    mesh.indices.reserve(reserveSize);
 
     for (int d = 0; d < 3; ++d)
     {
@@ -402,7 +402,7 @@ Geometry meshGreedy(const V& vol)
                         s[v] = h;
 
                         const int axis = d * 2 + (m.d > 0 ? 1 : 0);
-                        emitBoxFace(&geometry, vol.interval,
+                        emitBoxFace(&mesh, vol.interval,
                                     axis, cc, c[0], c[1], c[2],
                                               s[0], s[1], s[2]);
 
@@ -423,23 +423,23 @@ Geometry meshGreedy(const V& vol)
                 }
         }
     }
-    return geometry;
+    return mesh;
 }
 
 } // namespace
 
-Geometry geometry(const Image& image, float interval)
+Mesh mesh(const Image& image, float interval)
 {
-    HCTIME("image geom");
+    HCTIME("image mesh");
     const Heightfield hfield(image, std::min(image.rect().w,
                                              image.rect().h) / interval, interval);
     return meshGreedy(hfield);
     //return meshCubes(hfield);
 }
 
-Geometry geometry(const ImageCube& imageCube, float interval)
+Mesh mesh(const ImageCube& imageCube, float interval)
 {
-    HCTIME("cube geom");
+    HCTIME("cube mesh");
     const Cubefield cfield(imageCube, interval);
 
     return meshGreedy(cfield);

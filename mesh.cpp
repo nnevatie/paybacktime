@@ -1,14 +1,14 @@
-#include "geometry.h"
+#include "mesh.h"
 
 namespace hc
 {
 
-Geometry squareGeometry(float halfWidth)
+Mesh squareMesh(float halfWidth)
 {
-    return rectGeometry(halfWidth, halfWidth);
+    return rectMesh(halfWidth, halfWidth);
 }
 
-Geometry rectGeometry(float halfWidth, float halfHeight)
+Mesh rectMesh(float halfWidth, float halfHeight)
 {
     return
     {

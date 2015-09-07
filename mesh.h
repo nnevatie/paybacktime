@@ -13,7 +13,7 @@ namespace hc
 typedef std::array<glm::vec3, 8>        Box;
 typedef std::pair<glm::vec3, glm::vec3> BoundingBox;
 
-struct Geometry
+struct Mesh
 {
     struct Vertex
     {
@@ -35,22 +35,22 @@ struct Geometry
     std::vector<Vertex> vertices;
     std::vector<Index>  indices;
 
-    Geometry() {}
+    Mesh() {}
 
-    Geometry(const std::vector<Vertex>& vertices,
-             const std::vector<Index>&  indices) :
-        vertices(vertices), indices(indices) {}
+    Mesh(const std::vector<Vertex>& vertices,
+         const std::vector<Index>& indices) :
+         vertices(vertices), indices(indices) {}
 
-    friend std::ostream& operator<<(std::ostream& out, const Geometry& geometry)
+    friend std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
     {
-        out << "Geometry[vertices: " << geometry.vertices.size()
-            << ", triangles: " << geometry.indices.size() / 3 << "]";
+        out << "Mesh[vertices: " << mesh.vertices.size()
+            << ", triangles: " << mesh.indices.size() / 3 << "]";
 
         return out;
     }
 };
 
-Geometry squareGeometry(float halfWidth = 1.f);
-Geometry rectGeometry(float halfWidth = 1.f, float halfHeight = 1.f);
+Mesh squareMesh(float halfWidth = 1.f);
+Mesh rectMesh(float halfWidth = 1.f, float halfHeight = 1.f);
 
 } // namespace

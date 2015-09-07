@@ -2,7 +2,7 @@
 
 #include <glm/vec3.hpp>
 
-#include "geometry.h"
+#include "mesh.h"
 
 namespace hc
 {
