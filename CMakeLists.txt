@@ -120,7 +120,7 @@ install(FILES ${shader_files}
 
 # Runtime
 file(GLOB runtime_files
-    "external/*.dll")
+    "runtime/*.dll")
 
 install(FILES ${runtime_files}
         DESTINATION .)
