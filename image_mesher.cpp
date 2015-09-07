@@ -433,7 +433,6 @@ Geometry geometry(const Image& image, float interval)
     HCTIME("image geom");
     const Heightfield hfield(image, std::min(image.rect().w,
                                              image.rect().h) / interval, interval);
-
     return meshGreedy(hfield);
     //return meshCubes(hfield);
 }
