@@ -8,7 +8,7 @@ namespace hc
 namespace gl
 {
 
-struct Mesh
+struct Primitive
 {
     enum class RenderType
     {
@@ -17,7 +17,7 @@ struct Mesh
         Triangles
     };
 
-    explicit Mesh(const Geometry& geometry);
+    explicit Primitive(const Geometry& geometry);
 
     void render(RenderType type = RenderType::Triangles) const;
 

@@ -1,11 +1,11 @@
-#include "gl_mesh.h"
+#include "gl_primitive.h"
 
 namespace hc
 {
 namespace gl
 {
 
-Mesh::Mesh(const Geometry& geometry) :
+Primitive::Primitive(const Geometry& geometry) :
     vertices(Buffer::Type::Vertex),
     indices(Buffer::Type::Index)
 {
@@ -16,7 +16,7 @@ Mesh::Mesh(const Geometry& geometry) :
                   int(sizeof(Geometry::Index) * geometry.indices.size()));
 }
 
-void Mesh::render(RenderType type) const
+void Primitive::render(RenderType type) const
 {
     const GLenum mode = type == RenderType::Points ? GL_POINT :
                         type == RenderType::Lines  ? GL_LINE : GL_FILL;

@@ -22,7 +22,7 @@
 #include "ref_mesher.h"
 #include "image_mesher.h"
 
-#include "gl_mesh.h"
+#include "gl_primitive.h"
 #include "gl_shaders.h"
 #include "gl_texture.h"
 #include "gl_fbo.h"
@@ -77,10 +77,10 @@ bool Application::run()
 
     const ImageCube geomSrc("data/floor.*.png", 1);
     const Geometry geom = ImageMesher::geometry(geomSrc);
-    const gl::Mesh mesh(geom);
+    const gl::Primitive primitive(geom);
 
     const Geometry rectGeom = squareGeometry();
-    const gl::Mesh rectMesh(rectGeom);
+    const gl::Primitive rectPrimitive(rectGeom);
 
     Ssao ssao(display.width(), display.height());
     ssao.fbo.bind()
@@ -122,7 +122,7 @@ bool Application::run()
                                                display.height()))
                 .setUniform("color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
-            mesh.render();
+            primitive.render();
         }
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -133,7 +133,7 @@ bool Application::run()
         {
             Binder<gl::Texture> binder(ssao.texColor);
             glActiveTexture(GL_TEXTURE0);
-            rectMesh.render();
+            rectPrimitive.render();
         }
 
         //display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");

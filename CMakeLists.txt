@@ -27,7 +27,7 @@ set(HEADER_FILES
     gl_texture.h
     gl_buffers.h
     gl_shaders.h
-    gl_mesh.h
+    gl_primitive.h
     gl_fbo.h
     render_stats.h
     geometry.h
@@ -53,7 +53,7 @@ set(SOURCE_FILES
     gl_texture.cpp
     gl_buffers.cpp
     gl_shaders.cpp
-    gl_mesh.cpp
+    gl_primitive.cpp
     gl_fbo.cpp
     render_stats.cpp
     geometry.cpp
