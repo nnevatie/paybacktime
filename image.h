@@ -18,7 +18,7 @@ struct Image
 
     operator bool() const;
 
-    Rect<int> rect() const;
+    Size<int> size() const;
 
     int depth() const;
     int stride() const;

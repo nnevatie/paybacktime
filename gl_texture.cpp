@@ -128,7 +128,7 @@ Texture& Texture::alloc(const Image& image)
     if (image.depth() > 0 && image.depth() <= 4)
     {
         const Format f = formats[image.depth() - 1];
-        return alloc({image.rect().w, image.rect().h},
+        return alloc({image.size().w, image.size().h},
                       f.internalFormat, f.format, GL_UNSIGNED_BYTE, image.bits());
     }
     return *this;

@@ -31,24 +31,23 @@ struct Heightfield
     }
 
     Heightfield(const Image& image, int depth, float interval = 1.f) :
-        width(image.rect().w / interval), height(image.rect().h / interval),
+        width(image.size().w / interval), height(image.size().h / interval),
         depth(depth),
         interval(interval),
         values(width * height)
     {
-        const Rect<int>             rect   = image.rect();
         const uint8_t* __restrict__ bits   = image.bits();
         const int                   stride = image.stride();
 
         for (int sy = 0; sy < height; ++sy)
         {
-            const float                  fy = rect.y + sy * interval;
+            const float                  fy = sy * interval;
             const int                     y = int(fy);
             const uint8_t* __restrict__ row = bits + y * stride;
 
             for (int sx = 0; sx < width; ++sx)
             {
-                const int fx            = int(rect.x + sx * interval);
+                const int fx            = int(sx * interval);
                 const int x             = int(fx);
                 const int p             = row[x];
                 const float v           = std::pow(float(p) / 255.f, 0.45f);
@@ -431,8 +430,8 @@ Mesh meshGreedy(const V& vol)
 Mesh mesh(const Image& image, float interval)
 {
     HCTIME("image mesh");
-    const Heightfield hfield(image, std::min(image.rect().w,
-                                             image.rect().h) / interval, interval);
+    const Heightfield hfield(image, std::min(image.size().w,
+                                             image.size().h) / interval, interval);
     return meshGreedy(hfield);
     //return meshCubes(hfield);
 }

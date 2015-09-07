@@ -71,22 +71,22 @@ const Image& ImageCube::side(ImageCube::Side s) const
 
 int ImageCube::width() const
 {
-    int w0 = std::min(side(Front).rect().w, side(Back).rect().w);
-    int w1 = std::min(side(Top).rect().w, side(Bottom).rect().w);
+    int w0 = std::min(side(Front).size().w, side(Back).size().w);
+    int w1 = std::min(side(Top).size().w, side(Bottom).size().w);
     return std::min(w0, w1);
 }
 
 int ImageCube::height() const
 {
-    int h0 = std::min(side(Front).rect().h, side(Back).rect().h);
-    int h1 = std::min(side(Left).rect().h, side(Right).rect().h);
+    int h0 = std::min(side(Front).size().h, side(Back).size().h);
+    int h1 = std::min(side(Left).size().h, side(Right).size().h);
     return std::min(h0, h1);
 }
 
 int ImageCube::depth() const
 {
-    int d0 = std::min(side(Left).rect().w, side(Right).rect().w);
-    int d1 = std::min(side(Top).rect().h, side(Bottom).rect().h);
+    int d0 = std::min(side(Left).size().w, side(Right).size().w);
+    int d1 = std::min(side(Top).size().h, side(Bottom).size().h);
     return std::min(d0, d1);
 }
 

@@ -59,9 +59,9 @@ Image::operator bool() const
     return d && d->width && d->height;
 }
 
-Rect<int> Image::rect() const
+Size<int> Image::size() const
 {
-    return Rect<int>(0, 0, d->width, d->height);
+    return Size<int>(d->width, d->height);
 }
 
 int Image::depth() const
