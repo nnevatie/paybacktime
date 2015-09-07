@@ -13,7 +13,7 @@ set(HEADER_FILES
     application.h
     display.h
     painter.h
-    rect.h
+    geometry.h
     image.h
     image_cube.h
     image_mesher.h
