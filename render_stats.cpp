@@ -54,7 +54,7 @@ void RenderStats::render()
                             << "Time: " << timeMs << " ms").c_str(), 0);
     nvgText(vg, 140, 20, str(std::stringstream()
                             << std::fixed << std::setprecision(1)
-                            << "FPS: " << (1000.f / timeMs) << " ms").c_str(), 0);
+                            << "FPS: " << (1000.f / timeMs)).c_str(), 0);
 
     nvgText(vg, 10, 40, str(std::stringstream()
                             << "Vertices: " << vertexCount).c_str(), 0);
