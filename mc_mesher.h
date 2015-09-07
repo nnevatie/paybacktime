@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mc_tables.h"
+#include "ext/mc_tables.h"
 #include "geometry.h"
 #include "sdf_primitives.h"
 
