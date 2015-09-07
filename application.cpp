@@ -27,31 +27,11 @@
 #include "gl_texture.h"
 #include "gl_fbo.h"
 
+#include "ssao.h"
 #include "render_stats.h"
 
 namespace hc
 {
-
-namespace
-{
-
-struct Ssao
-{
-    gl::Fbo fbo;
-    gl::Texture texColor, texNormal, texDepth;
-
-    Ssao& alloc(int width, int height)
-    {
-        auto fboSize = {width, height};
-        texColor.bind().alloc(fboSize, GL_RGB, GL_RGB);
-        texNormal.bind().alloc(fboSize, GL_RGB, GL_RGB);
-        texDepth.bind().alloc(fboSize, GL_DEPTH_COMPONENT32F,
-                                       GL_DEPTH_COMPONENT, GL_FLOAT);
-        return *this;
-    }
-};
-
-} // namespace
 
 Application::Application()
 {
@@ -102,9 +82,7 @@ bool Application::run()
     const Geometry rectGeom = squareGeometry();
     const gl::Mesh rectMesh(rectGeom);
 
-    Ssao ssao;
-    ssao.alloc(display.width(), display.height());
-
+    Ssao ssao(display.width(), display.height());
     ssao.fbo.bind()
        .attach(ssao.texColor,  gl::Fbo::Attachment::Color, 0)
        .attach(ssao.texNormal, gl::Fbo::Attachment::Color, 1)

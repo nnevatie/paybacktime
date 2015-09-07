@@ -32,6 +32,7 @@ set(HEADER_FILES
     geometry.h
     mc_mesher.h
     sn_mesher.h
+    ssao.h
     )
 
 set(SOURCE_FILES
@@ -55,6 +56,7 @@ set(SOURCE_FILES
     gl_fbo.cpp
     render_stats.cpp
     geometry.cpp
+    ssao.cpp
     )
 
 set(EXT_HEADER_FILES
