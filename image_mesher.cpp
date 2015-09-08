@@ -4,6 +4,8 @@
 
 #include <glm/ext.hpp>
 
+#include "geometry.h"
+
 #include "sn_mesher.h"
 
 #include "clock.h"

@@ -15,7 +15,18 @@ struct Size
         w(w), h(h)
     {}
 
-    T w = {}, h = {};
+    operator bool() const
+    {
+        return w && h;
+    }
+
+    template <typename CT>
+    CT as() const
+    {
+        return CT {w, h};
+    }
+
+    T w {}, h {};
 };
 
 template<typename T>
@@ -36,7 +47,7 @@ struct Rect
         x(0), y(0), size(size)
     {}
 
-    T x = {}, y = {}, size = {};
+    T x {}, y {}, size {};
 };
 
 template<typename T>

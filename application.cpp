@@ -60,7 +60,7 @@ Application::~Application()
 
 bool Application::run()
 {
-    Display display("High Caliber", 1280, 720);
+    Display display("High Caliber", {1280, 720});
     display.open();
 
     gl::Shader vsSimple(filesystem::path("shaders/simple.vs.glsl"));
@@ -82,7 +82,7 @@ bool Application::run()
     const Mesh rectMesh = squareMesh();
     const gl::Primitive rectPrimitive(rectMesh);
 
-    Ssao ssao(display.width(), display.height());
+    Ssao ssao(display.size());
     ssao.fbo.bind()
        .attach(ssao.texColor,  gl::Fbo::Attachment::Color, 0)
        .attach(ssao.texNormal, gl::Fbo::Attachment::Color, 1)
@@ -118,8 +118,7 @@ bool Application::run()
             wireProgram.bind()
                 .setUniform("mv",    view * model)
                 .setUniform("mvp",   proj * view * model)
-                .setUniform("size",  glm::vec2(display.width(),
-                                               display.height()))
+                .setUniform("size",  display.size().as<glm::vec2>())
                 .setUniform("color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
             primitive.render();

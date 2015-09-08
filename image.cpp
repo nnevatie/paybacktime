@@ -14,16 +14,9 @@ namespace hc
 
 struct Image::Data
 {
-    int width,
-        height,
-        depth,
-        stride;
-
-    uint8_t* bits;
-
-    Data() : width(), height(), depth(), stride(), bits()
-    {
-    }
+    Size<int> size;
+    int depth {}, stride {};
+    uint8_t* bits {};
 
     virtual ~Data()
     {
@@ -36,32 +29,31 @@ Image::Image() :
 {
 }
 
-Image::Image(int width, int height, int depth, int stride) :
+Image::Image(const Size<int>& size, int depth, int stride) :
     d(new Data {})
 {
-    d->width  = width;
-    d->height = height;
+    d->size   = size;
     d->depth  = depth;
     d->stride = stride;
-    d->bits   = new uint8_t[height * stride];
+    d->bits   = new uint8_t[size.h * stride];
 }
 
 Image::Image(const std::string& filename, int depth) :
     d(new Data {})
 {
-    d->bits = stbi_load(filename.c_str(),
-                        &d->width, &d->height, &d->depth, depth);
-    d->stride = d->width * d->depth;
+    d->bits  = stbi_load(filename.c_str(),
+                         &d->size.w, &d->size.h, &d->depth, depth);
+    d->stride = d->size.w * d->depth;
 }
 
 Image::operator bool() const
 {
-    return d && d->width && d->height;
+    return d && d->size;
 }
 
 Size<int> Image::size() const
 {
-    return Size<int>(d->width, d->height);
+    return d->size;
 }
 
 int Image::depth() const
@@ -87,14 +79,14 @@ const uint8_t* Image::bits() const
 SDL_Surface* Image::surface() const
 {
     return SDL_CreateRGBSurfaceFrom(
-        d->bits, d->width, d->height, d->depth * 8, d->stride,
-                0x000000ff, 0x00ff0000, 0x0000ff00, 0xff000000);
+        d->bits, d->size.w, d->size.h, d->depth * 8, d->stride,
+        0x000000ff, 0x00ff0000, 0x0000ff00, 0xff000000);
 }
 
 bool Image::write(const std::string& filename) const
 {
     return !stbi_write_bmp(filename.c_str(),
-                           d->width, d->height, d->depth, d->bits);
+                           d->size.w, d->size.h, d->depth, d->bits);
 }
 
 } // namespace

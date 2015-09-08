@@ -8,10 +8,9 @@
 namespace hc
 {
 
-Display::Display(const std::string& title, int width, int height) :
+Display::Display(const std::string& title, const Size<int>& size) :
     title_(title),
-    width_(width),
-    height_(height),
+    size_(size),
     window_(nullptr),
     glContext_(nullptr)
 {
@@ -22,14 +21,9 @@ Display::~Display()
     close();
 }
 
-int Display::width() const
+Size<int> Display::size() const
 {
-    return width_;
-}
-
-int Display::height() const
-{
-    return height_;
+    return size_;
 }
 
 SDL_Surface* Display::surface() const
@@ -53,8 +47,8 @@ bool Display::open()
         window_ = SDL_CreateWindow(title_.c_str(),
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
-            width_,
-            height_,
+            size_.w,
+            size_.h,
             SDL_WINDOW_OPENGL);
 
         // Create OpenGL context
@@ -109,23 +103,22 @@ bool Display::swap()
 
 Image Display::capture() const
 {
-    const int w = width();
-    const int h = height();
-    const int s = w * 4;
+    const Size<int> size = this->size();
+    const int stride = size.w * 4;
 
-    Image image(w, h, 4, s);
-    glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+    Image image(size, 4, stride);
+    glReadPixels(0, 0, size.w, size.h, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 
     // Flip vertically
-    uint8_t  t[s];
+    uint8_t  t[stride];
     uint8_t* b = image.bits();
-    for (int y = 0; y < h / 2; ++y)
+    for (int y = 0; y < size.h / 2; ++y)
     {
-        uint8_t* r0 = b + y * s;
-        uint8_t* r1 = b + (h - y - 1) * s;
-        std::copy(r0, r0 + s, t);
-        std::copy(r1, r1 + s, r0);
-        std::copy(t,  t  + s, r1);
+        uint8_t* r0 = b + y * stride;
+        uint8_t* r1 = b + (size.h - y - 1) * stride;
+        std::copy(r0, r0 + stride, t);
+        std::copy(r1, r1 + stride, r0);
+        std::copy(t,  t  + stride, r1);
     }
 
     return image;

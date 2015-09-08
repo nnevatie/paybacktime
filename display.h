@@ -4,6 +4,7 @@
 
 #include <SDL2/SDL.h>
 
+#include "geometry.h"
 #include "image.h"
 
 namespace hc
@@ -11,11 +12,10 @@ namespace hc
 
 struct Display
 {
-    Display(const std::string& title, int width, int height);
+    Display(const std::string& title, const Size<int>& size);
     ~Display();
 
-    int width() const;
-    int height() const;
+    Size<int> size() const;
 
     SDL_Surface* surface() const;
 
@@ -29,8 +29,7 @@ struct Display
 private:
 
     std::string title_;
-    int width_;
-    int height_;
+    Size<int> size_;
 
     SDL_Window* window_;
     SDL_GLContext glContext_;

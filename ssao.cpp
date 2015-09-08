@@ -3,9 +3,9 @@
 namespace hc
 {
 
-Ssao::Ssao(int width, int height)
+Ssao::Ssao(const Size<int>& size)
 {
-    auto fboSize = {width, height};
+    auto fboSize = {size.w, size.h};
     texColor.bind().alloc(fboSize,  GL_RGB, GL_RGB);
     texNormal.bind().alloc(fboSize, GL_RGB, GL_RGB);
     texDepth.bind().alloc(fboSize,  GL_DEPTH_COMPONENT32F,
