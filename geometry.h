@@ -55,8 +55,8 @@ std::ostream& operator<<(std::ostream& stream, const Size<T>& rect)
 {
     stream << "Rect[x: " << rect.x
            << ", y: " << rect.y
-           << ", w: " << rect.w
-           << ", h: " << rect.h << "]";
+           << ", w: " << rect.size.w
+           << ", h: " << rect.size.h << "]";
     return stream;
 }
 
