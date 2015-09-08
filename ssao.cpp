@@ -2,6 +2,15 @@
 
 namespace hc
 {
+namespace
+{
+
+gl::Texture noiseTexture()
+{
+    return gl::Texture();
+}
+
+}
 
 Ssao::Ssao(const Size<int>& size)
 {

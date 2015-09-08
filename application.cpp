@@ -76,6 +76,7 @@ bool Application::run()
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     const ImageCube meshSrc("data/floor.*.png", 1);
+
     const Mesh mesh = ImageMesher::mesh(meshSrc);
     const gl::Primitive primitive(mesh);
 
