@@ -11,10 +11,13 @@ namespace hc
 
 struct Ssao
 {
-    gl::Fbo fbo;
-    gl::Texture texColor, texNormal, texDepth;
+    Size<int> size,
+              noiseSize;
 
-    Ssao(const Size<int>& size);
+    gl::Fbo fbo;
+    gl::Texture texColor, texNormal, texDepth, texNoise;
+
+    Ssao(const Size<int>& size, const Size<int>& noiseSize);
 };
 
 } // namespace hc
