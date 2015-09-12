@@ -20,6 +20,11 @@ struct Size
         return w && h;
     }
 
+    T area() const
+    {
+        return w * h;
+    }
+
     template <typename CT>
     CT as() const
     {
