@@ -52,6 +52,11 @@ struct Rect
         x(0), y(0), size(size)
     {}
 
+    T area() const
+    {
+        return size.area();
+    }
+
     T x {}, y {}, size {};
 };
 
