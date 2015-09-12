@@ -15,7 +15,7 @@ std::vector<float> noiseData(int noiseLen)
     std::vector<float> noise(3 * noiseLen);
     for (int i = 0; i < noiseLen; ++i)
     {
-        glm::vec2 v = glm::circularRand(1);
+        glm::vec2 v = glm::circularRand<float>(1);
         noise[i * 3 + 0] = v.x;
         noise[i * 3 + 1] = v.y;
         noise[i * 3 + 2] = 0;
