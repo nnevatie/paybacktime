@@ -1,6 +1,7 @@
 #include "ssao.h"
 
 #include <vector>
+#include <boost/algorithm/clamp.hpp>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/random.hpp>
@@ -12,11 +13,16 @@ namespace
 
 std::vector<float> kernelData(int size)
 {
+    using namespace boost::algorithm;
+
     std::vector<float> data(3 * size);
     for (int i = 0; i < size; ++i)
     {
         // Positive Z-axis hemisphere
-        glm::vec3 v = glm::sphericalRand<float>(1);
+        // Scaled to include more samples near the center of the kernel
+        const float s0  = float(i) / size;
+        const float s1  = clamp(s0 * s0, 0.1f, 1.f);
+        glm::vec3 v     = glm::sphericalRand<float>(s1);
         data[i * 3 + 0] = v.x;
         data[i * 3 + 1] = v.y;
         data[i * 3 + 2] = std::abs(v.z);
@@ -29,7 +35,7 @@ std::vector<float> noiseData(int size)
     std::vector<float> data(3 * size);
     for (int i = 0; i < size; ++i)
     {
-        glm::vec2 v = glm::circularRand<float>(1);
+        glm::vec2 v     = glm::circularRand<float>(1);
         data[i * 3 + 0] = v.x;
         data[i * 3 + 1] = v.y;
         data[i * 3 + 2] = 0;
