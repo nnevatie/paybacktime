@@ -83,7 +83,7 @@ bool Application::run()
     const Mesh rectMesh = squareMesh();
     const gl::Primitive rectPrimitive(rectMesh);
 
-    Ssao ssao(display.size(), {4, 4});
+    Ssao ssao(32, display.size(), {4, 4});
     ssao.fbo.bind()
        .attach(ssao.texColor,  gl::Fbo::Attachment::Color, 0)
        .attach(ssao.texNormal, gl::Fbo::Attachment::Color, 1)

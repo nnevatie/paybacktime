@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <GL/glew.h>
 
 #include "geometry.h"
@@ -11,13 +12,17 @@ namespace hc
 
 struct Ssao
 {
-    Size<int> size,
+    int       kernelSize;
+    Size<int> renderSize,
               noiseSize;
 
     gl::Fbo fbo;
     gl::Texture texColor, texNormal, texDepth, texNoise;
+    std::vector<float> kernel;
 
-    Ssao(const Size<int>& size, const Size<int>& noiseSize);
+    Ssao(int kernelSize,
+         const Size<int>& renderSize,
+         const Size<int>& noiseSize);
 };
 
 } // namespace hc

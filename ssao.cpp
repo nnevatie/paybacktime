@@ -10,25 +10,44 @@ namespace hc
 namespace
 {
 
-std::vector<float> noiseData(int noiseLen)
+std::vector<float> kernelData(int size)
 {
-    std::vector<float> noise(3 * noiseLen);
-    for (int i = 0; i < noiseLen; ++i)
+    std::vector<float> data(3 * size);
+    for (int i = 0; i < size; ++i)
+    {
+        // Positive Z-axis hemisphere
+        glm::vec3 v = glm::sphericalRand<float>(1);
+        data[i * 3 + 0] = v.x;
+        data[i * 3 + 1] = v.y;
+        data[i * 3 + 2] = std::abs(v.z);
+    }
+    return data;
+}
+
+std::vector<float> noiseData(int size)
+{
+    std::vector<float> data(3 * size);
+    for (int i = 0; i < size; ++i)
     {
         glm::vec2 v = glm::circularRand<float>(1);
-        noise[i * 3 + 0] = v.x;
-        noise[i * 3 + 1] = v.y;
-        noise[i * 3 + 2] = 0;
+        data[i * 3 + 0] = v.x;
+        data[i * 3 + 1] = v.y;
+        data[i * 3 + 2] = 0;
     }
-    return noise;
+    return data;
 }
 
 }
 
-Ssao::Ssao(const Size<int>& size, const Size<int>& noiseSize) :
-    size(size), noiseSize(noiseSize)
+Ssao::Ssao(int kernelSize,
+           const Size<int>& renderSize,
+           const Size<int>& noiseSize) :
+    kernelSize(kernelSize),
+    renderSize(renderSize),
+    noiseSize(noiseSize),
+    kernel(kernelData(kernelSize))
 {
-    auto fboSize = {size.w, size.h};
+    auto fboSize = {renderSize.w, renderSize.h};
     texColor.bind().alloc(fboSize,  GL_RGB, GL_RGB);
     texNormal.bind().alloc(fboSize, GL_RGB, GL_RGB);
     texDepth.bind().alloc(fboSize,  GL_DEPTH_COMPONENT32F,
