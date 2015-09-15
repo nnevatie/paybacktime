@@ -74,6 +74,7 @@ set(SHADER_FILES
     shaders/screenspace.fs.glsl
     shaders/lambert.fs.glsl
     shaders/phong.fs.glsl
+    shaders/ssao.fs.glsl
     shaders/texture.fs.glsl
     shaders/wireframe.gs.glsl
     )
