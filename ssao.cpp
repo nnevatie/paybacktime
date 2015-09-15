@@ -61,7 +61,11 @@ Ssao::Ssao(int kernelSize,
 
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
                           GL_RGB32F, GL_RGB, GL_FLOAT,
-                          noiseData(noiseSize.area()).data());
+                          noiseData(noiseSize.area()).data())
+                   .set(GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+                   .set(GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+                   .set(GL_TEXTURE_WRAP_S, GL_REPEAT)
+                   .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
 } // namespace hc
