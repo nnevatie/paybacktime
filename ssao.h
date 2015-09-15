@@ -17,8 +17,13 @@ struct Ssao
     Size<int> renderSize,
               noiseSize;
 
-    gl::Fbo fbo;
-    gl::Texture texColor, texNormal, texDepth, texNoise;
+    gl::Fbo fbo[2];
+    gl::Texture texColor,
+                texNormal,
+                texBlur,
+                texDepth,
+                texNoise;
+
     std::vector<float> kernel;
 
     Ssao(int kernelSize,
