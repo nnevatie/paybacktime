@@ -68,9 +68,9 @@ Ssao::Ssao(int kernelSize,
                    .set(GL_TEXTURE_MIN_FILTER, GL_NEAREST)
                    .set(GL_TEXTURE_MAG_FILTER, GL_NEAREST)
                    .set(GL_TEXTURE_WRAP_S, GL_REPEAT)
-            .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
+                   .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    // Bind textures to FBO
+    // Attach textures to FBO
     fbo.bind()
            .attach(texColor,  gl::Fbo::Attachment::Color, 0)
            .attach(texNormal, gl::Fbo::Attachment::Color, 1)
