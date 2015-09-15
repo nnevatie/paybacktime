@@ -11,11 +11,11 @@ namespace hc
 namespace
 {
 
-std::vector<float> kernelData(int size)
+std::vector<glm::vec3> kernelData(int size)
 {
     using namespace boost::algorithm;
 
-    std::vector<float> data(3 * size);
+    std::vector<glm::vec3> data(size);
     for (int i = 0; i < size; ++i)
     {
         // Positive Z-axis hemisphere
@@ -23,9 +23,7 @@ std::vector<float> kernelData(int size)
         const float s0  = float(i) / size;
         const float s1  = clamp(s0 * s0, 0.1f, 1.f);
         glm::vec3 v     = glm::sphericalRand<float>(s1);
-        data[i * 3 + 0] = v.x;
-        data[i * 3 + 1] = v.y;
-        data[i * 3 + 2] = std::abs(v.z);
+        data[i]         = glm::vec3(v.x, v.y, std::abs(v.z));
     }
     return data;
 }
@@ -87,6 +85,11 @@ glm::vec2 Ssao::noiseScale() const
 {
     return glm::vec2(float(renderSize.w) / noiseSize.w,
                      float(renderSize.h) / noiseSize.h);
+}
+
+glm::vec2 Ssao::texelStep() const
+{
+    return glm::vec2(1.f / renderSize.w, 1.f / renderSize.h);
 }
 
 } // namespace hc

@@ -4,11 +4,14 @@
 const vec3 ldir = vec3(0, -1, -1);
 
 // Uniforms
+uniform mat4 mvp;
 uniform mat4 mv;
+uniform mat4 p;
 
 // Input
 in Block
 {
+    vec3 eye;
     vec3 normal;
     vec2 uv;
     vec3 bc;

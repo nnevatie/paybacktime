@@ -75,6 +75,7 @@ set(SHADER_FILES
     shaders/lambert.fs.glsl
     shaders/phong.fs.glsl
     shaders/ssao.fs.glsl
+    shaders/blur.fs.glsl
     shaders/texture.fs.glsl
     shaders/wireframe.gs.glsl
     )

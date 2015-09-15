@@ -18,6 +18,14 @@ ShaderProgram& ShaderProgram::setUniform<int>(
 }
 
 template<>
+ShaderProgram& ShaderProgram::setUniform<float>(
+    const char* name, const float& v)
+{
+    glUniform1f(glGetUniformLocation(id, name), v);
+    return *this;
+}
+
+template<>
 ShaderProgram& ShaderProgram::setUniform<glm::vec2>(
     const char* name, const glm::vec2& v)
 {
@@ -41,6 +49,15 @@ ShaderProgram& ShaderProgram::setUniform<glm::mat4>(
 {
     glUniformMatrix4fv(glGetUniformLocation(id, name),
                        1, GL_FALSE, glm::value_ptr(v));
+    return *this;
+}
+
+template<>
+ShaderProgram& ShaderProgram::setUniform<std::vector<glm::vec3>>(
+    const char* name, const std::vector<glm::vec3>& v)
+{
+    glUniform3fv(glGetUniformLocation(id, name),
+                 v.size(), (const GLfloat*) v.data());
     return *this;
 }
 

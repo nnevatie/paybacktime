@@ -1,28 +1,17 @@
 #version 150
 
-struct LightProperties
-{
-    vec3 dir;
-    vec4 ambColor;
-    vec4 diffColor;
-    vec4 specColor;
-};
-
-struct MaterialProperties
-{
-    vec4  ambColor;
-    vec4  diffColor;
-    vec4  specColor;
-    float specExp;
-};
+// Const
+const vec3 ldir         = vec3(0, -1, -1);
+const vec3 diffuseColor = vec3(0.5, 0.5, 0.75);
+const vec3 specColor    = vec3(1.0, 1.0, 1.0);
 
 // Uniforms
-uniform	LightProperties    light;
-uniform	MaterialProperties mat;
+uniform mat4 mv;
 
 // Input
 in Block
 {
+    vec3 eye;
     vec3 normal;
     vec2 uv;
     vec3 bc;
@@ -30,23 +19,25 @@ in Block
 ib;
 
 // Output
-layout(location = 0) out vec4 frag;
-layout(location = 1) out vec4 normal;
+out vec4 color;
+out vec4 normal;
 
 void main()
 {
-    vec4 c    = light.ambColor * mat.ambColor;
-    vec3 n    = normalize(ib.normal);
-    float ndl = max(dot(light.dir, n), 0.0);
-    if (ndl > 0.0)
+    mat3 nm = transpose(inverse(mat3(mv)));
+    vec3 n  = normalize(nm * ib.normal);
+
+    float lambertian = max(0.25 + dot(n, ldir), 0.0);
+    float specular   = 0.0;
+
+    if(lambertian > 0.0)
     {
-        vec3 eye   = normalize(v_eye);
-        vec3 refl  = reflect(-light.dir, n);
-        float edr  = max(dot(eye, reflection), 0.0);
-        float spec = edr > 0.0 ? pow(edr, mat.specExp) : 0.0;
-        c         += light.diffColor * mat.diffColor * ndl +
-                     light.specColor * mat.specColor * spec;
+        vec3 reflectDir = reflect(-ldir, n);
+        vec3 viewDir    = normalize(-ib.eye);
+        float specAngle = max(dot(reflectDir, viewDir), 0.0);
+        specular        = pow(specAngle, 4.0);
     }
-    frag   = color;
+
+    color  = vec4(lambertian * diffuseColor + specular * specColor, 1.0);
     normal = vec4(n.x * 0.5 + 0.5, n.y * 0.5 + 0.5, n.z * 0.5 + 0.5, 1.0);
 }

@@ -70,7 +70,7 @@ Texture& Texture::bind()
     return *this;
 }
 
-Texture &Texture::bindAs(GLenum unit)
+Texture& Texture::bindAs(GLenum unit)
 {
     glActiveTexture(unit);
     return bind();

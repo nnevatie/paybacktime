@@ -65,18 +65,23 @@ bool Application::run()
 
     gl::Shader vsSimple(filesystem::path("shaders/simple.vs.glsl"));
     gl::Shader fsLambert(filesystem::path("shaders/lambert.fs.glsl"));
+    gl::Shader fsPhong(filesystem::path("shaders/phong.fs.glsl"));
     gl::Shader fsScreenspace(filesystem::path("shaders/screenspace.fs.glsl"));
     gl::Shader fsTexture(filesystem::path("shaders/texture.fs.glsl"));
     gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
+    gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
-    gl::ShaderProgram wireProgram({vsSimple, /*gsWireframe,*/ fsLambert},
+    gl::ShaderProgram wireProgram({vsSimple, /*gsWireframe,*/ fsPhong},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     gl::ShaderProgram blitProgram({vsSimple, fsTexture},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     gl::ShaderProgram ssaoProgram({vsSimple, fsSsao},
+                                 {{0, "position"}, {1, "normal"}, {2, "uv"}});
+
+    gl::ShaderProgram blurProgram({vsSimple, fsBlur},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     const ImageCube meshSrc("data/floor.*.png", 1);
@@ -96,6 +101,10 @@ bool Application::run()
 
     while (running)
     {
+        glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 1.f, 100.f);
+        glm::mat4 view  = glm::translate({}, glm::vec3(-8.0f, -2.0f, -40.0f));
+        glm::mat4 model = glm::rotate({}, a, glm::vec3(1.0f, 0.5f, 0.9f));
+
         Clock clock;
         {
             // Geometry pass
@@ -108,22 +117,25 @@ bool Application::run()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
 
-            glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 0.01f, 400.f);
-            glm::mat4 view  = glm::translate({},
-                                             glm::vec3(-8.0f, -2.0f, -40.0f));
-
-            glm::mat4 model = glm::rotate({}, a, glm::vec3(1.0f, 0.5f, 0.9f));
-
             wireProgram.bind()
-                .setUniform("mv",    view * model)
                 .setUniform("mvp",   proj * view * model)
+                .setUniform("mv",    view * model)
                 .setUniform("size",  display.size().as<glm::vec2>())
                 .setUniform("color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
 
             primitive.render();
         }
 
-        ssaoProgram.bind().setUniform("mvp", glm::mat4());
+        ssaoProgram.bind().setUniform("texColor",   0)
+                          .setUniform("texNormal",  1)
+                          .setUniform("texDepth",   2)
+                          .setUniform("texNoise",   3)
+                          .setUniform("kernel",     ssao.kernel)
+                          .setUniform("noiseScale", ssao.noiseScale())
+                          .setUniform("mvp",        glm::mat4())
+                          .setUniform("invP",       glm::inverse(proj))
+                          .setUniform("p",          proj)
+                          .setUniform("r",          1.f);
         {
             // SSAO pass
             Binder<gl::Fbo> binder(ssao.fbo[1]);
@@ -137,14 +149,18 @@ bool Application::run()
             rectPrimitive.render();
         }
 
-        blitProgram.bind().setUniform("mvp", glm::mat4());
+        blurProgram.bind().setUniform("texColor",  0)
+                          .setUniform("texSsao",   1)
+                          .setUniform("texelStep", ssao.texelStep())
+                          .setUniform("mvp",       glm::mat4());
         {
             // Blur/output pass
             glClearColor(0.f, 0.f, 0.f, 1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
 
-            ssao.texBlur.bindAs(GL_TEXTURE0);
+            ssao.texColor.bindAs(GL_TEXTURE0);
+            ssao.texBlur.bindAs(GL_TEXTURE1);
             rectPrimitive.render();
         }
 

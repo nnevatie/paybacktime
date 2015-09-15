@@ -24,13 +24,14 @@ struct Ssao
                 texDepth,
                 texNoise;
 
-    std::vector<float> kernel;
+    std::vector<glm::vec3> kernel;
 
     Ssao(int kernelSize,
          const Size<int>& renderSize,
          const Size<int>& noiseSize);
 
     glm::vec2 noiseScale() const;
+    glm::vec2 texelStep() const;
 };
 
 } // namespace hc
