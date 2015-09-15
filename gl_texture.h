@@ -29,6 +29,7 @@ struct Texture
     Type type() const;
 
     Texture& bind();
+    Texture& bindAs(GLenum unit);
     Texture& unbind();
 
     Texture& set(GLenum name, GLint set);

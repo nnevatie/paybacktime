@@ -70,6 +70,12 @@ Texture& Texture::bind()
     return *this;
 }
 
+Texture &Texture::bindAs(GLenum unit)
+{
+    glActiveTexture(unit);
+    return bind();
+}
+
 Texture& Texture::unbind()
 {
     glBindTexture(d->target, 0);
