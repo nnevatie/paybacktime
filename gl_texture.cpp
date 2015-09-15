@@ -76,6 +76,12 @@ Texture& Texture::unbind()
     return *this;
 }
 
+Texture &Texture::set(GLenum name, GLint param)
+{
+    glTexParameteri(d->target, name, param);
+    return *this;
+}
+
 Texture& Texture::alloc(const std::vector<int> &dim,
                         GLint internalFormat, GLenum format,
                         GLenum type, const GLvoid* data)
@@ -102,12 +108,11 @@ Texture& Texture::alloc(int level, const std::vector<int>& dim,
                      level, internalFormat,
                      dim[0], dim[1], dim[2], 0, format, type , data);
 
-    // TODO: Move to a method
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
+    // Set default params
+    set(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    set(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     return *this;
 }
 

@@ -31,6 +31,8 @@ struct Texture
     Texture& bind();
     Texture& unbind();
 
+    Texture& set(GLenum name, GLint set);
+
     Texture& alloc(const std::vector<int>& dim,
                    GLint internalFormat, GLenum format,
                    GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = 0);
