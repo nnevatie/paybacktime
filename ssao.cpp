@@ -54,18 +54,34 @@ Ssao::Ssao(int kernelSize,
     kernel(kernelData(kernelSize))
 {
     auto fboSize = {renderSize.w, renderSize.h};
+
+    // Alloc color, normal and depth textures
     texColor.bind().alloc(fboSize,  GL_RGB, GL_RGB);
     texNormal.bind().alloc(fboSize, GL_RGB, GL_RGB);
     texDepth.bind().alloc(fboSize,  GL_DEPTH_COMPONENT32F,
                                     GL_DEPTH_COMPONENT, GL_FLOAT);
 
+    // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
                           GL_RGB32F, GL_RGB, GL_FLOAT,
                           noiseData(noiseSize.area()).data())
                    .set(GL_TEXTURE_MIN_FILTER, GL_NEAREST)
                    .set(GL_TEXTURE_MAG_FILTER, GL_NEAREST)
                    .set(GL_TEXTURE_WRAP_S, GL_REPEAT)
-                   .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
+            .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    // Bind textures to FBO
+    fbo.bind()
+           .attach(texColor,  gl::Fbo::Attachment::Color, 0)
+           .attach(texNormal, gl::Fbo::Attachment::Color, 1)
+           .attach(texDepth,  gl::Fbo::Attachment::Depth)
+           .unbind();
+}
+
+glm::vec2 Ssao::noiseScale() const
+{
+    return glm::vec2(float(renderSize.w) / noiseSize.w,
+                     float(renderSize.h) / noiseSize.h);
 }
 
 } // namespace hc

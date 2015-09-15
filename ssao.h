@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <GL/glew.h>
+#include <glm/vec2.hpp>
 
 #include "geometry.h"
 #include "gl_texture.h"
@@ -23,6 +24,8 @@ struct Ssao
     Ssao(int kernelSize,
          const Size<int>& renderSize,
          const Size<int>& noiseSize);
+
+    glm::vec2 noiseScale() const;
 };
 
 } // namespace hc

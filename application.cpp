@@ -84,11 +84,6 @@ bool Application::run()
     const gl::Primitive rectPrimitive(rectMesh);
 
     Ssao ssao(32, display.size(), {4, 4});
-    ssao.fbo.bind()
-       .attach(ssao.texColor,  gl::Fbo::Attachment::Color, 0)
-       .attach(ssao.texNormal, gl::Fbo::Attachment::Color, 1)
-       .attach(ssao.texDepth,  gl::Fbo::Attachment::Depth)
-       .unbind();
 
     RenderStats stats;
 
