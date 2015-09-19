@@ -84,9 +84,10 @@ bool Application::run()
     gl::ShaderProgram blurProgram({vsSimple, fsBlur},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    const ImageCube meshSrc("data/floor.*.png", 1);
+    const ImageCube depthCube("data/box.*.png", 1);
+    //const ImageCube albedoCube("data/floor.albedo.*.png");
 
-    const Mesh mesh = ImageMesher::mesh(meshSrc);
+    const Mesh mesh = ImageMesher::mesh(depthCube);
     const gl::Primitive primitive(mesh);
 
     const Mesh rectMesh = squareMesh();
@@ -102,7 +103,7 @@ bool Application::run()
     while (running)
     {
         glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 1.f, 100.f);
-        glm::mat4 view  = glm::translate({}, glm::vec3(-8.0f, -2.0f, -40.0f));
+        glm::mat4 view  = glm::translate({}, glm::vec3(-8.0f, -2.0f, -50.0f));
         glm::mat4 model = glm::rotate({}, a, glm::vec3(1.0f, 0.5f, 0.9f));
 
         Clock clock;
