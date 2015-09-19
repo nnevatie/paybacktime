@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(highcaliber)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
-    -std=c++11 -Wall -Wno-unused-function -fopenmp")
+    -std=c++11 -Wall -Wextra -Wno-unused-function -fopenmp")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
     -Wl,--stack,16777216")
