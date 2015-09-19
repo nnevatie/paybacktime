@@ -214,12 +214,32 @@ void emitBoxFace(Mesh* g, float s, int a, int c[8][3], int x,  int y,  int z,
                        y + (c[i[a][3]][1] * sy),
                        z + (c[i[a][3]][2] * sz));
 
-    const v n = glm::normalize(glm::cross(vc - va, vb - va));
+    const float l0 = glm::length2(va - vc);
+    const float l1 = glm::length2(vb - vd);
+    if (l0 < l1)
+    {
+        const v n0 = glm::normalize(glm::cross(vc - va, vb - va));
+        const v n1 = glm::normalize(glm::cross(va - vc, vd - vc));
+        g->vertices.insert(g->vertices.end(), {{va, n0}, {vb, n0}, {vc, n0},
+                                               {vc, n1}, {vd, n1}, {va, n1}});
+    }
+    else
+    {
+        const v n0 = glm::normalize(glm::cross(vd - vb, vc - vb));
+        const v n1 = glm::normalize(glm::cross(vb - vd, va - vd));
+        g->vertices.insert(g->vertices.end(), {{vb, n0}, {vc, n0}, {vd, n0},
+                                               {vd, n1}, {va, n1}, {vb, n1}});
+    }
+    g->indices.insert(g->indices.end(), {ib + 0, ib + 1, ib + 2,
+                                         ib + 3, ib + 4, ib + 5});
 
+    #if 0
+    const v n  = 0.5f * (n0 + n1);
     g->vertices.insert(g->vertices.end(), {{va, n}, {vb, n},
                                            {vc, n}, {vd, n}});
     g->indices.insert(g->indices.end(), {ib + 0, ib + 1, ib + 2,
                                          ib + 2, ib + 3, ib + 0});
+    #endif
 }
 
 void collapseConstants(int cc[8][3], int g)
