@@ -26,9 +26,7 @@ void main(void)
             sum += texture(texSsao,
                            vec2(ib.uv.s + float(s) * texelStep.s,
                                 ib.uv.t + float(t) * texelStep.t)).r;
-
-    sum /= 25.0;
-
+    sum  /= 25.0;
     //color = vec4(sum, sum, sum, 1.0);
     color = texture(texColor, ib.uv) * sum;
 }

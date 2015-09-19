@@ -1,8 +1,8 @@
 #version 150
 
 #define KERNEL_SIZE      32
-#define CAP_MIN_DISTANCE 0.001
-#define CAP_MAX_DISTANCE 0.025
+#define CAP_MIN_DISTANCE 0.0005
+#define CAP_MAX_DISTANCE 0.25
 
 // Uniforms
 uniform sampler2D texColor;
@@ -64,6 +64,6 @@ void main(void)
         if (d > CAP_MIN_DISTANCE && d < CAP_MAX_DISTANCE)
             occ += 1.0;
     }
-    occ   = 1.0 - occ / (float(KERNEL_SIZE) - 1.0);
+    occ   = 1.0 - (occ / KERNEL_SIZE);
     color = vec4(occ, occ, occ, 1.0);
 }
