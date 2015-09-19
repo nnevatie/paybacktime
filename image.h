@@ -13,6 +13,7 @@ namespace hc
 struct Image
 {
     Image();
+    Image(const Size<int>& size, int depth);
     Image(const Size<int>& size, int depth, int stride);
     Image(const std::string& filename, int depth = 0);
 

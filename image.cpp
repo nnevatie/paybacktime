@@ -29,6 +29,11 @@ Image::Image() :
 {
 }
 
+Image::Image(const Size<int> &size, int depth) :
+    Image(size, depth, size.w * depth)
+{
+}
+
 Image::Image(const Size<int>& size, int depth, int stride) :
     d(new Data {})
 {
