@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 
+#include "geometry.h"
 #include "image.h"
 
 namespace hc
@@ -24,6 +25,13 @@ struct ImageCube
     int depth() const;
 
     std::vector<Image> sides;
+};
+
+struct RectCube
+{
+    const Rect<float> side(ImageCube::Side s) const;
+
+    std::vector<Rect<float>> sides;
 };
 
 } // namespace

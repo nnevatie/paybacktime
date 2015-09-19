@@ -90,4 +90,9 @@ int ImageCube::depth() const
     return std::min(d0, d1);
 }
 
+const Rect<float> RectCube::side(ImageCube::Side s) const
+{
+    return sides[s];
+}
+
 } // namespace
