@@ -43,6 +43,12 @@ bool Display::open()
             HCLOG(Debug) << "#" << (i + 1) << ": "
                          << SDL_GetVideoDriver(i);
 
+        // Set required GL attributes
+        SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
+        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,  8);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
         // Create window
         window_ = SDL_CreateWindow(title_.c_str(),
             SDL_WINDOWPOS_UNDEFINED,
