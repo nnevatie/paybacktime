@@ -61,6 +61,15 @@ set(SOURCE_FILES
     )
 
 set(EXT_HEADER_FILES
+    ext/stb_image.h
+    ext/stb_image_write.h
+    ext/stb_truetype.h
+    ext/nanovg.h
+    ext/nanovg_gl.h
+    ext/nanovg_gl_utils.h
+    ext/mc_tables.h
+    ext/fontstash.h
+    ext/binpack2d.hpp
     )
 
 set(EXT_SOURCE_FILES
