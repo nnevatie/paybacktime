@@ -23,6 +23,7 @@ set(HEADER_FILES
     sdf_primitives.h
     ref_mesher.h
     image_mesher.h
+    image_atlas.h
     gl_uniforms.h
     gl_texture.h
     gl_buffers.h
@@ -43,6 +44,7 @@ set(SOURCE_FILES
     image.cpp
     image_cube.cpp
     image_mesher.cpp
+    image_atlas.cpp
     common.cpp
     clock.cpp
     log.cpp
@@ -67,7 +69,6 @@ set(EXT_HEADER_FILES
     ext/nanovg_gl.h
     ext/nanovg_gl_utils.h
     ext/fontstash.h
-    ext/binpack2d.hpp
     )
 
 set(EXT_SOURCE_FILES
