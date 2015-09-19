@@ -9,7 +9,7 @@ Image hc::ImageAtlas::image(int level) const
            images.at(level) : Image();
 }
 
-ImageAtlas::ImageAtlas(const Size<int> size, int depth) :
+ImageAtlas::ImageAtlas(const Size<int>& size, int depth) :
     size(size), images(depth)
 {
     for (int i = 0; i < depth; ++i)

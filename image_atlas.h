@@ -10,7 +10,7 @@ namespace hc
 
 struct ImageAtlas
 {
-    ImageAtlas(const Size<int> size, int depth = 1);
+    ImageAtlas(const Size<int>& size, int depth = 1);
 
     int depth() const;
 
