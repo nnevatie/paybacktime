@@ -325,11 +325,11 @@ Mesh meshGreedy(const V& vol)
     {
         int d, g0, g1;
 
-        operator==(const Mask& mask) const
+        bool operator==(const Mask& mask) const
         {
             return d == mask.d && g0 == mask.g0 && g1 == mask.g1;
         }
-        operator!=(const Mask& mask) const
+        bool operator!=(const Mask& mask) const
         {
             return !operator==(mask);
         }
