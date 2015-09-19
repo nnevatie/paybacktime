@@ -3,7 +3,7 @@
 // Const
 const vec3 ldir         = vec3(0, -1, -1);
 const vec3 diffuseColor = vec3(0.5, 0.5, 0.75);
-const vec3 specColor    = vec3(2.0, 2.0, 2.0);
+const vec3 specColor    = vec3(1.0, 1.0, 1.0);
 
 // Uniforms
 uniform mat4 mv;
@@ -27,7 +27,7 @@ void main()
     mat3 nm = transpose(inverse(mat3(mv)));
     vec3 n  = normalize(nm * ib.normal);
 
-    float lambertian = 0.5 + max(dot(n, ldir), 0.0);
+    float lambertian = 0.25 + max(dot(n, ldir), 0.0);
     float specular   = 0.0;
 
     if(lambertian > 0.0)
