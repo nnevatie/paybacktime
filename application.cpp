@@ -31,6 +31,8 @@
 #include "ssao.h"
 #include "render_stats.h"
 
+//#define CAPTURE_VIDEO 1
+
 namespace hc
 {
 
@@ -73,7 +75,7 @@ bool Application::run()
     gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
-    gl::ShaderProgram wireProgram({vsSimple, /*gsWireframe,*/ fsPhong},
+    gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsPhong},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     gl::ShaderProgram blitProgram({vsSimple, fsTexture},
@@ -85,10 +87,11 @@ bool Application::run()
     gl::ShaderProgram blurProgram({vsSimple, fsBlur},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    const ImageCube depthCube("data/box.*.png", 1);
-    //const ImageCube albedoCube("data/floor.albedo.*.png");
+    const ImageCube depthCube("data/floor.*.png", 1);
+    const ImageCube albedoCube("data/box.albedo.*.png");
 
     ImageAtlas imageAtlas({512, 512});
+    imageAtlas.insert(albedoCube);
 
     const Mesh mesh = ImageMesher::mesh(depthCube);
     const gl::Primitive primitive(mesh);
@@ -100,13 +103,14 @@ bool Application::run()
 
     RenderStats stats;
 
+    int f = 0;
     float a = 1.2;
     bool running = true;
 
     while (running)
     {
         glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 1.f, 100.f);
-        glm::mat4 view  = glm::translate({}, glm::vec3(-8.0f, -2.0f, -50.0f));
+        glm::mat4 view  = glm::translate({}, glm::vec3(-8.0f, -2.0f, -40.0f));
         glm::mat4 model = glm::rotate({}, a, glm::vec3(1.0f, 0.5f, 0.9f));
 
         Clock clock;
@@ -168,7 +172,12 @@ bool Application::run()
             rectPrimitive.render();
         }
 
-        //display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");
+        #ifdef CAPTURE_VIDEO
+        display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");
+        a += 0.01f;
+        #else
+        a += 0.001f;
+        #endif
 
         stats.accumulate(clock.stop(), mesh.vertices.size(),
                                        mesh.indices.size() / 3);
@@ -176,10 +185,8 @@ bool Application::run()
         stats.render();
         display.swap();
 
-        a += 0.001f;
-
         SDL_Event e;
-        while (SDL_PollEvent(&e))
+        while (SDL_PollEvent(&e) && f < 2000)
         {
             if (e.type == SDL_KEYDOWN)
                 running = false;
