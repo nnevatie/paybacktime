@@ -1,5 +1,8 @@
 #include "image_atlas.h"
 
+#include "painter.h"
+#include "log.h"
+
 namespace hc
 {
 
@@ -99,6 +102,10 @@ ImageAtlas::ImageAtlas(const Size<int>& size) :
 
 Image ImageAtlas::atlas() const
 {
+    Painter painter(d->atlas);
+    painter.setColor(0xff0000ff)
+           .drawRect(Rect<int>(100, 100, 100, 100));
+
     return d->atlas;
 }
 
