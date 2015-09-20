@@ -57,7 +57,8 @@ struct Rect
         return size.area();
     }
 
-    T x {}, y {}, size {};
+    T x {}, y {};
+    Size<T> size {};
 };
 
 template<typename T>
