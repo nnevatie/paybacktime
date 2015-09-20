@@ -11,7 +11,7 @@ struct Painter
 {
     Painter(SDL_Surface* surface);
 
-    bool drawImage(const Image &image, int x, int y);
+    bool drawImage(const Image& image, int x, int y);
 
 private:
 

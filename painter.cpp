@@ -14,7 +14,7 @@ Painter::Painter(SDL_Surface* surface) :
         throw std::invalid_argument("Cannot paint on a null-surface.");
 }
 
-bool Painter::drawImage(const Image &image, int x, int y)
+bool Painter::drawImage(const Image& image, int x, int y)
 {
     //HCTIME("time");
     SDL_Rect dstRect = {x, y, 0, 0};
