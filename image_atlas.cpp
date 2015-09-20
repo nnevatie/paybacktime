@@ -27,6 +27,8 @@ void ImageAtlas::insert(const Image& image)
 
 void ImageAtlas::insert(const ImageCube& imageCube)
 {
+    for (const Image& image : imageCube.sides)
+        insert(image);
 }
 
 } // namespace hc
