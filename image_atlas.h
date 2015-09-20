@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "geometry.h"
@@ -11,19 +12,18 @@ namespace hc
 
 struct ImageAtlas
 {
-    ImageAtlas(const Size<int>& size, int depth = 1);
+    ImageAtlas(const Size<int>& size);
 
-    int depth() const;
+    Image atlas() const;
 
-    Image layer(int index = 0) const;
-
-    void insert(const Image& image);
+    bool insert(const Image& image);
     void insert(const ImageCube& imageCube);
 
     //Rect<int> find(const Size<int>& s) const;
 
-    const Size<int> size;
-    std::vector<Image> layers;
+private:
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace hc
