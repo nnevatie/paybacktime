@@ -42,7 +42,7 @@ Image::Image(const Size<int>& size, int depth, int stride) :
     d->size   = size;
     d->depth  = depth;
     d->stride = stride;
-    d->bits   = new uint8_t[size.h * stride];
+    d->bits   = new uint8_t[d->size.h * d->stride];
 }
 
 Image::Image(const std::string& filename, int depth) :
@@ -87,7 +87,7 @@ SDL_Surface* Image::surface() const
 {
     return SDL_CreateRGBSurfaceFrom(
         d->bits, d->size.w, d->size.h, d->depth * 8, d->stride,
-                0x000000ff, 0x00ff0000, 0x0000ff00, 0xff000000);
+                0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 }
 
 Image& Image::fill(uint32_t value)
