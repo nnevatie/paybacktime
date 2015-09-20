@@ -22,6 +22,13 @@ ib;
 out vec4 color;
 out vec4 normal;
 
+float edge(vec3 bc)
+{
+    vec3 d  = fwidth(bc);
+    vec3 a3 = smoothstep(vec3(0.0), d * 1.5, bc);
+    return min(min(a3.x, a3.y), a3.z);
+}
+
 void main()
 {
     mat3 nm = transpose(inverse(mat3(mv)));
@@ -37,6 +44,9 @@ void main()
         float specAngle = max(dot(reflectDir, viewDir), 0.0);
         specular        = pow(specAngle, 4.0);
     }
+
+    //vec4 c = vec4(lambertian * diffuseColor + specular * specColor, 1.0);
+    //color  = mix(c + 0.25, c, edge(ib.bc));
 
     color  = vec4(lambertian * diffuseColor + specular * specColor, 1.0);
     normal = vec4(n.x * 0.5 + 0.5, n.y * 0.5 + 0.5, n.z * 0.5 + 0.5, 1.0);
