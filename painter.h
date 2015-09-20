@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 
+#include "geometry.h"
 #include "image.h"
 
 namespace hc
@@ -10,12 +11,19 @@ namespace hc
 struct Painter
 {
     Painter(SDL_Surface* surface);
+    Painter(Image& image);
 
-    bool drawImage(const Image& image, int x, int y);
+    virtual ~Painter();
+
+    Painter& setColor(uint32_t color);
+
+    Painter& drawRect(const Rect<int>& rect);
+    Painter& drawImage(const Image& image, int x, int y);
 
 private:
 
     SDL_Surface* surface_;
+    SDL_Renderer* renderer_;
 };
 
 } // namespace
