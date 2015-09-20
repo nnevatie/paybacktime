@@ -1,5 +1,7 @@
 #include "image.h"
 
+#include <algorithm>
+
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "ext/stb_image.h"
@@ -85,13 +87,30 @@ SDL_Surface* Image::surface() const
 {
     return SDL_CreateRGBSurfaceFrom(
         d->bits, d->size.w, d->size.h, d->depth * 8, d->stride,
-        0x000000ff, 0x00ff0000, 0x0000ff00, 0xff000000);
+                0x000000ff, 0x00ff0000, 0x0000ff00, 0xff000000);
 }
 
-bool Image::write(const std::string& filename) const
+Image& Image::fill(uint32_t value)
 {
-    return !stbi_write_bmp(filename.c_str(),
-                           d->size.w, d->size.h, d->depth, d->bits);
+    uint32_t* p0 = reinterpret_cast<uint32_t*>(d->bits);
+    uint32_t* p1 = reinterpret_cast<uint32_t*>(d->bits + d->size.h * d->stride);
+    std::fill(p0, p1, value);
+    return *this;
+}
+
+bool Image::write(const filesystem::path& path) const
+{
+    const std::string ext(path.extension().string());
+    if (ext == ".png")
+        return !stbi_write_png(path.string().c_str(),
+                               d->size.w, d->size.h, d->depth,
+                               d->bits, d->stride);
+    else
+    if (ext == ".bmp")
+        return !stbi_write_bmp(path.string().c_str(),
+                               d->size.w, d->size.h, d->depth,
+                               d->bits);
+    return false;
 }
 
 } // namespace

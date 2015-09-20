@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 
 #include "geometry.h"
+#include "file_system.h"
 
 namespace hc
 {
@@ -28,7 +29,9 @@ struct Image
     const uint8_t* bits() const;
     SDL_Surface* surface() const;
 
-    bool write(const std::string& filename) const;
+    Image& fill(uint32_t value);
+
+    bool write(const filesystem::path& path) const;
 
 private:
     struct Data;
