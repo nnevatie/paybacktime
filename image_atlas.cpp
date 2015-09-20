@@ -3,22 +3,30 @@
 namespace hc
 {
 
-Image hc::ImageAtlas::image(int level) const
+Image hc::ImageAtlas::layer(int index) const
 {
-    return level >= 0 && level < int(images.size()) ?
-           images.at(level) : Image();
+    return index >= 0 && index < int(layers.size()) ?
+                layers.at(index) : Image();
 }
 
 ImageAtlas::ImageAtlas(const Size<int>& size, int depth) :
-    size(size), images(depth)
+    size(size), layers(depth)
 {
     for (int i = 0; i < depth; ++i)
-        images[i] = Image(size, 4);
+        layers[i] = Image(size, 4);
 }
 
 int ImageAtlas::depth() const
 {
-    return int(images.size());
+    return int(layers.size());
+}
+
+void ImageAtlas::insert(const Image& image)
+{
+}
+
+void ImageAtlas::insert(const ImageCube& imageCube)
+{
 }
 
 } // namespace hc
