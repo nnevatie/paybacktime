@@ -465,6 +465,7 @@ Mesh mesh(const ImageCube& imageCube, float interval)
 
     return meshGreedy(cfield);
     //return meshCubes(cfield);
+    //return SnMesher::mesh(cfield);
 }
 
 } // namespace ImageMesher

@@ -161,6 +161,19 @@ Mesh mesh(const V& vol)
                     // depending on the sign of the corner
                     if (mask & 1)
                     {
+                        Mesh::Vertex& va = geom.vertices[buffer[m]];
+                        Mesh::Vertex& vb = geom.vertices[buffer[m - du]];
+                        Mesh::Vertex& vc = geom.vertices[buffer[m - du - dv]];
+                        Mesh::Vertex& vd = geom.vertices[buffer[m - dv]];
+
+                        const glm::vec3 n0 =
+                            glm::normalize(glm::cross(vc.p - va.p, vb.p - va.p));
+
+                        const glm::vec3 n1 =
+                            glm::normalize(glm::cross(va.p - vc.p, vd.p - vc.p));
+
+                        va.n = vb.n = vc.n = vd.n = 0.5 * (n0 + n1);
+
                         geom.indices.insert(geom.indices.end(),
                                            {buffer[m],
                                             buffer[m - du],
