@@ -17,8 +17,17 @@ namespace hc
 struct Image::Data
 {
     Size<int> size;
-    int depth {}, stride {};
-    uint8_t* bits {};
+    int       depth, stride;
+    uint8_t*  bits;
+
+    Data() : depth(0), stride(0), bits(0)
+    {}
+
+    Data(const Size<int>& size, int depth, int stride) :
+        size(size), depth(depth), stride(stride),
+        bits(new uint8_t[size.h * stride])
+    {
+    }
 
     virtual ~Data()
     {
@@ -27,7 +36,7 @@ struct Image::Data
 };
 
 Image::Image() :
-    d(new Data {})
+    d(new Data())
 {
 }
 
@@ -37,19 +46,15 @@ Image::Image(const Size<int> &size, int depth) :
 }
 
 Image::Image(const Size<int>& size, int depth, int stride) :
-    d(new Data {})
+    d(new Data(size, depth, stride))
 {
-    d->size   = size;
-    d->depth  = depth;
-    d->stride = stride;
-    d->bits   = new uint8_t[d->size.h * d->stride];
 }
 
 Image::Image(const std::string& filename, int depth) :
-    d(new Data {})
+    d(new Data())
 {
-    d->bits  = stbi_load(filename.c_str(),
-                         &d->size.w, &d->size.h, &d->depth, depth);
+    d->bits   = stbi_load(filename.c_str(),
+                          &d->size.w, &d->size.h, &d->depth, depth);
     d->stride = d->size.w * d->depth;
 }
 
@@ -92,12 +97,7 @@ SDL_Surface* Image::surface() const
 
 Image Image::clone() const
 {
-    Image image;
-    image.d         = std::shared_ptr<Data>(new Data());
-    image.d->size   = d->size;
-    image.d->depth  = d->depth;
-    image.d->stride = d->stride;
-    image.d->bits   = new uint8_t[d->size.h * d->stride];
+    Image image(d->size, d->depth, d->stride);
     std::copy(d->bits, d->bits + (d->size.h * d->stride), image.d->bits);
     return image;
 }
