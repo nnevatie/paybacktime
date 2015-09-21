@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <vector>
+#include <array>
 
 #include "geometry.h"
 #include "image.h"
@@ -27,11 +28,7 @@ struct ImageCube
     std::vector<Image> sides;
 };
 
-struct RectCube
-{
-    const Rect<float> side(ImageCube::Side s) const;
-
-    std::vector<Rect<float>> sides;
-};
+template <typename T>
+using CubeRect = std::array<Rect<T>, 6>;
 
 } // namespace
