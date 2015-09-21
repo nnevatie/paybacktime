@@ -16,10 +16,8 @@ struct ImageAtlas
 
     Image atlas(bool drawNodes = false) const;
 
-    bool insert(const Image& image);
-    void insert(const ImageCube& imageCube);
-
-    //Rect<int> find(const Size<int>& s) const;
+    Rect<int> insert(const Image& image);
+    CubeRect<int> insert(const ImageCube& imageCube);
 
 private:
     struct Data;

@@ -121,7 +121,7 @@ Image ImageAtlas::atlas(bool drawNodes) const
     return atlas;
 }
 
-bool ImageAtlas::insert(const Image& image)
+Rect<int> ImageAtlas::insert(const Image& image)
 {
     if (Node* node = d->root.reserve(image.size()))
     {
@@ -131,16 +131,20 @@ bool ImageAtlas::insert(const Image& image)
         // Blit the image into atlas
         Painter painter(&d->atlas);
         painter.drawImage(image, node->rect.x, node->rect.y);
-        return true;
+        return node->rect;
     }
-    return false;
+    return Rect<int>();
 }
 
-void ImageAtlas::insert(const ImageCube& imageCube)
+CubeRect<int> ImageAtlas::insert(const ImageCube& imageCube)
 {
     HCTIME("cube");
-    for (const Image& image : imageCube.sides)
-        insert(image);
+
+    CubeRect<int> cubeRect;
+    for (int i = 0; i < int(imageCube.sides.size()); ++i)
+        cubeRect[i] = insert(imageCube.side(ImageCube::Side(i)));
+
+    return cubeRect;
 }
 
 } // namespace hc
