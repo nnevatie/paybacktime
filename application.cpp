@@ -87,7 +87,7 @@ bool Application::run()
     ImageAtlas imageAtlas({512, 512});
     imageAtlas.insert(albedoCube);
 
-    imageAtlas.atlas(true).write(filesystem::path("c:/temp/atlas.png"));
+    imageAtlas.atlas().write(filesystem::path("c:/temp/atlas.png"));
 
     const Mesh mesh = ImageMesher::mesh(depthCube);
     const gl::Primitive primitive(mesh);

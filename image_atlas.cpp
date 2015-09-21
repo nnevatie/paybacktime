@@ -79,6 +79,14 @@ struct Node
             return node ? node : nodes[1]->reserve(size);
         }
     }
+
+    void draw(Painter* painter, uint32_t color) const
+    {
+        painter->setColor(color);
+        painter->drawRect(rect);
+        if (nodes[0]) nodes[0]->draw(painter, 0xff0000ff);
+        if (nodes[1]) nodes[1]->draw(painter, 0xffff0000);
+    }
 };
 
 }
@@ -106,9 +114,8 @@ Image ImageAtlas::atlas(bool drawNodes) const
     if (drawNodes)
     {
         atlas = atlas.clone();
-        Painter painter(atlas);
-        painter.setColor(0xff0000ff)
-               .drawRect(Rect<int>(100, 100, 100, 100));
+        Painter painter(&atlas);
+        d->root.draw(&painter, 0xff0000ff);
     }
     return atlas;
 }
@@ -118,6 +125,9 @@ bool ImageAtlas::insert(const Image& image)
     Node* node = d->root.reserve(image.size());
     if (node)
     {
+        node->id = 1;
+        Painter painter(&d->atlas);
+        painter.drawImage(image, node->rect.x, node->rect.y);
         return true;
     }
     return false;
