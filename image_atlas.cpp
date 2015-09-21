@@ -122,10 +122,12 @@ Image ImageAtlas::atlas(bool drawNodes) const
 
 bool ImageAtlas::insert(const Image& image)
 {
-    Node* node = d->root.reserve(image.size());
-    if (node)
+    if (Node* node = d->root.reserve(image.size()))
     {
-        node->id = 1;
+        // Generate a unique ID from node coordinates
+        node->id = 1 + d->root.rect.size.w * node->rect.y + node->rect.x;
+
+        // Blit the image into atlas
         Painter painter(&d->atlas);
         painter.drawImage(image, node->rect.x, node->rect.y);
         return true;
