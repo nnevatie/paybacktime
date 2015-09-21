@@ -117,7 +117,7 @@ struct Cubefield
         interval(interval)
     {
         const int depths[6] = {depth, depth, width, width, height, height};
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < int(imageCube.sides.size()); ++i)
             hfields[i] = Heightfield(imageCube.sides[i], depths[i], interval);
     }
 
