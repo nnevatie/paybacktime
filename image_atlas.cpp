@@ -100,13 +100,17 @@ ImageAtlas::ImageAtlas(const Size<int>& size) :
 {
 }
 
-Image ImageAtlas::atlas() const
+Image ImageAtlas::atlas(bool drawNodes) const
 {
-    Painter painter(d->atlas);
-    painter.setColor(0xff0000ff)
-           .drawRect(Rect<int>(100, 100, 100, 100));
-
-    return d->atlas;
+    Image atlas = d->atlas;
+    if (drawNodes)
+    {
+        atlas = atlas.clone();
+        Painter painter(atlas);
+        painter.setColor(0xff0000ff)
+               .drawRect(Rect<int>(100, 100, 100, 100));
+    }
+    return atlas;
 }
 
 bool ImageAtlas::insert(const Image& image)

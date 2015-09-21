@@ -14,7 +14,7 @@ struct ImageAtlas
 {
     ImageAtlas(const Size<int>& size);
 
-    Image atlas() const;
+    Image atlas(bool drawNodes = false) const;
 
     bool insert(const Image& image);
     void insert(const ImageCube& imageCube);
