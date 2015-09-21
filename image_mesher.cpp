@@ -186,7 +186,7 @@ void emitBox(Mesh* g, const Box& box)
 }
 
 void emitBoxFace(Mesh* g, float s, int a, int c[8][3], int x,  int y,  int z,
-                                                           int sx, int sy, int sz)
+                                                       int sx, int sy, int sz)
 {
     const int i[6][4] =
     {
@@ -232,14 +232,6 @@ void emitBoxFace(Mesh* g, float s, int a, int c[8][3], int x,  int y,  int z,
     }
     g->indices.insert(g->indices.end(), {ib + 0, ib + 1, ib + 2,
                                          ib + 3, ib + 4, ib + 5});
-
-    #if 0
-    const v n  = 0.5f * (n0 + n1);
-    g->vertices.insert(g->vertices.end(), {{va, n}, {vb, n},
-                                           {vc, n}, {vd, n}});
-    g->indices.insert(g->indices.end(), {ib + 0, ib + 1, ib + 2,
-                                         ib + 2, ib + 3, ib + 0});
-    #endif
 }
 
 void collapseConstants(int cc[8][3], int g)
@@ -314,7 +306,7 @@ Mesh meshCubes(const V& vol)
 }
 
 template <typename V>
-Mesh meshGreedy(const V& vol)
+Mesh meshGreedy(const V& vol, const RectCube<float>& uvCube)
 {
     struct Cell
     {
@@ -454,16 +446,18 @@ Mesh mesh(const Image& image, float interval)
     HCTIME("image");
     const Heightfield hfield(image, std::min(image.size().w,
                                              image.size().h) / interval, interval);
-    return meshGreedy(hfield);
+    return meshGreedy(hfield, RectCube<float>());
     //return meshCubes(hfield);
 }
 
-Mesh mesh(const ImageCube& imageCube, float interval)
+Mesh mesh(const ImageCube& imageCube,
+          const RectCube<float>& uvCube,
+          float interval)
 {
     HCTIME("cube");
     const Cubefield cfield(imageCube, interval);
 
-    return meshGreedy(cfield);
+    return meshGreedy(cfield, uvCube);
     //return meshCubes(cfield);
     //return SnMesher::mesh(cfield);
 }
