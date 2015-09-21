@@ -1,6 +1,7 @@
 #include "image_atlas.h"
 
 #include "painter.h"
+#include "clock.h"
 #include "log.h"
 
 namespace hc
@@ -137,6 +138,7 @@ bool ImageAtlas::insert(const Image& image)
 
 void ImageAtlas::insert(const ImageCube& imageCube)
 {
+    HCTIME("cube");
     for (const Image& image : imageCube.sides)
         insert(image);
 }

@@ -451,7 +451,7 @@ Mesh meshGreedy(const V& vol)
 
 Mesh mesh(const Image& image, float interval)
 {
-    HCTIME("image mesh");
+    HCTIME("image");
     const Heightfield hfield(image, std::min(image.size().w,
                                              image.size().h) / interval, interval);
     return meshGreedy(hfield);
@@ -460,7 +460,7 @@ Mesh mesh(const Image& image, float interval)
 
 Mesh mesh(const ImageCube& imageCube, float interval)
 {
-    HCTIME("cube mesh");
+    HCTIME("cube");
     const Cubefield cfield(imageCube, interval);
 
     return meshGreedy(cfield);
