@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <array>
 
 #include "geometry.h"
@@ -11,19 +12,14 @@ namespace hc
 
 struct TextureAtlas
 {
-    struct Tile
-    {
-        // Image and texture rects
-        Rect<int>   ri;
-        Rect<float> rt;
-    };
-    typedef std::array<Tile, 6> TileCube;
+    // Image and texture rect cubes
+    typedef std::pair<RectCube<int>, RectCube<float>> EntryCube;
 
     TextureAtlas(const Size<int>& size);
 
     void update();
 
-    TileCube insert(const ImageCube& imageCube);
+    EntryCube insert(const ImageCube& imageCube);
 
     ImageAtlas  atlas;
     gl::Texture texture;
