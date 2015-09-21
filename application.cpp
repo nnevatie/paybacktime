@@ -18,7 +18,7 @@
 
 #include "sdf_primitives.h"
 #include "image_cube.h"
-#include "image_atlas.h"
+#include "texture_atlas.h"
 
 #include "ref_mesher.h"
 #include "image_mesher.h"
@@ -84,10 +84,9 @@ bool Application::run()
     const ImageCube depthCube("data/box.*.png", 1);
     const ImageCube albedoCube("data/box.albedo.*.png");
 
-    ImageAtlas imageAtlas({512, 512});
-    imageAtlas.insert(albedoCube);
-
-    imageAtlas.atlas(true).write(filesystem::path("c:/temp/atlas.png"));
+    TextureAtlas texAtlas({512, 512});
+    texAtlas.insert(albedoCube);
+    texAtlas.atlas.image (true).write(filesystem::path("c:/temp/atlas.png"));
 
     const Mesh mesh = ImageMesher::mesh(depthCube);
     const gl::Primitive primitive(mesh);
