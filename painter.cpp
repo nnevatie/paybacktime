@@ -16,8 +16,8 @@ Painter::Painter(SDL_Surface* surface) :
     renderer_ = SDL_CreateSoftwareRenderer(surface_);
 }
 
-Painter::Painter(Image& image) :
-    Painter(image.surface())
+Painter::Painter(Image* image) :
+    Painter(image->surface())
 {
 }
 

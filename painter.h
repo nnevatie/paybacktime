@@ -11,7 +11,7 @@ namespace hc
 struct Painter
 {
     Painter(SDL_Surface* surface);
-    Painter(Image& image);
+    Painter(Image* image);
 
     virtual ~Painter();
 
