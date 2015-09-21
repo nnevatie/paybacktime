@@ -68,15 +68,11 @@ bool Application::run()
 
     gl::Shader vsSimple(filesystem::path("shaders/simple.vs.glsl"));
     gl::Shader fsPhong(filesystem::path("shaders/phong.fs.glsl"));
-    gl::Shader fsTexture(filesystem::path("shaders/texture.fs.glsl"));
     gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
     gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
     gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsPhong},
-                                 {{0, "position"}, {1, "normal"}, {2, "uv"}});
-
-    gl::ShaderProgram blitProgram({vsSimple, fsTexture},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     gl::ShaderProgram ssaoProgram({vsSimple, fsSsao},
