@@ -20,6 +20,11 @@ struct Size
         return w && h;
     }
 
+    Size scaled(T sx, T sy) const
+    {
+        return Size(w * sx, h * sy);
+    }
+
     T area() const
     {
         return w * h;
@@ -28,7 +33,7 @@ struct Size
     template <typename CT>
     CT as() const
     {
-        return CT {w, h};
+        return CT(w, h);
     }
 
     T w {}, h {};
@@ -52,9 +57,20 @@ struct Rect
         x(0), y(0), size(size)
     {}
 
+    Rect scaled(T sx, T sy) const
+    {
+        return Rect(x * sx, y * sy, size.w * sx, size.h * sy);
+    }
+
     T area() const
     {
         return size.area();
+    }
+
+    template <typename CT>
+    CT as() const
+    {
+        return CT(x, y, size.w, size.h);
     }
 
     T x {}, y {};
