@@ -29,6 +29,6 @@ struct ImageCube
 };
 
 template <typename T>
-using CubeRect = std::array<Rect<T>, 6>;
+using RectCube = std::array<Rect<T>, 6>;
 
 } // namespace

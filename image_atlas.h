@@ -14,10 +14,11 @@ struct ImageAtlas
 {
     ImageAtlas(const Size<int>& size);
 
-    Image atlas(bool drawNodes = false) const;
+    Size<int> size() const;
+    Image image(bool drawNodes = false) const;
 
     Rect<int> insert(const Image& image);
-    CubeRect<int> insert(const ImageCube& imageCube);
+    RectCube<int> insert(const ImageCube& imageCube);
 
 private:
     struct Data;
