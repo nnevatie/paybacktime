@@ -29,6 +29,7 @@ struct Image
     const uint8_t* bits() const;
     SDL_Surface* surface() const;
 
+    Image clone() const;
     Image& fill(uint32_t value);
 
     bool write(const filesystem::path& path) const;

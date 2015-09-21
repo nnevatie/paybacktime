@@ -90,6 +90,18 @@ SDL_Surface* Image::surface() const
                 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 }
 
+Image Image::clone() const
+{
+    Image image;
+    image.d         = std::shared_ptr<Data>(new Data());
+    image.d->size   = d->size;
+    image.d->depth  = d->depth;
+    image.d->stride = d->stride;
+    image.d->bits   = new uint8_t[d->size.h * d->stride];
+    std::copy(d->bits, d->bits + (d->size.h * d->stride), image.d->bits);
+    return image;
+}
+
 Image& Image::fill(uint32_t value)
 {
     uint32_t* p0 = reinterpret_cast<uint32_t*>(d->bits);
