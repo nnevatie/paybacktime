@@ -87,7 +87,7 @@ SDL_Surface* Image::surface() const
 {
     return SDL_CreateRGBSurfaceFrom(
         d->bits, d->size.w, d->size.h, d->depth * 8, d->stride,
-                0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+        0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 }
 
 Image Image::clone() const
