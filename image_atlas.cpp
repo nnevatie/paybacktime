@@ -14,7 +14,7 @@ struct Node
 {
     typedef std::shared_ptr<Node> Ptr;
 
-    int id {};
+    bool reserved {};
     Rect<int> rect;
     Node::Ptr nodes[2];
 
@@ -34,7 +34,7 @@ struct Node
         if (isLeaf())
         {
             // Already contains data?
-            if (id)
+            if (reserved)
                 return nullptr;
 
             // Too small to fit?
@@ -109,7 +109,12 @@ ImageAtlas::ImageAtlas(const Size<int>& size) :
 {
 }
 
-Image ImageAtlas::atlas(bool drawNodes) const
+Size<int> ImageAtlas::size() const
+{
+    return d->atlas.size();
+}
+
+Image ImageAtlas::image(bool drawNodes) const
 {
     Image atlas = d->atlas;
     if (drawNodes)
@@ -125,22 +130,22 @@ Rect<int> ImageAtlas::insert(const Image& image)
 {
     if (Node* node = d->root.reserve(image.size()))
     {
-        // Generate a unique ID from node coordinates
-        node->id = 1 + d->root.rect.size.w * node->rect.y + node->rect.x;
-
         // Blit the image into atlas
         Painter painter(&d->atlas);
         painter.drawImage(image, node->rect.x, node->rect.y);
+
+        // Mark node reserved
+        node->reserved = true;
         return node->rect;
     }
     return Rect<int>();
 }
 
-CubeRect<int> ImageAtlas::insert(const ImageCube& imageCube)
+RectCube<int> ImageAtlas::insert(const ImageCube& imageCube)
 {
     HCTIME("cube");
 
-    CubeRect<int> cubeRect;
+    RectCube<int> cubeRect;
     for (int i = 0; i < int(imageCube.sides.size()); ++i)
         cubeRect[i] = insert(imageCube.side(ImageCube::Side(i)));
 
