@@ -16,21 +16,23 @@ namespace hc
 
 struct Image::Data
 {
-    Size<int> size;
-    int       depth, stride;
-    uint8_t*  bits;
+    Size<int>    size;
+    int          depth, stride;
+    uint8_t*     bits;
+    SDL_Surface* surface;
 
-    Data() : depth(0), stride(0), bits(0)
+    Data() : depth(0), stride(0), bits(0), surface(0)
     {}
 
     Data(const Size<int>& size, int depth, int stride) :
         size(size), depth(depth), stride(stride),
-        bits(new uint8_t[size.h * stride])
-    {
-    }
+        bits(new uint8_t[size.h * stride]),
+        surface(0)
+    {}
 
     virtual ~Data()
     {
+        SDL_FreeSurface(surface);
         delete bits;
     }
 };
@@ -90,9 +92,11 @@ const uint8_t* Image::bits() const
 
 SDL_Surface* Image::surface() const
 {
-    return SDL_CreateRGBSurfaceFrom(
-        d->bits, d->size.w, d->size.h, d->depth * 8, d->stride,
-        0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    if (!d->surface)
+        d->surface = SDL_CreateRGBSurfaceFrom(
+                         d->bits, d->size.w, d->size.h, d->depth * 8, d->stride,
+                         0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    return d->surface;
 }
 
 Image Image::clone() const
