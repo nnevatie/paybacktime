@@ -17,6 +17,8 @@ set(HEADER_FILES
     image.h
     image_cube.h
     image_mesher.h
+    image_atlas.h
+    texture_atlas.h
     common.h
     clock.h
     log.h
@@ -45,6 +47,7 @@ set(SOURCE_FILES
     image_cube.cpp
     image_mesher.cpp
     image_atlas.cpp
+    texture_atlas.cpp
     common.cpp
     clock.cpp
     log.cpp
