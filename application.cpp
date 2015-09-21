@@ -85,10 +85,10 @@ bool Application::run()
     const ImageCube albedoCube("data/box.albedo.*.png");
 
     TextureAtlas texAtlas({512, 512});
-    texAtlas.insert(albedoCube);
-    texAtlas.atlas.image (true).write(filesystem::path("c:/temp/atlas.png"));
+    TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
+    texAtlas.atlas.image(true).write(filesystem::path("c:/temp/atlas.png"));
 
-    const Mesh mesh = ImageMesher::mesh(depthCube);
+    const Mesh mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
     const gl::Primitive primitive(mesh);
 
     const Mesh rectMesh = squareMesh();
