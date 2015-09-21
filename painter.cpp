@@ -45,7 +45,6 @@ Painter& Painter::drawRect(const Rect<int>& rect)
 
 Painter& Painter::drawImage(const Image& image, int x, int y)
 {
-    //HCTIME("time");
     SDL_Rect dstRect = {x, y, 0, 0};
     SDL_BlitSurface(image.surface(), nullptr, surface_, &dstRect);
     return *this;
