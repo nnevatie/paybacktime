@@ -87,7 +87,7 @@ bool Application::run()
     gl::ShaderProgram blurProgram({vsSimple, fsBlur},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    const ImageCube depthCube("data/floor.*.png", 1);
+    const ImageCube depthCube("data/box.*.png", 1);
     const ImageCube albedoCube("data/box.albedo.*.png");
 
     ImageAtlas imageAtlas({512, 512});
