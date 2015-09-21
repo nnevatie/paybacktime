@@ -67,9 +67,7 @@ bool Application::run()
     display.open();
 
     gl::Shader vsSimple(filesystem::path("shaders/simple.vs.glsl"));
-    gl::Shader fsLambert(filesystem::path("shaders/lambert.fs.glsl"));
     gl::Shader fsPhong(filesystem::path("shaders/phong.fs.glsl"));
-    gl::Shader fsScreenspace(filesystem::path("shaders/screenspace.fs.glsl"));
     gl::Shader fsTexture(filesystem::path("shaders/texture.fs.glsl"));
     gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
     gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
