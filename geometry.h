@@ -78,7 +78,7 @@ struct Rect
 };
 
 template<typename T>
-std::ostream& operator<<(std::ostream& stream, const Size<T>& rect)
+std::ostream& operator<<(std::ostream& stream, const Rect<T>& rect)
 {
     stream << "Rect[x: " << rect.x
            << ", y: " << rect.y

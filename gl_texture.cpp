@@ -64,6 +64,20 @@ Texture::Type Texture::type() const
     return d->type;
 }
 
+Image Texture::image()
+{
+    bind();
+    Size<int> size;
+    glGetTexLevelParameteriv(d->target, 0, GL_TEXTURE_WIDTH,  &size.w);
+    glGetTexLevelParameteriv(d->target, 0, GL_TEXTURE_HEIGHT, &size.h);
+
+    Image image(size, 4);
+    glGetTexImage(d->target, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+    unbind();
+
+    return image;
+}
+
 Texture& Texture::bind()
 {
     glBindTexture(d->target, d->id);

@@ -185,8 +185,9 @@ void emitBox(Mesh* g, const Box& box)
          ib + 6, ib + 2, ib + 1});
 }
 
-void emitBoxFace(Mesh* g, float s, int a, int c[8][3], int x,  int y,  int z,
-                                                       int sx, int sy, int sz)
+void emitBoxFace(Mesh* g, float s, int a, int c[8][3],
+                 int x,  int y,  int z, int sx, int sy, int sz,
+                 const glm::vec2& uv0, const glm::vec2& uv1)
 {
     const int i[6][4] =
     {
@@ -200,6 +201,7 @@ void emitBoxFace(Mesh* g, float s, int a, int c[8][3], int x,  int y,  int z,
     const Mesh::Index ib = g->vertices.size();
 
     typedef glm::vec3 v;
+    typedef glm::vec2 uv;
 
     const v va = s * v(x + (c[i[a][0]][0] * sx),
                        y + (c[i[a][0]][1] * sy),
@@ -214,21 +216,47 @@ void emitBoxFace(Mesh* g, float s, int a, int c[8][3], int x,  int y,  int z,
                        y + (c[i[a][3]][1] * sy),
                        z + (c[i[a][3]][2] * sz));
 
+    //if (a != 1) return;
+
+    const uv uvs[6][4] =
+    {
+        {
+         {uv1.y, uv1.x},
+         {uv0.y, uv1.x},
+         {uv0.y, uv0.x},
+         {uv1.y, uv0.x}
+        },
+        {
+         {uv1.y, uv1.x},
+         {uv0.y, uv1.x},
+         {uv0.y, uv0.x},
+         {uv1.y, uv0.x}
+        },
+    };
+
     const float l0 = glm::length2(va - vc);
     const float l1 = glm::length2(vb - vd);
     if (l0 < l1)
     {
         const v n0 = glm::normalize(glm::cross(vc - va, vb - va));
         const v n1 = glm::normalize(glm::cross(va - vc, vd - vc));
-        g->vertices.insert(g->vertices.end(), {{va, n0}, {vb, n0}, {vc, n0},
-                                               {vc, n1}, {vd, n1}, {va, n1}});
+        g->vertices.insert(g->vertices.end(), {{va, n0, uvs[a][0]},
+                                               {vb, n0, uvs[a][1]},
+                                               {vc, n0, uvs[a][2]},
+                                               {vc, n1, uvs[a][2]},
+                                               {vd, n1, uvs[a][3]},
+                                               {va, n1, uvs[a][0]}});
     }
     else
     {
         const v n0 = glm::normalize(glm::cross(vd - vb, vc - vb));
         const v n1 = glm::normalize(glm::cross(vb - vd, va - vd));
-        g->vertices.insert(g->vertices.end(), {{vb, n0}, {vc, n0}, {vd, n0},
-                                               {vd, n1}, {va, n1}, {vb, n1}});
+        g->vertices.insert(g->vertices.end(), {{vb, n0, uvs[a][1]},
+                                               {vc, n0, uvs[a][2]},
+                                               {vd, n0, uvs[a][3]},
+                                               {vd, n1, uvs[a][3]},
+                                               {va, n1, uvs[a][0]},
+                                               {vb, n1, uvs[a][1]}});
     }
     g->indices.insert(g->indices.end(), {ib + 0, ib + 1, ib + 2,
                                          ib + 3, ib + 4, ib + 5});
@@ -403,7 +431,7 @@ Mesh meshGreedy(const V& vol, const RectCube<float>& uvCube)
                         x[u] = i;
                         x[v] = j;
 
-                        // Emit quad
+                        // Query collapse constants for vertices
                         int cc[8][3];
                         collapseConstants(cc, m.d > 0 ? m.g0 : m.g1);
 
@@ -414,10 +442,25 @@ Mesh meshGreedy(const V& vol, const RectCube<float>& uvCube)
                         s[u] = w;
                         s[v] = h;
 
+                        // Detemine axis+direction [0, 5]
                         const int axis = d * 2 + (m.d > 0 ? 1 : 0);
+
+                        // Texture coordinates, planar projection
+                        const Rect<float>& uvRect = uvCube[1];
+
+
+                        glm::vec2 uv0(
+                            uvRect.x + (uvRect.size.w * c[u] / dims[u]),
+                            uvRect.y + (uvRect.size.h * c[v] / dims[v]));
+
+                        glm::vec2 uv1(
+                            uvRect.x + (uvRect.size.w * (c[u] + s[u]) / dims[u]),
+                            uvRect.y + (uvRect.size.h * (c[v] + s[v]) / dims[v]));
+
+                        // Emit quad
                         emitBoxFace(&mesh, vol.interval,
-                                    axis, cc, c[0], c[1], c[2],
-                                              s[0], s[1], s[2]);
+                                     axis, cc, c[0], c[1], c[2],
+                                               s[0], s[1], s[2], uv0, uv1);
 
                         // Clear mask
                         for (int l = 0; l < h; ++l)

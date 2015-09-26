@@ -2,7 +2,7 @@
 
 #define KERNEL_SIZE      32
 #define CAP_MIN_DISTANCE 0.0005
-#define CAP_MAX_DISTANCE 0.25
+#define CAP_MAX_DISTANCE 0.005
 
 // Uniforms
 uniform sampler2D texColor;

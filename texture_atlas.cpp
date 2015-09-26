@@ -1,6 +1,7 @@
 #include "texture_atlas.h"
 
 #include "clock.h"
+#include "log.h"
 
 namespace hc
 {
@@ -15,7 +16,9 @@ TextureAtlas::TextureAtlas(const Size<int>& size) :
 void TextureAtlas::update()
 {
     HCTIME("");
-    texture.alloc(atlas.image());
+    texture.bind().alloc(atlas.image())
+                  .set(GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+                  .set(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 TextureAtlas::EntryCube TextureAtlas::insert(const ImageCube& imageCube)
@@ -29,6 +32,8 @@ TextureAtlas::EntryCube TextureAtlas::insert(const ImageCube& imageCube)
                                                            1.f / size.h);
         entryCube.first[i]  = ri;
         entryCube.second[i] = rt;
+
+        HCLOG(Info) << "side: " << i << " " << ri << " " << rt;
     }
     // Update texture. TODO: Only update dirty regions.
     update();

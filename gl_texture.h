@@ -28,6 +28,8 @@ struct Texture
     GLuint id() const;
     Type type() const;
 
+    Image image();
+
     Texture& bind();
     Texture& bindAs(GLenum unit);
     Texture& unbind();

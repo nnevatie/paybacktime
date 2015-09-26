@@ -24,7 +24,10 @@ struct Mesh
         Vertex() {}
         Vertex(const glm::vec3& p) : p(p) {}
         Vertex(const glm::vec3& p, const glm::vec3& n) : p(p), n(n) {}
-        Vertex(float x, float y, float z) : p(x, y, z) {}
+        Vertex(const glm::vec3& p, const glm::vec3& n, const glm::vec2& uv) :
+            p(p), n(n), uv(uv) {}
+
+        Vertex(float x,  float y,  float z) : p(x, y, z) {}
         Vertex(float x,  float y,  float z,
                float nx, float ny, float nz,
                float u,  float v) : p(x, y, z), n(nx, ny, nz), uv(u, v) {}

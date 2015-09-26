@@ -84,7 +84,7 @@ bool Application::run()
     const ImageCube depthCube("data/box.*.png", 1);
     const ImageCube albedoCube("data/box.albedo.*.png");
 
-    TextureAtlas texAtlas({512, 512});
+    TextureAtlas texAtlas({128, 128});
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
     texAtlas.atlas.image(true).write(filesystem::path("c:/temp/atlas.png"));
 
@@ -99,16 +99,25 @@ bool Application::run()
     RenderStats stats;
 
     int f = 0;
-    float a = 1.2;
     bool running = true;
+
+    float ay = 0, az = 0;
 
     while (running)
     {
-        glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 1.f, 100.f);
-        glm::mat4 view  = glm::translate({}, glm::vec3(-8.0f, -2.0f, -40.0f));
-        glm::mat4 model = glm::rotate({}, a, glm::vec3(1.0f, 0.5f, 0.9f));
-
+        glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 1.f, 200.f);
+        glm::mat4 view  = glm::translate({}, glm::vec3(0.f, 0.f, -40.0f));
+        glm::mat4 model = glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
+                          glm::rotate({}, az, glm::vec3(0.f, 0.f, 1.f)) *
+                          glm::translate({}, glm::vec3(-8.0f, -8.0f, -8.0f));
         Clock clock;
+
+        wireProgram.bind()
+            .setUniform("albedo", 0)
+            .setUniform("mvp",    proj * view * model)
+            .setUniform("mv",     view * model)
+            .setUniform("size",   display.size().as<glm::vec2>())
+            .setUniform("color",  glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
         {
             // Geometry pass
             Binder<gl::Fbo> binder(ssao.fbo[0]);
@@ -120,12 +129,7 @@ bool Application::run()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
 
-            wireProgram.bind()
-                .setUniform("mvp",   proj * view * model)
-                .setUniform("mv",    view * model)
-                .setUniform("size",  display.size().as<glm::vec2>())
-                .setUniform("color", glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
-
+            texAtlas.texture.bindAs(GL_TEXTURE0);
             primitive.render();
         }
 
@@ -171,7 +175,7 @@ bool Application::run()
         display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");
         a += 0.01f;
         #else
-        a += 0.001f;
+        //a += 0.001f;
         #endif
 
         stats.accumulate(clock.stop(), mesh.vertices.size(),
@@ -184,7 +188,18 @@ bool Application::run()
         while (SDL_PollEvent(&e) && f < 2000)
         {
             if (e.type == SDL_KEYDOWN)
-                running = false;
+            {
+                if (e.key.keysym.sym == SDLK_LEFT)
+                    ay += 0.05f;
+                if (e.key.keysym.sym == SDLK_RIGHT)
+                    ay -= 0.05f;
+                if (e.key.keysym.sym == SDLK_UP)
+                    az += 0.05f;
+                if (e.key.keysym.sym == SDLK_DOWN)
+                    az -= 0.05f;
+                if (e.key.keysym.sym == SDLK_ESCAPE)
+                    running = false;
+            }
         }
     }
     return true;

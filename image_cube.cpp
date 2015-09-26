@@ -30,7 +30,7 @@ ImageCube::ImageCube(const std::string& filename, int depth)
     for (SideImage& sideImage : sideImages)
     {
         const auto fn = boost::replace_all_copy(filename, "*", sideImage.name);
-        sideImage.image = Image(fn, depth);
+        sideImage.image = Image(fn, depth).flipped();
     }
 
     // Mirror missing images with priority ordered fallbacks

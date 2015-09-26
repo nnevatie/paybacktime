@@ -99,6 +99,29 @@ SDL_Surface* Image::surface() const
     return d->surface;
 }
 
+Image Image::flipped() const
+{
+    Image image(clone());
+
+    // Flip vertically
+    const int h      = image.d->size.h;
+    const int stride = image.d->stride;
+
+    uint8_t  t[image.d->stride];
+    uint8_t* b = image.bits();
+
+    for (int y = 0; y < h / 2; ++y)
+    {
+        uint8_t* r0 = b + y * stride;
+        uint8_t* r1 = b + (h - y - 1) * stride;
+        std::copy(r0, r0 + stride, t);
+        std::copy(r1, r1 + stride, r0);
+        std::copy(t,  t  + stride, r1);
+    }
+
+    return image;
+}
+
 Image Image::clone() const
 {
     Image image(d->size, d->depth, d->stride);

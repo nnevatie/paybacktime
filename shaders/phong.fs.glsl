@@ -1,12 +1,12 @@
 #version 150
 
 // Const
-const vec3 ldir         = vec3(0, -1, -1);
-const vec3 diffuseColor = vec3(0.5, 0.5, 0.75);
-const vec3 specColor    = vec3(1.0, 1.0, 1.0);
+const vec3 ldir         = vec3(-1, -1, -1);
+const vec4 specColor    = vec4(0.25, 0.25, 0.3, 1.0);
 
 // Uniforms
 uniform mat4 mv;
+uniform sampler2D albedo;
 
 // Input
 in Block
@@ -42,12 +42,18 @@ void main()
         vec3 reflectDir = reflect(-ldir, n);
         vec3 viewDir    = normalize(-ib.eye);
         float specAngle = max(dot(reflectDir, viewDir), 0.0);
-        specular        = pow(specAngle, 4.0);
+        specular        = pow(specAngle, 1.0);
     }
 
-    //vec4 c = vec4(lambertian * diffuseColor + specular * specColor, 1.0);
-    //color  = mix(c + 0.25, c, edge(ib.bc));
+    vec4 albedo = texture(albedo, ib.uv);
 
-    color  = vec4(lambertian * diffuseColor + specular * specColor, 1.0);
+    //vec4 albedo = vec4(ib.uv.x, ib.uv.y, 0, 1.0);
+    vec4 c = albedo;
+    //vec4 c = vec4(ib.uv.y, ib.uv.y, ib.uv.y, 1);
+
+    //vec4 c = lambertian * albedo + specular * specColor;
+    //color  = vec4(mix(c + 0.25, c, edge(ib.bc)).rgb, 1.0);
+
+    color  = vec4(c.rgb, 1.0);
     normal = vec4(n.x * 0.5 + 0.5, n.y * 0.5 + 0.5, n.z * 0.5 + 0.5, 1.0);
 }
