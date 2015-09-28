@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ostream>
+#include <boost/algorithm/clamp.hpp>
 
 namespace hc
 {
@@ -47,7 +48,8 @@ struct Rect
 
     Rect(T x, T y, T w, T h) :
         x(x), y(y), size(w, h)
-    {}
+    {
+    }
 
     Rect(T x, T y, const Size<T>& size) :
         x(x), y(y), size(size)
@@ -57,9 +59,27 @@ struct Rect
         x(0), y(0), size(size)
     {}
 
+    Rect rect(float fx, float fy, float fw, float fh) const
+    {
+        using namespace boost::algorithm;
+        const float cfx = clamp(fx, 0.f, 1.f);
+        const float cfy = clamp(fy, 0.f, 1.f);
+        const float cfw = clamp(fw, 0.f, 1.f - cfx);
+        const float cfh = clamp(fh, 0.f, 1.f - cfy);
+        return Rect(x + cfx * size.w,
+                    y + cfy * size.h,
+                    cfw * size.w,
+                    cfh * size.h);
+    }
+
     Rect scaled(T sx, T sy) const
     {
         return Rect(x * sx, y * sy, size.w * sx, size.h * sy);
+    }
+
+    Rect transposed() const
+    {
+        return Rect(y, x, size.h, size.w);
     }
 
     T area() const
