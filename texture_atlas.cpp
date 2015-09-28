@@ -17,8 +17,8 @@ void TextureAtlas::update()
 {
     HCTIME("");
     texture.bind().alloc(atlas.image())
-                  .set(GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-                  .set(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                  .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                  .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 TextureAtlas::EntryCube TextureAtlas::insert(const ImageCube& imageCube)
@@ -32,8 +32,6 @@ TextureAtlas::EntryCube TextureAtlas::insert(const ImageCube& imageCube)
                                                            1.f / size.h);
         entryCube.first[i]  = ri;
         entryCube.second[i] = rt;
-
-        HCLOG(Info) << "side: " << i << " " << ri << " " << rt;
     }
     // Update texture. TODO: Only update dirty regions.
     update();
