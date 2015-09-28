@@ -81,8 +81,8 @@ bool Application::run()
     gl::ShaderProgram blurProgram({vsSimple, fsBlur},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    const ImageCube depthCube("data/debug.*.png", 1);
-    const ImageCube albedoCube("data/debug.albedo.*.png");
+    const ImageCube depthCube("data/escher.*.png", 1);
+    const ImageCube albedoCube("data/floor.albedo.*.png");
 
     TextureAtlas texAtlas({128, 128});
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
@@ -106,7 +106,7 @@ bool Application::run()
     while (running)
     {
         glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 1.f, 200.f);
-        glm::mat4 view  = glm::translate({}, glm::vec3(0.f, 0.f, -40.0f));
+        glm::mat4 view  = glm::translate({}, glm::vec3(0.f, 0.f, -25.0f));
         glm::mat4 model = glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
                           glm::rotate({}, az, glm::vec3(0.f, 0.f, 1.f)) *
                           glm::translate({}, glm::vec3(-8.0f, -8.0f, -8.0f));
@@ -141,8 +141,7 @@ bool Application::run()
                           .setUniform("noiseScale", ssao.noiseScale())
                           .setUniform("mvp",        glm::mat4())
                           .setUniform("invP",       glm::inverse(proj))
-                          .setUniform("p",          proj)
-                          .setUniform("r",          1.f);
+                          .setUniform("p",          proj);
         {
             // SSAO pass
             Binder<gl::Fbo> binder(ssao.fbo[1]);

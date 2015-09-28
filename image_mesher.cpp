@@ -249,8 +249,8 @@ void emitBoxFace(Mesh* g, float scale, int axis, int cc[8][3],
     const float l1 = glm::length2(vb - vd);
     if (l0 < l1)
     {
-        const v n0 = glm::normalize(glm::cross(vc - va, vb - va));
-        const v n1 = glm::normalize(glm::cross(va - vc, vd - vc));
+        const v n0 = glm::normalize(glm::cross(vb - va, vc - va));
+        const v n1 = glm::normalize(glm::cross(vd - vc, va - vc));
         g->vertices.insert(g->vertices.end(), {{va, n0, uvs[axis][0]},
                                                {vb, n0, uvs[axis][1]},
                                                {vc, n0, uvs[axis][2]},
@@ -260,8 +260,8 @@ void emitBoxFace(Mesh* g, float scale, int axis, int cc[8][3],
     }
     else
     {
-        const v n0 = glm::normalize(glm::cross(vd - vb, vc - vb));
-        const v n1 = glm::normalize(glm::cross(vb - vd, va - vd));
+        const v n0 = glm::normalize(glm::cross(vc - vb, vd - vb));
+        const v n1 = glm::normalize(glm::cross(va - vd, vb - vd));
         g->vertices.insert(g->vertices.end(), {{vb, n0, uvs[axis][1]},
                                                {vc, n0, uvs[axis][2]},
                                                {vd, n0, uvs[axis][3]},

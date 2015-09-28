@@ -29,5 +29,6 @@ void main(void)
     sum  /= 25.0;
     //color = vec4(sum, sum, sum, 1.0);
     color = texture(texColor, ib.uv) * sum;
+    //color = texture(texSsao, ib.uv);
     //color = texture(texColor, ib.uv);
 }

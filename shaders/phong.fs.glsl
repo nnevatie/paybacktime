@@ -1,8 +1,8 @@
 #version 150
 
 // Const
-const vec3 ldir         = vec3(-1, -1, -1);
-const vec4 specColor    = vec4(0.25, 0.25, 0.3, 1.0);
+const vec3 ldir         = normalize(vec3(-1, 5, 1));
+const vec4 specColor    = vec4(0.25, 0.25, 0.4, 1.0);
 
 // Uniforms
 uniform mat4 mv;
@@ -40,14 +40,14 @@ void main()
     if(lambertian > 0.0)
     {
         vec3 reflectDir = reflect(-ldir, n);
-        vec3 viewDir    = normalize(-ib.eye);
+        vec3 viewDir    = normalize(ib.eye);
         float specAngle = max(dot(reflectDir, viewDir), 0.0);
         specular        = pow(specAngle, 1.0);
     }
 
     vec4 albedo = texture(albedo, ib.uv);
+    //vec4 c = albedo;
     //vec4 albedo = vec4(ib.uv.y, ib.uv.y, 0, 1.0);
-
     vec4 c = lambertian * albedo + specular * specColor;
     color  = vec4(c.rgb, 1.0);
     //color  = vec4(mix(c + 0.25, c, edge(ib.bc)).rgb, 1.0);
