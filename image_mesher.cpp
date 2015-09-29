@@ -227,7 +227,8 @@ void emitBoxFace(Mesh* g, float scale, int axis, int cc[8][3],
                           s[axisUV[axis][0]] / d[axisUV[axis][0]],
                           s[axisUV[axis][1]] / d[axisUV[axis][1]]);
 
-    const Rect<float> uv(uvCube[axis].rect(
+    const int axisSide[6] = {3, 2, 5, 4, 1, 0};
+    const Rect<float> uv(uvCube[axisSide[axis]].rect(
                          uvn.x, uvn.y, uvn.size.w, uvn.size.h));
 
     const glm::vec2 uva(uv.x,             uv.y);
