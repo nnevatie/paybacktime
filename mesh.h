@@ -55,5 +55,6 @@ struct Mesh
 
 Mesh squareMesh(float halfWidth = 1.f);
 Mesh rectMesh(float halfWidth = 1.f, float halfHeight = 1.f);
+Mesh gridMesh(float interval, float halfWidth, float halfHeight);
 
 } // namespace
