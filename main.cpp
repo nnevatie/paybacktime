@@ -1,14 +1,26 @@
 #include <stdexcept>
 
+#include <boost/program_options.hpp>
+
 #include "application.h"
 #include "log.h"
 
-int main(int /*argc*/, char** /*argv*/)
+int main(int argc, char** argv)
 {
     try
     {
+        using namespace boost::program_options;
+        options_description desc("Allowed options");
+        desc.add_options()
+            ("input,i",
+             value<std::string>()->default_value("debug"),
+             "Input name");
+
+        variables_map args;
+        store(parse_command_line(argc, argv, desc), args);
+
         hc::Application app;
-        app.run();
+        app.run(args["input"].as<std::string>());
     }
     catch (const std::exception& e)
     {

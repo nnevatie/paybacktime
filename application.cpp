@@ -61,7 +61,7 @@ Application::~Application()
     SDL_Quit();
 }
 
-bool Application::run()
+bool Application::run(const std::string& input)
 {
     Display display("High Caliber", {1280, 720});
     display.open();
@@ -81,8 +81,8 @@ bool Application::run()
     gl::ShaderProgram blurProgram({vsSimple, fsBlur},
                                  {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    const ImageCube depthCube("data/barrel.*.png", 1);
-    const ImageCube albedoCube("data/barrel.albedo.*.png");
+    const ImageCube depthCube("data/" + input + ".*.png", 1);
+    const ImageCube albedoCube("data/" + input + ".albedo.*.png");
 
     TextureAtlas texAtlas({128, 128});
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
@@ -105,7 +105,9 @@ bool Application::run()
 
     while (running)
     {
-        glm::mat4 proj  = glm::perspective(45.0f, 4.0f / 3.0f, 1.f, 200.f);
+        glm::mat4 proj  = glm::perspective(
+                              45.0f, display.size().aspect<float>(), 1.f, 200.f);
+
         glm::mat4 view  = glm::translate({}, glm::vec3(0.f, 0.f, -30.0f));
         glm::mat4 model = glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
                           glm::rotate({}, az, glm::vec3(0.f, 0.f, 1.f)) *
