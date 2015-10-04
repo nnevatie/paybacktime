@@ -100,6 +100,7 @@ set(SYS_LIBS
 set(BOOST_LIBS
     boost_system
     boost_filesystem
+    boost_program_options
     )
 
 # SDL dependencies
