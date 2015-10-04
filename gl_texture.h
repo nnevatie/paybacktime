@@ -34,6 +34,8 @@ struct Texture
     Texture& bindAs(GLenum unit);
     Texture& unbind();
 
+    static unbind(GLenum target, GLenum unit);
+
     Texture& set(GLenum name, GLint set);
 
     Texture& alloc(const std::vector<int>& dim,

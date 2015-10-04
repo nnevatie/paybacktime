@@ -96,6 +96,12 @@ Texture& Texture::unbind()
     return *this;
 }
 
+Texture::unbind(GLenum target, GLenum unit)
+{
+    glActiveTexture(unit);
+    glBindTexture(target, 0);
+}
+
 Texture &Texture::set(GLenum name, GLint param)
 {
     glTexParameteri(d->target, name, param);
