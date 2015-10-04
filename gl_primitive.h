@@ -10,16 +10,9 @@ namespace gl
 
 struct Primitive
 {
-    enum class RenderType
-    {
-        Points,
-        Lines,
-        Triangles
-    };
-
     explicit Primitive(const Mesh& mesh);
 
-    void render(RenderType type = RenderType::Triangles) const;
+    void render(GLenum mode = GL_TRIANGLES) const;
 
     Buffer vertices, indices;
 };

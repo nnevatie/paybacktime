@@ -16,12 +16,8 @@ Primitive::Primitive(const Mesh& mesh) :
                   int(sizeof(Mesh::Index) * mesh.indices.size()));
 }
 
-void Primitive::render(RenderType type) const
+void Primitive::render(GLenum mode) const
 {
-    const GLenum mode = type == RenderType::Points ? GL_POINT :
-                        type == RenderType::Lines  ? GL_LINE : GL_FILL;
-
-    glPolygonMode(GL_FRONT_AND_BACK, mode);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
@@ -41,7 +37,8 @@ void Primitive::render(RenderType type) const
                           stride, offset(sizeof(float) * 6));
 
     indices.bind();
-    glDrawElements(GL_TRIANGLES,
+
+    glDrawElements(mode,
                    indices.size / int(sizeof(Mesh::Index)),
                    GL_UNSIGNED_INT,
                    0);
