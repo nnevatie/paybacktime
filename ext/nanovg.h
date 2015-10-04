@@ -35,9 +35,9 @@ typedef struct NVGcontext NVGcontext;
 struct NVGcolor {
 	union {
 		float rgba[4];
-        struct {
+		struct {
 			float r,g,b,a;
-        };
+		};
 	};
 };
 typedef struct NVGcolor NVGcolor;
@@ -46,7 +46,7 @@ struct NVGpaint {
 	float xform[6];
 	float extent[2];
 	float radius;
-    float feather;
+	float feather;
 	NVGcolor innerColor;
 	NVGcolor outerColor;
 	int image;
