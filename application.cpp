@@ -31,6 +31,8 @@
 #include "ssao.h"
 #include "render_stats.h"
 
+#include "scene.h"
+
 //#define CAPTURE_VIDEO 1
 
 namespace hc
@@ -67,26 +69,29 @@ bool Application::run(const std::string& input)
     display.open();
 
     gl::Shader vsSimple(filesystem::path("shaders/simple.vs.glsl"));
+    gl::Shader fsColor(filesystem::path("shaders/color.fs.glsl"));
     gl::Shader fsPhong(filesystem::path("shaders/phong.fs.glsl"));
     gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
     gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
-    gl::ShaderProgram wireProgram({vsSimple, gsWireframe, fsPhong},
-                                 {{0, "position"}, {1, "normal"}, {2, "uv"}});
+    gl::ShaderProgram gridProg({vsSimple, fsColor},
+                               {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    gl::ShaderProgram ssaoProgram({vsSimple, fsSsao},
-                                 {{0, "position"}, {1, "normal"}, {2, "uv"}});
+    gl::ShaderProgram geomProg({vsSimple, gsWireframe, fsPhong},
+                               {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    gl::ShaderProgram blurProgram({vsSimple, fsBlur},
-                                 {{0, "position"}, {1, "normal"}, {2, "uv"}});
+    gl::ShaderProgram ssaoProg({vsSimple, fsSsao},
+                               {{0, "position"}, {1, "normal"}, {2, "uv"}});
+
+    gl::ShaderProgram blurProg({vsSimple, fsBlur},
+                               {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     const ImageCube depthCube("data/" + input + ".*.png", 1);
     const ImageCube albedoCube("data/" + input + ".albedo.*.png");
 
     TextureAtlas texAtlas({128, 128});
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
-    texAtlas.atlas.image(true).write(filesystem::path("c:/temp/atlas.png"));
 
     const Mesh mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
     const gl::Primitive primitive(mesh);
@@ -94,32 +99,32 @@ bool Application::run(const std::string& input)
     const Mesh rectMesh = squareMesh();
     const gl::Primitive rectPrimitive(rectMesh);
 
+    const Mesh gMesh = gridMesh(16, 128, 128);
+    const gl::Primitive gridPrimitive(gMesh);
+
     Ssao ssao(32, display.size(), {4, 4});
 
     RenderStats stats;
 
-    int f = 0;
-    bool running = true;
+    Scene scene;
 
+    int f = 0;
     float ay = 0, az = 0;
 
+    bool running = true;
     while (running)
     {
         glm::mat4 proj  = glm::perspective(
-                              45.0f, display.size().aspect<float>(), 1.f, 200.f);
+                              45.0f, display.size().aspect<float>(), 200.f, 400.f);
 
-        glm::mat4 view  = glm::translate({}, glm::vec3(0.f, 0.f, -30.0f));
+        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 200, 200),
+                                      glm::vec3(0.f, 0.f, 0.f),
+                                      glm::vec3(0, 1, 0));
+
         glm::mat4 model = glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
-                          glm::rotate({}, az, glm::vec3(0.f, 0.f, 1.f)) *
-                          glm::translate({}, glm::vec3(-8.0f, -8.0f, -8.0f));
+                          glm::rotate({}, az, glm::vec3(0.f, 0.f, 1.f));
         Clock clock;
 
-        wireProgram.bind()
-            .setUniform("albedo", 0)
-            .setUniform("mvp",    proj * view * model)
-            .setUniform("mv",     view * model)
-            .setUniform("size",   display.size().as<glm::vec2>())
-            .setUniform("color",  glm::vec4(0.1f, 0.2f, 0.4f, 1.f));
         {
             // Geometry pass
             Binder<gl::Fbo> binder(ssao.fbo[0]);
@@ -131,19 +136,34 @@ bool Application::run(const std::string& input)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
 
+            gridProg.bind()
+                .setUniform("albedo", glm::vec4(0, 0.5f, 0, 1))
+                .setUniform("mvp",    proj * view * model)
+                .setUniform("mv",     view * model)
+                .setUniform("size",   display.size().as<glm::vec2>());
+
+            gl::Texture::unbind(GL_TEXTURE_2D, GL_TEXTURE0);
+            gridPrimitive.render(GL_LINES);
+
+            geomProg.bind()
+                .setUniform("albedo", 0)
+                .setUniform("mvp",    proj * view * model)
+                .setUniform("mv",     view * model)
+                .setUniform("size",   display.size().as<glm::vec2>());
+
             texAtlas.texture.bindAs(GL_TEXTURE0);
             primitive.render();
         }
 
-        ssaoProgram.bind().setUniform("texColor",   0)
-                          .setUniform("texNormal",  1)
-                          .setUniform("texDepth",   2)
-                          .setUniform("texNoise",   3)
-                          .setUniform("kernel",     ssao.kernel)
-                          .setUniform("noiseScale", ssao.noiseScale())
-                          .setUniform("mvp",        glm::mat4())
-                          .setUniform("invP",       glm::inverse(proj))
-                          .setUniform("p",          proj);
+        ssaoProg.bind().setUniform("texColor",   0)
+                       .setUniform("texNormal",  1)
+                       .setUniform("texDepth",   2)
+                       .setUniform("texNoise",   3)
+                       .setUniform("kernel",     ssao.kernel)
+                       .setUniform("noiseScale", ssao.noiseScale())
+                       .setUniform("mvp",        glm::mat4())
+                       .setUniform("invP",       glm::inverse(proj))
+                       .setUniform("p",          proj);
         {
             // SSAO pass
             Binder<gl::Fbo> binder(ssao.fbo[1]);
@@ -157,10 +177,10 @@ bool Application::run(const std::string& input)
             rectPrimitive.render();
         }
 
-        blurProgram.bind().setUniform("texColor",  0)
-                          .setUniform("texSsao",   1)
-                          .setUniform("texelStep", ssao.texelStep())
-                          .setUniform("mvp",       glm::mat4());
+        blurProg.bind().setUniform("texColor",  0)
+                       .setUniform("texSsao",   1)
+                       .setUniform("texelStep", ssao.texelStep())
+                       .setUniform("mvp",       glm::mat4());
         {
             // Blur/output pass
             glClearColor(0.f, 0.f, 0.f, 1.f);

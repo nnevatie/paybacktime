@@ -36,6 +36,7 @@ set(HEADER_FILES
     mesh.h
     sn_mesher.h
     ssao.h
+    scene.h
     )
 
 set(SOURCE_FILES
@@ -62,6 +63,7 @@ set(SOURCE_FILES
     render_stats.cpp
     mesh.cpp
     ssao.cpp
+    scene.cpp
     )
 
 set(EXT_HEADER_FILES
@@ -81,7 +83,7 @@ set(EXT_SOURCE_FILES
 set(SHADER_FILES
     shaders/simple.vs.glsl
     shaders/passthrough.vs.glsl
-    shaders/constant.fs.glsl
+    shaders/color.fs.glsl
     shaders/screenspace.fs.glsl
     shaders/lambert.fs.glsl
     shaders/phong.fs.glsl
