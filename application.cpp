@@ -88,8 +88,8 @@ bool Application::run(const std::string& input)
     gl::ShaderProgram blurProg({vsSimple, fsBlur},
                                {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    const ImageCube depthCube("data/" + input + ".*.png", 1);
-    const ImageCube albedoCube("data/" + input + ".albedo.*.png");
+    const ImageCube depthCube("objects/" + input + ".*.png", 1);
+    const ImageCube albedoCube("objects/" + input + ".albedo.*.png");
 
     TextureAtlas texAtlas({128, 128});
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);

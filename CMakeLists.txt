@@ -156,9 +156,9 @@ file(GLOB runtime_files
 install(FILES ${runtime_files}
         DESTINATION .)
 
-# Data
-file(GLOB data_files
-    "data/*")
+# Objects
+file(GLOB object_files
+    "objects/*")
 
-install(FILES ${data_files}
-        DESTINATION data)
+install(FILES ${object_files}
+        DESTINATION objects)
