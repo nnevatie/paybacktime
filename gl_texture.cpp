@@ -96,7 +96,7 @@ Texture& Texture::unbind()
     return *this;
 }
 
-Texture::unbind(GLenum target, GLenum unit)
+void Texture::unbind(GLenum target, GLenum unit)
 {
     glActiveTexture(unit);
     glBindTexture(target, 0);

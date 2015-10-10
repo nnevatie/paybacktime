@@ -34,7 +34,7 @@ struct Texture
     Texture& bindAs(GLenum unit);
     Texture& unbind();
 
-    static unbind(GLenum target, GLenum unit);
+    static void unbind(GLenum target, GLenum unit);
 
     Texture& set(GLenum name, GLint set);
 
