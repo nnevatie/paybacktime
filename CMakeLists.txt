@@ -37,6 +37,8 @@ set(HEADER_FILES
     sn_mesher.h
     ssao.h
     scene.h
+    object.h
+    object_store.h
     )
 
 set(SOURCE_FILES
@@ -64,6 +66,8 @@ set(SOURCE_FILES
     mesh.cpp
     ssao.cpp
     scene.cpp
+    object.cpp
+    object_store.cpp
     )
 
 set(EXT_HEADER_FILES

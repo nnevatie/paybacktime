@@ -31,6 +31,7 @@
 #include "ssao.h"
 #include "render_stats.h"
 
+#include "object_store.h"
 #include "scene.h"
 
 //#define CAPTURE_VIDEO 1
@@ -106,6 +107,7 @@ bool Application::run(const std::string& input)
 
     RenderStats stats;
 
+    ObjectStore objectStore(filesystem::path("data"), &texAtlas);
     Scene scene;
 
     int f = 0;
