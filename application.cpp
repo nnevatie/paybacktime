@@ -107,7 +107,7 @@ bool Application::run(const std::string& input)
 
     RenderStats stats;
 
-    ObjectStore objectStore(filesystem::path("data"), &texAtlas);
+    ObjectStore objectStore(filesystem::path("objects"), &texAtlas);
     Scene scene;
 
     int f = 0;
