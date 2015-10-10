@@ -1,9 +1,9 @@
 #version 150
 
-#define RADIUS           10
+#define RADIUS           5
 #define KERNEL_SIZE      32
 #define CAP_MIN_DISTANCE 0.001
-#define CAP_MAX_DISTANCE 0.25
+#define CAP_MAX_DISTANCE 0.05
 
 // Uniforms
 uniform sampler2D texColor;
