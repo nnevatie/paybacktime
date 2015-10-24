@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sstream>
+#include <cmath>
 
 #include "file_system.h"
 
@@ -47,5 +48,11 @@ inline D bitCast(const S& src)
 std::string str(const std::ostream& ostr);
 
 std::string readFile(const filesystem::path& path, bool binary = true);
+
+template <typename T>
+inline T radians(T deg)
+{
+     return T(deg * (M_PI / 180));
+}
 
 }  // namespace
