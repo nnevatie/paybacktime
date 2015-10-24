@@ -116,17 +116,16 @@ bool Application::run(const std::string& input)
     bool running = true;
     while (running)
     {
-        glm::mat4 proj  = glm::perspective(
-                              45.0f, display.size().aspect<float>(), 200.f, 400.f);
+        glm::mat4 proj  = glm::perspective(45.0f, display.size().aspect<float>(),
+                                           0.1f, 100.f);
 
-        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 200, 200),
+        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 50, 50),
                                       glm::vec3(0.f, 0.f, 0.f),
                                       glm::vec3(0, 1, 0));
 
         glm::mat4 model = glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
                           glm::rotate({}, az, glm::vec3(0.f, 0.f, 1.f));
         Clock clock;
-
         {
             // Geometry pass
             Binder<gl::Fbo> binder(ssao.fbo[0]);
@@ -135,6 +134,7 @@ bool Application::run(const std::string& input)
             glDrawBuffers(2, drawBuffers);
 
             glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClearDepth(1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
 
@@ -151,6 +151,7 @@ bool Application::run(const std::string& input)
                 .setUniform("albedo", 0)
                 .setUniform("mvp",    proj * view * model)
                 .setUniform("mv",     view * model)
+                .setUniform("fow",    radians(45.f))
                 .setUniform("size",   display.size().as<glm::vec2>());
 
             texAtlas.texture.bindAs(GL_TEXTURE0);
@@ -185,7 +186,6 @@ bool Application::run(const std::string& input)
                        .setUniform("mvp",       glm::mat4());
         {
             // Blur/output pass
-            glClearColor(0.f, 0.f, 0.f, 1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
 
