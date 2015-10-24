@@ -1,7 +1,8 @@
 #pragma once
 
-#include "file_system.h"
-#include "texture_atlas.h"
+#include <vector>
+
+#include "object.h"
 
 namespace hc
 {
@@ -9,6 +10,8 @@ namespace hc
 struct ObjectStore
 {
     ObjectStore(const filesystem::path& path, TextureAtlas* atlas);
+
+    std::vector<Object> objects;
 };
 
 } // namespace hc
