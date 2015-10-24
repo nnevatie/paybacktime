@@ -122,6 +122,10 @@ set(OPENGL_LIBS
     opengl32
     )
 
+# Build definitions
+add_definitions(-D_USE_MATH_DEFINES
+                -DGLEW_STATIC)
+
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
                                ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES}
                                ${SHADER_FILES})
