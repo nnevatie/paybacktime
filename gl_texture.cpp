@@ -74,7 +74,6 @@ Image Texture::image()
     Image image(size, 4);
     glGetTexImage(d->target, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
     unbind();
-
     return image;
 }
 
@@ -122,17 +121,17 @@ Texture& Texture::alloc(int level, const std::vector<int>& dim,
     if (d->target == GL_TEXTURE_1D && dim.size() > 0)
         glTexImage1D(GL_TEXTURE_1D,
                      level, internalFormat,
-                     dim[0], 0, format, type , data);
+                     dim[0], 0, format, type, data);
     else
     if (d->target == GL_TEXTURE_2D && dim.size() > 1)
         glTexImage2D(GL_TEXTURE_2D,
                      level, internalFormat,
-                     dim[0], dim[1], 0, format, type , data);
+                     dim[0], dim[1], 0, format, type, data);
     else
     if (d->target == GL_TEXTURE_3D && dim.size() > 2)
         glTexImage3D(GL_TEXTURE_3D,
                      level, internalFormat,
-                     dim[0], dim[1], dim[2], 0, format, type , data);
+                     dim[0], dim[1], dim[2], 0, format, type, data);
 
     // Set default params
     set(GL_TEXTURE_MIN_FILTER, GL_NEAREST);

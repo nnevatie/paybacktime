@@ -36,7 +36,7 @@ struct Texture
 
     static void unbind(GLenum target, GLenum unit);
 
-    Texture& set(GLenum name, GLint set);
+    Texture& set(GLenum name, GLint param);
 
     Texture& alloc(const std::vector<int>& dim,
                    GLint internalFormat, GLenum format,
