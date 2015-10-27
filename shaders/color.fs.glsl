@@ -7,7 +7,6 @@ uniform vec4 albedo;
 // Input
 in Block
 {
-    vec3 eye;
     vec3 normal;
     vec2 uv;
     vec3 bc;

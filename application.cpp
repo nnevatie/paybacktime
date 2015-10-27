@@ -70,6 +70,8 @@ bool Application::run(const std::string& input)
     display.open();
 
     gl::Shader vsSimple(filesystem::path("shaders/simple.vs.glsl"));
+    gl::Shader vsGeometry(filesystem::path("shaders/geometry.vs.glsl"));
+    gl::Shader fsGeometry(filesystem::path("shaders/geometry.fs.glsl"));
     gl::Shader fsColor(filesystem::path("shaders/color.fs.glsl"));
     gl::Shader fsPhong(filesystem::path("shaders/phong.fs.glsl"));
     gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
@@ -79,7 +81,7 @@ bool Application::run(const std::string& input)
     gl::ShaderProgram gridProg({vsSimple, fsColor},
                                {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    gl::ShaderProgram geomProg({vsSimple, gsWireframe, fsPhong},
+    gl::ShaderProgram geomProg({vsGeometry, /*gsWireframe,*/ fsGeometry},
                                {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     gl::ShaderProgram ssaoProg({vsSimple, fsSsao},
@@ -107,8 +109,10 @@ bool Application::run(const std::string& input)
 
     RenderStats stats;
 
+    /*
     ObjectStore objectStore(filesystem::path("objects"), &texAtlas);
     Scene scene;
+    */
 
     int f = 0;
     float ay = 0, az = 0;
@@ -117,9 +121,9 @@ bool Application::run(const std::string& input)
     while (running)
     {
         glm::mat4 proj  = glm::perspective(45.0f, display.size().aspect<float>(),
-                                           0.1f, 100.f);
+                                           0.1f, 200.f);
 
-        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 50, 50),
+        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 40, 40),
                                       glm::vec3(0.f, 0.f, 0.f),
                                       glm::vec3(0, 1, 0));
 
@@ -130,14 +134,15 @@ bool Application::run(const std::string& input)
             // Geometry pass
             Binder<gl::Fbo> binder(ssao.fbo[0]);
             const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
-                                          GL_COLOR_ATTACHMENT1};
-            glDrawBuffers(2, drawBuffers);
+                                          GL_COLOR_ATTACHMENT1,
+                                          GL_COLOR_ATTACHMENT2};
+            glDrawBuffers(3, drawBuffers);
 
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-            glClearDepth(1.f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+/*
             gridProg.bind()
                 .setUniform("albedo", glm::vec4(0, 0.5f, 0, 1))
                 .setUniform("mvp",    proj * view * model)
@@ -146,36 +151,36 @@ bool Application::run(const std::string& input)
 
             gl::Texture::unbind(GL_TEXTURE_2D, GL_TEXTURE0);
             gridPrimitive.render(GL_LINES);
-
+*/
             geomProg.bind()
                 .setUniform("albedo", 0)
                 .setUniform("mvp",    proj * view * model)
                 .setUniform("mv",     view * model)
-                .setUniform("fow",    radians(45.f))
+                .setUniform("p",      proj)
                 .setUniform("size",   display.size().as<glm::vec2>());
 
             texAtlas.texture.bindAs(GL_TEXTURE0);
             primitive.render();
         }
 
-        ssaoProg.bind().setUniform("texColor",   0)
-                       .setUniform("texNormal",  1)
-                       .setUniform("texDepth",   2)
-                       .setUniform("texNoise",   3)
-                       .setUniform("kernel",     ssao.kernel)
-                       .setUniform("noiseScale", ssao.noiseScale())
-                       .setUniform("mvp",        glm::mat4())
-                       .setUniform("invP",       glm::inverse(proj))
-                       .setUniform("p",          proj);
+        ssaoProg.bind().setUniform("texPosDepth", 0)
+                       .setUniform("texNormal",   1)
+                       .setUniform("texColor",    2)
+                       .setUniform("texNoise",    3)
+                       .setUniform("kernel",      ssao.kernel)
+                       .setUniform("noiseScale",  ssao.noiseScale())
+                       .setUniform("mvp",         glm::mat4())
+                       .setUniform("invP",        glm::inverse(proj))
+                       .setUniform("p",           proj);
         {
             // SSAO pass
             Binder<gl::Fbo> binder(ssao.fbo[1]);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            ssao.texColor.bindAs(GL_TEXTURE0);
+            ssao.texPosDepth.bindAs(GL_TEXTURE0);
             ssao.texNormal.bindAs(GL_TEXTURE1);
-            ssao.texDepth.bindAs(GL_TEXTURE2);
+            ssao.texColor.bindAs(GL_TEXTURE2);
             ssao.texNoise.bindAs(GL_TEXTURE3);
             rectPrimitive.render();
         }
@@ -193,7 +198,6 @@ bool Application::run(const std::string& input)
             ssao.texBlur.bindAs(GL_TEXTURE1);
             rectPrimitive.render();
         }
-
         #ifdef CAPTURE_VIDEO
         display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");
         a += 0.01f;
@@ -201,9 +205,9 @@ bool Application::run(const std::string& input)
         //a += 0.001f;
         #endif
 
+
         stats.accumulate(clock.stop(), mesh.vertices.size(),
                                        mesh.indices.size() / 3);
-
         stats.render();
         display.swap();
 

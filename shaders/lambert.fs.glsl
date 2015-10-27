@@ -11,7 +11,6 @@ uniform mat4 p;
 // Input
 in Block
 {
-    vec3 eye;
     vec3 normal;
     vec2 uv;
     vec3 bc;

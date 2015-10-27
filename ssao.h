@@ -6,6 +6,7 @@
 
 #include "geometry.h"
 #include "gl_texture.h"
+#include "gl_rbo.h"
 #include "gl_fbo.h"
 
 namespace hc
@@ -18,10 +19,12 @@ struct Ssao
               noiseSize;
 
     gl::Fbo fbo[2];
-    gl::Texture texColor,
+
+    gl::Rbo     rboDepth;
+    gl::Texture texPosDepth,
                 texNormal,
+                texColor,
                 texBlur,
-                texDepth,
                 texNoise;
 
     std::vector<glm::vec3> kernel;

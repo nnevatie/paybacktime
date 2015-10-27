@@ -1,14 +1,13 @@
 #version 150
 
-#define RADIUS           5
+#define RADIUS           2.0
 #define KERNEL_SIZE      32
-#define CAP_MIN_DISTANCE 0.001
-#define CAP_MAX_DISTANCE 0.05
+#define POW              2
 
 // Uniforms
-uniform sampler2D texColor;
+uniform sampler2D texPosDepth;
 uniform sampler2D texNormal;
-uniform sampler2D texDepth;
+uniform sampler2D texColor;
 uniform sampler2D texNoise;
 uniform vec3      kernel[KERNEL_SIZE];
 uniform vec2      noiseScale;
@@ -18,7 +17,6 @@ uniform mat4      p;
 // Input
 in Block
 {
-    vec3 eye;
     vec3 normal;
     vec2 uv;
     vec3 bc;
@@ -28,44 +26,34 @@ ib;
 // Output
 out vec4 color;
 
-vec4 viewPos(vec2 uv)
-{
-    float x = uv.s * 2.0 - 1.0;
-    float y = uv.t * 2.0 - 1.0;
-    float z = texture(texDepth, uv).r * 2.0 - 1.0;
-    vec4 p  = vec4(x, y, z, 1.0);
-    vec4 v  = invP * p;
-    v      /= v.w;
-    return v;
-}
-
 void main(void)
 {
-    vec4 posView       = viewPos(ib.uv);
-    vec3 normalView    = normalize(texture(texNormal, ib.uv).
-                                   xyz * 2.0 - 1.0);
-    vec3 randomVector  = normalize(texture(texNoise,
-                                   ib.uv * noiseScale).xyz * 2.0 - 1.0);
+    vec3 fragPos   = texture(texPosDepth, ib.uv).xyz;
+    vec3 normal    = texture(texNormal, ib.uv).xyz;
+    vec3 randomVec = texture(texNoise, ib.uv * noiseScale).xyz;
+    vec3 tangent   = normalize(randomVec - normal * dot(randomVec, normal));
+    vec3 bitangent = cross(normal, tangent);
+    mat3 tbn       = mat3(tangent, bitangent, normal);
 
-    vec3 tangentView   = normalize(randomVector - dot(
-                                   randomVector, normalView) * normalView);
+    // Offset from surface, prevent self-occlusion
+    fragPos       += 0.5 * normal;
 
-    vec3 bitangentView = cross(normalView, tangentView);
-    mat3 kernelMatrix  = mat3(tangentView, bitangentView, normalView);
-
-    float occ = 0.0;
-    for (int i = 0; i < KERNEL_SIZE; ++i)
+    float occlusion = 0.0;
+    for(int i = 0; i < KERNEL_SIZE; ++i)
     {
-        vec3 vv    = kernelMatrix * kernel[i];
-        vec4 pv    = posView + RADIUS * vec4(vv, 0.0);
-        vec4 pndc  = p * pv;
-        pndc      /= pndc.w;
-        vec2 puv   = pndc.xy * 0.5 + 0.5;
-        float sndc = texture(texDepth, puv).r * 2.0 - 1.0;
-        float d    = pndc.z - sndc;
-        if (d > CAP_MIN_DISTANCE && d < CAP_MAX_DISTANCE)
-            occ += 1.0;
+        vec3 ray    = tbn * kernel[i];
+        vec3 sample = fragPos + ray * RADIUS;
+
+        vec4 offset = vec4(sample, 1.0);
+        offset      = p * offset;
+        offset.xy  /= offset.w;
+        offset.xy   = offset.xy * 0.5 + 0.5;
+
+        float sampleDepth = -texture(texPosDepth, offset.xy).w;
+        float range       = abs(fragPos.z - sampleDepth);
+        float rangeCheck  = smoothstep(0.0, 1.0, RADIUS / range);
+
+        occlusion += (sampleDepth >= sample.z ? 1.0 : 0.0) * rangeCheck;
     }
-    occ   = pow(1.0 - (occ / KERNEL_SIZE), 2);
-    color = vec4(occ, occ, occ, 1.0);
+    color = vec4(pow(1.0 - (occlusion / KERNEL_SIZE), POW));
 }

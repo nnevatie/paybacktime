@@ -5,6 +5,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/random.hpp>
+#include <glm/gtx/compatibility.hpp>
 
 namespace hc
 {
@@ -14,7 +15,6 @@ namespace
 std::vector<glm::vec3> kernelData(int size)
 {
     using namespace boost::algorithm;
-
     std::vector<glm::vec3> data(size);
     for (int i = 0; i < size; ++i)
     {
@@ -53,25 +53,28 @@ Ssao::Ssao(int kernelSize,
 {
     auto fboSize = {renderSize.w, renderSize.h};
 
-    // Alloc color, normal and depth textures
-    texColor.bind().alloc(fboSize,  GL_RGB, GL_RGB);
-    texNormal.bind().alloc(fboSize, GL_RGB, GL_RGB);
-    texBlur.bind().alloc(fboSize,   GL_RGB, GL_RGB);
-    texDepth.bind().alloc(fboSize,  GL_DEPTH_COMPONENT32F,
-                                    GL_DEPTH_COMPONENT, GL_FLOAT);
+    // Alloc depth RBO
+    rboDepth.bind().alloc(renderSize, GL_DEPTH_COMPONENT);
+
+    // Alloc pos/depth, color and normal textures
+    texPosDepth.bind().alloc(fboSize,  GL_RGBA16F, GL_RGB, GL_FLOAT);
+    texNormal.bind().alloc(fboSize,    GL_RGB16F,  GL_RGB, GL_FLOAT);
+    texColor.bind().alloc(fboSize,     GL_RGB,     GL_RGB, GL_FLOAT);
+    texBlur.bind().alloc(fboSize,      GL_RGB,     GL_RGB);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
-                          GL_RGB32F, GL_RGB, GL_FLOAT,
+                          GL_RGB16F, GL_RGB, GL_FLOAT,
                           noiseData(noiseSize.area()).data())
                    .set(GL_TEXTURE_WRAP_S, GL_REPEAT)
                    .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    // Attach textures to FBOs
+    // Attach RBO and textures to FBOs
     fbo[0].bind()
-          .attach(texColor,  gl::Fbo::Attachment::Color, 0)
-          .attach(texNormal, gl::Fbo::Attachment::Color, 1)
-          .attach(texDepth,  gl::Fbo::Attachment::Depth)
+          .attach(rboDepth,    gl::Fbo::Attachment::Depth)
+          .attach(texPosDepth, gl::Fbo::Attachment::Color, 0)
+          .attach(texNormal,   gl::Fbo::Attachment::Color, 1)
+          .attach(texColor,    gl::Fbo::Attachment::Color, 2)
           .unbind();
 
     fbo[1].bind()

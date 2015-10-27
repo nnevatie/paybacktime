@@ -55,6 +55,13 @@ Fbo& Fbo::bind()
     return *this;
 }
 
+Fbo& Fbo::attach(const Rbo& rbo, Fbo::Attachment attachment, int index)
+{
+    const GLenum type = GLenum(attachmentType(attachment) + index);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, type, GL_RENDERBUFFER, rbo.id());
+    return *this;
+}
+
 Fbo& Fbo::attach(const Texture& texture, Attachment attachment, int index)
 {
     const GLenum target = GL_FRAMEBUFFER;

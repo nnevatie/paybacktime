@@ -9,7 +9,7 @@ uniform vec2 size;
 // Input
 in Block
 {
-    vec3 eye;
+    vec3 viewPos;
     vec3 normal;
     vec2 uv;
     vec3 bc;
@@ -19,7 +19,7 @@ ib[];
 // Output
 out Block
 {
-    vec3 eye;
+    vec3 viewPos;
     vec3 normal;
     vec2 uv;
     vec3 bc;
@@ -38,25 +38,25 @@ void main(void)
 
     float area = abs(v1.x * v2.y - v1.y * v2.x);
 
-    ob.eye    = ib[0].eye;
-    ob.normal = ib[0].normal;
-    ob.uv     = ib[0].uv;
-    ob.bc     = vec3(area / length(v0), 0, 0);
-    gl_Position   = gl_in[0].gl_Position;
+    ob.viewPos  = ib[0].viewPos;
+    ob.normal   = ib[0].normal;
+    ob.uv       = ib[0].uv;
+    ob.bc       = vec3(area / length(v0), 0, 0);
+    gl_Position = gl_in[0].gl_Position;
     EmitVertex();
 
-    ob.eye    = ib[1].eye;
-    ob.normal = ib[1].normal;
-    ob.uv     = ib[1].uv;
-    ob.bc     = vec3(0, area / length(v1), 0);
-    gl_Position   = gl_in[1].gl_Position;
+    ob.viewPos  = ib[1].viewPos;
+    ob.normal   = ib[1].normal;
+    ob.uv       = ib[1].uv;
+    ob.bc       = vec3(0, area / length(v1), 0);
+    gl_Position = gl_in[1].gl_Position;
     EmitVertex();
 
-    ob.eye    = ib[2].eye;
-    ob.normal = ib[2].normal;
-    ob.uv     = ib[2].uv;
-    ob.bc     = vec3(0, 0, area / length(v2));
-    gl_Position   = gl_in[2].gl_Position;
+    ob.viewPos  = ib[2].viewPos;
+    ob.normal   = ib[2].normal;
+    ob.uv       = ib[2].uv;
+    ob.bc       = vec3(0, 0, area / length(v2));
+    gl_Position = gl_in[2].gl_Position;
     EmitVertex();
 
     EndPrimitive();

@@ -11,7 +11,7 @@ uniform sampler2D albedo;
 // Input
 in Block
 {
-    vec3 eye;
+    vec3 viewPos;
     vec3 normal;
     vec2 uv;
     vec3 bc;
@@ -37,6 +37,7 @@ void main()
     float lambertian = 0.25 + max(dot(n, ldir), 0.0);
     float specular   = 0.0;
 
+    /*
     if(lambertian > 0.0)
     {
         vec3 reflectDir = reflect(-ldir, n);
@@ -44,6 +45,7 @@ void main()
         float specAngle = max(dot(reflectDir, viewDir), 0.0);
         specular        = pow(specAngle, 1.0);
     }
+    */
 
     vec4 albedo = texture(albedo, ib.uv);
     //vec4 c = albedo;
