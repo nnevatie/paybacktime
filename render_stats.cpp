@@ -41,6 +41,7 @@ void RenderStats::render()
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
     glPolygonMode(GL_FRONT, GL_FILL);
     nvgBeginFrame(vg, viewport[2], viewport[3], 1.f);
     nvgFontSize(vg, 16.0f);
@@ -66,9 +67,8 @@ void RenderStats::render()
 
     nvgText(vg, 10, 60, str(std::stringstream()
                             << "Geometry: ~" << geomKb << " KB").c_str(), 0);
-
-
     nvgEndFrame(vg);
+    glPopAttrib();
 }
 
 } // namespace hc
