@@ -32,6 +32,7 @@ set(HEADER_FILES
     gl_shaders.h
     gl_primitive.h
     gl_fbo.h
+    gl_rbo.h
     render_stats.h
     mesh.h
     sn_mesher.h
@@ -62,6 +63,7 @@ set(SOURCE_FILES
     gl_shaders.cpp
     gl_primitive.cpp
     gl_fbo.cpp
+    gl_rbo.cpp
     render_stats.cpp
     mesh.cpp
     ssao.cpp
@@ -86,6 +88,8 @@ set(EXT_SOURCE_FILES
 
 set(SHADER_FILES
     shaders/simple.vs.glsl
+    shaders/geometry.vs.glsl
+    shaders/geometry.fs.glsl
     shaders/passthrough.vs.glsl
     shaders/color.fs.glsl
     shaders/screenspace.fs.glsl
