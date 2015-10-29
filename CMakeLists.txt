@@ -101,6 +101,10 @@ set(SHADER_FILES
     shaders/wireframe.gs.glsl
     )
 
+set(RESOURCE_FILES
+    highcaliber.rc
+    )
+
 # System dependencies
 set(SYS_LIBS
     mingw32
@@ -132,7 +136,7 @@ add_definitions(-D_USE_MATH_DEFINES
 
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
                                ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES}
-                               ${SHADER_FILES})
+                               ${SHADER_FILES} ${RESOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME}
                       ${SYS_LIBS}

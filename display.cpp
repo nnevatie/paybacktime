@@ -55,7 +55,8 @@ bool Display::open()
             SDL_WINDOWPOS_UNDEFINED,
             size_.w,
             size_.h,
-            SDL_WINDOW_OPENGL);
+            SDL_WINDOW_OPENGL |
+            SDL_WINDOW_ALLOW_HIGHDPI);
 
         // Create OpenGL context
         // TODO: Define requested version/profile
