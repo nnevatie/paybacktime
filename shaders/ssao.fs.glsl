@@ -7,7 +7,6 @@
 // Uniforms
 uniform sampler2D texPosDepth;
 uniform sampler2D texNormal;
-uniform sampler2D texColor;
 uniform sampler2D texNoise;
 uniform vec3      kernel[KERNEL_SIZE];
 uniform vec2      noiseScale;

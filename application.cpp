@@ -160,8 +160,7 @@ bool Application::run(const std::string& input)
 
         ssaoProg.bind().setUniform("texPosDepth", 0)
                        .setUniform("texNormal",   1)
-                       .setUniform("texColor",    2)
-                       .setUniform("texNoise",    3)
+                       .setUniform("texNoise",    2)
                        .setUniform("kernel",      ssao.kernel)
                        .setUniform("noiseScale",  ssao.noiseScale())
                        .setUniform("p",           proj);
@@ -173,8 +172,7 @@ bool Application::run(const std::string& input)
 
             ssao.texPosDepth.bindAs(GL_TEXTURE0);
             ssao.texNormal.bindAs(GL_TEXTURE1);
-            ssao.texColor.bindAs(GL_TEXTURE2);
-            ssao.texNoise.bindAs(GL_TEXTURE3);
+            ssao.texNoise.bindAs(GL_TEXTURE2);
             rectPrimitive.render();
         }
 
