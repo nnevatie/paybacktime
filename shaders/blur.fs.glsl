@@ -8,9 +8,7 @@ uniform vec2      texelStep;
 // Input
 in Block
 {
-    vec3 normal;
     vec2 uv;
-    vec3 bc;
 }
 ib;
 

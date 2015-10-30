@@ -11,15 +11,12 @@ uniform sampler2D texColor;
 uniform sampler2D texNoise;
 uniform vec3      kernel[KERNEL_SIZE];
 uniform vec2      noiseScale;
-uniform mat4      invP;
 uniform mat4      p;
 
 // Input
 in Block
 {
-    vec3 normal;
     vec2 uv;
-    vec3 bc;
 }
 ib;
 

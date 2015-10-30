@@ -26,6 +26,17 @@ struct VertexSpec
     std::vector<Attrib> attribs;
 };
 
+struct Vertex_P
+{
+    glm::vec3 p;
+
+    static VertexSpec spec()
+    {
+        return {sizeof(Vertex_P),
+               {std::make_tuple(3, GL_FLOAT, sizeof(p))}};
+    }
+};
+
 struct Vertex_P_UV
 {
     glm::vec3 p;
@@ -83,57 +94,57 @@ struct Mesh
     }
 };
 
+typedef Mesh<Vertex_P,      uint32_t> Mesh_P;
 typedef Mesh<Vertex_P_UV,   uint32_t> Mesh_P_UV;
 typedef Mesh<Vertex_P_N_UV, uint32_t> Mesh_P_N_UV;
 
-inline Mesh_P_N_UV rectMesh(float halfWidth = 1.f, float halfHeight = 1.f)
+inline Mesh_P_UV rectMesh(float halfWidth = 1.f, float halfHeight = 1.f)
 {
-    const glm::vec3 n(0, 0, 1);
     return
     {
         {
-            {glm::vec3(-halfWidth, -halfHeight, 0), n, glm::vec2(0, 0)},
-            {glm::vec3( halfWidth, -halfHeight, 0), n, glm::vec2(1, 0)},
-            {glm::vec3( halfWidth,  halfHeight, 0), n, glm::vec2(1, 1)},
-            {glm::vec3(-halfWidth,  halfHeight, 0), n, glm::vec2(0, 1)},
+            {glm::vec3(-halfWidth, -halfHeight, 0), glm::vec2(0, 0)},
+            {glm::vec3( halfWidth, -halfHeight, 0), glm::vec2(1, 0)},
+            {glm::vec3( halfWidth,  halfHeight, 0), glm::vec2(1, 1)},
+            {glm::vec3(-halfWidth,  halfHeight, 0), glm::vec2(0, 1)},
         },
         {0, 1, 2, 2, 3, 0}
     };
 }
 
-inline Mesh_P_N_UV squareMesh(float halfWidth = 1.f)
+inline Mesh_P_UV squareMesh(float halfWidth = 1.f)
 {
     return rectMesh(halfWidth, halfWidth);
 }
 
-inline Mesh_P_N_UV gridMesh(float interval, float halfWidth, float halfHeight)
+inline Mesh_P gridMesh(float interval, float halfWidth, float halfHeight)
 {
     const Size<int>   size(halfWidth * 2 / interval, halfHeight * 2 / interval);
     const Size<float> step(halfWidth * 2 / size.w,   halfHeight * 2 / size.h);
 
-    Mesh_P_N_UV mesh;
+    Mesh_P mesh;
     for (int y = 0; y <= size.h; ++y)
         for (int x = 0; x <= size.w; ++x)
         {
             if (x < size.w)
             {
-                const Mesh_P_N_UV::Index index0 = mesh.vertices.size();
+                const Mesh_P::Index index0 = mesh.vertices.size();
                 mesh.indices.insert(mesh.indices.end(), {index0, index0 + 1});
                 mesh.vertices.insert(mesh.vertices.end(),
-                    {{-halfWidth  + (x + 0) * step.w, 0,
-                      -halfHeight + (y + 0) * step.h},
-                     {-halfWidth  + (x + 1) * step.w, 0,
-                      -halfHeight + (y + 0) * step.h}});
+                    {{{-halfWidth  + (x + 0) * step.w, 0,
+                       -halfHeight + (y + 0) * step.h}},
+                     {{-halfWidth  + (x + 1) * step.w, 0,
+                       -halfHeight + (y + 0) * step.h}}});
             }
             if (y < size.h)
             {
-                const Mesh_P_N_UV::Index index1 = mesh.vertices.size();
+                const Mesh_P::Index index1 = mesh.vertices.size();
                 mesh.indices.insert(mesh.indices.end(), {index1, index1 + 1});
                 mesh.vertices.insert(mesh.vertices.end(),
-                    {{-halfWidth  + (x + 0) * step.w, 0,
-                      -halfHeight + (y + 0) * step.h},
-                     {-halfWidth  + (x + 0) * step.w, 0,
-                      -halfHeight + (y + 1) * step.h}});
+                    {{{-halfWidth  + (x + 0) * step.w, 0,
+                       -halfHeight + (y + 0) * step.h}},
+                     {{-halfWidth  + (x + 0) * step.w, 0,
+                       -halfHeight + (y + 1) * step.h}}});
             }
         }
 

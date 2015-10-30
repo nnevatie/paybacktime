@@ -66,26 +66,25 @@ bool Application::run(const std::string& input)
     Display display("High Caliber", {1280, 720});
     display.open();
 
-    gl::Shader vsSimple(filesystem::path("shaders/simple.vs.glsl"));
     gl::Shader vsGeometry(filesystem::path("shaders/geometry.vs.glsl"));
     gl::Shader fsGeometry(filesystem::path("shaders/geometry.fs.glsl"));
+    gl::Shader vsTexture(filesystem::path("shaders/texture.vs.glsl"));
     gl::Shader fsColor(filesystem::path("shaders/color.fs.glsl"));
-    gl::Shader fsPhong(filesystem::path("shaders/phong.fs.glsl"));
     gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
     gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
-    gl::ShaderProgram gridProg({vsSimple, fsColor},
-                               {{0, "position"}, {1, "normal"}, {2, "uv"}});
+    //gl::ShaderProgram gridProg({vsSimple, fsColor},
+    //                           {{0, "position"}});
 
     gl::ShaderProgram geomProg({vsGeometry, /*gsWireframe,*/ fsGeometry},
                                {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    gl::ShaderProgram ssaoProg({vsSimple, fsSsao},
-                               {{0, "position"}, {1, "normal"}, {2, "uv"}});
+    gl::ShaderProgram ssaoProg({vsTexture, fsSsao},
+                               {{0, "position"}, {1, "uv"}});
 
-    gl::ShaderProgram blurProg({vsSimple, fsBlur},
-                               {{0, "position"}, {1, "normal"}, {2, "uv"}});
+    gl::ShaderProgram blurProg({vsTexture, fsBlur},
+                               {{0, "position"}, {1, "uv"}});
 
     const ImageCube depthCube("objects/" + input + ".*.png", 1);
     const ImageCube albedoCube("objects/" + input + ".albedo.*.png");
@@ -96,10 +95,10 @@ bool Application::run(const std::string& input)
     const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
     const gl::Primitive primitive(mesh);
 
-    const Mesh_P_N_UV rectMesh = squareMesh();
+    const Mesh_P_UV rectMesh = squareMesh();
     const gl::Primitive rectPrimitive(rectMesh);
 
-    const Mesh_P_N_UV gMesh = gridMesh(16, 128, 128);
+    const Mesh_P gMesh = gridMesh(16, 128, 128);
     const gl::Primitive gridPrimitive(gMesh);
 
     Ssao ssao(32, display.size(), {4, 4});
@@ -166,8 +165,6 @@ bool Application::run(const std::string& input)
                        .setUniform("texNoise",    3)
                        .setUniform("kernel",      ssao.kernel)
                        .setUniform("noiseScale",  ssao.noiseScale())
-                       .setUniform("mvp",         glm::mat4())
-                       .setUniform("invP",        glm::inverse(proj))
                        .setUniform("p",           proj);
         {
             // SSAO pass
@@ -184,8 +181,7 @@ bool Application::run(const std::string& input)
 
         blurProg.bind().setUniform("texColor",  0)
                        .setUniform("texSsao",   1)
-                       .setUniform("texelStep", ssao.texelStep())
-                       .setUniform("mvp",       glm::mat4());
+                       .setUniform("texelStep", ssao.texelStep());
         {
             // Blur/output pass
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
