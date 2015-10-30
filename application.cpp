@@ -150,7 +150,6 @@ bool Application::run(const std::string& input)
 */
             geomProg.bind()
                 .setUniform("albedo", 0)
-                .setUniform("mvp",    proj * view * model)
                 .setUniform("mv",     view * model)
                 .setUniform("p",      proj)
                 .setUniform("size",   display.size().as<glm::vec2>());

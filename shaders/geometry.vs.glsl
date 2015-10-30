@@ -1,7 +1,6 @@
 #version 150
 
 // Uniforms
-uniform mat4 mvp;
 uniform mat4 mv;
 uniform mat4 p;
 
