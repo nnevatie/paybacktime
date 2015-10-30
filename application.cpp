@@ -16,11 +16,8 @@
 #include "clock.h"
 #include "log.h"
 
-#include "sdf_primitives.h"
 #include "image_cube.h"
 #include "texture_atlas.h"
-
-#include "ref_mesher.h"
 #include "image_mesher.h"
 
 #include "gl_primitive.h"
