@@ -157,9 +157,9 @@ struct Cubefield
     float interval;
 };
 
-void emitBox(Mesh* g, const Box& box)
+void emitBox(Mesh<>* g, const Box& box)
 {
-    const Mesh::Index ib = g->vertices.size();
+    const Mesh<>::Index ib = g->vertices.size();
     g->vertices.insert(g->vertices.end(),
                        box.begin(),
                        box.end());
@@ -185,7 +185,7 @@ void emitBox(Mesh* g, const Box& box)
          ib + 6, ib + 2, ib + 1});
 }
 
-void emitBoxFace(Mesh* g, float scale, int axis, int cc[8][3],
+void emitBoxFace(Mesh<>* g, float scale, int axis, int cc[8][3],
                  const glm::vec3& p, const glm::vec3& s, const glm::vec3& d,
                  const RectCube<float>& uvCube)
 {
@@ -198,7 +198,7 @@ void emitBoxFace(Mesh* g, float scale, int axis, int cc[8][3],
         {7, 6, 5, 4},
         {0, 1, 2, 3}
     };
-    const Mesh::Index ib = g->vertices.size();
+    const Mesh<>::Index ib = g->vertices.size();
 
     typedef glm::vec3 v;
 
@@ -328,11 +328,11 @@ Box box(const V& vol, int x, int y, int z)
 }
 
 template <typename V>
-Mesh meshCubes(const V& vol)
+Mesh<> meshCubes(const V& vol)
 {
     const int dims[3] = {vol.width, vol.height, vol.depth};
 
-    Mesh mesh;
+    Mesh<> mesh;
     mesh.vertices.reserve(dims[0] * dims[1] * dims[2] * 8);
     mesh.indices.reserve(dims[0] * dims[1] * dims[2] * 36);
 
@@ -346,7 +346,7 @@ Mesh meshCubes(const V& vol)
 }
 
 template <typename V>
-Mesh meshGreedy(const V& vol, const RectCube<float>& uvCube)
+Mesh<> meshGreedy(const V& vol, const RectCube<float>& uvCube)
 {
     struct Cell
     {
@@ -385,7 +385,7 @@ Mesh meshGreedy(const V& vol, const RectCube<float>& uvCube)
                 cells[x][y][z].g = v ? vol.g(x, y, z) : 0;
             }
 
-    Mesh mesh;
+    Mesh<> mesh;
     const int reserveSize = (dims[0] / 4) * (dims[1] / 4) * (dims[2] / 4);
     mesh.vertices.reserve(reserveSize);
     mesh.indices.reserve(reserveSize);
@@ -485,7 +485,7 @@ Mesh meshGreedy(const V& vol, const RectCube<float>& uvCube)
 
 } // namespace
 
-Mesh mesh(const Image& image, float interval)
+Mesh<> mesh(const Image& image, float interval)
 {
     HCTIME("image");
     const Heightfield hfield(image, std::min(image.size().w,
@@ -494,9 +494,9 @@ Mesh mesh(const Image& image, float interval)
     //return meshCubes(hfield);
 }
 
-Mesh mesh(const ImageCube& imageCube,
-          const RectCube<float>& uvCube,
-          float interval)
+Mesh<> mesh(const ImageCube& imageCube,
+            const RectCube<float>& uvCube,
+            float interval)
 {
     HCTIME("cube");
     const Cubefield cfield(imageCube, interval);

@@ -9,12 +9,12 @@ namespace hc
 namespace ImageMesher
 {
 
-Mesh mesh(const Image& image,
-          float interval = 1.f);
+Mesh<> mesh(const Image& image,
+            float interval = 1.f);
 
-Mesh mesh(const ImageCube& imageCube,
-          const RectCube<float>& uvCube,
-          float interval = 1.f);
+Mesh<> mesh(const ImageCube& imageCube,
+            const RectCube<float>& uvCube,
+            float interval = 1.f);
 
 } // namespace ImageMesher
 } // namespace hc

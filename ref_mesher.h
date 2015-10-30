@@ -8,8 +8,8 @@ namespace hc
 namespace RefMesher
 {
 
-Mesh mesh(const sdf::Sphere& sphere);
-Mesh mesh(const sdf::Box& box);
+Mesh<> mesh(const sdf::Sphere& sphere);
+Mesh<> mesh(const sdf::Box& box);
 
 } // namespace RefMesher
 } // namespace

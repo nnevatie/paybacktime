@@ -22,8 +22,6 @@ set(HEADER_FILES
     common.h
     clock.h
     log.h
-    sdf_primitives.h
-    ref_mesher.h
     image_mesher.h
     image_atlas.h
     gl_uniforms.h
@@ -55,17 +53,13 @@ set(SOURCE_FILES
     common.cpp
     clock.cpp
     log.cpp
-    sdf_primitives.cpp
-    ref_mesher.cpp
     image_mesher.cpp
     gl_texture.cpp
     gl_buffers.cpp
     gl_shaders.cpp
-    gl_primitive.cpp
     gl_fbo.cpp
     gl_rbo.cpp
     render_stats.cpp
-    mesh.cpp
     ssao.cpp
     scene.cpp
     object.cpp
@@ -97,6 +91,7 @@ set(SHADER_FILES
     shaders/phong.fs.glsl
     shaders/ssao.fs.glsl
     shaders/blur.fs.glsl
+    shaders/texture.vs.glsl
     shaders/texture.fs.glsl
     shaders/wireframe.gs.glsl
     )
@@ -132,7 +127,7 @@ set(OPENGL_LIBS
 
 # Build definitions
 add_definitions(-D_USE_MATH_DEFINES
-                -DGLEW_STATIC)
+                 -DGLEW_STATIC)
 
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
                                ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES}
