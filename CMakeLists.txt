@@ -91,6 +91,7 @@ set(SHADER_FILES
     shaders/phong.fs.glsl
     shaders/ssao.fs.glsl
     shaders/blur.fs.glsl
+    shaders/lighting.fs.glsl
     shaders/texture.vs.glsl
     shaders/texture.fs.glsl
     shaders/wireframe.gs.glsl

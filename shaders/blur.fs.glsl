@@ -1,7 +1,6 @@
 #version 150
 
 // Uniforms
-uniform sampler2D texColor;
 uniform sampler2D texAo;
 
 // Input
@@ -23,8 +22,6 @@ void main(void)
             sum += texture(texAo, vec2(ib.uv + vec2(float(s), float(t)) *
                                                texelSize)).r;
     sum  /= 4.0 * 4.0;
-    //color = vec4(sum, sum, sum, 1.0);
-    color = texture(texColor, ib.uv) * sum;
+    color = vec4(sum, sum, sum, 1.0);
     //color = texture(texAo, ib.uv);
-    //color = texture(texColor, ib.uv);
 }

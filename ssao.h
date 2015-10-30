@@ -27,6 +27,7 @@ struct Ssao
                 texNormal,
                 texColor,
                 texAo,
+                texBlur,
                 texNoise;
 
     std::vector<glm::vec3> kernel;

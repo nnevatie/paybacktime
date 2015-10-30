@@ -56,11 +56,12 @@ Ssao::Ssao(int kernelSize,
     // Alloc depth RBO
     rboDepth.bind().alloc(renderSize, GL_DEPTH_COMPONENT);
 
-    // Alloc pos/depth, color and normal textures
+    // Alloc pos/depth, normal, color and AO textures
     texPosDepth.bind().alloc(fboSize,  GL_RGBA16F, GL_RGB, GL_FLOAT);
     texNormal.bind().alloc(fboSize,    GL_RGB16F,  GL_RGB, GL_FLOAT);
     texColor.bind().alloc(fboSize,     GL_RGB,     GL_RGB, GL_FLOAT);
     texAo.bind().alloc(fboSize,        GL_RED,     GL_RGB, GL_FLOAT);
+    texBlur.bind().alloc(fboSize,      GL_RED,     GL_RGB, GL_FLOAT);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
@@ -80,6 +81,10 @@ Ssao::Ssao(int kernelSize,
     fboAo.bind()
          .attach(texAo, gl::Fbo::Attachment::Color)
          .unbind();
+
+    fboBlur.bind()
+           .attach(texBlur, gl::Fbo::Attachment::Color)
+           .unbind();
 }
 
 glm::vec2 Ssao::noiseScale() const

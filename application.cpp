@@ -72,6 +72,7 @@ bool Application::run(const std::string& input)
     gl::Shader fsColor(filesystem::path("shaders/color.fs.glsl"));
     gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
     gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
+    gl::Shader fsLighting(filesystem::path("shaders/lighting.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
     //gl::ShaderProgram gridProg({vsSimple, fsColor},
@@ -85,6 +86,9 @@ bool Application::run(const std::string& input)
 
     gl::ShaderProgram blurProg({vsTexture, fsBlur},
                                {{0, "position"}, {1, "uv"}});
+
+    gl::ShaderProgram lightingProg({vsTexture, fsLighting},
+                                   {{0, "position"}, {1, "uv"}});
 
     const ImageCube depthCube("objects/" + input + ".*.png", 1);
     const ImageCube albedoCube("objects/" + input + ".albedo.*.png");
@@ -119,7 +123,7 @@ bool Application::run(const std::string& input)
         glm::mat4 proj  = glm::perspective(45.0f, display.size().aspect<float>(),
                                            0.1f, 200.f);
 
-        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 40, 40),
+        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 25, 25),
                                       glm::vec3(0.f, 0.f, 0.f),
                                       glm::vec3(0, 1, 0));
 
@@ -176,18 +180,33 @@ bool Application::run(const std::string& input)
             rectPrimitive.render();
         }
 
-        blurProg.bind().setUniform("texColor", 0)
-                       .setUniform("texAo",    1);
+        blurProg.bind().setUniform("texAo", 0);
         {
             // SSAO blur pass
-            // TODO: Direct to FBO
+            Binder<gl::Fbo> binder(ssao.fboBlur);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
 
-            ssao.texColor.bindAs(GL_TEXTURE0);
-            ssao.texAo.bindAs(GL_TEXTURE1);
+            ssao.texAo.bindAs(GL_TEXTURE0);
             rectPrimitive.render();
         }
+
+        lightingProg.bind().setUniform("texPosDepth", 0)
+                           .setUniform("texNormal",   1)
+                           .setUniform("texColor",    2)
+                           .setUniform("texAo",       3);
+        {
+            // Lighting pass
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_TEST);
+
+            ssao.texPosDepth.bindAs(GL_TEXTURE0);
+            ssao.texNormal.bindAs(GL_TEXTURE1);
+            ssao.texColor.bindAs(GL_TEXTURE2);
+            ssao.texBlur.bindAs(GL_TEXTURE3);
+            rectPrimitive.render();
+        }
+
         #ifdef CAPTURE_VIDEO
         display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");
         a += 0.01f;
