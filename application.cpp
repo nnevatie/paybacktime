@@ -177,8 +177,7 @@ bool Application::run(const std::string& input)
         }
 
         blurProg.bind().setUniform("texColor",  0)
-                       .setUniform("texSsao",   1)
-                       .setUniform("texelStep", ssao.texelStep());
+                       .setUniform("texAo",     1);
         {
             // Blur/output pass
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

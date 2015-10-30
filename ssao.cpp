@@ -88,9 +88,4 @@ glm::vec2 Ssao::noiseScale() const
                      float(renderSize.h) / noiseSize.h);
 }
 
-glm::vec2 Ssao::texelStep() const
-{
-    return glm::vec2(1.f / renderSize.w, 1.f / renderSize.h);
-}
-
 } // namespace hc

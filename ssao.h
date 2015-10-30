@@ -36,7 +36,6 @@ struct Ssao
          const Size<int>& noiseSize);
 
     glm::vec2 noiseScale() const;
-    glm::vec2 texelStep() const;
 };
 
 } // namespace hc
