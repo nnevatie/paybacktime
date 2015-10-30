@@ -133,7 +133,7 @@ Mesh<> mesh(const V& vol)
                 // Add vertex to buffer,
                 // store pointer to vertex index in buffer
                 buffer[m] = geom.vertices.size();
-                geom.vertices.push_back({v[0], v[1], v[2]});
+                geom.vertices.push_back({glm::vec3(v[0], v[1], v[2])});
 
                 // Now we need to add faces together,
                 // to do this we just loop over 3 basis components
@@ -161,10 +161,10 @@ Mesh<> mesh(const V& vol)
                     // depending on the sign of the corner
                     if (mask & 1)
                     {
-                        Vertex& va = geom.vertices[buffer[m]];
-                        Vertex& vb = geom.vertices[buffer[m - du]];
-                        Vertex& vc = geom.vertices[buffer[m - du - dv]];
-                        Vertex& vd = geom.vertices[buffer[m - dv]];
+                        Mesh<>::Vertex& va = geom.vertices[buffer[m]];
+                        Mesh<>::Vertex& vb = geom.vertices[buffer[m - du]];
+                        Mesh<>::Vertex& vc = geom.vertices[buffer[m - du - dv]];
+                        Mesh<>::Vertex& vd = geom.vertices[buffer[m - dv]];
 
                         const glm::vec3 n0 =
                             glm::normalize(glm::cross(vc.p - va.p, vb.p - va.p));

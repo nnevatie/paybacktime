@@ -8,10 +8,11 @@ namespace hc
 namespace gl
 {
 
-template <typename V = Vertex>
 struct Primitive
 {
-    explicit Primitive(const Mesh<V>& mesh) :
+    template <typename V, typename I>
+    explicit Primitive(const Mesh<V, I>& mesh) :
+       vertexSpec {V::spec()}, indexSpec {sizeof(I)},
        vertices(Buffer::Type::Vertex),
        indices(Buffer::Type::Index)
     {
@@ -19,7 +20,7 @@ struct Primitive
                        int(sizeof(V) * mesh.vertices.size()));
 
         indices.alloc(mesh.indices.data(),
-                      int(sizeof(V) * mesh.indices.size()));
+                      int(sizeof(I) * mesh.indices.size()));
     }
 
     void render(GLenum mode = GL_TRIANGLES) const
@@ -29,34 +30,43 @@ struct Primitive
 
         vertices.bind();
 
-        for (int i = 0; i < 3; ++i)
+        const int stride      = vertexSpec.size;
+        const int attribCount = int(vertexSpec.attribs.size());
+
+        // Enable attrib arrays
+        for (int i = 0; i < attribCount; ++i)
             glEnableVertexAttribArray(i);
 
-        const int stride = sizeof(V);
-        auto offset = [](size_t size) {return (const void*) size;};
+        // Set attrib pointers
+        size_t offset = 0;
+        for (int i = 0; i < attribCount; ++i)
+        {
+            const VertexSpec::Attrib& attrib = vertexSpec.attribs.at(i);
+            glVertexAttribPointer(i, std::get<0>(attrib), std::get<1>(attrib),
+                                  GL_FALSE, stride, (const void*) offset);
+            offset += std::get<2>(attrib);
+        }
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                              stride, offset(sizeof(float) * 0));
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                              stride, offset(sizeof(float) * 3));
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                              stride, offset(sizeof(float) * 6));
-
+        // Draw elements
         indices.bind();
-
         glDrawElements(mode,
-                       indices.size / int(sizeof(Mesh<>::Index)),
-                       GL_UNSIGNED_INT,
+                       indices.size / int(indexSpec.size),
+                       indexSpec.size == 4 ? GL_UNSIGNED_INT :
+                       indexSpec.size == 2 ? GL_UNSIGNED_SHORT :
+                                             GL_UNSIGNED_BYTE,
                        0);
 
-        for (int i = 0; i < 3; ++i)
+        // Disable attrib arrays
+        for (int i = 0; i < attribCount; ++i)
             glDisableVertexAttribArray(i);
 
         indices.unbind();
         vertices.unbind();
     }
 
-    Buffer vertices, indices;
+    VertexSpec vertexSpec;
+    IndexSpec  indexSpec;
+    Buffer     vertices, indices;
 };
 
 } // namespace gl

@@ -62,7 +62,7 @@ void RenderStats::render()
     nvgText(vg, 140, 40, str(std::stringstream()
                             << "Triangles: " << triangleCount).c_str(), 0);
 
-    int geomKb = 0.001 * (vertexCount * sizeof(Vertex) +
+    int geomKb = 0.001 * (vertexCount * sizeof(Mesh<>::Vertex) +
                           triangleCount * 3 * sizeof(Mesh<>::Index));
 
     nvgText(vg, 10, 60, str(std::stringstream()

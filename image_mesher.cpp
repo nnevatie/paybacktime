@@ -157,34 +157,6 @@ struct Cubefield
     float interval;
 };
 
-void emitBox(Mesh<>* g, const Box& box)
-{
-    const Mesh<>::Index ib = g->vertices.size();
-    g->vertices.insert(g->vertices.end(),
-                       box.begin(),
-                       box.end());
-
-    g->indices.insert(g->indices.end(),
-        {// Front
-         ib + 0, ib + 1, ib + 2,
-         ib + 2, ib + 3, ib + 0,
-         // Top
-         ib + 3, ib + 2, ib + 6,
-         ib + 6, ib + 7, ib + 3,
-         // Back
-         ib + 7, ib + 6, ib + 5,
-         ib + 5, ib + 4, ib + 7,
-         // Bottom
-         ib + 4, ib + 5, ib + 1,
-         ib + 1, ib + 0, ib + 4,
-         // Left
-         ib + 4, ib + 0, ib + 3,
-         ib + 3, ib + 7, ib + 4,
-         // Right
-         ib + 1, ib + 5, ib + 6,
-         ib + 6, ib + 2, ib + 1});
-}
-
 void emitBoxFace(Mesh<>* g, float scale, int axis, int cc[8][3],
                  const glm::vec3& p, const glm::vec3& s, const glm::vec3& d,
                  const RectCube<float>& uvCube)
@@ -325,24 +297,6 @@ Box box(const V& vol, int x, int y, int z)
         glm::vec3(x + c[6][0], y + c[6][1], z + c[6][2]) * s,
         glm::vec3(x + c[7][0], y + c[7][1], z + c[7][2]) * s,
     };
-}
-
-template <typename V>
-Mesh<> meshCubes(const V& vol)
-{
-    const int dims[3] = {vol.width, vol.height, vol.depth};
-
-    Mesh<> mesh;
-    mesh.vertices.reserve(dims[0] * dims[1] * dims[2] * 8);
-    mesh.indices.reserve(dims[0] * dims[1] * dims[2] * 36);
-
-    for (int z = 0; z < dims[2]; ++z)
-        for (int y = 0; y < dims[1]; ++y)
-            for (int x = 0; x < dims[0]; ++x)
-                if (visible(vol, x, y, z))
-                    emitBox(&mesh, box(vol, x, y, z));
-
-    return mesh;
 }
 
 template <typename V>
