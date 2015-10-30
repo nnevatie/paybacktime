@@ -165,7 +165,7 @@ bool Application::run(const std::string& input)
                        .setUniform("noiseScale",  ssao.noiseScale())
                        .setUniform("p",           proj);
         {
-            // SSAO pass
+            // SSAO AO pass
             Binder<gl::Fbo> binder(ssao.fboAo);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -176,10 +176,11 @@ bool Application::run(const std::string& input)
             rectPrimitive.render();
         }
 
-        blurProg.bind().setUniform("texColor",  0)
-                       .setUniform("texAo",     1);
+        blurProg.bind().setUniform("texColor", 0)
+                       .setUniform("texAo",    1);
         {
-            // Blur/output pass
+            // SSAO blur pass
+            // TODO: Direct to FBO
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
 
