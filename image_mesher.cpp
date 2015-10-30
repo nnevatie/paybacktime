@@ -157,7 +157,7 @@ struct Cubefield
     float interval;
 };
 
-void emitBoxFace(Mesh<>* g, float scale, int axis, int cc[8][3],
+void emitBoxFace(Mesh_P_N_UV* g, float scale, int axis, int cc[8][3],
                  const glm::vec3& p, const glm::vec3& s, const glm::vec3& d,
                  const RectCube<float>& uvCube)
 {
@@ -170,7 +170,7 @@ void emitBoxFace(Mesh<>* g, float scale, int axis, int cc[8][3],
         {7, 6, 5, 4},
         {0, 1, 2, 3}
     };
-    const Mesh<>::Index ib = g->vertices.size();
+    const Mesh_P_N_UV::Index ib = g->vertices.size();
 
     typedef glm::vec3 v;
 
@@ -300,7 +300,7 @@ Box box(const V& vol, int x, int y, int z)
 }
 
 template <typename V>
-Mesh<> meshGreedy(const V& vol, const RectCube<float>& uvCube)
+Mesh_P_N_UV meshGreedy(const V& vol, const RectCube<float>& uvCube)
 {
     struct Cell
     {
@@ -339,7 +339,7 @@ Mesh<> meshGreedy(const V& vol, const RectCube<float>& uvCube)
                 cells[x][y][z].g = v ? vol.g(x, y, z) : 0;
             }
 
-    Mesh<> mesh;
+    Mesh_P_N_UV mesh;
     const int reserveSize = (dims[0] / 4) * (dims[1] / 4) * (dims[2] / 4);
     mesh.vertices.reserve(reserveSize);
     mesh.indices.reserve(reserveSize);
@@ -439,7 +439,7 @@ Mesh<> meshGreedy(const V& vol, const RectCube<float>& uvCube)
 
 } // namespace
 
-Mesh<> mesh(const Image& image, float interval)
+Mesh_P_N_UV mesh(const Image& image, float interval)
 {
     HCTIME("image");
     const Heightfield hfield(image, std::min(image.size().w,
@@ -448,7 +448,7 @@ Mesh<> mesh(const Image& image, float interval)
     //return meshCubes(hfield);
 }
 
-Mesh<> mesh(const ImageCube& imageCube,
+Mesh_P_N_UV mesh(const ImageCube& imageCube,
             const RectCube<float>& uvCube,
             float interval)
 {

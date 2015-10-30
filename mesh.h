@@ -59,7 +59,7 @@ struct IndexSpec
     size_t size;
 };
 
-template <typename V = Vertex_P_N_UV, typename I = uint32_t>
+template <typename V, typename I>
 struct Mesh
 {
     typedef V Vertex;
@@ -86,7 +86,7 @@ struct Mesh
 typedef Mesh<Vertex_P_UV,   uint32_t> Mesh_P_UV;
 typedef Mesh<Vertex_P_N_UV, uint32_t> Mesh_P_N_UV;
 
-inline Mesh<> rectMesh(float halfWidth = 1.f, float halfHeight = 1.f)
+inline Mesh_P_N_UV rectMesh(float halfWidth = 1.f, float halfHeight = 1.f)
 {
     const glm::vec3 n(0, 0, 1);
     return
@@ -101,23 +101,23 @@ inline Mesh<> rectMesh(float halfWidth = 1.f, float halfHeight = 1.f)
     };
 }
 
-inline Mesh<> squareMesh(float halfWidth = 1.f)
+inline Mesh_P_N_UV squareMesh(float halfWidth = 1.f)
 {
     return rectMesh(halfWidth, halfWidth);
 }
 
-inline Mesh<> gridMesh(float interval, float halfWidth, float halfHeight)
+inline Mesh_P_N_UV gridMesh(float interval, float halfWidth, float halfHeight)
 {
     const Size<int>   size(halfWidth * 2 / interval, halfHeight * 2 / interval);
     const Size<float> step(halfWidth * 2 / size.w,   halfHeight * 2 / size.h);
 
-    Mesh<> mesh;
+    Mesh_P_N_UV mesh;
     for (int y = 0; y <= size.h; ++y)
         for (int x = 0; x <= size.w; ++x)
         {
             if (x < size.w)
             {
-                const Mesh<>::Index index0 = mesh.vertices.size();
+                const Mesh_P_N_UV::Index index0 = mesh.vertices.size();
                 mesh.indices.insert(mesh.indices.end(), {index0, index0 + 1});
                 mesh.vertices.insert(mesh.vertices.end(),
                     {{-halfWidth  + (x + 0) * step.w, 0,
@@ -127,7 +127,7 @@ inline Mesh<> gridMesh(float interval, float halfWidth, float halfHeight)
             }
             if (y < size.h)
             {
-                const Mesh<>::Index index1 = mesh.vertices.size();
+                const Mesh_P_N_UV::Index index1 = mesh.vertices.size();
                 mesh.indices.insert(mesh.indices.end(), {index1, index1 + 1});
                 mesh.vertices.insert(mesh.vertices.end(),
                     {{-halfWidth  + (x + 0) * step.w, 0,

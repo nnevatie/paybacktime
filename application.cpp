@@ -93,13 +93,13 @@ bool Application::run(const std::string& input)
     TextureAtlas texAtlas({128, 128});
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
 
-    const Mesh<> mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
+    const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
     const gl::Primitive primitive(mesh);
 
-    const Mesh<> rectMesh = squareMesh();
+    const Mesh_P_N_UV rectMesh = squareMesh();
     const gl::Primitive rectPrimitive(rectMesh);
 
-    const Mesh<> gMesh = gridMesh(16, 128, 128);
+    const Mesh_P_N_UV gMesh = gridMesh(16, 128, 128);
     const gl::Primitive gridPrimitive(gMesh);
 
     Ssao ssao(32, display.size(), {4, 4});

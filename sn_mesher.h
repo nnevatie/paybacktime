@@ -51,7 +51,7 @@ struct EdgeTable
 static EdgeTable edgeTable;
 
 template <typename V>
-Mesh<> mesh(const V& vol)
+Mesh_P_N_UV mesh(const V& vol)
 {
     const std::array<int, 3>& dims = {vol.width + 2, vol.height + 2, vol.depth + 2};
 
@@ -61,7 +61,7 @@ Mesh<> mesh(const V& vol)
 
     std::vector<int> buffer(r[2] * 2, 0);
 
-    Mesh<> geom;
+    Mesh_P_N_UV geom;
 
     //March over the voxel grid
     int bufNo = 1;
@@ -161,10 +161,10 @@ Mesh<> mesh(const V& vol)
                     // depending on the sign of the corner
                     if (mask & 1)
                     {
-                        Mesh<>::Vertex& va = geom.vertices[buffer[m]];
-                        Mesh<>::Vertex& vb = geom.vertices[buffer[m - du]];
-                        Mesh<>::Vertex& vc = geom.vertices[buffer[m - du - dv]];
-                        Mesh<>::Vertex& vd = geom.vertices[buffer[m - dv]];
+                        Mesh_P_N_UV::Vertex& va = geom.vertices[buffer[m]];
+                        Mesh_P_N_UV::Vertex& vb = geom.vertices[buffer[m - du]];
+                        Mesh_P_N_UV::Vertex& vc = geom.vertices[buffer[m - du - dv]];
+                        Mesh_P_N_UV::Vertex& vd = geom.vertices[buffer[m - dv]];
 
                         const glm::vec3 n0 =
                             glm::normalize(glm::cross(vc.p - va.p, vb.p - va.p));
