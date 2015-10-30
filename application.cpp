@@ -128,7 +128,7 @@ bool Application::run(const std::string& input)
         Clock clock;
         {
             // Geometry pass
-            Binder<gl::Fbo> binder(ssao.fbo[0]);
+            Binder<gl::Fbo> binder(ssao.fboGeometry);
             const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
                                           GL_COLOR_ATTACHMENT1,
                                           GL_COLOR_ATTACHMENT2};
@@ -166,7 +166,7 @@ bool Application::run(const std::string& input)
                        .setUniform("p",           proj);
         {
             // SSAO pass
-            Binder<gl::Fbo> binder(ssao.fbo[1]);
+            Binder<gl::Fbo> binder(ssao.fboAo);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glClear(GL_COLOR_BUFFER_BIT);
 
@@ -185,7 +185,7 @@ bool Application::run(const std::string& input)
             glEnable(GL_DEPTH_TEST);
 
             ssao.texColor.bindAs(GL_TEXTURE0);
-            ssao.texBlur.bindAs(GL_TEXTURE1);
+            ssao.texAo.bindAs(GL_TEXTURE1);
             rectPrimitive.render();
         }
         #ifdef CAPTURE_VIDEO

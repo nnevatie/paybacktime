@@ -60,7 +60,7 @@ Ssao::Ssao(int kernelSize,
     texPosDepth.bind().alloc(fboSize,  GL_RGBA16F, GL_RGB, GL_FLOAT);
     texNormal.bind().alloc(fboSize,    GL_RGB16F,  GL_RGB, GL_FLOAT);
     texColor.bind().alloc(fboSize,     GL_RGB,     GL_RGB, GL_FLOAT);
-    texBlur.bind().alloc(fboSize,      GL_RGB,     GL_RGB);
+    texAo.bind().alloc(fboSize,        GL_RED,     GL_RGB, GL_FLOAT);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
@@ -70,16 +70,16 @@ Ssao::Ssao(int kernelSize,
                    .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // Attach RBO and textures to FBOs
-    fbo[0].bind()
-          .attach(rboDepth,    gl::Fbo::Attachment::Depth)
-          .attach(texPosDepth, gl::Fbo::Attachment::Color, 0)
-          .attach(texNormal,   gl::Fbo::Attachment::Color, 1)
-          .attach(texColor,    gl::Fbo::Attachment::Color, 2)
-          .unbind();
+    fboGeometry.bind()
+               .attach(rboDepth,    gl::Fbo::Attachment::Depth)
+               .attach(texPosDepth, gl::Fbo::Attachment::Color, 0)
+               .attach(texNormal,   gl::Fbo::Attachment::Color, 1)
+               .attach(texColor,    gl::Fbo::Attachment::Color, 2)
+               .unbind();
 
-    fbo[1].bind()
-          .attach(texBlur, gl::Fbo::Attachment::Color)
-          .unbind();
+    fboAo.bind()
+         .attach(texAo, gl::Fbo::Attachment::Color)
+         .unbind();
 }
 
 glm::vec2 Ssao::noiseScale() const

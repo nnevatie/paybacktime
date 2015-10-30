@@ -14,17 +14,19 @@ namespace hc
 
 struct Ssao
 {
-    int       kernelSize;
-    Size<int> renderSize,
-              noiseSize;
+    int         kernelSize;
+    Size<int>   renderSize,
+                noiseSize;
 
-    gl::Fbo fbo[2];
+    gl::Fbo     fboGeometry,
+                fboAo,
+                fboBlur;
 
     gl::Rbo     rboDepth;
     gl::Texture texPosDepth,
                 texNormal,
                 texColor,
-                texBlur,
+                texAo,
                 texNoise;
 
     std::vector<glm::vec3> kernel;
