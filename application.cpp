@@ -123,7 +123,7 @@ bool Application::run(const std::string& input)
         glm::mat4 proj  = glm::perspective(45.0f, display.size().aspect<float>(),
                                            0.1f, 200.f);
 
-        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 25, 25),
+        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 40, 40),
                                       glm::vec3(0.f, 0.f, 0.f),
                                       glm::vec3(0, 1, 0));
 
@@ -184,8 +184,8 @@ bool Application::run(const std::string& input)
         {
             // SSAO blur pass
             Binder<gl::Fbo> binder(ssao.fboBlur);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             ssao.texAo.bindAs(GL_TEXTURE0);
             rectPrimitive.render();
@@ -197,8 +197,8 @@ bool Application::run(const std::string& input)
                            .setUniform("texAo",       3);
         {
             // Lighting pass
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             ssao.texPosDepth.bindAs(GL_TEXTURE0);
             ssao.texNormal.bindAs(GL_TEXTURE1);
