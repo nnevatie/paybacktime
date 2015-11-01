@@ -20,7 +20,8 @@ struct Ssao
 
     gl::Fbo     fboGeometry,
                 fboAo,
-                fboBlur;
+                fboBlur,
+                fboOutput;
 
     gl::Rbo     rboDepth;
     gl::Texture texPosDepth,
@@ -28,6 +29,7 @@ struct Ssao
                 texColor,
                 texAo,
                 texBlur,
+                texLighting,
                 texNoise;
 
     std::vector<glm::vec3> kernel;

@@ -28,9 +28,17 @@ float linearDepth(float depth, mat4 proj)
     return (2.0 * near * far) / (far + near - z * (far - near));
 }
 
+float edge(vec3 bc)
+{
+    vec3 d  = fwidth(bc);
+    vec3 a3 = smoothstep(vec3(0.0), d * 1.0, bc);
+    return min(min(a3.x, a3.y), a3.z);
+}
+
 void main()
 {
     posDepth = vec4(ib.viewPos, linearDepth(gl_FragCoord.z, p));
     normal   = normalize(ib.normal);
-    color    = texture(albedo, ib.uv);
+    vec4 alb = texture(albedo, ib.uv);
+    color    = vec4(mix(alb - 0.25, alb, edge(ib.bc)).rgb, 1.0);
 }

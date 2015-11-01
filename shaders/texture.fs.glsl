@@ -1,21 +1,19 @@
 #version 150
 
 // Uniforms
-uniform sampler2D tex;
+uniform sampler2D texColor;
 
 // Input
 in Block
 {
-    vec3 normal;
     vec2 uv;
-    vec3 bc;
 }
 ib;
 
 // Output
 out vec4 color;
 
-void main()
+void main(void)
 {
-    color = texture(tex, ib.uv);
+    color = texture(texColor, ib.uv);
 }

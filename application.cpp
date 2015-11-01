@@ -68,27 +68,32 @@ bool Application::run(const std::string& input)
 
     gl::Shader vsGeometry(filesystem::path("shaders/geometry.vs.glsl"));
     gl::Shader fsGeometry(filesystem::path("shaders/geometry.fs.glsl"));
-    gl::Shader vsTexture(filesystem::path("shaders/texture.vs.glsl"));
+    gl::Shader vsModelPos(filesystem::path("shaders/model_pos.vs.glsl"));
+    gl::Shader vsQuadUv(filesystem::path("shaders/quad_uv.vs.glsl"));
     gl::Shader fsColor(filesystem::path("shaders/color.fs.glsl"));
     gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
     gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
     gl::Shader fsLighting(filesystem::path("shaders/lighting.fs.glsl"));
+    gl::Shader fsTexture(filesystem::path("shaders/texture.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
 
-    //gl::ShaderProgram gridProg({vsSimple, fsColor},
-    //                           {{0, "position"}});
+    gl::ShaderProgram gridProg({vsModelPos, fsColor},
+                               {{0, "position"}});
 
-    gl::ShaderProgram geomProg({vsGeometry, /*gsWireframe,*/ fsGeometry},
+    gl::ShaderProgram geomProg({vsGeometry, gsWireframe, fsGeometry},
                                {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
-    gl::ShaderProgram ssaoProg({vsTexture, fsSsao},
+    gl::ShaderProgram ssaoProg({vsQuadUv, fsSsao},
                                {{0, "position"}, {1, "uv"}});
 
-    gl::ShaderProgram blurProg({vsTexture, fsBlur},
+    gl::ShaderProgram blurProg({vsQuadUv, fsBlur},
                                {{0, "position"}, {1, "uv"}});
 
-    gl::ShaderProgram lightingProg({vsTexture, fsLighting},
+    gl::ShaderProgram lightingProg({vsQuadUv, fsLighting},
                                    {{0, "position"}, {1, "uv"}});
+
+    gl::ShaderProgram outputProg({vsQuadUv, fsTexture},
+                                 {{0, "position"}, {1, "uv"}});
 
     const ImageCube depthCube("objects/" + input + ".*.png", 1);
     const ImageCube albedoCube("objects/" + input + ".albedo.*.png");
@@ -130,6 +135,12 @@ bool Application::run(const std::string& input)
         glm::mat4 model = glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
                           glm::rotate({}, az, glm::vec3(0.f, 0.f, 1.f));
         Clock clock;
+
+        geomProg.bind()
+            .setUniform("albedo", 0)
+            .setUniform("mv",     view * model)
+            .setUniform("p",      proj)
+            .setUniform("size",   display.size().as<glm::vec2>());
         {
             // Geometry pass
             Binder<gl::Fbo> binder(ssao.fboGeometry);
@@ -139,25 +150,10 @@ bool Application::run(const std::string& input)
             glDrawBuffers(3, drawBuffers);
 
             glEnable(GL_DEPTH_TEST);
+            glDepthMask(true);
+
             glClearColor(0.f, 0.f, 0.f, 1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-/*
-            gridProg.bind()
-                .setUniform("albedo", glm::vec4(0, 0.5f, 0, 1))
-                .setUniform("mvp",    proj * view * model)
-                .setUniform("mv",     view * model)
-                .setUniform("size",   display.size().as<glm::vec2>());
-
-            gl::Texture::unbind(GL_TEXTURE_2D, GL_TEXTURE0);
-            gridPrimitive.render(GL_LINES);
-*/
-            geomProg.bind()
-                .setUniform("albedo", 0)
-                .setUniform("mv",     view * model)
-                .setUniform("p",      proj)
-                .setUniform("size",   display.size().as<glm::vec2>());
-
             texAtlas.texture.bindAs(GL_TEXTURE0);
             primitive.render();
         }
@@ -172,8 +168,8 @@ bool Application::run(const std::string& input)
             // SSAO AO pass
             Binder<gl::Fbo> binder(ssao.fboAo);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
-            glClear(GL_COLOR_BUFFER_BIT);
 
+            glClear(GL_COLOR_BUFFER_BIT);
             ssao.texPosDepth.bindAs(GL_TEXTURE0);
             ssao.texNormal.bindAs(GL_TEXTURE1);
             ssao.texNoise.bindAs(GL_TEXTURE2);
@@ -185,8 +181,8 @@ bool Application::run(const std::string& input)
             // SSAO blur pass
             Binder<gl::Fbo> binder(ssao.fboBlur);
             glEnable(GL_DEPTH_TEST);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             ssao.texAo.bindAs(GL_TEXTURE0);
             rectPrimitive.render();
         }
@@ -197,13 +193,45 @@ bool Application::run(const std::string& input)
                            .setUniform("texAo",       3);
         {
             // Lighting pass
+            Binder<gl::Fbo> binder(ssao.fboOutput);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glEnable(GL_DEPTH_TEST);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDepthMask(false);
 
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             ssao.texPosDepth.bindAs(GL_TEXTURE0);
             ssao.texNormal.bindAs(GL_TEXTURE1);
             ssao.texColor.bindAs(GL_TEXTURE2);
             ssao.texBlur.bindAs(GL_TEXTURE3);
+            rectPrimitive.render();
+        }
+
+        gridProg.bind()
+            .setUniform("albedo", glm::vec4(0, 1.0f, 0, 1))
+            .setUniform("mvp",    proj * view * model);
+        {
+            // Grid pass
+            Binder<gl::Fbo> binder(ssao.fboOutput);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(true);
+
+            glEnable(GL_LINE_STIPPLE);
+            glLineStipple(1, 0x00ff);
+
+            gl::Texture::unbind(GL_TEXTURE_2D, GL_TEXTURE0);
+            gridPrimitive.render(GL_LINES);
+        }
+
+        outputProg.bind().setUniform("texColor", 0);
+        {
+            // Lighting pass
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(true);
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            ssao.texLighting.bindAs(GL_TEXTURE0);
             rectPrimitive.render();
         }
 

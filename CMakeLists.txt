@@ -81,19 +81,15 @@ set(EXT_SOURCE_FILES
     )
 
 set(SHADER_FILES
-    shaders/simple.vs.glsl
     shaders/geometry.vs.glsl
     shaders/geometry.fs.glsl
-    shaders/passthrough.vs.glsl
     shaders/color.fs.glsl
-    shaders/screenspace.fs.glsl
-    shaders/lambert.fs.glsl
-    shaders/phong.fs.glsl
     shaders/ssao.fs.glsl
     shaders/blur.fs.glsl
     shaders/lighting.fs.glsl
-    shaders/texture.vs.glsl
     shaders/texture.fs.glsl
+    shaders/model_pos.vs.glsl
+    shaders/quad_uv.vs.glsl
     shaders/wireframe.gs.glsl
     )
 

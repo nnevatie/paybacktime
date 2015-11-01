@@ -62,6 +62,7 @@ Ssao::Ssao(int kernelSize,
     texColor.bind().alloc(fboSize,     GL_RGB,     GL_RGB, GL_FLOAT);
     texAo.bind().alloc(fboSize,        GL_RED,     GL_RGB, GL_FLOAT);
     texBlur.bind().alloc(fboSize,      GL_RED,     GL_RGB, GL_FLOAT);
+    texLighting.bind().alloc(fboSize,  GL_RGB,     GL_RGB, GL_FLOAT);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
@@ -70,7 +71,7 @@ Ssao::Ssao(int kernelSize,
                    .set(GL_TEXTURE_WRAP_S, GL_REPEAT)
                    .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    // Attach RBO and textures to FBOs
+    // Attach RBO and 6textures to FBOs
     fboGeometry.bind()
                .attach(rboDepth,    gl::Fbo::Attachment::Depth)
                .attach(texPosDepth, gl::Fbo::Attachment::Color, 0)
@@ -85,6 +86,11 @@ Ssao::Ssao(int kernelSize,
     fboBlur.bind()
            .attach(texBlur, gl::Fbo::Attachment::Color)
            .unbind();
+
+    fboOutput.bind()
+               .attach(rboDepth,    gl::Fbo::Attachment::Depth)
+               .attach(texLighting, gl::Fbo::Attachment::Color)
+               .unbind();
 }
 
 glm::vec2 Ssao::noiseScale() const

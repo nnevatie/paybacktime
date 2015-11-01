@@ -23,8 +23,7 @@ void main(void)
     vec3 diffuse    = texture(texColor, ib.uv).rgb;
     float ao        = texture(texAo, ib.uv).r;
 
-    vec3 ambient    = vec3(0.1 - (1.0 - ao));
-    vec3 lighting   = ambient;
+    vec3 ambient    = vec3(ao - 0.75);
     vec3 viewDir    = normalize(-fragPos);
 
     // Diffuse
@@ -37,13 +36,6 @@ void main(void)
     float spec      = pow(max(dot(normal, halfwayDir), 0.0), 8.0);
     vec3 specular   = vec3(spec);
 
-    /*
-    // Attenuation
-    float distance = length(light.Position - FragPos);
-    float attenuation = 1.0 / (1.0 + light.Linear * distance + light.Quadratic * distance * distance);
-    diffuse *= attenuation;
-    specular *= attenuation;
-    */
-    lighting += diffuse + specular;
-    color     = vec4(lighting, 1.0);
+    vec3 lighting = ambient + diffuse + specular;
+    color         = vec4(lighting, 1.0);
 }
