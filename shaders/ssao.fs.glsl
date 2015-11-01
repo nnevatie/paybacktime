@@ -1,8 +1,8 @@
 #version 150
 
-#define RADIUS           2.0
+#define RADIUS           5.0
 #define KERNEL_SIZE      32
-#define POW              2
+#define POW              4
 
 // Uniforms
 uniform sampler2D texPosDepth;
@@ -21,6 +21,14 @@ ib;
 
 // Output
 out vec4 color;
+
+vec4 sampleStar(sampler2D sampler, vec2 uv)
+{
+    vec2 ts = 1.0 / vec2(textureSize(sampler, 0));
+    return (texture(sampler, vec2(uv.s - ts.s, uv.t)) +
+            texture(sampler, vec2(uv.s       , uv.t)) +
+            texture(sampler, vec2(uv.s + ts.s, uv.t))) / 3.0;
+}
 
 void main(void)
 {

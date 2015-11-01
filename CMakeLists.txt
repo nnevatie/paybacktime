@@ -83,6 +83,7 @@ set(EXT_SOURCE_FILES
 set(SHADER_FILES
     shaders/geometry.vs.glsl
     shaders/geometry.fs.glsl
+    shaders/denoise.fs.glsl
     shaders/color.fs.glsl
     shaders/ssao.fs.glsl
     shaders/blur.fs.glsl

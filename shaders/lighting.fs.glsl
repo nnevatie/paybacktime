@@ -23,7 +23,7 @@ void main(void)
     vec3 diffuse    = texture(texColor, ib.uv).rgb;
     float ao        = texture(texAo, ib.uv).r;
 
-    vec3 ambient    = vec3(ao - 0.75);
+    vec3 ambient    = vec3(0.1);
     vec3 viewDir    = normalize(-fragPos);
 
     // Diffuse
@@ -33,9 +33,9 @@ void main(void)
 
     // Specular
     vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec      = pow(max(dot(normal, halfwayDir), 0.0), 8.0);
+    float spec      = pow(max(dot(normal, halfwayDir), 0.0), 16.0);
     vec3 specular   = vec3(spec);
 
-    vec3 lighting = ambient + diffuse + specular;
-    color         = vec4(lighting, 1.0);
+    vec3 lighting   = ambient + ao * diffuse + specular;
+    color           = vec4(lighting, 1.0);
 }

@@ -26,6 +26,7 @@ struct Ssao
     gl::Rbo     rboDepth;
     gl::Texture texPosDepth,
                 texNormal,
+                texNormalDenoise,
                 texColor,
                 texAo,
                 texBlur,

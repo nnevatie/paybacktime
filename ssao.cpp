@@ -57,12 +57,13 @@ Ssao::Ssao(int kernelSize,
     rboDepth.bind().alloc(renderSize, GL_DEPTH_COMPONENT);
 
     // Alloc pos/depth, normal, color and AO textures
-    texPosDepth.bind().alloc(fboSize,  GL_RGBA16F, GL_RGB, GL_FLOAT);
-    texNormal.bind().alloc(fboSize,    GL_RGB16F,  GL_RGB, GL_FLOAT);
-    texColor.bind().alloc(fboSize,     GL_RGB,     GL_RGB, GL_FLOAT);
-    texAo.bind().alloc(fboSize,        GL_RED,     GL_RGB, GL_FLOAT);
-    texBlur.bind().alloc(fboSize,      GL_RED,     GL_RGB, GL_FLOAT);
-    texLighting.bind().alloc(fboSize,  GL_RGB,     GL_RGB, GL_FLOAT);
+    texPosDepth.bind().alloc(fboSize,      GL_RGBA16F, GL_RGB, GL_FLOAT);
+    texNormal.bind().alloc(fboSize,        GL_RGB16F,  GL_RGB, GL_FLOAT);
+    texNormalDenoise.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
+    texColor.bind().alloc(fboSize,         GL_RGB,     GL_RGB, GL_FLOAT);
+    texAo.bind().alloc(fboSize,            GL_RED,     GL_RGB, GL_FLOAT);
+    texBlur.bind().alloc(fboSize,          GL_RED,     GL_RGB, GL_FLOAT);
+    texLighting.bind().alloc(fboSize,      GL_RGB,     GL_RGB, GL_FLOAT);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
@@ -73,10 +74,11 @@ Ssao::Ssao(int kernelSize,
 
     // Attach RBO and 6textures to FBOs
     fboGeometry.bind()
-               .attach(rboDepth,    gl::Fbo::Attachment::Depth)
-               .attach(texPosDepth, gl::Fbo::Attachment::Color, 0)
-               .attach(texNormal,   gl::Fbo::Attachment::Color, 1)
-               .attach(texColor,    gl::Fbo::Attachment::Color, 2)
+               .attach(rboDepth,         gl::Fbo::Attachment::Depth)
+               .attach(texPosDepth,      gl::Fbo::Attachment::Color, 0)
+               .attach(texNormal,        gl::Fbo::Attachment::Color, 1)
+               .attach(texColor,         gl::Fbo::Attachment::Color, 2)
+               .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 3)
                .unbind();
 
     fboAo.bind()
@@ -88,9 +90,9 @@ Ssao::Ssao(int kernelSize,
            .unbind();
 
     fboOutput.bind()
-               .attach(rboDepth,    gl::Fbo::Attachment::Depth)
-               .attach(texLighting, gl::Fbo::Attachment::Color)
-               .unbind();
+             .attach(rboDepth,    gl::Fbo::Attachment::Depth)
+             .attach(texLighting, gl::Fbo::Attachment::Color)
+             .unbind();
 }
 
 glm::vec2 Ssao::noiseScale() const

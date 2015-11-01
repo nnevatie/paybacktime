@@ -68,6 +68,7 @@ bool Application::run(const std::string& input)
 
     gl::Shader vsGeometry(filesystem::path("shaders/geometry.vs.glsl"));
     gl::Shader fsGeometry(filesystem::path("shaders/geometry.fs.glsl"));
+    gl::Shader fsDenoise(filesystem::path("shaders/denoise.fs.glsl"));
     gl::Shader vsModelPos(filesystem::path("shaders/model_pos.vs.glsl"));
     gl::Shader vsQuadUv(filesystem::path("shaders/quad_uv.vs.glsl"));
     gl::Shader fsColor(filesystem::path("shaders/color.fs.glsl"));
@@ -80,8 +81,11 @@ bool Application::run(const std::string& input)
     gl::ShaderProgram gridProg({vsModelPos, fsColor},
                                {{0, "position"}});
 
-    gl::ShaderProgram geomProg({vsGeometry, gsWireframe, fsGeometry},
+    gl::ShaderProgram geomProg({vsGeometry, /*gsWireframe,*/ fsGeometry},
                                {{0, "position"}, {1, "normal"}, {2, "uv"}});
+
+    gl::ShaderProgram denoiseProg({vsQuadUv, fsDenoise},
+                                  {{0, "position"}, {1, "uv"}});
 
     gl::ShaderProgram ssaoProg({vsQuadUv, fsSsao},
                                {{0, "position"}, {1, "uv"}});
@@ -98,11 +102,18 @@ bool Application::run(const std::string& input)
     const ImageCube depthCube("objects/" + input + ".*.png", 1);
     const ImageCube albedoCube("objects/" + input + ".albedo.*.png");
 
+    const ImageCube floorCube("objects/floor.*.png", 1);
+    const ImageCube floorAlb("objects/floor.albedo.*.png");
+
     TextureAtlas texAtlas({128, 128});
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
 
     const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
     const gl::Primitive primitive(mesh);
+
+    TextureAtlas::EntryCube albedoFloor = texAtlas.insert(floorAlb);
+    const Mesh_P_N_UV floorMesh = ImageMesher::mesh(floorCube, albedoFloor.second);
+    const gl::Primitive floor(floorMesh);
 
     const Mesh_P_UV rectMesh = squareMesh();
     const gl::Primitive rectPrimitive(rectMesh);
@@ -114,10 +125,8 @@ bool Application::run(const std::string& input)
 
     RenderStats stats;
 
-    /*
     ObjectStore objectStore(filesystem::path("objects"), &texAtlas);
     Scene scene;
-    */
 
     int f = 0;
     float ay = 0, az = 0;
@@ -126,18 +135,18 @@ bool Application::run(const std::string& input)
     while (running)
     {
         glm::mat4 proj  = glm::perspective(45.0f, display.size().aspect<float>(),
-                                           0.1f, 200.f);
+                                           0.1f, 400.f);
 
-        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 40, 40),
+        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 150, 150),
                                       glm::vec3(0.f, 0.f, 0.f),
                                       glm::vec3(0, 1, 0));
 
         glm::mat4 model = glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
-                          glm::rotate({}, az, glm::vec3(0.f, 0.f, 1.f));
+                          glm::rotate({}, az, glm::vec3(1.f, 0.f, 0.f));
         Clock clock;
 
         geomProg.bind()
-            .setUniform("albedo", 0)
+            .setUniform("texAlbedo", 0)
             .setUniform("mv",     view * model)
             .setUniform("p",      proj)
             .setUniform("size",   display.size().as<glm::vec2>());
@@ -155,7 +164,32 @@ bool Application::run(const std::string& input)
             glClearColor(0.f, 0.f, 0.f, 1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             texAtlas.texture.bindAs(GL_TEXTURE0);
-            primitive.render();
+
+            for (int y = 0; y < 5; ++y)
+                for (int x = 0; x < 5; ++x)
+                {
+                    geomProg.bind().setUniform("mv", view *
+                        glm::translate(model, glm::vec3(x * 16, 0, y * 16)));
+                    floor.render();
+                }
+
+            for (int y = 0; y < 5; ++y)
+                for (int x = 0; x < 5; ++x)
+            {
+                if (y % 2 && x % 2)
+                {
+                geomProg.bind().setUniform("mv", view *
+                    glm::translate(model, glm::vec3(x * 16, 0, y * 16)));
+                primitive.render();
+                }
+            }
+
+            denoiseProg.bind().setUniform("tex", 0);
+            glDrawBuffer(GL_COLOR_ATTACHMENT3);
+            glDisable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT);
+            ssao.texNormal.bindAs(GL_TEXTURE0);
+            rectPrimitive.render();
         }
 
         ssaoProg.bind().setUniform("texPosDepth", 0)
@@ -171,7 +205,7 @@ bool Application::run(const std::string& input)
 
             glClear(GL_COLOR_BUFFER_BIT);
             ssao.texPosDepth.bindAs(GL_TEXTURE0);
-            ssao.texNormal.bindAs(GL_TEXTURE1);
+            ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
             ssao.texNoise.bindAs(GL_TEXTURE2);
             rectPrimitive.render();
         }
@@ -200,14 +234,14 @@ bool Application::run(const std::string& input)
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             ssao.texPosDepth.bindAs(GL_TEXTURE0);
-            ssao.texNormal.bindAs(GL_TEXTURE1);
+            ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
             ssao.texColor.bindAs(GL_TEXTURE2);
             ssao.texBlur.bindAs(GL_TEXTURE3);
             rectPrimitive.render();
         }
 
         gridProg.bind()
-            .setUniform("albedo", glm::vec4(0, 1.0f, 0, 1))
+            .setUniform("albedo", glm::vec4(0.f, 0.75f, 0.f, 1.f))
             .setUniform("mvp",    proj * view * model);
         {
             // Grid pass
@@ -215,9 +249,6 @@ bool Application::run(const std::string& input)
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glEnable(GL_DEPTH_TEST);
             glDepthMask(true);
-
-            glEnable(GL_LINE_STIPPLE);
-            glLineStipple(1, 0x00ff);
 
             gl::Texture::unbind(GL_TEXTURE_2D, GL_TEXTURE0);
             gridPrimitive.render(GL_LINES);

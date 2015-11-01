@@ -3,7 +3,7 @@
 // Uniforms
 uniform mat4 mv;
 uniform mat4 p;
-uniform sampler2D albedo;
+uniform sampler2D texAlbedo;
 
 // Input
 in Block
@@ -39,6 +39,6 @@ void main()
 {
     posDepth = vec4(ib.viewPos, linearDepth(gl_FragCoord.z, p));
     normal   = normalize(ib.normal);
-    vec4 alb = texture(albedo, ib.uv);
+    vec4 alb = texture(texAlbedo, ib.uv);
     color    = vec4(mix(alb - 0.25, alb, edge(ib.bc)).rgb, 1.0);
 }
