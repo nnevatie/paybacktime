@@ -18,12 +18,11 @@ GLenum attachmentType(Fbo::Attachment attachment)
         GL_STENCIL_ATTACHMENT,
         GL_DEPTH_STENCIL_ATTACHMENT
     };
-    const int index = int(attachment);
+    const std::size_t index = std::size_t(attachment);
 
-    if (index < 0 || index >= int(types.size()))
+    if (index >= types.size())
         throw std::runtime_error("Invalid attachment type " +
                                  std::to_string(index));
-
     return types.at(index);
 }
 
@@ -57,7 +56,7 @@ Fbo& Fbo::bind()
 
 Fbo& Fbo::attach(const Rbo& rbo, Fbo::Attachment attachment, int index)
 {
-    const GLenum type = GLenum(attachmentType(attachment) + index);
+    const GLenum type = GLenum(attachmentType(attachment) + uint32_t(index));
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, type, GL_RENDERBUFFER, rbo.id());
     return *this;
 }
@@ -65,7 +64,7 @@ Fbo& Fbo::attach(const Rbo& rbo, Fbo::Attachment attachment, int index)
 Fbo& Fbo::attach(const Texture& texture, Attachment attachment, int index)
 {
     const GLenum target = GL_FRAMEBUFFER;
-    const GLenum type   = GLenum(attachmentType(attachment) + index);
+    const GLenum type   = GLenum(attachmentType(attachment) + uint32_t(index));
     const GLuint tid    = texture.id();
 
     if (texture.type() == Texture::Type::Texture1d)

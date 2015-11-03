@@ -179,7 +179,7 @@ bool Application::run(const std::string& input)
                 if (y % 2 && x % 2)
                 {
                 geomProg.bind().setUniform("mv", view *
-                    glm::translate(model, glm::vec3(x * 16, 0, y * 16)));
+                    glm::translate(model, glm::vec3(x * 16, 2, y * 16)));
                 primitive.render();
                 }
             }

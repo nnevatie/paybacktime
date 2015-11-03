@@ -22,9 +22,9 @@ GLenum shaderType(Shader::Type type)
         GL_GEOMETRY_SHADER,
         GL_COMPUTE_SHADER
     };
-    const int index = int(type);
+    const std::size_t index = std::size_t(type);
 
-    if (index < 0 || index >= int(types.size()))
+    if (index >= int(types.size()))
         throw std::runtime_error("Invalid shader type " +
                                  std::to_string(index));
 

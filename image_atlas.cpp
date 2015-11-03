@@ -14,9 +14,9 @@ struct Node
 {
     typedef std::shared_ptr<Node> Ptr;
 
-    bool reserved {};
     Rect<int> rect;
     Node::Ptr nodes[2];
+    bool reserved {};
 
     Node()
     {}
@@ -146,7 +146,7 @@ RectCube<int> ImageAtlas::insert(const ImageCube& imageCube)
     HCTIME("cube");
 
     RectCube<int> cubeRect;
-    for (int i = 0; i < int(imageCube.sides.size()); ++i)
+    for (std::size_t i = 0; i < imageCube.sides.size(); ++i)
         cubeRect[i] = insert(imageCube.side(ImageCube::Side(i)));
 
     return cubeRect;

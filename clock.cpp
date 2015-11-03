@@ -17,23 +17,23 @@ void Clock::start()
     t0_ = ticks();
 }
 
-double Clock::stop()
+float Clock::stop()
 {
     t1_ = ticks();
     return us();
 }
 
-double Clock::us() const
+float Clock::us() const
 {
-    return double(t1_ - t0_) * US_IN_S / frequency();
+    return float(t1_ - t0_) * US_IN_S / frequency();
 }
 
-double Clock::ms() const
+float Clock::ms() const
 {
     return us() / 1000;
 }
 
-double Clock::s() const
+float Clock::s() const
 {
     return us() / 1000000;
 }
@@ -55,7 +55,7 @@ Clock::Time Clock::now()
 
 void Clock::sleep(Clock::Time time)
 {
-    SDL_Delay((unsigned int) time);
+    SDL_Delay(uint32_t(time));
 }
 
 ScopedClock::ScopedClock(const SourceLocation& source,

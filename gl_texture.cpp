@@ -21,9 +21,9 @@ GLenum textureTarget(Texture::Type type)
         GL_TEXTURE_1D_ARRAY,
         GL_TEXTURE_2D_ARRAY
     };
-    const int index = int(type);
+    const std::size_t index = std::size_t(type);
 
-    if (index < 0 || index >= int(types.size()))
+    if (index >= int(types.size()))
         throw std::runtime_error("Invalid texture type " + std::to_string(index));
 
     return types.at(index);

@@ -30,20 +30,21 @@ struct Primitive
 
         vertices.bind();
 
-        const int stride      = vertexSpec.size;
-        const int attribCount = int(vertexSpec.attribs.size());
+        const std::size_t stride      = vertexSpec.size;
+        const std::size_t attribCount = vertexSpec.attribs.size();
 
         // Enable attrib arrays
-        for (int i = 0; i < attribCount; ++i)
+        for (std::size_t i = 0; i < attribCount; ++i)
             glEnableVertexAttribArray(i);
 
         // Set attrib pointers
         size_t offset = 0;
-        for (int i = 0; i < attribCount; ++i)
+        for (std::size_t i = 0; i < attribCount; ++i)
         {
             const VertexSpec::Attrib& attrib = vertexSpec.attribs.at(i);
             glVertexAttribPointer(i, std::get<0>(attrib), std::get<1>(attrib),
-                                  GL_FALSE, stride, (const void*) offset);
+                                  GL_FALSE, stride,
+                                  reinterpret_cast<const void*>(offset));
             offset += std::get<2>(attrib);
         }
 
@@ -57,7 +58,7 @@ struct Primitive
                        0);
 
         // Disable attrib arrays
-        for (int i = 0; i < attribCount; ++i)
+        for (std::size_t i = 0; i < attribCount; ++i)
             glDisableVertexAttribArray(i);
 
         indices.unbind();

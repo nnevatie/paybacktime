@@ -78,6 +78,11 @@ struct Rect
                     cfh * size.h);
     }
 
+    Rect translated(T tx, T ty) const
+    {
+        return Rect(x + tx, y + ty, size.w, size.h);
+    }
+
     Rect scaled(T sx, T sy) const
     {
         return Rect(x * sx, y * sy, size.w * sx, size.h * sy);

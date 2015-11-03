@@ -10,7 +10,7 @@ struct Clock
     /**
      * Time/frequency/duration data types.
      */
-    typedef long long Time;
+    typedef uint64_t Time;
 
     /**
      * Conversion constants.
@@ -30,11 +30,11 @@ struct Clock
     /**
      * Stops the clock and returns elapsed time (us).
      */
-    double stop();
+    float stop();
 
-    double us() const;
-    double ms() const;
-    double s() const;
+    float us() const;
+    float ms() const;
+    float s() const;
 
     /**
      * Returns the clock's frequency.
