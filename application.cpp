@@ -273,7 +273,6 @@ bool Application::run(const std::string& input)
         //a += 0.001f;
         #endif
 
-
         stats.accumulate(clock.stop(), mesh.vertices.size(),
                                        mesh.indices.size() / 3);
         stats.render();
