@@ -4,6 +4,7 @@
 uniform mat4 mv;
 uniform mat4 p;
 uniform sampler2D texAlbedo;
+uniform sampler2D texLight;
 
 // Input
 in Block
@@ -11,6 +12,7 @@ in Block
     vec3 viewPos;
     vec3 normal;
     vec2 uv;
+    vec2 wuv;
     vec3 bc;
 }
 ib;
@@ -19,6 +21,9 @@ ib;
 out vec4 posDepth;
 out vec3 normal;
 out vec4 color;
+
+// Externals
+vec4 textureBicubic(sampler2D, vec2);
 
 float linearDepth(float depth, mat4 proj)
 {
@@ -39,6 +44,7 @@ void main()
 {
     posDepth = vec4(ib.viewPos, linearDepth(gl_FragCoord.z, p));
     normal   = normalize(ib.normal);
-    vec4 alb = texture(texAlbedo, ib.uv);
-    color    = vec4(mix(alb - 0.25, alb, edge(ib.bc)).rgb, 1.0);
+    vec4 alb = texture(texAlbedo, ib.uv) * textureBicubic(texLight, ib.wuv);
+    color    = alb;
+    //color    = vec4(mix(alb + 0.25, alb, edge(ib.bc)).rgb, 1.0);
 }
