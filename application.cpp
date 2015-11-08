@@ -63,7 +63,7 @@ Application::~Application()
 
 bool Application::run(const std::string& input)
 {
-    Display display("High Caliber", {1280, 720});
+    Display display("High Caliber", {1920, 1080});
     display.open();
 
     gl::Shader fsSampling(filesystem::path("shaders/sampling.fs.glsl"));
@@ -102,9 +102,10 @@ bool Application::run(const std::string& input)
 
     const ImageCube depthCube("objects/" + input + "/*.png", 1);
     const ImageCube albedoCube("objects/" + input + "/albedo.*.png");
-
     const ImageCube floorCube("objects/floor/*.png", 1);
     const ImageCube floorAlb("objects/floor/albedo.*.png");
+    const ImageCube wallCube("objects/wall/*.png", 1);
+    const ImageCube wallAlb("objects/wall/albedo.*.png");
 
     gl::Texture lightmap;
     lightmap.bind().alloc(Image("data/lightmap.png"))
@@ -120,6 +121,10 @@ bool Application::run(const std::string& input)
     TextureAtlas::EntryCube albedoFloor = texAtlas.insert(floorAlb);
     const Mesh_P_N_UV floorMesh = ImageMesher::mesh(floorCube, albedoFloor.second);
     const gl::Primitive floor(floorMesh);
+
+    TextureAtlas::EntryCube albedoWall = texAtlas.insert(wallAlb);
+    const Mesh_P_N_UV wallMesh = ImageMesher::mesh(wallCube, albedoWall.second);
+    const gl::Primitive wall(wallMesh);
 
     const Mesh_P_UV rectMesh = squareMesh();
     const gl::Primitive rectPrimitive(rectMesh);
@@ -175,6 +180,22 @@ bool Application::run(const std::string& input)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             texAtlas.texture.bindAs(GL_TEXTURE0);
             lightmap.bindAs(GL_TEXTURE1);
+
+            for (int y = 0; y < 5; ++y)
+                for (int x = 0; x < 5; ++x)
+                if (y == 0 || x == 4)
+                {
+                    glm::mat4 m = glm::translate(model, glm::vec3(x * 16, 0, y * 16));
+
+                    if (x == 4)
+                    {
+                    m = glm::translate(m, glm::vec3(16, 0, 0));
+                    m = glm::rotate(m, -0.5f * float(M_PI), glm::vec3(0.f, 1.f, 0.f));
+                    }
+
+                    geomProg.bind().setUniform("m", m);
+                    wall.render();
+                }
 
             for (int y = 0; y < 5; ++y)
                 for (int x = 0; x < 5; ++x)
