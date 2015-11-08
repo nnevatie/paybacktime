@@ -60,10 +60,10 @@ Ssao::Ssao(int kernelSize,
     texPosDepth.bind().alloc(fboSize,      GL_RGBA16F, GL_RGB, GL_FLOAT);
     texNormal.bind().alloc(fboSize,        GL_RGB16F,  GL_RGB, GL_FLOAT);
     texNormalDenoise.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
-    texColor.bind().alloc(fboSize,         GL_RGB,     GL_RGB, GL_FLOAT);
+    texColor.bind().alloc(fboSize,         GL_RGBA16F, GL_RGB, GL_FLOAT);
     texAo.bind().alloc(fboSize,            GL_RED,     GL_RGB, GL_FLOAT);
     texBlur.bind().alloc(fboSize,          GL_RED,     GL_RGB, GL_FLOAT);
-    texLighting.bind().alloc(fboSize,      GL_RGB,     GL_RGB, GL_FLOAT);
+    texLighting.bind().alloc(fboSize,      GL_RGB16F,  GL_RGB, GL_FLOAT);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},

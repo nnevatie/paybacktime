@@ -23,7 +23,7 @@ void main(void)
     vec3 diffuse    = texture(texColor, ib.uv).rgb;
     float ao        = texture(texAo, ib.uv).r;
 
-    vec3 ambient    = vec3(0.05);
+    vec3 ambient    = vec3(0.01);
     vec3 viewDir    = normalize(-fragPos);
 
     // Diffuse

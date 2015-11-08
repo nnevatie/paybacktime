@@ -103,8 +103,8 @@ bool Application::run(const std::string& input)
     const ImageCube depthCube("objects/" + input + ".*.png", 1);
     const ImageCube albedoCube("objects/" + input + ".albedo.*.png");
 
-    const ImageCube floorCube("objects/floor.*.png", 1);
-    const ImageCube floorAlb("objects/floor.albedo.*.png");
+    const ImageCube floorCube("objects/floor/*.png", 1);
+    const ImageCube floorAlb("objects/floor/albedo.*.png");
 
     gl::Texture lightmap;
     lightmap.bind().alloc(Image("data/lightmap.png"))
@@ -167,7 +167,7 @@ bool Application::run(const std::string& input)
                                           GL_COLOR_ATTACHMENT1,
                                           GL_COLOR_ATTACHMENT2};
             glDrawBuffers(3, drawBuffers);
-
+            glDisable(GL_FRAMEBUFFER_SRGB);
             glEnable(GL_DEPTH_TEST);
             glDepthMask(true);
 
@@ -267,6 +267,7 @@ bool Application::run(const std::string& input)
         {
             // Lighting pass
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glEnable(GL_FRAMEBUFFER_SRGB);
             glEnable(GL_DEPTH_TEST);
             glDepthMask(true);
 
