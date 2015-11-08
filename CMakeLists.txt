@@ -170,8 +170,18 @@ install(FILES ${data_files}
         DESTINATION data)
 
 # Objects
-file(GLOB object_files
+file(GLOB object_entries
     "objects/*")
 
+foreach(entry ${object_entries})
+   IF(IS_DIRECTORY "${entry}" )
+      LIST(APPEND object_dirs "${entry}")
+   ELSE()
+      LIST(APPEND object_files "${entry}")
+   ENDIF()
+endforeach()
+
+install(DIRECTORY ${object_dirs}
+        DESTINATION objects)
 install(FILES ${object_files}
         DESTINATION objects)
