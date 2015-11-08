@@ -66,6 +66,20 @@ bool Display::open()
         // Init GLEW
         const GLenum glewStatus = glewInit();
 
+        /*
+        int dedicatedVideoMem = 0,
+            totalAvailableMem = 0,
+            curAvailableMem   = 0;
+
+        glGetIntegerv(0x9047, &dedicatedVideoMem);
+        glGetIntegerv(0x9048, &totalAvailableMem);
+        glGetIntegerv(0x9049, &curAvailableMem);
+
+        HCLOG(Debug) << dedicatedVideoMem << ", "
+                     << totalAvailableMem << ", "
+                     << curAvailableMem;
+        */
+
         // Log renderer info
         HCLOG(Debug) << "OpenGL vendor: '" << glGetString(GL_VENDOR)
                      << "', renderer: '"   << glGetString(GL_RENDERER)
