@@ -42,9 +42,9 @@ float edge(vec3 bc)
 
 void main()
 {
+    vec4 alb = vec4(texture(texAlbedo, ib.uv).rgb, textureBicubic(texLight, ib.wuv).r);
     posDepth = vec4(ib.viewPos, linearDepth(gl_FragCoord.z, p));
     normal   = normalize(ib.normal);
-    vec4 alb = texture(texAlbedo, ib.uv) * textureBicubic(texLight, ib.wuv);
     color    = alb;
     //color    = vec4(mix(alb + 0.25, alb, edge(ib.bc)).rgb, 1.0);
 }
