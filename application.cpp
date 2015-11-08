@@ -100,8 +100,8 @@ bool Application::run(const std::string& input)
     gl::ShaderProgram outputProg({vsQuadUv, fsTexture},
                                  {{0, "position"}, {1, "uv"}});
 
-    const ImageCube depthCube("objects/" + input + ".*.png", 1);
-    const ImageCube albedoCube("objects/" + input + ".albedo.*.png");
+    const ImageCube depthCube("objects/" + input + "/*.png", 1);
+    const ImageCube albedoCube("objects/" + input + "/albedo.*.png");
 
     const ImageCube floorCube("objects/floor/*.png", 1);
     const ImageCube floorAlb("objects/floor/albedo.*.png");

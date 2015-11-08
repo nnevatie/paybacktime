@@ -13,7 +13,7 @@ int main(int argc, char** argv)
         options_description desc("Allowed options");
         desc.add_options()
             ("input,i",
-             value<std::string>()->default_value("box"),
+             value<std::string>()->default_value("debug"),
              "Input name");
 
         variables_map args;
