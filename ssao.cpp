@@ -53,18 +53,14 @@ Ssao::Ssao(int kernelSize,
 {
     auto fboSize = {renderSize.w, renderSize.h};
 
-    // Alloc depth RBO
-    //rboDepth.bind().alloc(renderSize, GL_DEPTH_COMPONENT);
-
-    // Alloc pos/depth, normal, color and AO textures
-    //texPosDepth.bind().alloc(fboSize,      GL_RGBA16F, GL_RGB, GL_FLOAT);
+    // Alloc depth, normal, color and lighting textures
     texDepth.bind().alloc(fboSize,         GL_DEPTH_COMPONENT32F,
                                            GL_DEPTH_COMPONENT, GL_FLOAT);
     texNormal.bind().alloc(fboSize,        GL_RGB16F,  GL_RGB, GL_FLOAT);
     texNormalDenoise.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
-    texColor.bind().alloc(fboSize,         GL_RGBA16F, GL_RGB, GL_FLOAT);
-    texAo.bind().alloc(fboSize,            GL_RED,     GL_RGB, GL_FLOAT);
-    texBlur.bind().alloc(fboSize,          GL_RED,     GL_RGB, GL_FLOAT);
+    texColor.bind().alloc(fboSize,         GL_RGB8,    GL_RGB, GL_UNSIGNED_BYTE);
+    texAo.bind().alloc(fboSize,            GL_R16F,    GL_RGB, GL_FLOAT);
+    texBlur.bind().alloc(fboSize,          GL_R16F,    GL_RGB, GL_FLOAT);
     texLighting.bind().alloc(fboSize,      GL_RGB16F,  GL_RGB, GL_FLOAT);
 
     // Alloc and generate noise texture
@@ -74,11 +70,9 @@ Ssao::Ssao(int kernelSize,
                    .set(GL_TEXTURE_WRAP_S, GL_REPEAT)
                    .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    // Attach RBO and 6textures to FBOs
+    // Attach textures to FBOs
     fboGeometry.bind()
-               .attach(texDepth, gl::Fbo::Attachment::Depth)
-               //.attach(rboDepth,         gl::Fbo::Attachment::Depth)
-               //.attach(texPosDepth,      gl::Fbo::Attachment::Color, 0)
+               .attach(texDepth,         gl::Fbo::Attachment::Depth)
                .attach(texNormal,        gl::Fbo::Attachment::Color, 0)
                .attach(texColor,         gl::Fbo::Attachment::Color, 1)
                .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 2)
@@ -93,7 +87,6 @@ Ssao::Ssao(int kernelSize,
            .unbind();
 
     fboOutput.bind()
-             //.attach(rboDepth,    gl::Fbo::Attachment::Depth)
              .attach(texDepth,    gl::Fbo::Attachment::Depth)
              .attach(texLighting, gl::Fbo::Attachment::Color)
              .unbind();
