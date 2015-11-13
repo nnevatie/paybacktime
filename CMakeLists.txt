@@ -88,7 +88,9 @@ set(SHADER_FILES
     shaders/color.fs.glsl
     shaders/ssao.fs.glsl
     shaders/blur.fs.glsl
+    shaders/gaussian.fs.glsl
     shaders/lighting.fs.glsl
+    shaders/emissive.fs.glsl
     shaders/texture.fs.glsl
     shaders/model_pos.vs.glsl
     shaders/quad_uv.vs.glsl

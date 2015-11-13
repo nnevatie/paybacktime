@@ -75,6 +75,8 @@ bool Application::run(const std::string& input)
     gl::Shader fsColor(filesystem::path("shaders/color.fs.glsl"));
     gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
     gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
+    gl::Shader fsEmissive(filesystem::path("shaders/emissive.fs.glsl"));
+    gl::Shader fsGaussian(filesystem::path("shaders/gaussian.fs.glsl"));
     gl::Shader fsLighting(filesystem::path("shaders/lighting.fs.glsl"));
     gl::Shader fsTexture(filesystem::path("shaders/texture.fs.glsl"));
     gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
@@ -94,6 +96,12 @@ bool Application::run(const std::string& input)
     gl::ShaderProgram blurProg({vsQuadUv, fsBlur},
                                {{0, "position"}, {1, "uv"}});
 
+    gl::ShaderProgram albedoEmisProg({vsQuadUv, fsEmissive},
+                                     {{0, "position"}, {1, "uv"}});
+
+    gl::ShaderProgram emissiveBlurProg({vsQuadUv, fsGaussian},
+                                       {{0, "position"}, {1, "uv"}});
+
     gl::ShaderProgram lightingProg({vsQuadUv, fsLighting, fsCommon},
                                    {{0, "position"}, {1, "uv"}});
 
@@ -102,6 +110,8 @@ bool Application::run(const std::string& input)
 
     const ImageCube depthCube("objects/" + input + "/*.png", 1);
     const ImageCube albedoCube("objects/" + input + "/albedo.*.png");
+    const ImageCube lightCube("objects/" + input + "/light.*.png");
+
     const ImageCube floorCube("objects/floor/*.png", 1);
     const ImageCube floorAlb("objects/floor/albedo.*.png");
     const ImageCube wallCube("objects/wall/*.png", 1);
@@ -113,7 +123,10 @@ bool Application::run(const std::string& input)
                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     TextureAtlas texAtlas({128, 128});
+    TextureAtlas lightAtlas({128, 128});
+
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
+    lightAtlas.insert(lightCube);
 
     const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
     const gl::Primitive primitive(mesh);
@@ -161,17 +174,18 @@ bool Application::run(const std::string& input)
 
         geomProg.bind()
             .setUniform("texAlbedo", 0)
+            .setUniform("texLight",  1)
             .setUniform("m",         model)
             .setUniform("v",         view)
             .setUniform("p",         proj)
             .setUniform("size",      display.size().as<glm::vec2>());
-
         {
             // Geometry pass
             Binder<gl::Fbo> binder(ssao.fboGeometry);
             const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
-                                          GL_COLOR_ATTACHMENT1};
-            glDrawBuffers(2, drawBuffers);
+                                          GL_COLOR_ATTACHMENT1,
+                                          GL_COLOR_ATTACHMENT2};
+            glDrawBuffers(3, drawBuffers);
             glDisable(GL_FRAMEBUFFER_SRGB);
             glEnable(GL_DEPTH_TEST);
             glDepthMask(true);
@@ -179,6 +193,7 @@ bool Application::run(const std::string& input)
             glClearColor(0.f, 0.f, 0.f, 1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             texAtlas.texture.bindAs(GL_TEXTURE0);
+            lightAtlas.texture.bindAs(GL_TEXTURE1);
 
             for (int y = 0; y < 5; ++y)
                 for (int x = 0; x < 5; ++x)
@@ -213,10 +228,10 @@ bool Application::run(const std::string& input)
                         primitive.render();
                     }
 
+            // Denoise normals
             denoiseProg.bind().setUniform("tex", 0);
-            glDrawBuffer(GL_COLOR_ATTACHMENT2);
+            glDrawBuffer(GL_COLOR_ATTACHMENT3);
             glDisable(GL_DEPTH_TEST);
-            glClear(GL_COLOR_BUFFER_BIT);
             ssao.texNormal.bindAs(GL_TEXTURE0);
             rectPrimitive.render();
         }
@@ -233,45 +248,77 @@ bool Application::run(const std::string& input)
             // SSAO AO pass
             Binder<gl::Fbo> binder(ssao.fboAo);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glDisable(GL_DEPTH_TEST);
 
-            glClear(GL_COLOR_BUFFER_BIT);
             ssao.texDepth.bindAs(GL_TEXTURE0);
             ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
             ssao.texNoise.bindAs(GL_TEXTURE2);
             rectPrimitive.render();
         }
 
-        blurProg.bind().setUniform("texAo", 0);
+        blurProg.bind().setUniform("tex", 0);
         {
             // SSAO blur pass
-            Binder<gl::Fbo> binder(ssao.fboBlur);
-            glEnable(GL_DEPTH_TEST);
-
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            Binder<gl::Fbo> binder(ssao.fboAoBlur);
+            glDisable(GL_DEPTH_TEST);
             ssao.texAo.bindAs(GL_TEXTURE0);
             rectPrimitive.render();
         }
 
-        lightingProg.bind().setUniform("texDepth",  0)
-                           .setUniform("texNormal", 1)
-                           .setUniform("texColor",  2)
-                           .setUniform("texAo",     3)
-                           .setUniform("texGi",     4)
+        albedoEmisProg.bind().setUniform("texColor",  0)
+                             .setUniform("texLight",  1);
+        {
+            // Albedo/emission combine pass
+            Binder<gl::Fbo> binder(ssao.fboEmissive);
+            glDisable(GL_DEPTH_TEST);
+            ssao.texColor.bindAs(GL_TEXTURE0);
+            ssao.texLight.bindAs(GL_TEXTURE1);
+            rectPrimitive.render();
+        }
+
+        emissiveBlurProg.bind().setUniform("tex", 0);
+        {
+            // Emission blur passes
+            {
+                Binder<gl::Fbo> binder(ssao.fboEmissiveBlur1);
+                glDisable(GL_DEPTH_TEST);
+                emissiveBlurProg.setUniform("horizontal", 1);
+                ssao.texEmissive.bindAs(GL_TEXTURE0);
+                rectPrimitive.render();
+            }
+            {
+                Binder<gl::Fbo> binder(ssao.fboEmissiveBlur2);
+                glDisable(GL_DEPTH_TEST);
+                emissiveBlurProg.setUniform("horizontal", 0);
+                ssao.texEmissiveBlur.bindAs(GL_TEXTURE0);
+                rectPrimitive.render();
+            }
+        }
+
+        lightingProg.bind().setUniform("texDepth",    0)
+                           .setUniform("texNormal",   1)
+                           .setUniform("texColor",    2)
+                           .setUniform("texLight",    3)
+                           .setUniform("texEmissive", 4)
+                           .setUniform("texAo",       5)
+                           .setUniform("texGi",       6)
                            .setUniform("v",         view)
                            .setUniform("p",         proj);
         {
             // Lighting pass
             Binder<gl::Fbo> binder(ssao.fboOutput);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
-            glEnable(GL_DEPTH_TEST);
+            glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT);
             ssao.texDepth.bindAs(GL_TEXTURE0);
             ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
             ssao.texColor.bindAs(GL_TEXTURE2);
-            ssao.texBlur.bindAs(GL_TEXTURE3);
-            lightmap.bindAs(GL_TEXTURE4);
+            ssao.texLight.bindAs(GL_TEXTURE3);
+            ssao.texEmissive.bindAs(GL_TEXTURE4);
+            ssao.texAoBlur.bindAs(GL_TEXTURE5);
+            lightmap.bindAs(GL_TEXTURE6);
             rectPrimitive.render();
         }
 
@@ -294,10 +341,8 @@ bool Application::run(const std::string& input)
             // Output pass
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glEnable(GL_FRAMEBUFFER_SRGB);
-            glEnable(GL_DEPTH_TEST);
-            glDepthMask(true);
+            glDisable(GL_DEPTH_TEST);
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             ssao.texLighting.bindAs(GL_TEXTURE0);
             rectPrimitive.render();
         }

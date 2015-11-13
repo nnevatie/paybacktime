@@ -51,7 +51,7 @@ Ssao::Ssao(int kernelSize,
     noiseSize(noiseSize),
     kernel(kernelData(kernelSize))
 {
-    auto fboSize = {renderSize.w, renderSize.h};
+    auto fboSize  = {renderSize.w, renderSize.h};
 
     // Alloc depth, normal, color and lighting textures
     texDepth.bind().alloc(fboSize,         GL_DEPTH_COMPONENT32F,
@@ -59,8 +59,11 @@ Ssao::Ssao(int kernelSize,
     texNormal.bind().alloc(fboSize,        GL_RGB16F,  GL_RGB, GL_FLOAT);
     texNormalDenoise.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
     texColor.bind().alloc(fboSize,         GL_RGB8,    GL_RGB, GL_UNSIGNED_BYTE);
+    texLight.bind().alloc(fboSize,         GL_RGB8,    GL_RGB, GL_UNSIGNED_BYTE);
+    texEmissive.bind().alloc(fboSize,      GL_RGB16F,  GL_RGB, GL_FLOAT);
+    texEmissiveBlur.bind().alloc(fboSize,  GL_RGB16F,  GL_RGB, GL_FLOAT);
     texAo.bind().alloc(fboSize,            GL_R16F,    GL_RGB, GL_FLOAT);
-    texBlur.bind().alloc(fboSize,          GL_R16F,    GL_RGB, GL_FLOAT);
+    texAoBlur.bind().alloc(fboSize,        GL_R16F,    GL_RGB, GL_FLOAT);
     texLighting.bind().alloc(fboSize,      GL_RGB16F,  GL_RGB, GL_FLOAT);
 
     // Alloc and generate noise texture
@@ -75,15 +78,28 @@ Ssao::Ssao(int kernelSize,
                .attach(texDepth,         gl::Fbo::Attachment::Depth)
                .attach(texNormal,        gl::Fbo::Attachment::Color, 0)
                .attach(texColor,         gl::Fbo::Attachment::Color, 1)
-               .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 2)
+               .attach(texLight,         gl::Fbo::Attachment::Color, 2)
+               .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 3)
                .unbind();
+
+    fboEmissive.bind()
+         .attach(texEmissive, gl::Fbo::Attachment::Color)
+         .unbind();
+
+    fboEmissiveBlur1.bind()
+         .attach(texEmissiveBlur, gl::Fbo::Attachment::Color)
+         .unbind();
+
+    fboEmissiveBlur2.bind()
+         .attach(texEmissive, gl::Fbo::Attachment::Color)
+         .unbind();
 
     fboAo.bind()
          .attach(texAo, gl::Fbo::Attachment::Color)
          .unbind();
 
-    fboBlur.bind()
-           .attach(texBlur, gl::Fbo::Attachment::Color)
+    fboAoBlur.bind()
+           .attach(texAoBlur, gl::Fbo::Attachment::Color)
            .unbind();
 
     fboOutput.bind()

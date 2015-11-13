@@ -10,6 +10,14 @@ namespace gl
 {
 
 template<>
+ShaderProgram& ShaderProgram::setUniform<bool>(
+    const char* name, const bool& v)
+{
+    glUniform1i(glGetUniformLocation(id, name), v);
+    return *this;
+}
+
+template<>
 ShaderProgram& ShaderProgram::setUniform<int>(
     const char* name, const int& v)
 {
