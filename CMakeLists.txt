@@ -81,7 +81,7 @@ set(EXT_SOURCE_FILES
     )
 
 set(SHADER_FILES
-    shaders/sampling.fs.glsl
+    shaders/common.fs.glsl
     shaders/geometry.vs.glsl
     shaders/geometry.fs.glsl
     shaders/denoise.fs.glsl
