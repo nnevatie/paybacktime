@@ -1,10 +1,7 @@
 #version 150
 
 // Uniforms
-uniform mat4 mv;
-uniform mat4 p;
 uniform sampler2D texAlbedo;
-uniform sampler2D texLight;
 
 // Input
 in Block
@@ -12,26 +9,13 @@ in Block
     vec3 viewPos;
     vec3 normal;
     vec2 uv;
-    vec2 wuv;
     vec3 bc;
 }
 ib;
 
 // Output
-out vec4 posDepth;
 out vec3 normal;
 out vec4 color;
-
-// Externals
-vec4 textureBicubic(sampler2D, vec2);
-
-float linearDepth(float depth, mat4 proj)
-{
-    float near = proj[3][2] / (proj[2][2] - 1);
-    float far  = proj[3][2] / (proj[2][2] + 1);
-    float z    = depth * 2.0 - 1.0;
-    return (2.0 * near * far) / (far + near - z * (far - near));
-}
 
 float edge(vec3 bc)
 {
@@ -42,9 +26,7 @@ float edge(vec3 bc)
 
 void main()
 {
-    vec4 alb = vec4(texture(texAlbedo, ib.uv).rgb, textureBicubic(texLight, ib.wuv).r);
-    posDepth = vec4(ib.viewPos, linearDepth(gl_FragCoord.z, p));
     normal   = normalize(ib.normal);
-    color    = alb;
+    color    = texture(texAlbedo, ib.uv);
     //color    = vec4(mix(alb + 0.25, alb, edge(ib.bc)).rgb, 1.0);
 }

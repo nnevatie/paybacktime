@@ -63,10 +63,10 @@ Application::~Application()
 
 bool Application::run(const std::string& input)
 {
-    Display display("High Caliber", {1920, 1080});
+    Display display("High Caliber", {1280, 720});
     display.open();
 
-    gl::Shader fsSampling(filesystem::path("shaders/sampling.fs.glsl"));
+    gl::Shader fsCommon(filesystem::path("shaders/common.fs.glsl"));
     gl::Shader vsGeometry(filesystem::path("shaders/geometry.vs.glsl"));
     gl::Shader fsGeometry(filesystem::path("shaders/geometry.fs.glsl"));
     gl::Shader fsDenoise(filesystem::path("shaders/denoise.fs.glsl"));
@@ -82,19 +82,19 @@ bool Application::run(const std::string& input)
     gl::ShaderProgram gridProg({vsModelPos, fsColor},
                                {{0, "position"}});
 
-    gl::ShaderProgram geomProg({vsGeometry, gsWireframe, fsGeometry, fsSampling},
+    gl::ShaderProgram geomProg({vsGeometry, gsWireframe, fsGeometry, fsCommon},
                                {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     gl::ShaderProgram denoiseProg({vsQuadUv, fsDenoise},
                                   {{0, "position"}, {1, "uv"}});
 
-    gl::ShaderProgram ssaoProg({vsQuadUv, fsSsao},
+    gl::ShaderProgram ssaoProg({vsQuadUv, fsSsao, fsCommon},
                                {{0, "position"}, {1, "uv"}});
 
     gl::ShaderProgram blurProg({vsQuadUv, fsBlur},
                                {{0, "position"}, {1, "uv"}});
 
-    gl::ShaderProgram lightingProg({vsQuadUv, fsLighting},
+    gl::ShaderProgram lightingProg({vsQuadUv, fsLighting, fsCommon},
                                    {{0, "position"}, {1, "uv"}});
 
     gl::ShaderProgram outputProg({vsQuadUv, fsTexture},
@@ -145,10 +145,11 @@ bool Application::run(const std::string& input)
     bool running = true;
     while (running)
     {
-        glm::mat4 proj  = glm::perspective(45.0f, display.size().aspect<float>(),
-                                           0.1f, 400.f);
+        const float fov = 45.f;
+        const float ar  = display.size().aspect<float>();
 
-        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 150, 150),
+        glm::mat4 proj  = glm::perspective(glm::radians(fov), ar, 0.1f, 400.f);
+        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 200, 200),
                                       glm::vec3(0.f, 0.f, 0.f),
                                       glm::vec3(0, 1, 0)) *
                          (glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
@@ -160,18 +161,17 @@ bool Application::run(const std::string& input)
 
         geomProg.bind()
             .setUniform("texAlbedo", 0)
-            .setUniform("texLight",  1)
             .setUniform("m",         model)
             .setUniform("v",         view)
             .setUniform("p",         proj)
             .setUniform("size",      display.size().as<glm::vec2>());
+
         {
             // Geometry pass
             Binder<gl::Fbo> binder(ssao.fboGeometry);
             const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
-                                          GL_COLOR_ATTACHMENT1,
-                                          GL_COLOR_ATTACHMENT2};
-            glDrawBuffers(3, drawBuffers);
+                                          GL_COLOR_ATTACHMENT1};
+            glDrawBuffers(2, drawBuffers);
             glDisable(GL_FRAMEBUFFER_SRGB);
             glEnable(GL_DEPTH_TEST);
             glDepthMask(true);
@@ -179,7 +179,6 @@ bool Application::run(const std::string& input)
             glClearColor(0.f, 0.f, 0.f, 1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             texAtlas.texture.bindAs(GL_TEXTURE0);
-            lightmap.bindAs(GL_TEXTURE1);
 
             for (int y = 0; y < 5; ++y)
                 for (int x = 0; x < 5; ++x)
@@ -215,26 +214,28 @@ bool Application::run(const std::string& input)
                     }
 
             denoiseProg.bind().setUniform("tex", 0);
-            glDrawBuffer(GL_COLOR_ATTACHMENT3);
+            glDrawBuffer(GL_COLOR_ATTACHMENT2);
             glDisable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT);
             ssao.texNormal.bindAs(GL_TEXTURE0);
             rectPrimitive.render();
         }
 
-        ssaoProg.bind().setUniform("texPosDepth", 0)
+        ssaoProg.bind().setUniform("texDepth",    0)
                        .setUniform("texNormal",   1)
                        .setUniform("texNoise",    2)
                        .setUniform("kernel",      ssao.kernel)
                        .setUniform("noiseScale",  ssao.noiseScale())
-                       .setUniform("p",           proj);
+                       .setUniform("p",           proj)
+                       .setUniform("tanHalfFov",  std::tan(radians(0.5f * fov)))
+                       .setUniform("aspectRatio", ar);
         {
             // SSAO AO pass
             Binder<gl::Fbo> binder(ssao.fboAo);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
             glClear(GL_COLOR_BUFFER_BIT);
-            ssao.texPosDepth.bindAs(GL_TEXTURE0);
+            ssao.texDepth.bindAs(GL_TEXTURE0);
             ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
             ssao.texNoise.bindAs(GL_TEXTURE2);
             rectPrimitive.render();
@@ -251,10 +252,13 @@ bool Application::run(const std::string& input)
             rectPrimitive.render();
         }
 
-        lightingProg.bind().setUniform("texPosDepth", 0)
-                           .setUniform("texNormal",   1)
-                           .setUniform("texColor",    2)
-                           .setUniform("texAo",       3);
+        lightingProg.bind().setUniform("texDepth",  0)
+                           .setUniform("texNormal", 1)
+                           .setUniform("texColor",  2)
+                           .setUniform("texAo",     3)
+                           .setUniform("texGi",     4)
+                           .setUniform("v",         view)
+                           .setUniform("p",         proj);
         {
             // Lighting pass
             Binder<gl::Fbo> binder(ssao.fboOutput);
@@ -263,10 +267,11 @@ bool Application::run(const std::string& input)
             glDepthMask(false);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            ssao.texPosDepth.bindAs(GL_TEXTURE0);
+            ssao.texDepth.bindAs(GL_TEXTURE0);
             ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
             ssao.texColor.bindAs(GL_TEXTURE2);
             ssao.texBlur.bindAs(GL_TEXTURE3);
+            lightmap.bindAs(GL_TEXTURE4);
             rectPrimitive.render();
         }
 
@@ -286,7 +291,7 @@ bool Application::run(const std::string& input)
 
         outputProg.bind().setUniform("texColor", 0);
         {
-            // Lighting pass
+            // Output pass
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glEnable(GL_FRAMEBUFFER_SRGB);
             glEnable(GL_DEPTH_TEST);

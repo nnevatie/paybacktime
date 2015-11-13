@@ -1,5 +1,13 @@
 #version 150
 
+float linearDepth(float depth, mat4 proj)
+{
+  const float drmin = 0.0;
+  const float drmax = 1.0;
+  float ndcZ = (2.0 * depth - drmin - drmax) / (drmax - drmin);
+  return proj[3][2] / ((proj[2][3] * ndcZ) - proj[2][2]);
+}
+
 vec4 cubic(float v)
 {
     vec4 n  = vec4(1.0, 2.0, 3.0, 4.0) - v;

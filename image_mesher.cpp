@@ -224,6 +224,7 @@ void emitBoxFace(Mesh_P_N_UV* g, float scale, int axis, int cc[8][3],
     {
         const v n0 = glm::normalize(glm::cross(vb - va, vc - va));
         const v n1 = glm::normalize(glm::cross(vd - vc, va - vc));
+
         g->vertices.insert(g->vertices.end(), {{va, n0, uvs[axis][0]},
                                                {vb, n0, uvs[axis][1]},
                                                {vc, n0, uvs[axis][2]},

@@ -28,14 +28,14 @@ struct Primitive
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        vertices.bind();
-
         const std::size_t stride      = vertexSpec.size;
         const std::size_t attribCount = vertexSpec.attribs.size();
 
         // Enable attrib arrays
         for (std::size_t i = 0; i < attribCount; ++i)
             glEnableVertexAttribArray(i);
+
+        vertices.bind();
 
         // Set attrib pointers
         size_t offset = 0;
@@ -50,6 +50,7 @@ struct Primitive
 
         // Draw elements
         indices.bind();
+
         glDrawElements(mode,
                        indices.size / int(indexSpec.size),
                        indexSpec.size == 4 ? GL_UNSIGNED_INT :

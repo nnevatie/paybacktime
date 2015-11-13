@@ -54,10 +54,12 @@ Ssao::Ssao(int kernelSize,
     auto fboSize = {renderSize.w, renderSize.h};
 
     // Alloc depth RBO
-    rboDepth.bind().alloc(renderSize, GL_DEPTH_COMPONENT);
+    //rboDepth.bind().alloc(renderSize, GL_DEPTH_COMPONENT);
 
     // Alloc pos/depth, normal, color and AO textures
-    texPosDepth.bind().alloc(fboSize,      GL_RGBA16F, GL_RGB, GL_FLOAT);
+    //texPosDepth.bind().alloc(fboSize,      GL_RGBA16F, GL_RGB, GL_FLOAT);
+    texDepth.bind().alloc(fboSize,         GL_DEPTH_COMPONENT32F,
+                                           GL_DEPTH_COMPONENT, GL_FLOAT);
     texNormal.bind().alloc(fboSize,        GL_RGB16F,  GL_RGB, GL_FLOAT);
     texNormalDenoise.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
     texColor.bind().alloc(fboSize,         GL_RGBA16F, GL_RGB, GL_FLOAT);
@@ -74,11 +76,12 @@ Ssao::Ssao(int kernelSize,
 
     // Attach RBO and 6textures to FBOs
     fboGeometry.bind()
-               .attach(rboDepth,         gl::Fbo::Attachment::Depth)
-               .attach(texPosDepth,      gl::Fbo::Attachment::Color, 0)
-               .attach(texNormal,        gl::Fbo::Attachment::Color, 1)
-               .attach(texColor,         gl::Fbo::Attachment::Color, 2)
-               .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 3)
+               .attach(texDepth, gl::Fbo::Attachment::Depth)
+               //.attach(rboDepth,         gl::Fbo::Attachment::Depth)
+               //.attach(texPosDepth,      gl::Fbo::Attachment::Color, 0)
+               .attach(texNormal,        gl::Fbo::Attachment::Color, 0)
+               .attach(texColor,         gl::Fbo::Attachment::Color, 1)
+               .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 2)
                .unbind();
 
     fboAo.bind()
@@ -90,7 +93,8 @@ Ssao::Ssao(int kernelSize,
            .unbind();
 
     fboOutput.bind()
-             .attach(rboDepth,    gl::Fbo::Attachment::Depth)
+             //.attach(rboDepth,    gl::Fbo::Attachment::Depth)
+             .attach(texDepth,    gl::Fbo::Attachment::Depth)
              .attach(texLighting, gl::Fbo::Attachment::Color)
              .unbind();
 }

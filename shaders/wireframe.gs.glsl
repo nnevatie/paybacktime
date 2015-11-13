@@ -12,7 +12,6 @@ in Block
     vec3 viewPos;
     vec3 normal;
     vec2 uv;
-    vec2 wuv;
     vec3 bc;
 }
 ib[];
@@ -23,7 +22,6 @@ out Block
     vec3 viewPos;
     vec3 normal;
     vec2 uv;
-    vec2 wuv;
     vec3 bc;
 }
 ob;
@@ -43,7 +41,6 @@ void main(void)
     ob.viewPos  = ib[0].viewPos;
     ob.normal   = ib[0].normal;
     ob.uv       = ib[0].uv;
-    ob.wuv      = ib[0].wuv;
     ob.bc       = vec3(area / length(v0), 0, 0);
     gl_Position = gl_in[0].gl_Position;
     EmitVertex();
@@ -51,7 +48,6 @@ void main(void)
     ob.viewPos  = ib[1].viewPos;
     ob.normal   = ib[1].normal;
     ob.uv       = ib[1].uv;
-    ob.wuv      = ib[1].wuv;
     ob.bc       = vec3(0, area / length(v1), 0);
     gl_Position = gl_in[1].gl_Position;
     EmitVertex();
@@ -59,7 +55,6 @@ void main(void)
     ob.viewPos  = ib[2].viewPos;
     ob.normal   = ib[2].normal;
     ob.uv       = ib[2].uv;
-    ob.wuv      = ib[2].wuv;
     ob.bc       = vec3(0, 0, area / length(v2));
     gl_Position = gl_in[2].gl_Position;
     EmitVertex();

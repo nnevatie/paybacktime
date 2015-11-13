@@ -16,7 +16,6 @@ out Block
     vec3 viewPos;
     vec3 normal;
     vec2 uv;
-    vec2 wuv;
     vec3 bc;
 }
 ob;
@@ -26,10 +25,10 @@ void main()
     mat4 mv        = v * m;
     mat3 normalMat = transpose(inverse(mat3(mv)));
     vec4 viewPos   = mv * vec4(position, 1.0);
+
     ob.viewPos     = viewPos.xyz;
     ob.normal      = normalMat * normal;
     ob.uv          = uv;
-    ob.wuv         = (m * vec4(position, 1.0)).xz / vec2(16.0 * 5, 16.0 * 5);
     ob.bc          = vec3(1.0);
     gl_Position    = p * viewPos;
 }

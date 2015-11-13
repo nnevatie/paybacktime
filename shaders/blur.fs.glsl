@@ -6,7 +6,8 @@ uniform sampler2D texAo;
 // Input
 in Block
 {
-    vec2 uv;
+    vec2               uv;
+    noperspective vec3 viewRay;
 }
 ib;
 
