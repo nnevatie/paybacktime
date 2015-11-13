@@ -23,8 +23,7 @@ struct Ssao
                 fboBlur,
                 fboOutput;
 
-    gl::Texture texPosDepth,
-                texDepth,
+    gl::Texture texDepth,
                 texNormal,
                 texNormalDenoise,
                 texColor,
