@@ -35,6 +35,7 @@ set(HEADER_FILES
     mesh.h
     sn_mesher.h
     ssao.h
+    bloom.h
     scene.h
     object.h
     object_store.h
@@ -61,6 +62,7 @@ set(SOURCE_FILES
     gl_rbo.cpp
     render_stats.cpp
     ssao.cpp
+    bloom.cpp
     scene.cpp
     object.cpp
     object_store.cpp
@@ -85,12 +87,13 @@ set(SHADER_FILES
     shaders/geometry.vs.glsl
     shaders/geometry.fs.glsl
     shaders/denoise.fs.glsl
+    shaders/add.fs.glsl
     shaders/color.fs.glsl
     shaders/ssao.fs.glsl
     shaders/blur.fs.glsl
     shaders/gaussian.fs.glsl
     shaders/lighting.fs.glsl
-    shaders/emissive.fs.glsl
+    shaders/bloom.fs.glsl
     shaders/texture.fs.glsl
     shaders/model_pos.vs.glsl
     shaders/quad_uv.vs.glsl

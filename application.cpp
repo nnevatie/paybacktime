@@ -26,6 +26,8 @@
 #include "gl_fbo.h"
 
 #include "ssao.h"
+#include "bloom.h"
+
 #include "render_stats.h"
 
 #include "object_store.h"
@@ -66,20 +68,19 @@ bool Application::run(const std::string& input)
     Display display("High Caliber", {1280, 720});
     display.open();
 
-    gl::Shader fsCommon(filesystem::path("shaders/common.fs.glsl"));
-    gl::Shader vsGeometry(filesystem::path("shaders/geometry.vs.glsl"));
-    gl::Shader fsGeometry(filesystem::path("shaders/geometry.fs.glsl"));
-    gl::Shader fsDenoise(filesystem::path("shaders/denoise.fs.glsl"));
-    gl::Shader vsModelPos(filesystem::path("shaders/model_pos.vs.glsl"));
-    gl::Shader vsQuadUv(filesystem::path("shaders/quad_uv.vs.glsl"));
-    gl::Shader fsColor(filesystem::path("shaders/color.fs.glsl"));
-    gl::Shader fsSsao(filesystem::path("shaders/ssao.fs.glsl"));
-    gl::Shader fsBlur(filesystem::path("shaders/blur.fs.glsl"));
-    gl::Shader fsEmissive(filesystem::path("shaders/emissive.fs.glsl"));
-    gl::Shader fsGaussian(filesystem::path("shaders/gaussian.fs.glsl"));
-    gl::Shader fsLighting(filesystem::path("shaders/lighting.fs.glsl"));
-    gl::Shader fsTexture(filesystem::path("shaders/texture.fs.glsl"));
-    gl::Shader gsWireframe(filesystem::path("shaders/wireframe.gs.glsl"));
+    gl::Shader fsCommon(gl::Shader::path("common.fs.glsl"));
+    gl::Shader vsGeometry(gl::Shader::path("geometry.vs.glsl"));
+    gl::Shader fsGeometry(gl::Shader::path("geometry.fs.glsl"));
+    gl::Shader fsDenoise(gl::Shader::path("denoise.fs.glsl"));
+    gl::Shader vsModelPos(gl::Shader::path("model_pos.vs.glsl"));
+    gl::Shader vsQuadUv(gl::Shader::path("quad_uv.vs.glsl"));
+    gl::Shader fsColor(gl::Shader::path("color.fs.glsl"));
+    gl::Shader fsSsao(gl::Shader::path("ssao.fs.glsl"));
+    gl::Shader fsBlur(gl::Shader::path("blur.fs.glsl"));
+    gl::Shader fsLighting(gl::Shader::path("lighting.fs.glsl"));
+    gl::Shader fsAdd(gl::Shader::path("add.fs.glsl"));
+    gl::Shader fsTexture(gl::Shader::path("texture.fs.glsl"));
+    gl::Shader gsWireframe(gl::Shader::path("wireframe.gs.glsl"));
 
     gl::ShaderProgram gridProg({vsModelPos, fsColor},
                                {{0, "position"}});
@@ -96,16 +97,10 @@ bool Application::run(const std::string& input)
     gl::ShaderProgram blurProg({vsQuadUv, fsBlur},
                                {{0, "position"}, {1, "uv"}});
 
-    gl::ShaderProgram albedoEmisProg({vsQuadUv, fsEmissive},
-                                     {{0, "position"}, {1, "uv"}});
-
-    gl::ShaderProgram emissiveBlurProg({vsQuadUv, fsGaussian},
-                                       {{0, "position"}, {1, "uv"}});
-
     gl::ShaderProgram lightingProg({vsQuadUv, fsLighting, fsCommon},
                                    {{0, "position"}, {1, "uv"}});
 
-    gl::ShaderProgram outputProg({vsQuadUv, fsTexture},
+    gl::ShaderProgram outputProg({vsQuadUv, fsAdd},
                                  {{0, "position"}, {1, "uv"}});
 
     const ImageCube depthCube("objects/" + input + "/*.png", 1);
@@ -114,8 +109,11 @@ bool Application::run(const std::string& input)
 
     const ImageCube floorCube("objects/floor/*.png", 1);
     const ImageCube floorAlb("objects/floor/albedo.*.png");
+    const ImageCube floorLight("objects/floor/light.*.png");
+
     const ImageCube wallCube("objects/wall/*.png", 1);
     const ImageCube wallAlb("objects/wall/albedo.*.png");
+    const ImageCube wallLight("objects/wall/light.*.png");
 
     gl::Texture lightmap;
     lightmap.bind().alloc(Image("data/lightmap.png"))
@@ -127,6 +125,8 @@ bool Application::run(const std::string& input)
 
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
     lightAtlas.insert(lightCube);
+    lightAtlas.insert(floorLight);
+    lightAtlas.insert(wallLight);
 
     const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
     const gl::Primitive primitive(mesh);
@@ -146,6 +146,7 @@ bool Application::run(const std::string& input)
     const gl::Primitive gridPrimitive(gMesh);
 
     Ssao ssao(32, display.size(), {4, 4});
+    Bloom bloom(display.size());
 
     RenderStats stats;
 
@@ -265,36 +266,6 @@ bool Application::run(const std::string& input)
             rectPrimitive.render();
         }
 
-        albedoEmisProg.bind().setUniform("texColor",  0)
-                             .setUniform("texLight",  1);
-        {
-            // Albedo/emission combine pass
-            Binder<gl::Fbo> binder(ssao.fboEmissive);
-            glDisable(GL_DEPTH_TEST);
-            ssao.texColor.bindAs(GL_TEXTURE0);
-            ssao.texLight.bindAs(GL_TEXTURE1);
-            rectPrimitive.render();
-        }
-
-        emissiveBlurProg.bind().setUniform("tex", 0);
-        {
-            // Emission blur passes
-            {
-                Binder<gl::Fbo> binder(ssao.fboEmissiveBlur1);
-                glDisable(GL_DEPTH_TEST);
-                emissiveBlurProg.setUniform("horizontal", 1);
-                ssao.texEmissive.bindAs(GL_TEXTURE0);
-                rectPrimitive.render();
-            }
-            {
-                Binder<gl::Fbo> binder(ssao.fboEmissiveBlur2);
-                glDisable(GL_DEPTH_TEST);
-                emissiveBlurProg.setUniform("horizontal", 0);
-                ssao.texEmissiveBlur.bindAs(GL_TEXTURE0);
-                rectPrimitive.render();
-            }
-        }
-
         lightingProg.bind().setUniform("texDepth",    0)
                            .setUniform("texNormal",   1)
                            .setUniform("texColor",    2)
@@ -316,11 +287,13 @@ bool Application::run(const std::string& input)
             ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
             ssao.texColor.bindAs(GL_TEXTURE2);
             ssao.texLight.bindAs(GL_TEXTURE3);
-            ssao.texEmissive.bindAs(GL_TEXTURE4);
+            bloom.output()->bindAs(GL_TEXTURE4);
             ssao.texAoBlur.bindAs(GL_TEXTURE5);
             lightmap.bindAs(GL_TEXTURE6);
             rectPrimitive.render();
         }
+
+        bloom(&ssao.texColor, &ssao.texLighting, &ssao.texLight);
 
         gridProg.bind()
             .setUniform("albedo", glm::vec4(0.f, 0.75f, 0.f, 1.f))
@@ -336,7 +309,8 @@ bool Application::run(const std::string& input)
             gridPrimitive.render(GL_LINES);
         }
 
-        outputProg.bind().setUniform("texColor", 0);
+        outputProg.bind().setUniform("tex0", 0)
+                         .setUniform("tex1", 1);
         {
             // Output pass
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -344,6 +318,7 @@ bool Application::run(const std::string& input)
             glDisable(GL_DEPTH_TEST);
 
             ssao.texLighting.bindAs(GL_TEXTURE0);
+            bloom.output()->bindAs(GL_TEXTURE1);
             rectPrimitive.render();
         }
 
