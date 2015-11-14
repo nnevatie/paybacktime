@@ -5,6 +5,7 @@
 
 #include <GL/glew.h>
 
+#include "geometry.h"
 #include "image.h"
 
 namespace hc
@@ -27,6 +28,8 @@ struct Texture
 
     GLuint id() const;
     Type type() const;
+
+    Size<int> size();
 
     Image image();
 
