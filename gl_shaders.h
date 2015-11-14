@@ -28,6 +28,8 @@ struct Shader
 
     GLuint id() const;
 
+    static filesystem::path path(const std::string& filename);
+
 private:
     struct Data;
     std::shared_ptr<Data> d;

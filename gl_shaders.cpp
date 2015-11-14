@@ -111,7 +111,13 @@ GLuint Shader::id() const
     return d->id;
 }
 
-ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders, const std::vector<AttribLocation> &attribs) :
+filesystem::path Shader::path(const std::string& filename)
+{
+    return filesystem::path("shaders/" + filename);
+}
+
+ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders,
+                             const std::vector<AttribLocation> &attribs) :
     shaders(shaders)
 {
     id = glCreateProgram();
