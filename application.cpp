@@ -163,7 +163,7 @@ bool Application::run(const std::string& input)
         const float ar  = display.size().aspect<float>();
 
         glm::mat4 proj  = glm::perspective(glm::radians(fov), ar, 0.1f, 400.f);
-        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 200, 200),
+        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 250, 250),
                                       glm::vec3(0.f, 0.f, 0.f),
                                       glm::vec3(0, 1, 0)) *
                          (glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
