@@ -43,6 +43,12 @@ struct Size
         return RT(w, h);
     }
 
+    template <typename AT>
+    Size operator/(AT d) const
+    {
+        return Size(T(w / d), T(h / d));
+    }
+
     T w {}, h {};
 };
 
