@@ -73,9 +73,6 @@ Bloom& Bloom::operator()(gl::Texture* texAlbedo,
     // Setup common GL states
     glDisable(GL_DEPTH_TEST);
 
-    //texColor->image().flipped().write("c:/temp/bloom/color.png");
-    //texLight->image().flipped().write("c:/temp/bloom/light.png");
-
     // Produce bloom bright map
     bloomProg.bind().setUniform("texAlbedo", 0)
                     .setUniform("texColor",  1)
@@ -95,8 +92,8 @@ Bloom& Bloom::operator()(gl::Texture* texAlbedo,
         scaleProg.bind().setUniform("texColor", 0);
         Binder<gl::Fbo> binder(fboScale[i]);
         glViewport(0, 0, size.w, size.h);
-        gl::Texture src = i > 0 ? texScale[i - 1] : texBloom;
-        src.bindAs(GL_TEXTURE0);
+        gl::Texture scaleSrc = i > 0 ? texScale[i - 1] : texBloom;
+        scaleSrc.bindAs(GL_TEXTURE0);
         rect.render();
     }
 
@@ -104,8 +101,6 @@ Bloom& Bloom::operator()(gl::Texture* texAlbedo,
     for (int i = scaleCount - 1; i >= 0; --i)
     {
         const Size<int> size = texScale[i].size();
-        //texScale[i].image().flipped().write("c:/temp/bloom/scale_" +
-        //                                    std::to_string(i) + ".png");
 
         // Blur source will be either the downscaled texture or it
         // combined with the previous level's blurred version.
@@ -140,8 +135,6 @@ Bloom& Bloom::operator()(gl::Texture* texAlbedo,
             texBlur[i].bindAs(GL_TEXTURE0);
             rect.render();
         }
-        //texScale[i].image().flipped().write("c:/temp/bloom/blur_" +
-        //                                    std::to_string(i) + ".png");
     }
 
     // Restore viewport
