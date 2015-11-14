@@ -19,9 +19,6 @@ struct Ssao
                 noiseSize;
 
     gl::Fbo     fboGeometry,
-                fboEmissive,
-                fboEmissiveBlur1,
-                fboEmissiveBlur2,
                 fboAo,
                 fboAoBlur,
                 fboOutput;
@@ -31,8 +28,6 @@ struct Ssao
                 texNormalDenoise,
                 texColor,
                 texLight,
-                texEmissive,
-                texEmissiveBlur,
                 texAo,
                 texAoBlur,
                 texLighting,
