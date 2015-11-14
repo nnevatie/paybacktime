@@ -1,0 +1,157 @@
+#include "bloom.h"
+
+#include "mesh.h"
+#include "log.h"
+
+namespace hc
+{
+
+Bloom::Bloom(const Size<int>& renderSize) :
+    renderSize(renderSize),
+    rect(squareMesh()),
+    vsQuadUv(gl::Shader::path("quad_uv.vs.glsl")),
+    fsBloom(gl::Shader::path("bloom.fs.glsl")),
+    fsTexture(gl::Shader::path("texture.fs.glsl")),
+    fsAdd(gl::Shader::path("add.fs.glsl")),
+    fsGaussian(gl::Shader::path("gaussian.fs.glsl")),
+    bloomProg({vsQuadUv, fsBloom},
+              {{0, "position"}, {1, "uv"}}),
+    scaleProg({vsQuadUv, fsTexture},
+              {{0, "position"}, {1, "uv"}}),
+    addProg({vsQuadUv, fsAdd},
+            {{0, "position"}, {1, "uv"}}),
+    blurProg({vsQuadUv, fsGaussian},
+              {{0, "position"}, {1, "uv"}})
+{
+    HCLOG(Info) << "size " << renderSize.w << "x" << renderSize.h;
+    auto fboSize = {renderSize.w, renderSize.h};
+
+    const GLint iformat = GL_RGB16F;
+    const GLenum type   = GL_FLOAT;
+
+    // Color + emissive texture and FBO
+    texBloom.bind().alloc(fboSize, iformat, GL_RGB, type)
+                   .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                   .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    fboBloom.bind()
+            .attach(texBloom, gl::Fbo::Attachment::Color)
+            .unbind();
+
+    for (int i = 0; i < scaleCount; ++i)
+    {
+        const Size<int> size = renderSize / (2 << i);
+        auto sizeScaled      = {size.w, size.h};
+
+        texScale[i].bind().alloc(sizeScaled, iformat, GL_RGB, GL_FLOAT)
+                          .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                          .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        texAdd[i].bind().alloc(sizeScaled, iformat, GL_RGB, GL_FLOAT)
+                        .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                        .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        texBlur[i].bind().alloc(sizeScaled, iformat, GL_RGB, GL_FLOAT)
+                         .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                         .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        fboScale[i].bind()
+                   .attach(texScale[i], gl::Fbo::Attachment::Color)
+                   .unbind();
+        fboAdd[i].bind()
+                 .attach(texAdd[i], gl::Fbo::Attachment::Color)
+                 .unbind();
+        fboBlur[i].bind()
+                  .attach(texBlur[i], gl::Fbo::Attachment::Color)
+                  .unbind();
+
+        HCLOG(Info) << i << " " << size.w << "x" << size.h;
+    }
+}
+
+Bloom& Bloom::operator()(gl::Texture* texAlbedo,
+                         gl::Texture* texColor,
+                         gl::Texture* texLight)
+{
+    // Setup common GL states
+    glDisable(GL_DEPTH_TEST);
+
+    //texColor->image().flipped().write("c:/temp/bloom/color.png");
+    //texLight->image().flipped().write("c:/temp/bloom/light.png");
+
+    // Produce bloom bright map
+    bloomProg.bind().setUniform("texAlbedo", 0)
+                    .setUniform("texColor",  1)
+                    .setUniform("texLight",  2);
+    {
+        Binder<gl::Fbo> binder(fboBloom);
+        texAlbedo->bindAs(GL_TEXTURE0);
+        texColor->bindAs(GL_TEXTURE1);
+        texLight->bindAs(GL_TEXTURE2);
+        rect.render();
+    }
+
+    // Downscale
+    for (int i = 0; i < scaleCount; ++i)
+    {
+        const Size<int> size = texScale[i].size();
+        scaleProg.bind().setUniform("texColor", 0);
+        Binder<gl::Fbo> binder(fboScale[i]);
+        glViewport(0, 0, size.w, size.h);
+        gl::Texture src = i > 0 ? texScale[i - 1] : texBloom;
+        src.bindAs(GL_TEXTURE0);
+        rect.render();
+    }
+
+    // Blur and combine to next scale level up
+    for (int i = scaleCount - 1; i >= 0; --i)
+    {
+        const Size<int> size = texScale[i].size();
+        //texScale[i].image().flipped().write("c:/temp/bloom/scale_" +
+        //                                    std::to_string(i) + ".png");
+
+        // Blur source will be either the downscaled texture or it
+        // combined with the previous level's blurred version.
+        gl::Texture blurSrc = texScale[i];
+        if (i < scaleCount - 1)
+        {
+            // Add previous level
+            addProg.bind().setUniform("tex0", 0).setUniform("tex1", 1);
+            Binder<gl::Fbo> binder(fboAdd[i]);
+            glViewport(0, 0, size.w, size.h);
+            texBloom.bindAs(GL_TEXTURE0);
+            texScale[i + 1].bindAs(GL_TEXTURE1);
+            rect.render();
+            blurSrc = texAdd[i];
+        }
+
+        // Seperable gaussian blur
+        blurProg.bind().setUniform("texColor", 0);
+        {
+            // Blur horizontal
+            blurProg.setUniform("horizontal", true);
+            Binder<gl::Fbo> binder(fboBlur[i]);
+            glViewport(0, 0, size.w, size.h);
+            blurSrc.bindAs(GL_TEXTURE0);
+            rect.render();
+        }
+        {
+            // Blur vertical
+            blurProg.setUniform("horizontal", false);
+            Binder<gl::Fbo> binder(fboScale[i]);
+            glViewport(0, 0, size.w, size.h);
+            texBlur[i].bindAs(GL_TEXTURE0);
+            rect.render();
+        }
+        //texScale[i].image().flipped().write("c:/temp/bloom/blur_" +
+        //                                    std::to_string(i) + ".png");
+    }
+
+    // Restore viewport
+    glViewport(0, 0, renderSize.w, renderSize.h);
+    return *this;
+}
+
+gl::Texture* Bloom::output()
+{
+    return &texScale[0];
+}
+
+} // namespace hc
