@@ -8,6 +8,15 @@
 namespace hc
 {
 
+static void debugCallback(
+    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+    const GLchar* message, const GLvoid* userParam)
+{
+    if (severity == GL_DEBUG_SEVERITY_MEDIUM_ARB ||
+        severity == GL_DEBUG_SEVERITY_HIGH_ARB)
+        HCLOG(Debug) << message;
+}
+
 Display::Display(const std::string& title, const Size<int>& size) :
     title_(title),
     size_(size),
@@ -43,7 +52,15 @@ bool Display::open()
             HCLOG(Debug) << "#" << (i + 1) << ": "
                          << SDL_GetVideoDriver(i);
 
-        // Set required GL attributes
+        // Set GL context attributes
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                            SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
+                            SDL_GL_CONTEXT_DEBUG_FLAG);
+
+        // Set GL buffer attributes
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,  8);
@@ -65,6 +82,13 @@ bool Display::open()
 
         // Init GLEW
         const GLenum glewStatus = glewInit();
+
+        if (glDebugMessageCallbackARB != nullptr)
+        {
+            glDebugMessageCallbackARB(debugCallback, 0);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            HCLOG(Info) << "GL debug callback supported";
+        }
 
         /*
         int dedicatedVideoMem = 0,
