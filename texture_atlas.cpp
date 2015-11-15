@@ -15,7 +15,6 @@ TextureAtlas::TextureAtlas(const Size<int>& size) :
 
 void TextureAtlas::update()
 {
-    HCTIME("");
     texture.bind().alloc(atlas.image())
                   .set(GL_TEXTURE_MIN_FILTER, GL_NEAREST)
                   .set(GL_TEXTURE_MAG_FILTER, GL_NEAREST);

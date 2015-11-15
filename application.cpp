@@ -120,8 +120,8 @@ bool Application::run(const std::string& input)
                    .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    TextureAtlas texAtlas({128, 128});
-    TextureAtlas lightAtlas({128, 128});
+    TextureAtlas texAtlas({256, 256});
+    TextureAtlas lightAtlas({256, 256});
 
     TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
     lightAtlas.insert(lightCube);
@@ -162,7 +162,7 @@ bool Application::run(const std::string& input)
         const float fov = 45.f;
         const float ar  = display.size().aspect<float>();
 
-        glm::mat4 proj  = glm::perspective(glm::radians(fov), ar, 0.1f, 400.f);
+        glm::mat4 proj  = glm::perspective(glm::radians(fov), ar, 0.1f, 500.f);
         glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 250, 250),
                                       glm::vec3(0.f, 0.f, 0.f),
                                       glm::vec3(0, 1, 0)) *
@@ -189,6 +189,7 @@ bool Application::run(const std::string& input)
             glDrawBuffers(3, drawBuffers);
             glDisable(GL_FRAMEBUFFER_SRGB);
             glEnable(GL_DEPTH_TEST);
+            glDisable(GL_BLEND);
             glDepthMask(true);
 
             glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -313,7 +314,6 @@ bool Application::run(const std::string& input)
                          .setUniform("tex1", 1);
         {
             // Output pass
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glEnable(GL_FRAMEBUFFER_SRGB);
             glDisable(GL_DEPTH_TEST);
 
@@ -329,8 +329,14 @@ bool Application::run(const std::string& input)
         //a += 0.001f;
         #endif
 
-        stats.accumulate(clock.stop(), mesh.vertices.size(),
-                                       mesh.indices.size() / 3);
+        const int vc = 4 * mesh.vertices.size() +
+                       5 * 5 * floorMesh.vertices.size() +
+                       10 * wallMesh.vertices.size();
+        const int ic = (4 * mesh.indices.size() +
+                        5 * 5 * floorMesh.indices.size() +
+                        10 * wallMesh.indices.size()) / 3;
+
+        stats.accumulate(clock.stop(), vc, ic);
         stats.render();
         display.swap();
 

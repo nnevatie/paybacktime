@@ -10,8 +10,6 @@ namespace hc
 
 ImageCube::ImageCube(const std::string& filename, int depth)
 {
-    HCTIME("load images");
-
     struct SideImage
     {
         std::string name;
@@ -53,8 +51,8 @@ ImageCube::ImageCube(const std::string& filename, int depth)
                 if (fallback.image)
                 {
                     sideImages[i].image = fallback.image;
-                    HCLOG(Debug) << __FUNCTION__ << " using " << fallback.name
-                                                 << " as "    << sideImages[i].name;
+                    //HCLOG(Debug) << __FUNCTION__ << " using " << fallback.name
+                    //                             << " as "    << sideImages[i].name;
                     break;
                 }
             }

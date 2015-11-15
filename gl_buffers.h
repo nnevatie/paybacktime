@@ -31,6 +31,7 @@ struct Buffer
     bool alloc(const void* data, int size);
     bool dealloc();
 
+    // TODO: Make shared private
     Type   type;
     Usage  usage;
     GLuint id;

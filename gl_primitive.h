@@ -14,13 +14,19 @@ struct Primitive
     explicit Primitive(const Mesh<V, I>& mesh) :
        vertexSpec {V::spec()}, indexSpec {sizeof(I)},
        vertices(Buffer::Type::Vertex),
-       indices(Buffer::Type::Index)
+       indices(Buffer::Type::Index),
+       vao(0)
     {
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
         vertices.alloc(mesh.vertices.data(),
                        int(sizeof(V) * mesh.vertices.size()));
 
         indices.alloc(mesh.indices.data(),
                       int(sizeof(I) * mesh.indices.size()));
+
+        glBindVertexArray(0);
     }
 
     void render(GLenum mode = GL_TRIANGLES) const
@@ -31,11 +37,14 @@ struct Primitive
         const std::size_t stride      = vertexSpec.size;
         const std::size_t attribCount = vertexSpec.attribs.size();
 
+        glBindVertexArray(vao);
+
+        vertices.bind();
+        //glEnableClientState(GL_VERTEX_ARRAY);
+
         // Enable attrib arrays
         for (std::size_t i = 0; i < attribCount; ++i)
             glEnableVertexAttribArray(i);
-
-        vertices.bind();
 
         // Set attrib pointers
         size_t offset = 0;
@@ -64,11 +73,17 @@ struct Primitive
 
         indices.unbind();
         vertices.unbind();
+
+        glBindVertexArray(0);
+
+        //glDisableClientState(GL_VERTEX_ARRAY);
     }
 
     VertexSpec vertexSpec;
     IndexSpec  indexSpec;
+
     Buffer     vertices, indices;
+    GLuint     vao;
 };
 
 } // namespace gl
