@@ -90,6 +90,9 @@ bool Display::open()
             HCLOG(Info) << "GL debug callback supported";
         }
 
+        // Set swap interval
+        SDL_GL_SetSwapInterval(0);
+
         /*
         int dedicatedVideoMem = 0,
             totalAvailableMem = 0,
