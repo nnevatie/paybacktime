@@ -336,9 +336,10 @@ bool Application::run(const std::string& input)
                         5 * 5 * floorMesh.indices.size() +
                         10 * wallMesh.indices.size()) / 3;
 
-        stats.accumulate(clock.stop(), vc, ic);
         stats.render();
         display.swap();
+
+        stats.accumulate(clock.stop(), vc, ic);
 
         SDL_Event e;
         while (SDL_PollEvent(&e) && f < 2000)
