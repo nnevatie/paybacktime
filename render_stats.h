@@ -18,7 +18,9 @@ struct RenderStats
 private:
     NVGcontext* vg;
 
-    MovingAvg<int64_t> frameTime;
+    float accumTime, meanTimeMs;
+    MovingAvg<int64_t> frameTimes;
+
     int vertexCount, triangleCount;
 };
 

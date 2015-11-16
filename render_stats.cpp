@@ -13,12 +13,11 @@
 
 namespace hc
 {
-namespace gl
-{
+const float UPDATE_INTERVAL_US = 1000.f * 200;
 
-}
-
-RenderStats::RenderStats() : frameTime(10), vertexCount(0), triangleCount(0)
+RenderStats::RenderStats() :
+    accumTime(0), meanTimeMs(0),
+    frameTimes(100), vertexCount(0), triangleCount(0)
 {
     vg = nvgCreateGL3(0);
     nvgCreateFont(vg, "dejavu-sans", "data/deja_vu_sans.ttf");
@@ -31,9 +30,16 @@ RenderStats::~RenderStats()
 
 void RenderStats::accumulate(float frameTime, int vertexCount, int triangleCount)
 {
-    this->frameTime.push(frameTime);
+    this->frameTimes.push(frameTime);
     this->vertexCount   = vertexCount;
     this->triangleCount = triangleCount;
+
+    accumTime += frameTime;
+    if (accumTime >= UPDATE_INTERVAL_US || meanTimeMs == 0.f)
+    {
+        meanTimeMs = frameTimes.mean() * 0.001f;
+        accumTime  = std::fmod(accumTime, UPDATE_INTERVAL_US);
+    }
 }
 
 void RenderStats::render()
@@ -46,7 +52,7 @@ void RenderStats::render()
     nvgFontFace(vg, "dejavu-sans");
     nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
 
-    float timeMs = frameTime.mean() * 0.001f;
+    const float timeMs = meanTimeMs;
 
     nvgText(vg, 10, 20, str(std::stringstream()
                             << std::fixed << std::setprecision(1)
