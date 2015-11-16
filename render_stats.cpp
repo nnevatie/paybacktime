@@ -35,7 +35,7 @@ void RenderStats::accumulate(float frameTime, int vertexCount, int triangleCount
     this->triangleCount = triangleCount;
 
     accumTime += frameTime;
-    if (accumTime >= UPDATE_INTERVAL_US || meanTimeMs == 0.f)
+    if (accumTime >= UPDATE_INTERVAL_US || !meanTimeMs)
     {
         meanTimeMs = frameTimes.mean() * 0.001f;
         accumTime  = std::fmod(accumTime, UPDATE_INTERVAL_US);
