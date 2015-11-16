@@ -20,27 +20,14 @@ struct Primitive
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
+        const std::size_t stride      = vertexSpec.size;
+        const std::size_t attribCount = vertexSpec.attribs.size();
+
         vertices.alloc(mesh.vertices.data(),
                        int(sizeof(V) * mesh.vertices.size()));
 
         indices.alloc(mesh.indices.data(),
                       int(sizeof(I) * mesh.indices.size()));
-
-        glBindVertexArray(0);
-    }
-
-    void render(GLenum mode = GL_TRIANGLES) const
-    {
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        const std::size_t stride      = vertexSpec.size;
-        const std::size_t attribCount = vertexSpec.attribs.size();
-
-        glBindVertexArray(vao);
-
-        vertices.bind();
-        //glEnableClientState(GL_VERTEX_ARRAY);
 
         // Enable attrib arrays
         for (std::size_t i = 0; i < attribCount; ++i)
@@ -57,26 +44,23 @@ struct Primitive
             offset += std::get<2>(attrib);
         }
 
-        // Draw elements
-        indices.bind();
+        glBindVertexArray(0);
+    }
 
+    void render(GLenum mode = GL_TRIANGLES) const
+    {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
+        // Draw elements with VAO
+        glBindVertexArray(vao);
         glDrawElements(mode,
                        indices.size / int(indexSpec.size),
                        indexSpec.size == 4 ? GL_UNSIGNED_INT :
                        indexSpec.size == 2 ? GL_UNSIGNED_SHORT :
                                              GL_UNSIGNED_BYTE,
                        0);
-
-        // Disable attrib arrays
-        for (std::size_t i = 0; i < attribCount; ++i)
-            glDisableVertexAttribArray(i);
-
-        indices.unbind();
-        vertices.unbind();
-
         glBindVertexArray(0);
-
-        //glDisableClientState(GL_VERTEX_ARRAY);
     }
 
     VertexSpec vertexSpec;
