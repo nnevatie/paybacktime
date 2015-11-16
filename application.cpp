@@ -197,6 +197,7 @@ bool Application::run(const std::string& input)
             texAtlas.texture.bindAs(GL_TEXTURE0);
             lightAtlas.texture.bindAs(GL_TEXTURE1);
 
+            geomProg.bind();
             for (int y = 0; y < 5; ++y)
                 for (int x = 0; x < 5; ++x)
                 if (y == 0 || x == 4)
@@ -209,14 +210,14 @@ bool Application::run(const std::string& input)
                     m = glm::rotate(m, -0.5f * float(M_PI), glm::vec3(0.f, 1.f, 0.f));
                     }
 
-                    geomProg.bind().setUniform("m", m);
+                    geomProg.setUniform("m", m);
                     wall.render();
                 }
 
             for (int y = 0; y < 5; ++y)
                 for (int x = 0; x < 5; ++x)
                 {
-                    geomProg.bind().setUniform("m",
+                    geomProg.setUniform("m",
                         glm::translate(model, glm::vec3(x * 16, 0, y * 16)));
                     floor.render();
                 }
@@ -225,7 +226,7 @@ bool Application::run(const std::string& input)
                 for (int x = 0; x < 5; ++x)
                     if (y % 2 && x % 2)
                     {
-                        geomProg.bind().setUniform("m",
+                        geomProg.setUniform("m",
                             glm::translate(model, glm::vec3(x * 16, 2, y * 16)));
                         primitive.render();
                     }
