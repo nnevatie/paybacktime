@@ -15,40 +15,45 @@ T stdev(T cnt, T sum, T ssq)
 template <typename Scalar>
 struct MovingAvg
 {
-    explicit MovingAvg(int n) : sum(0), ssq(0)
+    explicit MovingAvg(int n) : sum_(0), ssq_(0)
     {
-        q = boost::circular_buffer<int>(n);
+        q_ = boost::circular_buffer<int>(n);
     }
     void push(Scalar v)
     {
-        if (q.size() == q.capacity())
+        if (q_.size() == q_.capacity())
         {
-            Scalar t = q.front();
-            sum -= t;
-            ssq -= t * t;
-            q.pop_front();
+            Scalar t = q_.front();
+            sum_ -= t;
+            ssq_ -= t * t;
+            q_.pop_front();
         }
-        q.push_back(v);
-        sum += v;
-        ssq += v * v;
+        q_.push_back(v);
+        sum_ += v;
+        ssq_ += v * v;
     }
-    Scalar size()
+    Scalar sum() const
     {
-        return q.size();
+        return sum_;
     }
-    Scalar mean()
+    Scalar size() const
     {
-        return sum / size();
+        return q_.size();
     }
-    Scalar stdev()
+    Scalar mean() const
     {
-        return hc::stdev(size(), sum, ssq);
+        const std::size_t s = size();
+        return s > 0 ? sum_ / s : 0;
+    }
+    Scalar stdev() const
+    {
+        return hc::stdev(size(), sum_, ssq_);
     }
 
 private:
-    boost::circular_buffer<int> q;
-    Scalar sum;
-    Scalar ssq;
+    boost::circular_buffer<int> q_;
+    Scalar sum_;
+    Scalar ssq_;
 };
 
 } // namespace hc
