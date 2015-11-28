@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "file_system.h"
 
@@ -18,8 +18,7 @@ struct Shader
     {
         Vertex,
         Fragment,
-        Mesh,
-        Compute
+        Mesh
     };
 
     Shader(Type type, const std::string& s);

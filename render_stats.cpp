@@ -3,10 +3,12 @@
 #include <sstream>
 #include <iomanip>
 
-#include <GL/glew.h>
+#include <glad/glad.h>
+
+#include <glad/glad.h>
 
 #define NANOVG_GL3_IMPLEMENTATION
-#include "ext/nanovg_gl.h"
+#include <nanovg_gl.h>
 
 #include "mesh.h"
 #include "common.h"

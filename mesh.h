@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 
-#include <gl/glew.h>
+#include <glad/glad.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>

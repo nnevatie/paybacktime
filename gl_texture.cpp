@@ -1,4 +1,4 @@
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "gl_texture.h"
 
@@ -154,10 +154,10 @@ Texture& Texture::alloc(const Image& image)
     }
     formats[] =
     {
-        {GL_R,    GL_RED},
-        {GL_RG,   GL_RG},
-        {GL_RGB,  GL_RGB},
-        {GL_RGBA, GL_RGBA}
+        {GL_R8,    GL_RED},
+        {GL_RG8,   GL_RG},
+        {GL_RGB8,  GL_RGB},
+        {GL_RGBA8, GL_RGBA}
     };
     if (image.depth() > 0 && image.depth() <= 4)
     {

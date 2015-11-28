@@ -1,4 +1,4 @@
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "gl_shaders.h"
 #include "gl_uniforms.h"
@@ -19,8 +19,7 @@ GLenum shaderType(Shader::Type type)
     {
         GL_VERTEX_SHADER,
         GL_FRAGMENT_SHADER,
-        GL_GEOMETRY_SHADER,
-        GL_COMPUTE_SHADER
+        GL_GEOMETRY_SHADER
     };
     const std::size_t index = std::size_t(type);
 
@@ -38,8 +37,7 @@ Shader::Type typeFromExt(const filesystem::path& path)
     {
         {".vs", Shader::Type::Vertex},
         {".fs", Shader::Type::Fragment},
-        {".gs", Shader::Type::Mesh},
-        {".cs", Shader::Type::Compute}
+        {".gs", Shader::Type::Mesh}
     };
     for (const Type& type : types)
         if (path.extension().string()        == type.first ||

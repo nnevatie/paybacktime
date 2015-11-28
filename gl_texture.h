@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "geometry.h"
 #include "image.h"

@@ -1,4 +1,4 @@
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "display.h"
 
@@ -80,13 +80,14 @@ bool Display::open()
         //       and check return value
         glContext_ = SDL_GL_CreateContext(window_);
 
-        // Init GLEW
-        const GLenum glewStatus = glewInit();
+        // Init GLAD
+        const int gladStatus = gladLoadGLLoader((GLADloadproc)
+                                                SDL_GL_GetProcAddress);
 
         if (glDebugMessageCallbackARB != nullptr)
         {
             glDebugMessageCallbackARB(debugCallback, 0);
-            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
             HCLOG(Info) << "GL debug callback supported";
         }
 
@@ -112,7 +113,7 @@ bool Display::open()
                      << "', renderer: '"   << glGetString(GL_RENDERER)
                      << "', version: '"    << glGetString(GL_VERSION) << "'";
 
-        return glewStatus == GLEW_OK;
+        return gladStatus;
     }
     else
         HCLOG(Warn) << "Window already open.";

@@ -79,6 +79,7 @@ set(EXT_HEADER_FILES
     )
 
 set(EXT_SOURCE_FILES
+    ext/glad.c
     ext/nanovg.c
     )
 
@@ -125,13 +126,14 @@ set(SDL_LIBS
 
 # OpenGL dependencies
 set(OPENGL_LIBS
-    glew32
     opengl32
     )
 
+# Include paths
+include_directories(ext)
+
 # Build definitions
-add_definitions(-D_USE_MATH_DEFINES
-                 -DGLEW_STATIC)
+add_definitions(-D_USE_MATH_DEFINES)
 
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
                                ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES}
