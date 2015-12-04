@@ -29,7 +29,9 @@ float edge(vec3 bc)
 void main()
 {
     normal = normalize(ib.normal);
-    color  = texture(texAlbedo, ib.uv);
     light  = texture(texLight, ib.uv).rgb;
+
+    vec4 alb = texture(texAlbedo, ib.uv);
+    color  = alb;
     //color = vec4(mix(alb + 0.25, alb, edge(ib.bc)).rgb, 1.0);
 }
