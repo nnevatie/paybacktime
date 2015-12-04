@@ -5,17 +5,23 @@
 #include "clock.h"
 #include "log.h"
 
-namespace hc
+namespace
 {
 
-static void debugCallback(
-    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-    const GLchar* message, const GLvoid* userParam)
+void debugCallback(
+    GLenum /*source*/, GLenum /*type*/, GLuint /*id*/,
+    GLenum severity, GLsizei /*length*/,
+    const GLchar* message, const GLvoid* /*userParam*/)
 {
     if (severity == GL_DEBUG_SEVERITY_MEDIUM_ARB ||
         severity == GL_DEBUG_SEVERITY_HIGH_ARB)
         HCLOG(Debug) << message;
 }
+
+} // namespace
+
+namespace hc
+{
 
 Display::Display(const std::string& title, const Size<int>& size) :
     title_(title),
@@ -57,8 +63,8 @@ bool Display::open()
                             SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-        //SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
-        //                    SDL_GL_CONTEXT_DEBUG_FLAG);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
+                            SDL_GL_CONTEXT_DEBUG_FLAG);
 
         // Set GL buffer attributes
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
@@ -76,8 +82,6 @@ bool Display::open()
             SDL_WINDOW_ALLOW_HIGHDPI);
 
         // Create OpenGL context
-        // TODO: Define requested version/profile
-        //       and check return value
         glContext_ = SDL_GL_CreateContext(window_);
 
         // Init GLAD
@@ -88,30 +92,25 @@ bool Display::open()
         {
             glDebugMessageCallbackARB(debugCallback, 0);
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-            HCLOG(Info) << "GL debug callback supported";
         }
 
         // Set swap interval
         SDL_GL_SetSwapInterval(0);
 
-        /*
-        int dedicatedVideoMem = 0,
-            totalAvailableMem = 0,
-            curAvailableMem   = 0;
-
-        glGetIntegerv(0x9047, &dedicatedVideoMem);
-        glGetIntegerv(0x9048, &totalAvailableMem);
-        glGetIntegerv(0x9049, &curAvailableMem);
-
-        HCLOG(Debug) << dedicatedVideoMem << ", "
-                     << totalAvailableMem << ", "
-                     << curAvailableMem;
-        */
-
         // Log renderer info
         HCLOG(Debug) << "OpenGL vendor: '" << glGetString(GL_VENDOR)
                      << "', renderer: '"   << glGetString(GL_RENDERER)
                      << "', version: '"    << glGetString(GL_VERSION) << "'";
+
+        // Log GPU RAM info
+        int gpuRamDedicated = 0, gpuRamTotal = 0, gpuRamAvail   = 0;
+        glGetIntegerv(0x9047, &gpuRamDedicated);
+        glGetIntegerv(0x9048, &gpuRamTotal);
+        glGetIntegerv(0x9049, &gpuRamAvail);
+        HCLOG(Debug) << "GPU RAM (dedicated, total, available): "
+                     << gpuRamDedicated << ", "
+                     << gpuRamTotal << ", "
+                     << gpuRamAvail;
 
         return gladStatus;
     }
