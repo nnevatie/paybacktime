@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 
-#include "gl_shaders.h"
-#include "gl_uniforms.h"
+#include "shaders.h"
+#include "uniforms.h"
 
 #include "common.h"
 #include "log.h"

@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 
-#include "gl_buffers.h"
+#include "buffers.h"
 #include "log.h"
 
 namespace hc

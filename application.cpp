@@ -20,10 +20,10 @@
 #include "texture_atlas.h"
 #include "image_mesher.h"
 
-#include "gl/gl_primitive.h"
-#include "gl/gl_shaders.h"
-#include "gl/gl_texture.h"
-#include "gl/gl_fbo.h"
+#include "gl/primitive.h"
+#include "gl/shaders.h"
+#include "gl/texture.h"
+#include "gl/fbo.h"
 
 #include "ssao.h"
 #include "bloom.h"

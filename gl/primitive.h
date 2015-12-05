@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mesh.h"
-#include "gl_buffers.h"
+#include "buffers.h"
 
 namespace hc
 {

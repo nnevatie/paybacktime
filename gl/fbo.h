@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "gl_rbo.h"
-#include "gl_texture.h"
+#include "rbo.h"
+#include "texture.h"
 
 namespace hc
 {

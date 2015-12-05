@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 
-#include "gl_rbo.h"
+#include "rbo.h"
 
 namespace hc
 {

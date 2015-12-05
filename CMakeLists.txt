@@ -33,13 +33,13 @@ set(HEADER_FILES
     object.h
     object_store.h
 
-    gl/gl_uniforms.h
-    gl/gl_texture.h
-    gl/gl_buffers.h
-    gl/gl_shaders.h
-    gl/gl_primitive.h
-    gl/gl_fbo.h
-    gl/gl_rbo.h
+    gl/uniforms.h
+    gl/texture.h
+    gl/buffers.h
+    gl/shaders.h
+    gl/primitive.h
+    gl/fbo.h
+    gl/rbo.h
     )
 
 set(SOURCE_FILES
@@ -63,11 +63,11 @@ set(SOURCE_FILES
     object.cpp
     object_store.cpp
 
-    gl/gl_texture.cpp
-    gl/gl_buffers.cpp
-    gl/gl_shaders.cpp
-    gl/gl_fbo.cpp
-    gl/gl_rbo.cpp
+    gl/texture.cpp
+    gl/buffers.cpp
+    gl/shaders.cpp
+    gl/fbo.cpp
+    gl/rbo.cpp
     )
 
 set(EXT_HEADER_FILES

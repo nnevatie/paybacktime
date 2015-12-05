@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 
-#include "gl_texture.h"
+#include "texture.h"
 
 #include "log.h"
 
