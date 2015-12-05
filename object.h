@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/file_system.h"
-#include "texture_atlas.h"
+#include "gl/texture_atlas.h"
 
 namespace hc
 {

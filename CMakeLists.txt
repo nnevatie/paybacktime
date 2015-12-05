@@ -16,7 +16,6 @@ set(HEADER_FILES
     image_cube.h
     image_mesher.h
     image_atlas.h
-    texture_atlas.h
     image_mesher.h
     image_atlas.h
     render_stats.h
@@ -36,6 +35,7 @@ set(HEADER_FILES
     common/log.h
 
     gl/uniforms.h
+    gl/texture_atlas.h
     gl/texture.h
     gl/buffers.h
     gl/shaders.h
@@ -53,7 +53,6 @@ set(SOURCE_FILES
     image_cube.cpp
     image_mesher.cpp
     image_atlas.cpp
-    texture_atlas.cpp
     image_mesher.cpp
     render_stats.cpp
     ssao.cpp
@@ -66,6 +65,7 @@ set(SOURCE_FILES
     common/clock.cpp
     common/log.cpp
 
+    gl/texture_atlas.cpp
     gl/texture.cpp
     gl/buffers.cpp
     gl/shaders.cpp

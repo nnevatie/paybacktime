@@ -17,9 +17,9 @@
 #include "painter.h"
 
 #include "image_cube.h"
-#include "texture_atlas.h"
 #include "image_mesher.h"
 
+#include "gl/texture_atlas.h"
 #include "gl/primitive.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"
