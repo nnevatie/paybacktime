@@ -120,10 +120,10 @@ bool Application::run(const std::string& input)
                    .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    TextureAtlas texAtlas({256, 256});
-    TextureAtlas lightAtlas({256, 256});
+    gl::TextureAtlas texAtlas({256, 256});
+    gl::TextureAtlas lightAtlas({256, 256});
 
-    TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
+    gl::TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
     lightAtlas.insert(lightCube);
     lightAtlas.insert(floorLight);
     lightAtlas.insert(wallLight);
@@ -131,11 +131,11 @@ bool Application::run(const std::string& input)
     const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
     const gl::Primitive primitive(mesh);
 
-    TextureAtlas::EntryCube albedoFloor = texAtlas.insert(floorAlb);
+    gl::TextureAtlas::EntryCube albedoFloor = texAtlas.insert(floorAlb);
     const Mesh_P_N_UV floorMesh = ImageMesher::mesh(floorCube, albedoFloor.second);
     const gl::Primitive floor(floorMesh);
 
-    TextureAtlas::EntryCube albedoWall = texAtlas.insert(wallAlb);
+    gl::TextureAtlas::EntryCube albedoWall = texAtlas.insert(wallAlb);
     const Mesh_P_N_UV wallMesh = ImageMesher::mesh(wallCube, albedoWall.second);
     const gl::Primitive wall(wallMesh);
 

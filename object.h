@@ -8,7 +8,7 @@ namespace hc
 
 struct Object
 {
-    Object(const filesystem::path& path, TextureAtlas* atlas);
+    Object(const filesystem::path& path, gl::TextureAtlas* atlas);
 };
 
 } // namespace hc

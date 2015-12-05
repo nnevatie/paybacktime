@@ -9,7 +9,7 @@ namespace hc
 
 struct ObjectStore
 {
-    ObjectStore(const filesystem::path& path, TextureAtlas* atlas);
+    ObjectStore(const filesystem::path& path, gl::TextureAtlas* atlas);
 
     std::vector<Object> objects;
 };

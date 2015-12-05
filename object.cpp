@@ -3,7 +3,7 @@
 namespace hc
 {
 
-Object::Object(const filesystem::path& path, TextureAtlas* atlas)
+Object::Object(const filesystem::path& path, gl::TextureAtlas* atlas)
 {
 }
 

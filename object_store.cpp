@@ -6,7 +6,7 @@
 namespace hc
 {
 
-ObjectStore::ObjectStore(const filesystem::path& path, TextureAtlas* atlas)
+ObjectStore::ObjectStore(const filesystem::path& path, gl::TextureAtlas* atlas)
 {
     HCTIME("create objects");
     using namespace filesystem;

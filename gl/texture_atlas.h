@@ -9,6 +9,8 @@
 
 namespace hc
 {
+namespace gl
+{
 
 struct TextureAtlas
 {
@@ -25,4 +27,5 @@ struct TextureAtlas
     gl::Texture texture;
 };
 
+} // namespace gl
 } // namespace hc

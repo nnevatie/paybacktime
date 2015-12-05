@@ -5,6 +5,8 @@
 
 namespace hc
 {
+namespace gl
+{
 
 TextureAtlas::TextureAtlas(const Size<int>& size) :
     atlas(size)
@@ -38,4 +40,5 @@ TextureAtlas::EntryCube TextureAtlas::insert(const ImageCube& imageCube)
     return entryCube;
 }
 
+} // namespace gl
 } // namespace hc
