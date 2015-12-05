@@ -6,6 +6,8 @@ struct NVGcontext;
 
 namespace hc
 {
+namespace ui
+{
 
 struct RenderStats
 {
@@ -24,4 +26,5 @@ private:
     int vertexCount, triangleCount;
 };
 
+} // namespace ui
 } // namespace hc

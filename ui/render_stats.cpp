@@ -15,6 +15,9 @@
 
 namespace hc
 {
+namespace ui
+{
+
 const float UPDATE_INTERVAL_US = 1000.f * 200;
 
 RenderStats::RenderStats() :
@@ -76,4 +79,5 @@ void RenderStats::render()
     nvgEndFrame(vg);
 }
 
+} // namespace ui
 } // namespace hc

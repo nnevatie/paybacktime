@@ -13,11 +13,13 @@
 #include "common/clock.h"
 #include "common/log.h"
 
-#include "display.h"
 #include "painter.h"
 
 #include "image_cube.h"
 #include "image_mesher.h"
+
+#include "ui/display.h"
+#include "ui/render_stats.h"
 
 #include "gl/texture_atlas.h"
 #include "gl/primitive.h"
@@ -27,8 +29,6 @@
 
 #include "ssao.h"
 #include "bloom.h"
-
-#include "render_stats.h"
 
 #include "object_store.h"
 #include "scene.h"
@@ -65,7 +65,7 @@ Application::~Application()
 
 bool Application::run(const std::string& input)
 {
-    Display display("High Caliber", {1280, 720});
+    ui::Display display("High Caliber", {1280, 720});
     display.open();
 
     gl::Shader fsCommon(gl::Shader::path("common.fs.glsl"));
@@ -148,7 +148,7 @@ bool Application::run(const std::string& input)
     Ssao ssao(32, display.size(), {4, 4});
     Bloom bloom(display.size());
 
-    RenderStats stats;
+    ui::RenderStats stats;
 
     ObjectStore objectStore(filesystem::path("objects"), &texAtlas);
     Scene scene;

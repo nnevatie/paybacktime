@@ -22,6 +22,8 @@ void debugCallback(
 
 namespace hc
 {
+namespace ui
+{
 
 Display::Display(const std::string& title, const Size<int>& size) :
     title_(title),
@@ -172,4 +174,5 @@ Image Display::capture() const
     return image;
 }
 
-} // namespace
+} // namespace ui
+} // namespace hc

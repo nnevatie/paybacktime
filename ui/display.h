@@ -9,6 +9,8 @@
 
 namespace hc
 {
+namespace ui
+{
 
 struct Display
 {
@@ -35,4 +37,5 @@ private:
     SDL_GLContext glContext_;
 };
 
-} // namespace
+} // namespace ui
+} // namespace hc
