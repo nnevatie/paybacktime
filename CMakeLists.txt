@@ -128,7 +128,7 @@ set(SHADER_FILES
     )
 
 set(RESOURCE_FILES
-    highcaliber.rc
+    res/highcaliber.rc
     )
 
 # System dependencies
