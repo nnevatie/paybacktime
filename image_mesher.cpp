@@ -4,12 +4,11 @@
 
 #include <glm/ext.hpp>
 
+#include "common/clock.h"
+#include "common/log.h"
+
 #include "geometry.h"
-
 #include "sn_mesher.h"
-
-#include "clock.h"
-#include "log.h"
 
 namespace hc
 {

@@ -1,7 +1,7 @@
 #include "bloom.h"
 
+#include "common/log.h"
 #include "mesh.h"
-#include "log.h"
 
 namespace hc
 {

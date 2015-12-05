@@ -1,9 +1,9 @@
-#include <glad/glad.h>
-
 #include "display.h"
 
-#include "clock.h"
-#include "log.h"
+#include <glad/glad.h>
+
+#include "common/clock.h"
+#include "common/log.h"
 
 namespace
 {

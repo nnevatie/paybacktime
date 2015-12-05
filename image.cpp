@@ -8,8 +8,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-#include "clock.h"
-#include "log.h"
+#include "common/clock.h"
+#include "common/log.h"
 
 namespace hc
 {

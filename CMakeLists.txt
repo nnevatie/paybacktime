@@ -8,8 +8,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
     -Wl,--stack,16777216")
 
 set(HEADER_FILES
-    optional.h
-    file_system.h
     application.h
     display.h
     painter.h
@@ -19,9 +17,6 @@ set(HEADER_FILES
     image_mesher.h
     image_atlas.h
     texture_atlas.h
-    common.h
-    clock.h
-    log.h
     image_mesher.h
     image_atlas.h
     render_stats.h
@@ -32,6 +27,13 @@ set(HEADER_FILES
     scene.h
     object.h
     object_store.h
+
+    common/optional.h
+    common/statistics.h
+    common/file_system.h
+    common/common.h
+    common/clock.h
+    common/log.h
 
     gl/uniforms.h
     gl/texture.h
@@ -52,9 +54,6 @@ set(SOURCE_FILES
     image_mesher.cpp
     image_atlas.cpp
     texture_atlas.cpp
-    common.cpp
-    clock.cpp
-    log.cpp
     image_mesher.cpp
     render_stats.cpp
     ssao.cpp
@@ -62,6 +61,10 @@ set(SOURCE_FILES
     scene.cpp
     object.cpp
     object_store.cpp
+
+    common/common.cpp
+    common/clock.cpp
+    common/log.cpp
 
     gl/texture.cpp
     gl/buffers.cpp

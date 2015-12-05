@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 
+#include "common/log.h"
 #include "buffers.h"
-#include "log.h"
 
 namespace hc
 {

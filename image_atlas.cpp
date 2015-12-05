@@ -1,8 +1,8 @@
 #include "image_atlas.h"
 
+#include "common/clock.h"
+#include "common/log.h"
 #include "painter.h"
-#include "clock.h"
-#include "log.h"
 
 namespace hc
 {

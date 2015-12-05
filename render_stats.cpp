@@ -10,8 +10,8 @@
 #define NANOVG_GL3_IMPLEMENTATION
 #include <nanovg_gl.h>
 
+#include "common/common.h"
 #include "mesh.h"
-#include "common.h"
 
 namespace hc
 {

@@ -9,12 +9,12 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "file_system.h"
+#include "common/file_system.h"
+#include "common/clock.h"
+#include "common/log.h"
 
 #include "display.h"
 #include "painter.h"
-#include "clock.h"
-#include "log.h"
 
 #include "image_cube.h"
 #include "texture_atlas.h"

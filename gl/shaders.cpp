@@ -1,10 +1,10 @@
+#include "shaders.h"
+
 #include <glad/glad.h>
 
-#include "shaders.h"
+#include "common/common.h"
+#include "common/log.h"
 #include "uniforms.h"
-
-#include "common.h"
-#include "log.h"
 
 namespace hc
 {

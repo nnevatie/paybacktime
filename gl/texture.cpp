@@ -1,8 +1,8 @@
-#include <glad/glad.h>
-
 #include "texture.h"
 
-#include "log.h"
+#include <glad/glad.h>
+
+#include "common/log.h"
 
 namespace hc
 {

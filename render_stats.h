@@ -1,6 +1,6 @@
 #pragma once
 
-#include "statistics.h"
+#include "common/statistics.h"
 
 struct NVGcontext;
 

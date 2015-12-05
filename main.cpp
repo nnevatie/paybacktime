@@ -2,8 +2,8 @@
 
 #include <boost/program_options.hpp>
 
+#include "common/log.h"
 #include "application.h"
-#include "log.h"
 
 int main(int argc, char** argv)
 {
