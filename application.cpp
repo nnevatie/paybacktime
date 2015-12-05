@@ -30,8 +30,8 @@
 #include "gfx/ssao.h"
 #include "gfx/bloom.h"
 
-#include "object_store.h"
-#include "scene.h"
+#include "scene/object_store.h"
+#include "scene/scene.h"
 
 //#define CAPTURE_VIDEO 1
 

@@ -9,9 +9,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
 
 set(HEADER_FILES
     application.h
-    scene.h
-    object.h
-    object_store.h
 
     # Img
     img/image.h
@@ -24,6 +21,11 @@ set(HEADER_FILES
     geom/mesh.h
     geom/image_mesher.h
     geom/sn_mesher.h
+
+    # Scene
+    scene/scene.h
+    scene/object.h
+    scene/object_store.h
 
     # Common
     common/optional.h
@@ -55,9 +57,6 @@ set(HEADER_FILES
 set(SOURCE_FILES
     main.cpp
     application.cpp
-    scene.cpp
-    object.cpp
-    object_store.cpp
 
     # Img
     img/image.cpp
@@ -67,6 +66,11 @@ set(SOURCE_FILES
 
     # Geom
     geom/image_mesher.cpp
+
+    # Scene
+    scene/scene.cpp
+    scene/object.cpp
+    scene/object_store.cpp
 
     # Common
     common/common.cpp
