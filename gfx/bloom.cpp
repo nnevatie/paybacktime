@@ -1,7 +1,7 @@
 #include "bloom.h"
 
 #include "common/log.h"
-#include "mesh.h"
+#include "geom/mesh.h"
 
 namespace hc
 {

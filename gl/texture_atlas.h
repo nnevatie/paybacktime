@@ -3,8 +3,8 @@
 #include <utility>
 #include <array>
 
-#include "geometry.h"
-#include "image_atlas.h"
+#include "geom/geometry.h"
+#include "img/image_atlas.h"
 #include "gl/texture.h"
 
 namespace hc

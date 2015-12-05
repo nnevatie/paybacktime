@@ -11,7 +11,7 @@
 #include <nanovg_gl.h>
 
 #include "common/common.h"
-#include "mesh.h"
+#include "geom/mesh.h"
 
 namespace hc
 {

@@ -4,8 +4,8 @@
 
 #include <SDL2/SDL.h>
 
-#include "geometry.h"
-#include "image.h"
+#include "geom/geometry.h"
+#include "img/image.h"
 
 namespace hc
 {

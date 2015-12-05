@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "geometry.h"
-#include "image.h"
-#include "image_cube.h"
+#include "geom/geometry.h"
+#include "img/image_cube.h"
+#include "img/image.h"
 
 namespace hc
 {

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "img/image_cube.h"
+#include "img/image.h"
 #include "mesh.h"
-#include "image.h"
-#include "image_cube.h"
 
 namespace hc
 {

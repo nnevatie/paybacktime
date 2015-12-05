@@ -4,8 +4,8 @@
 #include <vector>
 #include <array>
 
-#include "geometry.h"
-#include "image.h"
+#include "geom/geometry.h"
+#include "img/image.h"
 
 namespace hc
 {

@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <glm/vec2.hpp>
 
-#include "geometry.h"
+#include "geom/geometry.h"
 #include "gl/texture.h"
 #include "gl/rbo.h"
 #include "gl/fbo.h"

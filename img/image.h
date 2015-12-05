@@ -6,7 +6,7 @@
 #include <SDL2/SDL.h>
 
 #include "common/file_system.h"
-#include "geometry.h"
+#include "geom/geometry.h"
 
 namespace hc
 {

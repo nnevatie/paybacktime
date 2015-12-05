@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mesh.h"
+#include "geom/mesh.h"
 #include "buffers.h"
 
 namespace hc

@@ -13,10 +13,10 @@
 #include "common/clock.h"
 #include "common/log.h"
 
-#include "painter.h"
+#include "img/painter.h"
+#include "img/image_cube.h"
 
-#include "image_cube.h"
-#include "image_mesher.h"
+#include "geom/image_mesher.h"
 
 #include "ui/display.h"
 #include "ui/render_stats.h"
@@ -27,8 +27,8 @@
 #include "gl/texture.h"
 #include "gl/fbo.h"
 
-#include "ssao.h"
-#include "bloom.h"
+#include "gfx/ssao.h"
+#include "gfx/bloom.h"
 
 #include "object_store.h"
 #include "scene.h"
