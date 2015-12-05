@@ -9,21 +9,21 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
 
 set(HEADER_FILES
     application.h
-    painter.h
-    geometry.h
-    image.h
-    image_cube.h
-    image_mesher.h
-    image_atlas.h
-    image_mesher.h
-    image_atlas.h
-    mesh.h
-    sn_mesher.h
-    ssao.h
-    bloom.h
     scene.h
     object.h
     object_store.h
+
+    # Img
+    img/image.h
+    img/image_cube.h
+    img/image_atlas.h
+    img/painter.h
+
+    # Geom
+    geom/geometry.h
+    geom/mesh.h
+    geom/image_mesher.h
+    geom/sn_mesher.h
 
     # Common
     common/optional.h
@@ -32,6 +32,10 @@ set(HEADER_FILES
     common/common.h
     common/clock.h
     common/log.h
+
+    # Gfx
+    gfx/ssao.h
+    gfx/bloom.h
 
     # GL
     gl/uniforms.h
@@ -51,22 +55,27 @@ set(HEADER_FILES
 set(SOURCE_FILES
     main.cpp
     application.cpp
-    painter.cpp
-    image.cpp
-    image_cube.cpp
-    image_mesher.cpp
-    image_atlas.cpp
-    image_mesher.cpp
-    ssao.cpp
-    bloom.cpp
     scene.cpp
     object.cpp
     object_store.cpp
+
+    # Img
+    img/image.cpp
+    img/image_cube.cpp
+    img/image_atlas.cpp
+    img/painter.cpp
+
+    # Geom
+    geom/image_mesher.cpp
 
     # Common
     common/common.cpp
     common/clock.cpp
     common/log.cpp
+
+    # Gfx
+    gfx/ssao.cpp
+    gfx/bloom.cpp
 
     # GL
     gl/texture_atlas.cpp

@@ -5,6 +5,8 @@
 
 namespace hc
 {
+namespace gfx
+{
 
 Bloom::Bloom(const Size<int>& renderSize) :
     renderSize(renderSize),
@@ -147,4 +149,5 @@ gl::Texture* Bloom::output()
     return &texScale[0];
 }
 
+} // namespace gfx
 } // namespace hc

@@ -11,6 +11,8 @@
 
 namespace hc
 {
+namespace gfx
+{
 
 struct Ssao
 {
@@ -42,4 +44,5 @@ struct Ssao
     glm::vec2 noiseScale() const;
 };
 
+} // namespace gfx
 } // namespace hc

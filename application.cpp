@@ -145,8 +145,8 @@ bool Application::run(const std::string& input)
     const Mesh_P gMesh = gridMesh(16, 128, 128);
     const gl::Primitive gridPrimitive(gMesh);
 
-    Ssao ssao(32, display.size(), {4, 4});
-    Bloom bloom(display.size());
+    gfx::Ssao ssao(32, display.size(), {4, 4});
+    gfx::Bloom bloom(display.size());
 
     ui::RenderStats stats;
 

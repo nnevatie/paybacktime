@@ -10,6 +10,8 @@
 
 namespace hc
 {
+namespace gfx
+{
 
 struct Bloom
 {
@@ -49,4 +51,5 @@ struct Bloom
     gl::Texture* output();
 };
 
+} // namespace gfx
 } // namespace hc

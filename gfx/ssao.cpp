@@ -8,6 +8,9 @@
 
 namespace hc
 {
+namespace gfx
+{
+
 namespace
 {
 
@@ -99,4 +102,5 @@ glm::vec2 Ssao::noiseScale() const
                      float(renderSize.h) / noiseSize.h);
 }
 
+} // namespace gfx
 } // namespace hc
