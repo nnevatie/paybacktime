@@ -24,13 +24,6 @@ set(HEADER_FILES
     log.h
     image_mesher.h
     image_atlas.h
-    gl_uniforms.h
-    gl_texture.h
-    gl_buffers.h
-    gl_shaders.h
-    gl_primitive.h
-    gl_fbo.h
-    gl_rbo.h
     render_stats.h
     mesh.h
     sn_mesher.h
@@ -39,6 +32,14 @@ set(HEADER_FILES
     scene.h
     object.h
     object_store.h
+
+    gl/gl_uniforms.h
+    gl/gl_texture.h
+    gl/gl_buffers.h
+    gl/gl_shaders.h
+    gl/gl_primitive.h
+    gl/gl_fbo.h
+    gl/gl_rbo.h
     )
 
 set(SOURCE_FILES
@@ -55,17 +56,18 @@ set(SOURCE_FILES
     clock.cpp
     log.cpp
     image_mesher.cpp
-    gl_texture.cpp
-    gl_buffers.cpp
-    gl_shaders.cpp
-    gl_fbo.cpp
-    gl_rbo.cpp
     render_stats.cpp
     ssao.cpp
     bloom.cpp
     scene.cpp
     object.cpp
     object_store.cpp
+
+    gl/gl_texture.cpp
+    gl/gl_buffers.cpp
+    gl/gl_shaders.cpp
+    gl/gl_fbo.cpp
+    gl/gl_rbo.cpp
     )
 
 set(EXT_HEADER_FILES
@@ -130,7 +132,10 @@ set(OPENGL_LIBS
     )
 
 # Include paths
-include_directories(ext)
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext
+    )
 
 # Build definitions
 add_definitions(-D_USE_MATH_DEFINES)

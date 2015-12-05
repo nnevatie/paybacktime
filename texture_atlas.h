@@ -5,7 +5,7 @@
 
 #include "geometry.h"
 #include "image_atlas.h"
-#include "gl_texture.h"
+#include "gl/gl_texture.h"
 
 namespace hc
 {

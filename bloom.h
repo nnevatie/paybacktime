@@ -3,10 +3,10 @@
 #include <vector>
 
 #include "geometry.h"
-#include "gl_primitive.h"
-#include "gl_shaders.h"
-#include "gl_texture.h"
-#include "gl_fbo.h"
+#include "gl/gl_primitive.h"
+#include "gl/gl_shaders.h"
+#include "gl/gl_texture.h"
+#include "gl/gl_fbo.h"
 
 namespace hc
 {

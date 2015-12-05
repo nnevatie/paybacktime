@@ -5,9 +5,9 @@
 #include <glm/vec2.hpp>
 
 #include "geometry.h"
-#include "gl_texture.h"
-#include "gl_rbo.h"
-#include "gl_fbo.h"
+#include "gl/gl_texture.h"
+#include "gl/gl_rbo.h"
+#include "gl/gl_fbo.h"
 
 namespace hc
 {
