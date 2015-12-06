@@ -2,8 +2,8 @@
 1 RT_MANIFEST res/highcaliber.exe.manifest
 
 1 VERSIONINFO
-FILEVERSION 2,0,0,0
-PRODUCTVERSION 2,0,0,0
+FILEVERSION 0,1,0,0
+PRODUCTVERSION 0,1,0,0
 FILEOS 0x4
 FILETYPE 0x1
 {
@@ -11,16 +11,15 @@ BLOCK "StringFileInfo"
 {
     BLOCK "040904E4"
     {
-        VALUE "CompanyName", "Your Company Name Here\0"
-        VALUE "FileDescription", "Your File Description Here\0"
-        VALUE "FileVersion", "2.0.0.0\0"
-        VALUE "InternalName", "Your Internal Name\0"
-        VALUE "LegalCopyright", "© Your Copyright Notice\0"
-        VALUE "LegalTrademarks", "Your Trademark Notice\0"
-        VALUE "OriginalFilename", "YourExeName\0"
-        VALUE "ProductName", "Your Product Name\0"
-        VALUE "ProductVersion", "2.0.0.0\0"
-        VALUE "Comments", "No Comments\0"
+        VALUE "CompanyName", "nnevatie\0"
+        VALUE "FileDescription", "High Caliber\0"
+        VALUE "FileVersion", "0.1.0.0\0"
+        VALUE "InternalName", "nnevatie\0"
+        VALUE "LegalCopyright", "Copyright 2015, Niko Nevatie\0"
+        VALUE "OriginalFilename", "highcaliber.exe\0"
+        VALUE "ProductName", "High Caliber\0"
+        VALUE "ProductVersion", "0.1.0.0\0"
+        //VALUE "Comments", "No Comments\0"
     }
 }
 
