@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <glad/glad.h>
 
 namespace hc
@@ -23,19 +25,16 @@ struct Buffer
     };
 
     Buffer(Type type);
-    ~Buffer();
 
-    bool bind() const;
-    bool unbind() const;
+    int size() const;
 
-    bool alloc(const void* data, int size);
-    bool dealloc();
+    Buffer& bind();
+    Buffer& unbind();
+    Buffer& alloc(const void* data, int size);
 
-    // TODO: Make shared private
-    Type   type;
-    Usage  usage;
-    GLuint id;
-    int    size;
+private:
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace gl

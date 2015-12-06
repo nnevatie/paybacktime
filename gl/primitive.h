@@ -55,7 +55,7 @@ struct Primitive
         // Draw elements with VAO
         glBindVertexArray(vao);
         glDrawElements(mode,
-                       indices.size / int(indexSpec.size),
+                       indices.size() / int(indexSpec.size),
                        indexSpec.size == 4 ? GL_UNSIGNED_INT :
                        indexSpec.size == 2 ? GL_UNSIGNED_SHORT :
                                              GL_UNSIGNED_BYTE,

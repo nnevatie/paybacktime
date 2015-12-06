@@ -30,71 +30,64 @@ GLenum bufferUsage(Buffer::Usage usage)
     return 0;
 }
 
-}
+} // namespace
 
-Buffer::Buffer(Buffer::Type type) :
-    type(type),
-    usage(Usage::StaticDraw),
-    id(0),
-    size(0)
+struct Buffer::Data
 {
-}
-
-Buffer::~Buffer()
-{
-    dealloc();
-}
-
-bool Buffer::bind() const
-{
-    if (id)
+    explicit Data(Buffer::Type type) :
+        id(0), size(0), type(type), usage(Usage::StaticDraw)
     {
-        glBindBuffer(bufferTarget(type), id);
-        return true;
-    }
-    return false;
-}
-
-bool Buffer::unbind() const
-{
-    if (id)
-    {
-        glBindBuffer(bufferTarget(type), 0);
-        return true;
-    }
-    return false;
-}
-
-bool Buffer::alloc(const void* data, int size)
-{
-    int allocated = 0;
-    const GLenum target = bufferTarget(type);
-
-    glGenBuffers(1, &id);
-    glBindBuffer(target, id);
-    glBufferData(target, size, data, bufferUsage(usage));
-    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &allocated);
-
-    if(allocated != size)
-    {
-        HCLOG(Warn) << "Could not alloc " << size << " bytes.";
-        dealloc();
-        return false;
+        glGenBuffers(1, &id);
     }
 
-    this->size = size;
-    return true;
-}
-
-bool Buffer::dealloc()
-{
-    if (id)
+    ~Data()
     {
         glDeleteBuffers(1, &id);
-        id = 0;
-        return true;
     }
-    return false;
+
+    GLuint id;
+    int    size;
+    Type   type;
+    Usage  usage;
+};
+
+Buffer::Buffer(Buffer::Type type) :
+    d(new Data(type))
+{
+}
+
+int Buffer::size() const
+{
+    return d->size;
+}
+
+Buffer& Buffer::bind()
+{
+    glBindBuffer(bufferTarget(d->type), d->id);
+    return *this;
+}
+
+Buffer& Buffer::unbind()
+{
+    glBindBuffer(bufferTarget(d->type), 0);
+    return *this;
+}
+
+Buffer& Buffer::alloc(const void* data, int size)
+{
+    int allocated = 0;
+    const GLenum target = bufferTarget(d->type);
+
+    glBindBuffer(target, d->id);
+    glBufferData(target, size, data, bufferUsage(d->usage));
+    glGetBufferParameteriv(target, GL_BUFFER_SIZE, &allocated);
+
+    if(allocated == size)
+        d->size = size;
+    else
+        HCLOG(Warn) << "Could not alloc " << size << " bytes.";
+
+    return *this;
 }
 
 } // namespace gl
