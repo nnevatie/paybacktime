@@ -13,7 +13,7 @@ template<>
 ShaderProgram& ShaderProgram::setUniform<bool>(
     const char* name, const bool& v)
 {
-    glUniform1i(glGetUniformLocation(id, name), v);
+    glUniform1i(glGetUniformLocation(id(), name), v);
     return *this;
 }
 
@@ -21,7 +21,7 @@ template<>
 ShaderProgram& ShaderProgram::setUniform<int>(
     const char* name, const int& v)
 {
-    glUniform1i(glGetUniformLocation(id, name), v);
+    glUniform1i(glGetUniformLocation(id(), name), v);
     return *this;
 }
 
@@ -29,7 +29,7 @@ template<>
 ShaderProgram& ShaderProgram::setUniform<float>(
     const char* name, const float& v)
 {
-    glUniform1f(glGetUniformLocation(id, name), v);
+    glUniform1f(glGetUniformLocation(id(), name), v);
     return *this;
 }
 
@@ -37,7 +37,7 @@ template<>
 ShaderProgram& ShaderProgram::setUniform<glm::vec2>(
     const char* name, const glm::vec2& v)
 {
-    glUniform2fv(glGetUniformLocation(id, name),
+    glUniform2fv(glGetUniformLocation(id(), name),
                  1, glm::value_ptr(v));
     return *this;
 }
@@ -46,7 +46,7 @@ template<>
 ShaderProgram& ShaderProgram::setUniform<glm::vec4>(
     const char* name, const glm::vec4& v)
 {
-    glUniform4fv(glGetUniformLocation(id, name),
+    glUniform4fv(glGetUniformLocation(id(), name),
                  1, glm::value_ptr(v));
     return *this;
 }
@@ -55,7 +55,7 @@ template<>
 ShaderProgram& ShaderProgram::setUniform<glm::mat4>(
     const char* name, const glm::mat4& v)
 {
-    glUniformMatrix4fv(glGetUniformLocation(id, name),
+    glUniformMatrix4fv(glGetUniformLocation(id(), name),
                        1, GL_FALSE, glm::value_ptr(v));
     return *this;
 }
@@ -64,7 +64,7 @@ template<>
 ShaderProgram& ShaderProgram::setUniform<std::vector<glm::vec3>>(
     const char* name, const std::vector<glm::vec3>& v)
 {
-    glUniform3fv(glGetUniformLocation(id, name),
+    glUniform3fv(glGetUniformLocation(id(), name),
                  v.size(), (const GLfloat*) v.data());
     return *this;
 }

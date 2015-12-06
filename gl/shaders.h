@@ -42,15 +42,15 @@ struct ShaderProgram
                   const std::vector<AttribLocation>& attribs =
                   std::vector<AttribLocation>());
 
-    ~ShaderProgram();
-
+    GLuint id() const;
     ShaderProgram& bind();
 
     template<typename T>
     ShaderProgram& setUniform(const char* name, const T& v);
 
-    GLuint id;
-    std::vector<Shader> shaders;
+private:
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace gl

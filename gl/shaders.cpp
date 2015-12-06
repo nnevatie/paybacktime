@@ -89,6 +89,20 @@ struct Shader::Data
     std::string source;
 };
 
+struct ShaderProgram::Data
+{
+    Data() : id(glCreateProgram())
+    {
+    }
+
+    ~Data()
+    {
+        glDeleteProgram(id);
+    }
+
+    GLuint id;
+};
+
 Shader::Shader(Type type, const std::string& s) :
     d(new Data(type, s))
 {
@@ -115,27 +129,26 @@ filesystem::path Shader::path(const std::string& filename)
 }
 
 ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders,
-                             const std::vector<AttribLocation> &attribs) :
-    shaders(shaders)
+                             const std::vector<AttribLocation>& attribs) :
+    d(new Data())
 {
-    id = glCreateProgram();
     for (const Shader& shader : shaders)
-        glAttachShader(id, shader.id());
+        glAttachShader(d->id, shader.id());
 
     for (const AttribLocation& attrib : attribs)
-        glBindAttribLocation(id, attrib.first, attrib.second.c_str());
+        glBindAttribLocation(d->id, attrib.first, attrib.second.c_str());
 
-    glLinkProgram(id);
+    glLinkProgram(d->id);
 }
 
-ShaderProgram::~ShaderProgram()
+GLuint ShaderProgram::id() const
 {
-    glDeleteProgram(id);
+    return d->id;
 }
 
 ShaderProgram& ShaderProgram::bind()
 {
-    glUseProgram(id);
+    glUseProgram(d->id);
     return *this;
 }
 
