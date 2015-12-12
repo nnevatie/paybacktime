@@ -76,7 +76,8 @@ Outline& Outline::operator()(gl::Fbo* fboOut,
         texColor->bindAs(GL_TEXTURE0);
         texDenoise.bindAs(GL_TEXTURE1);
         progOutline.bind().setUniform("tex", 0)
-                          .setUniform("outline", 1);
+                          .setUniform("outline", 1)
+                          .setUniform("fillColor", glm::vec4(0, 0.5, 0.75, 1));
         rect.render();
     }
     return *this;
