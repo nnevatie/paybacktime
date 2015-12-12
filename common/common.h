@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <cmath>
+#include <gsl.h>
 
 #include "file_system.h"
 
@@ -23,6 +24,8 @@ struct SourceLocation
 template <typename T>
 struct Binder
 {
+    explicit Binder(gsl::not_null<T*> obj) : Binder(*obj)
+    {}
     explicit Binder(T& obj) : obj(obj)
     {
         obj.bind();

@@ -27,10 +27,10 @@ struct Bloom
                       fsAdd,
                       fsGaussian;
 
-    gl::ShaderProgram bloomProg,
-                      scaleProg,
-                      addProg,
-                      blurProg;
+    gl::ShaderProgram progBloom,
+                      progScale,
+                      progAdd,
+                      progBlur;
 
     gl::Texture       texBloom,
                       texScale[scaleCount],

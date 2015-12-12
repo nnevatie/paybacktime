@@ -16,13 +16,13 @@ Bloom::Bloom(const Size<int>& renderSize) :
     fsTexture(gl::Shader::path("texture.fs.glsl")),
     fsAdd(gl::Shader::path("add.fs.glsl")),
     fsGaussian(gl::Shader::path("gaussian.fs.glsl")),
-    bloomProg({vsQuadUv, fsBloom},
+    progBloom({vsQuadUv, fsBloom},
               {{0, "position"}, {1, "uv"}}),
-    scaleProg({vsQuadUv, fsTexture},
+    progScale({vsQuadUv, fsTexture},
               {{0, "position"}, {1, "uv"}}),
-    addProg({vsQuadUv, fsAdd},
+    progAdd({vsQuadUv, fsAdd},
             {{0, "position"}, {1, "uv"}}),
-    blurProg({vsQuadUv, fsGaussian},
+    progBlur({vsQuadUv, fsGaussian},
               {{0, "position"}, {1, "uv"}})
 {
     HCLOG(Info) << "size " << renderSize.w << "x" << renderSize.h;
@@ -76,7 +76,7 @@ Bloom& Bloom::operator()(gl::Texture* texAlbedo,
     glDisable(GL_DEPTH_TEST);
 
     // Produce bloom bright map
-    bloomProg.bind().setUniform("texAlbedo", 0)
+    progBloom.bind().setUniform("texAlbedo", 0)
                     .setUniform("texColor",  1)
                     .setUniform("texLight",  2);
     {
@@ -91,7 +91,7 @@ Bloom& Bloom::operator()(gl::Texture* texAlbedo,
     for (int i = 0; i < scaleCount; ++i)
     {
         const Size<int> size = texScale[i].size();
-        scaleProg.bind().setUniform("texColor", 0);
+        progScale.bind().setUniform("texColor", 0);
         Binder<gl::Fbo> binder(fboScale[i]);
         glViewport(0, 0, size.w, size.h);
         gl::Texture scaleSrc = i > 0 ? texScale[i - 1] : texBloom;
@@ -110,7 +110,7 @@ Bloom& Bloom::operator()(gl::Texture* texAlbedo,
         if (i < scaleCount - 1)
         {
             // Add previous level
-            addProg.bind().setUniform("tex0", 0).setUniform("tex1", 1);
+            progAdd.bind().setUniform("tex0", 0).setUniform("tex1", 1);
             Binder<gl::Fbo> binder(fboAdd[i]);
             glViewport(0, 0, size.w, size.h);
             texBloom.bindAs(GL_TEXTURE0);
@@ -120,10 +120,10 @@ Bloom& Bloom::operator()(gl::Texture* texAlbedo,
         }
 
         // Seperable gaussian blur
-        blurProg.bind().setUniform("texColor", 0);
+        progBlur.bind().setUniform("texColor", 0);
         {
             // Blur horizontal
-            blurProg.setUniform("horizontal", true);
+            progBlur.setUniform("horizontal", true);
             Binder<gl::Fbo> binder(fboBlur[i]);
             glViewport(0, 0, size.w, size.h);
             blurSrc.bindAs(GL_TEXTURE0);
@@ -131,7 +131,7 @@ Bloom& Bloom::operator()(gl::Texture* texAlbedo,
         }
         {
             // Blur vertical
-            blurProg.setUniform("horizontal", false);
+            progBlur.setUniform("horizontal", false);
             Binder<gl::Fbo> binder(fboScale[i]);
             glViewport(0, 0, size.w, size.h);
             texBlur[i].bindAs(GL_TEXTURE0);

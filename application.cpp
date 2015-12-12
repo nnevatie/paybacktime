@@ -29,6 +29,7 @@
 
 #include "gfx/ssao.h"
 #include "gfx/bloom.h"
+#include "gfx/outline.h"
 
 #include "scene/object_store.h"
 #include "scene/scene.h"
@@ -147,6 +148,7 @@ bool Application::run(const std::string& input)
 
     gfx::Ssao ssao(32, display.size(), {4, 4});
     gfx::Bloom bloom(display.size());
+    gfx::Outline outline(display.size(), ssao.texDepth);
 
     ui::RenderStats stats;
 
@@ -189,6 +191,7 @@ bool Application::run(const std::string& input)
             glDrawBuffers(3, drawBuffers);
             glDisable(GL_FRAMEBUFFER_SRGB);
             glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LEQUAL);
             glDisable(GL_BLEND);
             glDepthMask(true);
 
@@ -283,8 +286,8 @@ bool Application::run(const std::string& input)
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
-
             glClear(GL_DEPTH_BUFFER_BIT);
+
             ssao.texDepth.bindAs(GL_TEXTURE0);
             ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
             ssao.texColor.bindAs(GL_TEXTURE2);
@@ -292,10 +295,15 @@ bool Application::run(const std::string& input)
             bloom.output()->bindAs(GL_TEXTURE4);
             ssao.texAoBlur.bindAs(GL_TEXTURE5);
             lightmap.bindAs(GL_TEXTURE6);
+
             rectPrimitive.render();
         }
 
+        // Bloom
         bloom(&ssao.texColor, &ssao.texLighting, &ssao.texLight);
+
+        // Outline
+        outline(&ssao.fboOutput, &ssao.texLighting, wall, proj * view * model);
 
         gridProg.bind()
             .setUniform("albedo", glm::vec4(0.f, 0.75f, 0.f, 1.f))

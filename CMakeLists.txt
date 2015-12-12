@@ -38,6 +38,7 @@ set(HEADER_FILES
     # Gfx
     gfx/ssao.h
     gfx/bloom.h
+    gfx/outline.h
 
     # GL
     gl/uniforms.h
@@ -80,6 +81,7 @@ set(SOURCE_FILES
     # Gfx
     gfx/ssao.cpp
     gfx/bloom.cpp
+    gfx/outline.cpp
 
     # GL
     gl/texture_atlas.cpp
@@ -121,6 +123,7 @@ set(SHADER_FILES
     shaders/gaussian.fs.glsl
     shaders/lighting.fs.glsl
     shaders/bloom.fs.glsl
+    shaders/outline.fs.glsl
     shaders/texture.fs.glsl
     shaders/model_pos.vs.glsl
     shaders/quad_uv.vs.glsl

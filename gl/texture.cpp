@@ -66,7 +66,7 @@ Texture::Type Texture::type() const
 
 Size<int> Texture::size()
 {
-    Binder<gl::Texture> binder(*this);
+    Binder<gl::Texture> binder(this);
     Size<int> size;
     glGetTexLevelParameteriv(d->target, 0, GL_TEXTURE_WIDTH,  &size.w);
     glGetTexLevelParameteriv(d->target, 0, GL_TEXTURE_HEIGHT, &size.h);
@@ -76,7 +76,7 @@ Size<int> Texture::size()
 Image Texture::image()
 {
     Image image(size(), 4);
-    Binder<gl::Texture> binder(*this);
+    Binder<gl::Texture> binder(this);
     glGetTexImage(d->target, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
     return image;
 }
