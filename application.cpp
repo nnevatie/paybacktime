@@ -189,7 +189,6 @@ bool Application::run(const std::string& input)
                                           GL_COLOR_ATTACHMENT1,
                                           GL_COLOR_ATTACHMENT2};
             glDrawBuffers(3, drawBuffers);
-            glDisable(GL_FRAMEBUFFER_SRGB);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
             glDisable(GL_BLEND);
