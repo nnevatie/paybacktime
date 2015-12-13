@@ -30,7 +30,7 @@ vec3 tonemap(vec3 x)
 
 void main(void)
 {
-   vec3 c0  = 12 * (texture(tex0, ib.uv) + texture(tex1, ib.uv)).rgb;
-   vec3 c1  = tonemap(c0 * (vec3(1.0) / tonemap(vec3(W))));
-   color    = vec4(c1, 1);
+   vec3 c0 = 12 * (texture(tex0, ib.uv) + texture(tex1, ib.uv)).rgb;
+   vec3 c1 = tonemap(c0 * (vec3(1.0) / tonemap(vec3(W))));
+   color   = vec4(c1, 1);
 }
