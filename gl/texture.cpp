@@ -154,10 +154,10 @@ Texture& Texture::alloc(const Image& image)
     }
     formats[] =
     {
-        {GL_R8,    GL_RED},
-        {GL_RG8,   GL_RG},
-        {GL_RGB8,  GL_RGB},
-        {GL_RGBA8, GL_RGBA}
+        {GL_R8,           GL_RED},
+        {GL_RG8,          GL_RG},
+        {GL_SRGB8,        GL_RGB},
+        {GL_SRGB8_ALPHA8, GL_RGBA}
     };
     if (image.depth() > 0 && image.depth() <= 4)
     {
