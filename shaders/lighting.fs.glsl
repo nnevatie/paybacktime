@@ -48,7 +48,7 @@ void main(void)
     vec3 ao         = texture(texAo, ib.uv).r *
                       textureBicubic(texGi, worldPos.xz).rgb;
     // Ambient
-    vec3 ambient    = vec3(0.01);
+    vec3 ambient    = vec3(0);
 
     // Diffuse
     vec3 viewDir    = normalize(fragPos);

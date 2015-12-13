@@ -79,7 +79,7 @@ bool Application::run(const std::string& input)
     gl::Shader fsSsao(gl::Shader::path("ssao.fs.glsl"));
     gl::Shader fsBlur(gl::Shader::path("blur.fs.glsl"));
     gl::Shader fsLighting(gl::Shader::path("lighting.fs.glsl"));
-    gl::Shader fsAdd(gl::Shader::path("add.fs.glsl"));
+    gl::Shader fsOutput(gl::Shader::path("output.fs.glsl"));
     gl::Shader fsTexture(gl::Shader::path("texture.fs.glsl"));
     gl::Shader gsWireframe(gl::Shader::path("wireframe.gs.glsl"));
 
@@ -101,7 +101,7 @@ bool Application::run(const std::string& input)
     gl::ShaderProgram lightingProg({vsQuadUv, fsLighting, fsCommon},
                                    {{0, "position"}, {1, "uv"}});
 
-    gl::ShaderProgram outputProg({vsQuadUv, fsAdd},
+    gl::ShaderProgram outputProg({vsQuadUv, fsOutput},
                                  {{0, "position"}, {1, "uv"}});
 
     const ImageCube depthCube("objects/" + input + "/*.png", 1);

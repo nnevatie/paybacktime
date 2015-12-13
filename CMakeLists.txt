@@ -129,6 +129,7 @@ set(SHADER_FILES
     shaders/quad_uv.vs.glsl
     shaders/wireframe.gs.glsl
     shaders/fxaa.fs.glsl
+    shaders/output.fs.glsl
     )
 
 set(RESOURCE_FILES
