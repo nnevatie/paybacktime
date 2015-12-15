@@ -44,13 +44,13 @@ Bloom::Bloom(const Size<int>& renderSize) :
         const Size<int> size = renderSize / (2 << i);
         auto sizeScaled      = {size.w, size.h};
 
-        texScale[i].bind().alloc(sizeScaled, iformat, GL_RGB, GL_FLOAT)
+        texScale[i].bind().alloc(sizeScaled, iformat, GL_RGB, type)
                           .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                           .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        texAdd[i].bind().alloc(sizeScaled, iformat, GL_RGB, GL_FLOAT)
+        texAdd[i].bind().alloc(sizeScaled, iformat, GL_RGB, type)
                         .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                         .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        texBlur[i].bind().alloc(sizeScaled, iformat, GL_RGB, GL_FLOAT)
+        texBlur[i].bind().alloc(sizeScaled, iformat, GL_RGB, type)
                          .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                          .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

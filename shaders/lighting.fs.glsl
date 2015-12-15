@@ -52,14 +52,14 @@ void main(void)
 
     // Diffuse
     vec3 viewDir    = normalize(fragPos);
-    vec3 lightPos   = vec3(10.0, 10.0, 1000.0);
+    vec3 lightPos   = vec3(10.0, 10.0, 750.0);
     vec3 lightDir   = normalize(lightPos - fragPos);
-    vec3 diffuse    = 1.0 * max(albedo * ao,
-                                albedo * max(dot(normal, lightDir), 0.0));
+    vec3 diffuse    = 0.75 * max(albedo * ao,
+                                 albedo * max(dot(normal, lightDir), 0.0));
 
     // Specular
     vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec      = pow(max(dot(normal, halfwayDir), 0.0), 16.0);
+    float spec      = 0.5 * pow(max(dot(normal, halfwayDir), 0.0), 16.0);
     vec3 specular   = light.r * vec3(spec);
 
     vec3 lighting   = ambient + ao * diffuse + ao * specular;

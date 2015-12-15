@@ -39,6 +39,7 @@ set(HEADER_FILES
     gfx/ssao.h
     gfx/bloom.h
     gfx/outline.h
+    gfx/anti_alias.h
 
     # GL
     gl/uniforms.h
@@ -82,6 +83,7 @@ set(SOURCE_FILES
     gfx/ssao.cpp
     gfx/bloom.cpp
     gfx/outline.cpp
+    gfx/anti_alias.cpp
 
     # GL
     gl/texture_atlas.cpp

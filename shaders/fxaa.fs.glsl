@@ -1,3 +1,23 @@
+#version 150
+
+#define FXAA_PC              1
+#define FXAA_GLSL_130        1
+#define FXAA_GATHER4_ALPHA   0
+#define FXAA_QUALITY__PRESET 15
+
+uniform sampler2D tex;
+
+// Input
+in Block
+{
+    vec2               uv;
+    noperspective vec3 viewRay;
+}
+ib;
+
+// Output
+out vec4 color;
+
 /*============================================================================
 
 
@@ -2045,3 +2065,12 @@ half4 FxaaPixelShader(
     return rgby2; }
 /*==========================================================================*/
 #endif
+
+////////////////////////////////////////////////////////////////////////////////
+void main(void)
+{
+    vec2 size = vec2(textureSize(tex, 0));
+    color = FxaaPixelShader(ib.uv, vec4(0), tex, tex, tex,
+                            vec2(1) / size, vec4(0), vec4(0), vec4(0),
+                            0.75, 0.166, 0.0833, 8.0, 0.125, 0.05, vec4(0));
+}

@@ -30,6 +30,7 @@
 #include "gfx/ssao.h"
 #include "gfx/bloom.h"
 #include "gfx/outline.h"
+#include "gfx/anti_alias.h"
 
 #include "scene/object_store.h"
 #include "scene/scene.h"
@@ -101,7 +102,10 @@ bool Application::run(const std::string& input)
     gl::ShaderProgram lightingProg({vsQuadUv, fsLighting, fsCommon},
                                    {{0, "position"}, {1, "uv"}});
 
-    gl::ShaderProgram outputProg({vsQuadUv, fsOutput},
+    gl::ShaderProgram tonemapProg({vsQuadUv, fsOutput},
+                                 {{0, "position"}, {1, "uv"}});
+
+    gl::ShaderProgram outputProg({vsQuadUv, fsTexture},
                                  {{0, "position"}, {1, "uv"}});
 
     const ImageCube depthCube("objects/" + input + "/*.png", 1);
@@ -149,6 +153,19 @@ bool Application::run(const std::string& input)
     gfx::Ssao ssao(32, display.size(), {4, 4});
     gfx::Bloom bloom(display.size());
     gfx::Outline outline(display.size(), ssao.texDepth);
+    gfx::AntiAlias antiAlias(display.size());
+
+    // Output
+    gl::Texture texOutput;
+    auto outputSize = {display.size().w, display.size().h};
+    texOutput.bind().alloc(outputSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
+                    .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    gl::Fbo fboOutput;
+    fboOutput.bind()
+            .attach(texOutput, gl::Fbo::Attachment::Color)
+            .unbind();
 
     ui::RenderStats stats;
 
@@ -318,15 +335,28 @@ bool Application::run(const std::string& input)
             gridPrimitive.render(GL_LINES);
         }
 
-        outputProg.bind().setUniform("tex0", 0)
-                         .setUniform("tex1", 1);
+        tonemapProg.bind().setUniform("tex0", 0)
+                          .setUniform("tex1", 1);
         {
-            // Output pass
-            glEnable(GL_FRAMEBUFFER_SRGB);
+            // Tonemap pass
+            Binder<gl::Fbo> binder(fboOutput);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glDisable(GL_DEPTH_TEST);
 
             ssao.texLighting.bindAs(GL_TEXTURE0);
             bloom.output()->bindAs(GL_TEXTURE1);
+            rectPrimitive.render();
+        }
+
+        // Anti-alias
+        antiAlias(&texOutput);
+
+        outputProg.bind().setUniform("tex", 0);
+        {
+            // Output pass
+            glDisable(GL_DEPTH_TEST);
+
+            antiAlias.output()->bindAs(GL_TEXTURE0);
             rectPrimitive.render();
         }
 

@@ -80,7 +80,7 @@ Outline& Outline::operator()(gl::Fbo* fboOut,
                           .setUniform("fillColor", glm::vec4(0, 0.5, 0.75, 1));
         rect.render();
     }
-    return *this;
+    return* this;
 }
 
 } // namespace gfx
