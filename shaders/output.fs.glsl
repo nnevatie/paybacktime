@@ -32,6 +32,6 @@ void main(void)
 {
    vec3 c0 = 12 * (texture(tex0, ib.uv) + texture(tex1, ib.uv)).rgb;
    vec3 c1 = tonemap(c0 * (vec3(1.0) / tonemap(vec3(W))));
-   vec3 c2 = pow(c1, vec3(1.0 / 2.0));
+   vec3 c2 = pow(c1, vec3(1.0 / 2.2));
    color   = vec4(c2, dot(c2.rgb, vec3(0.299, 0.587, 0.114)));
 }

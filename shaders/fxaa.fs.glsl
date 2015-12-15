@@ -1,8 +1,9 @@
 #version 150
+#extension GL_ARB_gpu_shader5 : enable
 
 #define FXAA_PC              1
 #define FXAA_GLSL_130        1
-#define FXAA_GATHER4_ALPHA   0
+#define FXAA_GATHER4_ALPHA   1
 #define FXAA_QUALITY__PRESET 15
 
 uniform sampler2D tex;
