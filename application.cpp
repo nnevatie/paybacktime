@@ -30,6 +30,7 @@
 #include "gfx/ssao.h"
 #include "gfx/bloom.h"
 #include "gfx/outline.h"
+#include "gfx/color_grade.h"
 #include "gfx/anti_alias.h"
 
 #include "scene/object_store.h"
@@ -154,18 +155,7 @@ bool Application::run(const std::string& input)
     gfx::Bloom bloom(display.size());
     gfx::Outline outline(display.size(), ssao.texDepth);
     gfx::AntiAlias antiAlias(display.size());
-
-    // Output
-    gl::Texture texOutput;
-    auto outputSize = {display.size().w, display.size().h};
-    texOutput.bind().alloc(outputSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
-                    .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    gl::Fbo fboOutput;
-    fboOutput.bind()
-            .attach(texOutput, gl::Fbo::Attachment::Color)
-            .unbind();
+    gfx::ColorGrade colorGrade(display.size());
 
     ui::RenderStats stats;
 
@@ -335,27 +325,16 @@ bool Application::run(const std::string& input)
             gridPrimitive.render(GL_LINES);
         }
 
-        tonemapProg.bind().setUniform("tex0", 0)
-                          .setUniform("tex1", 1);
-        {
-            // Tonemap pass
-            Binder<gl::Fbo> binder(fboOutput);
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
-            glDisable(GL_DEPTH_TEST);
-
-            ssao.texLighting.bindAs(GL_TEXTURE0);
-            bloom.output()->bindAs(GL_TEXTURE1);
-            rectPrimitive.render();
-        }
+        // Color grade
+        colorGrade(&ssao.texLighting, bloom.output());
 
         // Anti-alias
-        antiAlias(&texOutput);
+        antiAlias(colorGrade.output());
 
         outputProg.bind().setUniform("tex", 0);
         {
             // Output pass
             glDisable(GL_DEPTH_TEST);
-
             antiAlias.output()->bindAs(GL_TEXTURE0);
             rectPrimitive.render();
         }
