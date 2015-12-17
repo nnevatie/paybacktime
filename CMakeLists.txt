@@ -4,138 +4,49 @@ project(highcaliber)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
     -std=c++11 -Wall -Wextra -Wno-unused-function -fopenmp")
 
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
+#    -std=c++11 -Wall -Wextra -Wno-unused-function -fopenmp -Ofast -m64")
+
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
     -Wl,--stack,16777216")
 
-set(HEADER_FILES
-    application.h
-
-    # Img
-    img/image.h
-    img/image_cube.h
-    img/image_atlas.h
-    img/painter.h
-
-    # Geom
-    geom/geometry.h
-    geom/mesh.h
-    geom/image_mesher.h
-    geom/sn_mesher.h
-
-    # Scene
-    scene/scene.h
-    scene/object.h
-    scene/object_store.h
-
-    # Common
-    common/optional.h
-    common/statistics.h
-    common/file_system.h
-    common/common.h
-    common/clock.h
-    common/log.h
-
-    # Gfx
-    gfx/ssao.h
-    gfx/bloom.h
-    gfx/outline.h
-    gfx/anti_alias.h
-
-    # GL
-    gl/uniforms.h
-    gl/texture_atlas.h
-    gl/texture.h
-    gl/buffers.h
-    gl/shaders.h
-    gl/primitive.h
-    gl/fbo.h
-    gl/rbo.h
-
-    # UI
-    ui/display.h
-    ui/render_stats.h
+file(GLOB HEADER_FILES
+    *.h
+    img/*.h
+    geom/*.h
+    scene/*.h
+    common/*.h
+    gfx/*.h
+    gl/*.h
+    ui/*.h
     )
 
-set(SOURCE_FILES
-    main.cpp
-    application.cpp
-
-    # Img
-    img/image.cpp
-    img/image_cube.cpp
-    img/image_atlas.cpp
-    img/painter.cpp
-
-    # Geom
-    geom/image_mesher.cpp
-
-    # Scene
-    scene/scene.cpp
-    scene/object.cpp
-    scene/object_store.cpp
-
-    # Common
-    common/common.cpp
-    common/clock.cpp
-    common/log.cpp
-
-    # Gfx
-    gfx/ssao.cpp
-    gfx/bloom.cpp
-    gfx/outline.cpp
-    gfx/anti_alias.cpp
-
-    # GL
-    gl/texture_atlas.cpp
-    gl/texture.cpp
-    gl/buffers.cpp
-    gl/shaders.cpp
-    gl/fbo.cpp
-    gl/rbo.cpp
-
-    # UI
-    ui/display.cpp
-    ui/render_stats.cpp
+file(GLOB HEADER_FILES
+    *.cpp
+    img/*.cpp
+    geom/*.cpp
+    scene/*.cpp
+    common/*.cpp
+    gfx/*.cpp
+    gl/*.cpp
+    ui/*.cpp
     )
 
-set(EXT_HEADER_FILES
-    ext/stb_image.h
-    ext/stb_image_write.h
-    ext/stb_truetype.h
-    ext/nanovg.h
-    ext/nanovg_gl.h
-    ext/nanovg_gl_utils.h
-    ext/fontstash.h
+file(GLOB EXT_HEADER_FILES
+    ext/*.h
     )
 
-set(EXT_SOURCE_FILES
-    ext/glad.c
-    ext/nanovg.c
+file(GLOB EXT_SOURCE_FILES
+    ext/*.c
+    ext/*.cpp
     )
 
-set(SHADER_FILES
-    shaders/common.fs.glsl
-    shaders/geometry.vs.glsl
-    shaders/geometry.fs.glsl
-    shaders/denoise.fs.glsl
-    shaders/add.fs.glsl
-    shaders/color.fs.glsl
-    shaders/ssao.fs.glsl
-    shaders/blur.fs.glsl
-    shaders/gaussian.fs.glsl
-    shaders/lighting.fs.glsl
-    shaders/bloom.fs.glsl
-    shaders/outline.fs.glsl
-    shaders/texture.fs.glsl
-    shaders/model_pos.vs.glsl
-    shaders/quad_uv.vs.glsl
-    shaders/wireframe.gs.glsl
-    shaders/fxaa.fs.glsl
-    shaders/output.fs.glsl
+file(GLOB SHADER_FILES
+    shaders/*.glsl
     )
 
-set(RESOURCE_FILES
-    res/highcaliber.rc
+file(GLOB RESOURCE_FILES
+    res/*.rc
     )
 
 # System dependencies
