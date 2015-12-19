@@ -1,77 +1,57 @@
 #pragma once
 
+#include <chrono>
+
 #include "common.h"
+#include "log.h"
 
 namespace hc
 {
+using ChronoClock = std::chrono::high_resolution_clock;
+using TimePoint   = std::chrono::time_point<ChronoClock>;
+using Duration    = ChronoClock::duration;
 
-struct Clock
+template <typename T>
+struct Time
 {
-    /**
-     * Time/frequency/duration data types.
-     */
-    typedef uint64_t Time;
-
-    /**
-     * Conversion constants.
-     */
-    static const Time US_IN_S = 1000000;
-
-    /**
-     * Constructs a clock.
-     */
-    Clock();
-
-    /**
-     * Restarts the clock.
-     */
-    void start();
-
-    /**
-     * Stops the clock and returns elapsed time (us).
-     */
-    float stop();
-
-    float us() const;
-    float ms() const;
-    float s() const;
-
-    /**
-     * Returns the clock's frequency.
-     */
-    static Time frequency();
-
-    /**
-     * Returns the current tick count.
-     */
-    static Time ticks();
-
-    /**
-     * Returns the current time (us).
-     */
-    static Time now();
-    /**
-     * Sleep for given time (ms).
-     */
-    static void sleep(Time time);
-
+    Time() : tp0(now())
+    {}
+    TimePoint now() const
+    {
+        return impl.now();
+    }
+    Duration elapsed() const
+    {
+        return now() - tp0;
+    }
 private:
-
-    Time t0_, t1_;
+    T impl;
+    TimePoint tp0;
 };
 
-#define HCTIME(description)    \
-    hc::ScopedClock scopedClock_(HCSOURCE(), description)
+#define HCTIME(description) \
+    hc::ScopedClock<ChronoClock> scopedClock_(HCSOURCE(), description)
 
+template <typename T>
 struct ScopedClock
 {
-    ScopedClock(const SourceLocation& source, const std::string& message);
-    ~ScopedClock();
+    ScopedClock(const SourceLocation& source, const std::string& message) :
+        source_(source), message_(message)
+    {}
 
+    ~ScopedClock()
+    {
+        const float us = std::chrono::duration
+                         <float, std::micro>(clock_.elapsed()).count();
+
+        Logger(Logger::Info, source_)
+            << (message_.length() > 0 ? (message_ + " ") : "")
+            << us << " " << "us";
+    }
 private:
-    Clock clock_;
+    Time<T>        clock_;
     SourceLocation source_;
-    std::string message_;
+    std::string    message_;
 };
 
 }  // namespace

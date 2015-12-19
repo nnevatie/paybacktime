@@ -21,6 +21,7 @@
 #include "ui/display.h"
 #include "ui/render_stats.h"
 
+#include "gl/gpu_clock.h"
 #include "gl/texture_atlas.h"
 #include "gl/primitive.h"
 #include "gl/shaders.h"
@@ -180,7 +181,7 @@ bool Application::run(const std::string& input)
 
         glm::mat4 model;
 
-        Clock clock;
+        Time<ChronoClock> clock;
 
         geomProg.bind()
             .setUniform("texAlbedo", 0)
@@ -356,7 +357,7 @@ bool Application::run(const std::string& input)
         stats.render();
         display.swap();
 
-        stats.accumulate(clock.stop(), vc, ic);
+        stats.accumulate(clock.elapsed(), vc, ic);
 
         SDL_Event e;
         while (SDL_PollEvent(&e) && f < 2000)

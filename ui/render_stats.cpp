@@ -33,13 +33,17 @@ RenderStats::~RenderStats()
     nvgDeleteGL3(vg);
 }
 
-void RenderStats::accumulate(float frameTime, int vertexCount, int triangleCount)
+void RenderStats::accumulate(const hc::Duration& frameTime,
+                             int vertexCount, int triangleCount)
 {
-    this->frameTimes.push(frameTime);
+    const float timeUs = std::chrono::duration
+                         <float, std::micro>(frameTime).count();
+
+    this->frameTimes.push(timeUs);
     this->vertexCount   = vertexCount;
     this->triangleCount = triangleCount;
 
-    accumTime += frameTime;
+    accumTime += timeUs;
     if (accumTime >= UPDATE_INTERVAL_US || !meanTimeMs)
     {
         meanTimeMs = frameTimes.mean() * 0.001f;

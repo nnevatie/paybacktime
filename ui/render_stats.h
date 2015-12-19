@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/clock.h"
 #include "common/statistics.h"
 
 struct NVGcontext;
@@ -14,14 +15,15 @@ struct RenderStats
     RenderStats();
     ~RenderStats();
 
-    void accumulate(float frameTime, int vertexCount, int triangleCount);
+    void accumulate(const Duration& frameTime,
+                    int vertexCount, int triangleCount);
     void render();
 
 private:
     NVGcontext* vg;
 
     float accumTime, meanTimeMs;
-    MovingAvg<int64_t> frameTimes;
+    MovingAvg<float> frameTimes;
 
     int vertexCount, triangleCount;
 };
