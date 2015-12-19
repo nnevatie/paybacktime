@@ -21,7 +21,7 @@ file(GLOB HEADER_FILES
     ui/*.h
     )
 
-file(GLOB HEADER_FILES
+file(GLOB SOURCE_FILES
     *.cpp
     img/*.cpp
     geom/*.cpp
