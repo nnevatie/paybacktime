@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "geom/geometry.h"
+#include "geom/rect.h"
 #include "gl/primitive.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"

@@ -7,7 +7,7 @@
 #include "common/clock.h"
 #include "common/log.h"
 
-#include "geometry.h"
+#include "rect.h"
 #include "sn_mesher.h"
 
 namespace hc

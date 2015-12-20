@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "geom/geometry.h"
+#include "geom/rect.h"
 #include "img/image_cube.h"
 #include "img/image.h"
 

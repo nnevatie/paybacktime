@@ -4,7 +4,7 @@
 #include <vector>
 #include <array>
 
-#include "geom/geometry.h"
+#include "geom/rect.h"
 #include "img/image.h"
 
 namespace hc

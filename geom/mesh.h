@@ -9,7 +9,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
-#include "geometry.h"
+#include "rect.h"
 
 namespace hc
 {

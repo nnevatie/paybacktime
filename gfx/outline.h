@@ -2,7 +2,7 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "geom/geometry.h"
+#include "geom/rect.h"
 #include "gl/primitive.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"

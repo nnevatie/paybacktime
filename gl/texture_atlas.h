@@ -3,7 +3,7 @@
 #include <utility>
 #include <array>
 
-#include "geom/geometry.h"
+#include "geom/rect.h"
 #include "img/image_atlas.h"
 #include "gl/texture.h"
 
