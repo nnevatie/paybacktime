@@ -79,8 +79,6 @@ bool Application::run(const std::string& input)
     gl::Shader vsModelPos(gl::Shader::path("model_pos.vs.glsl"));
     gl::Shader vsQuadUv(gl::Shader::path("quad_uv.vs.glsl"));
     gl::Shader fsColor(gl::Shader::path("color.fs.glsl"));
-    gl::Shader fsSsao(gl::Shader::path("ssao.fs.glsl"));
-    gl::Shader fsBlur(gl::Shader::path("blur.fs.glsl"));
     gl::Shader fsLighting(gl::Shader::path("lighting.fs.glsl"));
     gl::Shader fsOutput(gl::Shader::path("output.fs.glsl"));
     gl::Shader fsTexture(gl::Shader::path("texture.fs.glsl"));
@@ -94,12 +92,6 @@ bool Application::run(const std::string& input)
 
     gl::ShaderProgram denoiseProg({vsQuadUv, fsDenoise},
                                   {{0, "position"}, {1, "uv"}});
-
-    gl::ShaderProgram ssaoProg({vsQuadUv, fsSsao, fsCommon},
-                               {{0, "position"}, {1, "uv"}});
-
-    gl::ShaderProgram blurProg({vsQuadUv, fsBlur},
-                               {{0, "position"}, {1, "uv"}});
 
     gl::ShaderProgram lightingProg({vsQuadUv, fsLighting, fsCommon},
                                    {{0, "position"}, {1, "uv"}});
