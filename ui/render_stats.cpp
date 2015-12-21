@@ -69,7 +69,7 @@ void RenderStats::render()
     nvgText(vg, 140, 20, str(std::stringstream()
                             << std::fixed << std::setprecision(1)
                             << "FPS: " << (1000.f / timeMs)).c_str(), 0);
-
+#if 0
     nvgText(vg, 10, 40, str(std::stringstream()
                             << "Vertices: " << vertexCount).c_str(), 0);
     nvgText(vg, 140, 40, str(std::stringstream()
@@ -80,6 +80,7 @@ void RenderStats::render()
 
     nvgText(vg, 10, 60, str(std::stringstream()
                             << "Geometry: ~" << geomKb << " KB").c_str(), 0);
+#endif
     nvgEndFrame(vg);
 }
 

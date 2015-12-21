@@ -11,7 +11,6 @@
 
 #include "common/file_system.h"
 #include "common/clock.h"
-#include "common/log.h"
 
 #include "img/painter.h"
 #include "img/image_cube.h"
@@ -262,22 +261,11 @@ bool Application::run(const std::string& input)
             rectPrimitive.render();
         }
 
-        // Bloom
         bloom(&ssao.texColor, &ssao.texLighting, &ssao.texLight);
-
-        // Outline
         outline(&ssao.fboOutput, &ssao.texLighting, wall, proj * view * model);
-
-        // Grid
         grid(&ssao.fboOutput, proj * view * model);
-
-        // Color grade
         colorGrade(&ssao.texLighting, bloom.output());
-
-        // Anti-alias
         antiAlias(colorGrade.output());
-
-        // Output
         output(antiAlias.output());
 
         #ifdef CAPTURE_VIDEO
@@ -287,17 +275,10 @@ bool Application::run(const std::string& input)
         //a += 0.001f;
         #endif
 
-        const int vc = 4 * mesh.vertices.size() +
-                       5 * 5 * floorMesh.vertices.size() +
-                       10 * wallMesh.vertices.size();
-        const int ic = (4 * mesh.indices.size() +
-                        5 * 5 * floorMesh.indices.size() +
-                        10 * wallMesh.indices.size()) / 3;
-
         stats.render();
         display.swap();
 
-        stats.accumulate(clock.elapsed(), vc, ic);
+        stats.accumulate(clock.elapsed(), 0, 0);
 
         SDL_Event e;
         while (SDL_PollEvent(&e) && f < 2000)
