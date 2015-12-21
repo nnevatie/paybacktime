@@ -36,7 +36,7 @@ ColorGrade& ColorGrade::operator()(gl::Texture* texColor, gl::Texture* texBloom)
     texColor->bindAs(GL_TEXTURE0);
     texBloom->bindAs(GL_TEXTURE1);
     rect.render();
-    return* this;
+    return *this;
 }
 
 gl::Texture* ColorGrade::output()
