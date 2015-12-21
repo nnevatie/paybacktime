@@ -33,6 +33,7 @@
 #include "gfx/outline.h"
 #include "gfx/color_grade.h"
 #include "gfx/anti_alias.h"
+#include "gfx/output.h"
 
 #include "scene/object_store.h"
 #include "scene/scene.h"
@@ -80,27 +81,19 @@ bool Application::run(const std::string& input)
     gl::Shader vsQuadUv(gl::Shader::path("quad_uv.vs.glsl"));
     gl::Shader fsColor(gl::Shader::path("color.fs.glsl"));
     gl::Shader fsLighting(gl::Shader::path("lighting.fs.glsl"));
-    gl::Shader fsOutput(gl::Shader::path("output.fs.glsl"));
-    gl::Shader fsTexture(gl::Shader::path("texture.fs.glsl"));
     gl::Shader gsWireframe(gl::Shader::path("wireframe.gs.glsl"));
 
     gl::ShaderProgram gridProg({vsModelPos, fsColor},
-                               {{0, "position"}});
+                              {{0, "position"}});
 
     gl::ShaderProgram geomProg({vsGeometry, gsWireframe, fsGeometry, fsCommon},
-                               {{0, "position"}, {1, "normal"}, {2, "uv"}});
+                              {{0, "position"}, {1, "normal"}, {2, "uv"}});
 
     gl::ShaderProgram denoiseProg({vsQuadUv, fsDenoise},
-                                  {{0, "position"}, {1, "uv"}});
+                                 {{0, "position"}, {1, "uv"}});
 
     gl::ShaderProgram lightingProg({vsQuadUv, fsLighting, fsCommon},
-                                   {{0, "position"}, {1, "uv"}});
-
-    gl::ShaderProgram tonemapProg({vsQuadUv, fsOutput},
-                                 {{0, "position"}, {1, "uv"}});
-
-    gl::ShaderProgram outputProg({vsQuadUv, fsTexture},
-                                 {{0, "position"}, {1, "uv"}});
+                                  {{0, "position"}, {1, "uv"}});
 
     const ImageCube depthCube("objects/" + input + "/*.png", 1);
     const ImageCube albedoCube("objects/" + input + "/albedo.*.png");
@@ -144,11 +137,13 @@ bool Application::run(const std::string& input)
     const Mesh_P gMesh = gridMesh(16, 128, 128);
     const gl::Primitive gridPrimitive(gMesh);
 
-    gfx::Ssao ssao(32, display.size(), {4, 4});
-    gfx::Bloom bloom(display.size());
-    gfx::Outline outline(display.size(), ssao.texDepth);
-    gfx::AntiAlias antiAlias(display.size());
-    gfx::ColorGrade colorGrade(display.size());
+    const Size<int> renderSize(display.size());
+    gfx::Ssao ssao(32, renderSize, {4, 4});
+    gfx::Bloom bloom(renderSize);
+    gfx::Outline outline(renderSize, ssao.texDepth);
+    gfx::ColorGrade colorGrade(renderSize);
+    gfx::AntiAlias antiAlias(renderSize);
+    gfx::Output output;
 
     ui::RenderStats stats;
 
@@ -162,7 +157,7 @@ bool Application::run(const std::string& input)
     while (running)
     {
         const float fov = 45.f;
-        const float ar  = display.size().aspect<float>();
+        const float ar  = renderSize.aspect<float>();
 
         glm::mat4 proj  = glm::perspective(glm::radians(fov), ar, 0.1f, 500.f);
         glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 250, 250),
@@ -181,7 +176,7 @@ bool Application::run(const std::string& input)
             .setUniform("m",         model)
             .setUniform("v",         view)
             .setUniform("p",         proj)
-            .setUniform("size",      display.size().as<glm::vec2>());
+            .setUniform("size",      renderSize.as<glm::vec2>());
         {
             // Geometry pass
             Binder<gl::Fbo> binder(ssao.fboGeometry);
@@ -298,13 +293,8 @@ bool Application::run(const std::string& input)
         // Anti-alias
         antiAlias(colorGrade.output());
 
-        outputProg.bind().setUniform("tex", 0);
-        {
-            // Output pass
-            glDisable(GL_DEPTH_TEST);
-            antiAlias.output()->bindAs(GL_TEXTURE0);
-            rectPrimitive.render();
-        }
+        // Output
+        output(antiAlias.output());
 
         #ifdef CAPTURE_VIDEO
         display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");
