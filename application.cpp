@@ -31,6 +31,7 @@
 #include "gfx/ssao.h"
 #include "gfx/bloom.h"
 #include "gfx/outline.h"
+#include "gfx/grid.h"
 #include "gfx/color_grade.h"
 #include "gfx/anti_alias.h"
 #include "gfx/output.h"
@@ -77,14 +78,9 @@ bool Application::run(const std::string& input)
     gl::Shader vsGeometry(gl::Shader::path("geometry.vs.glsl"));
     gl::Shader fsGeometry(gl::Shader::path("geometry.fs.glsl"));
     gl::Shader fsDenoise(gl::Shader::path("denoise.fs.glsl"));
-    gl::Shader vsModelPos(gl::Shader::path("model_pos.vs.glsl"));
     gl::Shader vsQuadUv(gl::Shader::path("quad_uv.vs.glsl"));
-    gl::Shader fsColor(gl::Shader::path("color.fs.glsl"));
     gl::Shader fsLighting(gl::Shader::path("lighting.fs.glsl"));
     gl::Shader gsWireframe(gl::Shader::path("wireframe.gs.glsl"));
-
-    gl::ShaderProgram gridProg({vsModelPos, fsColor},
-                              {{0, "position"}});
 
     gl::ShaderProgram geomProg({vsGeometry, gsWireframe, fsGeometry, fsCommon},
                               {{0, "position"}, {1, "normal"}, {2, "uv"}});
@@ -134,13 +130,12 @@ bool Application::run(const std::string& input)
     const Mesh_P_UV rectMesh = squareMesh();
     const gl::Primitive rectPrimitive(rectMesh);
 
-    const Mesh_P gMesh = gridMesh(16, 128, 128);
-    const gl::Primitive gridPrimitive(gMesh);
-
     const Size<int> renderSize(display.size());
+
     gfx::Ssao ssao(32, renderSize, {4, 4});
     gfx::Bloom bloom(renderSize);
     gfx::Outline outline(renderSize, ssao.texDepth);
+    gfx::Grid grid;
     gfx::ColorGrade colorGrade(renderSize);
     gfx::AntiAlias antiAlias(renderSize);
     gfx::Output output;
@@ -273,19 +268,8 @@ bool Application::run(const std::string& input)
         // Outline
         outline(&ssao.fboOutput, &ssao.texLighting, wall, proj * view * model);
 
-        gridProg.bind()
-            .setUniform("albedo", glm::vec4(0.f, 0.75f, 0.f, 1.f))
-            .setUniform("mvp",    proj * view * model);
-        {
-            // Grid pass
-            Binder<gl::Fbo> binder(ssao.fboOutput);
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
-            glEnable(GL_DEPTH_TEST);
-            glDepthMask(true);
-
-            gl::Texture::unbind(GL_TEXTURE_2D, GL_TEXTURE0);
-            gridPrimitive.render(GL_LINES);
-        }
+        // Grid
+        grid(&ssao.fboOutput, proj * view * model);
 
         // Color grade
         colorGrade(&ssao.texLighting, bloom.output());
