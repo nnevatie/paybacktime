@@ -12,24 +12,24 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
 
 file(GLOB HEADER_FILES
     *.h
+    platform/*.h
     img/*.h
     geom/*.h
     scene/*.h
     common/*.h
     gfx/*.h
     gl/*.h
-    ui/*.h
     )
 
 file(GLOB SOURCE_FILES
     *.cpp
+    platform/*.cpp
     img/*.cpp
     geom/*.cpp
     scene/*.cpp
     common/*.cpp
     gfx/*.cpp
     gl/*.cpp
-    ui/*.cpp
     )
 
 file(GLOB EXT_HEADER_FILES

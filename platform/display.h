@@ -9,7 +9,7 @@
 
 namespace hc
 {
-namespace ui
+namespace platform
 {
 
 struct Display

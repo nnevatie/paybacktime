@@ -7,7 +7,7 @@ struct NVGcontext;
 
 namespace hc
 {
-namespace ui
+namespace gfx
 {
 
 struct RenderStats
@@ -17,7 +17,8 @@ struct RenderStats
 
     void accumulate(const Duration& frameTime,
                     int vertexCount, int triangleCount);
-    void render();
+
+    RenderStats& operator()();
 
 private:
     NVGcontext* vg;

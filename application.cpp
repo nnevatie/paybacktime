@@ -2,9 +2,6 @@
 
 #include <stdexcept>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,10 +14,8 @@
 
 #include "geom/image_mesher.h"
 
-#include "ui/display.h"
-#include "ui/render_stats.h"
+#include "platform/display.h"
 
-#include "gl/gpu_clock.h"
 #include "gl/texture_atlas.h"
 #include "gl/primitive.h"
 #include "gl/shaders.h"
@@ -34,43 +29,25 @@
 #include "gfx/color_grade.h"
 #include "gfx/anti_alias.h"
 #include "gfx/output.h"
+#include "gfx/render_stats.h"
 
 #include "scene/object_store.h"
 #include "scene/scene.h"
-
-//#define CAPTURE_VIDEO 1
 
 namespace hc
 {
 
 Application::Application()
 {
-    HCTIME("Construct");
-
-    // Init SDL
-    if (SDL_Init(SDL_INIT_VIDEO))
-        throw std::runtime_error("SDL init failed.");
-
-    // Init SDL image
-    const int sdlImageFlags = IMG_INIT_PNG | IMG_INIT_JPG;
-    if (IMG_Init(sdlImageFlags) != sdlImageFlags)
-        throw std::runtime_error("SDL image init failed.");
 }
 
 Application::~Application()
 {
-    HCTIME("Clean up");
-
-    // Clean up SDL image
-    IMG_Quit();
-
-    // Clean up SDL
-    SDL_Quit();
 }
 
 bool Application::run(const std::string& input)
 {
-    ui::Display display("High Caliber", {1280, 720});
+    platform::Display display("High Caliber", {1280, 720});
     display.open();
 
     gl::Shader fsCommon(gl::Shader::path("common.fs.glsl"));
@@ -139,7 +116,7 @@ bool Application::run(const std::string& input)
     gfx::AntiAlias antiAlias(renderSize);
     gfx::Output output;
 
-    ui::RenderStats stats;
+    gfx::RenderStats stats;
 
     ObjectStore objectStore(filesystem::path("objects"), &texAtlas);
     Scene scene;
@@ -268,14 +245,7 @@ bool Application::run(const std::string& input)
         antiAlias(colorGrade.output());
         output(antiAlias.output());
 
-        #ifdef CAPTURE_VIDEO
-        display.capture().write("c:/temp/f/f_" + std::to_string(f++) + ".bmp");
-        a += 0.01f;
-        #else
-        //a += 0.001f;
-        #endif
-
-        stats.render();
+        stats();
         display.swap();
 
         stats.accumulate(clock.elapsed(), 0, 0);

@@ -15,7 +15,7 @@
 
 namespace hc
 {
-namespace ui
+namespace gfx
 {
 
 const float UPDATE_INTERVAL_US = 1000.f * 200;
@@ -51,7 +51,7 @@ void RenderStats::accumulate(const hc::Duration& frameTime,
     }
 }
 
-void RenderStats::render()
+RenderStats& RenderStats::operator()()
 {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -82,6 +82,7 @@ void RenderStats::render()
                             << "Geometry: ~" << geomKb << " KB").c_str(), 0);
 #endif
     nvgEndFrame(vg);
+    return *this;
 }
 
 } // namespace ui

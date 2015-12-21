@@ -22,7 +22,7 @@ void debugCallback(
 
 namespace hc
 {
-namespace ui
+namespace platform
 {
 
 Display::Display(const std::string& title, const Size<int>& size) :
