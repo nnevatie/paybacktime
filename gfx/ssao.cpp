@@ -6,6 +6,8 @@
 #include <glm/gtx/random.hpp>
 #include <glm/gtx/compatibility.hpp>
 
+#include "common/common.h"
+
 namespace hc
 {
 namespace gfx
@@ -14,10 +16,10 @@ namespace gfx
 namespace
 {
 
-std::vector<glm::vec3> kernelData(int size)
+Ssao::Kernel kernelData(int size)
 {
     using namespace boost::algorithm;
-    std::vector<glm::vec3> data(size);
+    Ssao::Kernel data(size);
     for (int i = 0; i < size; ++i)
     {
         // Positive Z-axis hemisphere
@@ -51,7 +53,16 @@ Ssao::Ssao(int kernelSize,
     kernelSize(kernelSize),
     renderSize(renderSize),
     noiseSize(noiseSize),
-    kernel(kernelData(kernelSize))
+    kernel(kernelData(kernelSize)),
+    rect(squareMesh()),
+    vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
+    fsCommon(gl::Shader::path("common.fs.glsl")),
+    fsAo(gl::Shader::path("ssao.fs.glsl")),
+    fsBlur(gl::Shader::path("blur.fs.glsl")),
+    progAo({vsQuad, fsAo, fsCommon},
+          {{0, "position"}, {1, "uv"}}),
+    progBlur({vsQuad, fsBlur},
+            {{0, "position"}, {1, "uv"}})
 {
     auto fboSize  = {renderSize.w, renderSize.h};
 
@@ -100,6 +111,39 @@ glm::vec2 Ssao::noiseScale() const
 {
     return glm::vec2(float(renderSize.w) / noiseSize.w,
                      float(renderSize.h) / noiseSize.h);
+}
+
+Ssao& Ssao::operator()(const glm::mat4& proj, float fov)
+{
+    {
+        // AO pass
+        Binder<gl::Fbo> binder(fboAo);
+        progAo.bind().setUniform("texDepth",    0)
+                     .setUniform("texNormal",   1)
+                     .setUniform("texNoise",    2)
+                     .setUniform("kernel",      kernel)
+                     .setUniform("noiseScale",  noiseScale())
+                     .setUniform("p",           proj)
+                     .setUniform("tanHalfFov",  std::tan(radians(0.5f * fov)))
+                     .setUniform("aspectRatio", renderSize.aspect<float>());
+
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        glDisable(GL_DEPTH_TEST);
+
+        texDepth.bindAs(GL_TEXTURE0);
+        texNormalDenoise.bindAs(GL_TEXTURE1);
+        texNoise.bindAs(GL_TEXTURE2);
+        rect.render();
+    }
+    {
+        // Blur pass
+        Binder<gl::Fbo> binder(fboAoBlur);
+        progBlur.bind().setUniform("tex", 0);
+        glDisable(GL_DEPTH_TEST);
+        texAo.bindAs(GL_TEXTURE0);
+        rect.render();
+    }
+    return *this;
 }
 
 } // namespace gfx

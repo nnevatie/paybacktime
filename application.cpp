@@ -249,34 +249,8 @@ bool Application::run(const std::string& input)
             rectPrimitive.render();
         }
 
-        ssaoProg.bind().setUniform("texDepth",    0)
-                       .setUniform("texNormal",   1)
-                       .setUniform("texNoise",    2)
-                       .setUniform("kernel",      ssao.kernel)
-                       .setUniform("noiseScale",  ssao.noiseScale())
-                       .setUniform("p",           proj)
-                       .setUniform("tanHalfFov",  std::tan(radians(0.5f * fov)))
-                       .setUniform("aspectRatio", ar);
-        {
-            // SSAO AO pass
-            Binder<gl::Fbo> binder(ssao.fboAo);
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
-            glDisable(GL_DEPTH_TEST);
-
-            ssao.texDepth.bindAs(GL_TEXTURE0);
-            ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
-            ssao.texNoise.bindAs(GL_TEXTURE2);
-            rectPrimitive.render();
-        }
-
-        blurProg.bind().setUniform("tex", 0);
-        {
-            // SSAO blur pass
-            Binder<gl::Fbo> binder(ssao.fboAoBlur);
-            glDisable(GL_DEPTH_TEST);
-            ssao.texAo.bindAs(GL_TEXTURE0);
-            rectPrimitive.render();
-        }
+        // SSAO
+        ssao(proj, fov);
 
         lightingProg.bind().setUniform("texDepth",    0)
                            .setUniform("texNormal",   1)
