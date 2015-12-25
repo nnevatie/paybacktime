@@ -4,7 +4,7 @@
 
 #include <glad/glad.h>
 
-#include "geom/rect.h"
+#include "geom/size.h"
 
 namespace hc
 {

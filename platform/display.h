@@ -4,7 +4,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "geom/rect.h"
+#include "geom/size.h"
 #include "img/image.h"
 
 namespace hc

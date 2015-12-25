@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geom/rect.h"
+#include "geom/size.h"
 #include "gl/primitive.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"
