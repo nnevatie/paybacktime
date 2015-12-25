@@ -13,8 +13,9 @@ void debugCallback(
     GLenum severity, GLsizei /*length*/,
     const GLchar* message, const GLvoid* /*userParam*/)
 {
-    if (severity == GL_DEBUG_SEVERITY_MEDIUM_ARB ||
-        severity == GL_DEBUG_SEVERITY_HIGH_ARB)
+    if ((severity == GL_DEBUG_SEVERITY_MEDIUM_ARB ||
+         severity == GL_DEBUG_SEVERITY_HIGH_ARB)  &&
+        !strstr(message, "recompiled"))
         HCLOG(Debug) << message;
 }
 

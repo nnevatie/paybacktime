@@ -207,7 +207,6 @@ bool Application::run(const std::string& input)
             rectPrimitive.render();
         }
 
-        // SSAO
         ssao(proj, fov);
 
         lightingProg.bind().setUniform("texDepth",    0)
@@ -244,10 +243,9 @@ bool Application::run(const std::string& input)
         colorGrade(&ssao.texLighting, bloom.output());
         antiAlias(colorGrade.output());
         output(antiAlias.output());
-
         stats();
-        display.swap();
 
+        display.swap();
         stats.accumulate(clock.elapsed(), 0, 0);
 
         SDL_Event e;
