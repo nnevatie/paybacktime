@@ -23,6 +23,7 @@
 #include "gl/fbo.h"
 
 #include "gfx/ssao.h"
+#include "gfx/lighting.h"
 #include "gfx/bloom.h"
 #include "gfx/outline.h"
 #include "gfx/grid.h"
@@ -55,7 +56,6 @@ bool Application::run(const std::string& input)
     gl::Shader fsGeometry(gl::Shader::path("geometry.fs.glsl"));
     gl::Shader fsDenoise(gl::Shader::path("denoise.fs.glsl"));
     gl::Shader vsQuadUv(gl::Shader::path("quad_uv.vs.glsl"));
-    gl::Shader fsLighting(gl::Shader::path("lighting.fs.glsl"));
     gl::Shader gsWireframe(gl::Shader::path("wireframe.gs.glsl"));
 
     gl::ShaderProgram geomProg({vsGeometry, gsWireframe, fsGeometry, fsCommon},
@@ -63,9 +63,6 @@ bool Application::run(const std::string& input)
 
     gl::ShaderProgram denoiseProg({vsQuadUv, fsDenoise},
                                  {{0, "position"}, {1, "uv"}});
-
-    gl::ShaderProgram lightingProg({vsQuadUv, fsLighting, fsCommon},
-                                  {{0, "position"}, {1, "uv"}});
 
     const ImageCube depthCube("objects/" + input + "/*.png", 1);
     const ImageCube albedoCube("objects/" + input + "/albedo.*.png");
@@ -109,6 +106,7 @@ bool Application::run(const std::string& input)
     const Size<int> renderSize(display.size());
 
     gfx::Ssao ssao(32, renderSize, {4, 4});
+    gfx::Lighting lighting(renderSize, ssao.texDepth);
     gfx::Bloom bloom(renderSize);
     gfx::Outline outline(renderSize, ssao.texDepth);
     gfx::Grid grid;
@@ -209,38 +207,19 @@ bool Application::run(const std::string& input)
 
         ssao(proj, fov);
 
-        lightingProg.bind().setUniform("texDepth",    0)
-                           .setUniform("texNormal",   1)
-                           .setUniform("texColor",    2)
-                           .setUniform("texLight",    3)
-                           .setUniform("texEmissive", 4)
-                           .setUniform("texAo",       5)
-                           .setUniform("texGi",       6)
-                           .setUniform("v",         view)
-                           .setUniform("p",         proj);
-        {
-            // Lighting pass
-            Binder<gl::Fbo> binder(ssao.fboOutput);
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
-            glDisable(GL_DEPTH_TEST);
-            glDepthMask(false);
-            glClear(GL_DEPTH_BUFFER_BIT);
+        lighting(&ssao.texDepth,
+                 &ssao.texNormalDenoise,
+                 &ssao.texColor,
+                 &ssao.texLight,
+                 bloom.output(),
+                 &ssao.texAoBlur,
+                 &lightmap,
+                 view, proj);
 
-            ssao.texDepth.bindAs(GL_TEXTURE0);
-            ssao.texNormalDenoise.bindAs(GL_TEXTURE1);
-            ssao.texColor.bindAs(GL_TEXTURE2);
-            ssao.texLight.bindAs(GL_TEXTURE3);
-            bloom.output()->bindAs(GL_TEXTURE4);
-            ssao.texAoBlur.bindAs(GL_TEXTURE5);
-            lightmap.bindAs(GL_TEXTURE6);
-
-            rectPrimitive.render();
-        }
-
-        bloom(&ssao.texColor, &ssao.texLighting, &ssao.texLight);
-        outline(&ssao.fboOutput, &ssao.texLighting, wall, proj * view * model);
-        grid(&ssao.fboOutput, proj * view * model);
-        colorGrade(&ssao.texLighting, bloom.output());
+        bloom(&ssao.texColor, lighting.output(), &ssao.texLight);
+        outline(&lighting.fbo, lighting.output(), wall, proj * view * model);
+        grid(&lighting.fbo, proj * view * model);
+        colorGrade(lighting.output(), bloom.output());
         antiAlias(colorGrade.output());
         output(antiAlias.output());
         stats();
