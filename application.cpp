@@ -17,11 +17,8 @@
 #include "platform/display.h"
 
 #include "gl/texture_atlas.h"
-#include "gl/primitive.h"
-#include "gl/shaders.h"
-#include "gl/texture.h"
-#include "gl/fbo.h"
 
+#include "gfx/geometry.h"
 #include "gfx/ssao.h"
 #include "gfx/lighting.h"
 #include "gfx/bloom.h"
@@ -50,19 +47,6 @@ bool Application::run(const std::string& input)
 {
     platform::Display display("High Caliber", {1280, 720});
     display.open();
-
-    gl::Shader fsCommon(gl::Shader::path("common.fs.glsl"));
-    gl::Shader vsGeometry(gl::Shader::path("geometry.vs.glsl"));
-    gl::Shader fsGeometry(gl::Shader::path("geometry.fs.glsl"));
-    gl::Shader fsDenoise(gl::Shader::path("denoise.fs.glsl"));
-    gl::Shader vsQuadUv(gl::Shader::path("quad_uv.vs.glsl"));
-    gl::Shader gsWireframe(gl::Shader::path("wireframe.gs.glsl"));
-
-    gl::ShaderProgram geomProg({vsGeometry, gsWireframe, fsGeometry, fsCommon},
-                              {{0, "position"}, {1, "normal"}, {2, "uv"}});
-
-    gl::ShaderProgram denoiseProg({vsQuadUv, fsDenoise},
-                                 {{0, "position"}, {1, "uv"}});
 
     const ImageCube depthCube("objects/" + input + "/*.png", 1);
     const ImageCube albedoCube("objects/" + input + "/albedo.*.png");
@@ -100,15 +84,13 @@ bool Application::run(const std::string& input)
     const Mesh_P_N_UV wallMesh = ImageMesher::mesh(wallCube, albedoWall.second);
     const gl::Primitive wall(wallMesh);
 
-    const Mesh_P_UV rectMesh = squareMesh();
-    const gl::Primitive rectPrimitive(rectMesh);
-
     const Size<int> renderSize(display.size());
 
-    gfx::Ssao ssao(32, renderSize, {4, 4});
-    gfx::Lighting lighting(renderSize, ssao.texDepth);
+    gfx::Geometry geometry(renderSize);
+    gfx::Ssao ssao(32, renderSize, {4, 4}, geometry.texDepth);
+    gfx::Lighting lighting(renderSize, geometry.texDepth);
     gfx::Bloom bloom(renderSize);
-    gfx::Outline outline(renderSize, ssao.texDepth);
+    gfx::Outline outline(renderSize, geometry.texDepth);
     gfx::Grid grid;
     gfx::ColorGrade colorGrade(renderSize);
     gfx::AntiAlias antiAlias(renderSize);
@@ -139,84 +121,46 @@ bool Application::run(const std::string& input)
 
         Time<ChronoClock> clock;
 
-        geomProg.bind()
-            .setUniform("texAlbedo", 0)
-            .setUniform("texLight",  1)
-            .setUniform("m",         model)
-            .setUniform("v",         view)
-            .setUniform("p",         proj)
-            .setUniform("size",      renderSize.as<glm::vec2>());
-        {
-            // Geometry pass
-            Binder<gl::Fbo> binder(ssao.fboGeometry);
-            const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
-                                          GL_COLOR_ATTACHMENT1,
-                                          GL_COLOR_ATTACHMENT2};
-            glDrawBuffers(3, drawBuffers);
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LEQUAL);
-            glDisable(GL_BLEND);
-            glDepthMask(true);
-
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            texAtlas.texture.bindAs(GL_TEXTURE0);
-            lightAtlas.texture.bindAs(GL_TEXTURE1);
-
-            geomProg.bind();
-            for (int y = 0; y < 5; ++y)
-                for (int x = 0; x < 5; ++x)
-                if (y == 0 || x == 4)
+        std::vector<gfx::Geometry::Instance> instances;
+        for (int y = 0; y < 5; ++y)
+            for (int x = 0; x < 5; ++x)
+            if (y == 0 || x == 4)
+            {
+                glm::mat4 m = glm::translate(model, glm::vec3(x * 16, 0, y * 16));
+                if (x == 4)
                 {
-                    glm::mat4 m = glm::translate(model, glm::vec3(x * 16, 0, y * 16));
-
-                    if (x == 4)
-                    {
                     m = glm::translate(m, glm::vec3(16, 0, 0));
                     m = glm::rotate(m, -0.5f * float(M_PI), glm::vec3(0.f, 1.f, 0.f));
-                    }
-
-                    geomProg.setUniform("m", m);
-                    wall.render();
                 }
+                instances.push_back({wall, m});
+            }
+        for (int y = 0; y < 5; ++y)
+            for (int x = 0; x < 5; ++x)
+                instances.push_back({floor,
+                                     glm::translate(model,
+                                        glm::vec3(x * 16, 0, y * 16))});
+        for (int y = 0; y < 5; ++y)
+            for (int x = 0; x < 5; ++x)
+                if (y % 2 && x % 2)
+                    instances.push_back({primitive,
+                                         glm::translate(model,
+                                             glm::vec3(x * 16, 2, y * 16))});
 
-            for (int y = 0; y < 5; ++y)
-                for (int x = 0; x < 5; ++x)
-                {
-                    geomProg.setUniform("m",
-                        glm::translate(model, glm::vec3(x * 16, 0, y * 16)));
-                    floor.render();
-                }
+        geometry(&texAtlas.texture, &lightAtlas.texture,
+                 instances, view, proj);
 
-            for (int y = 0; y < 5; ++y)
-                for (int x = 0; x < 5; ++x)
-                    if (y % 2 && x % 2)
-                    {
-                        geomProg.setUniform("m",
-                            glm::translate(model, glm::vec3(x * 16, 2, y * 16)));
-                        primitive.render();
-                    }
+        ssao(&geometry.texDepth, &geometry.texNormalDenoise, proj, fov);
 
-            // Denoise normals
-            denoiseProg.bind().setUniform("tex", 0);
-            glDrawBuffer(GL_COLOR_ATTACHMENT3);
-            glDisable(GL_DEPTH_TEST);
-            ssao.texNormal.bindAs(GL_TEXTURE0);
-            rectPrimitive.render();
-        }
-
-        ssao(proj, fov);
-
-        lighting(&ssao.texDepth,
-                 &ssao.texNormalDenoise,
-                 &ssao.texColor,
-                 &ssao.texLight,
+        lighting(&geometry.texDepth,
+                 &geometry.texNormalDenoise,
+                 &geometry.texColor,
+                 &geometry.texLight,
                  bloom.output(),
                  &ssao.texAoBlur,
                  &lightmap,
                  view, proj);
 
-        bloom(&ssao.texColor, lighting.output(), &ssao.texLight);
+        bloom(&geometry.texColor, lighting.output(), &geometry.texLight);
         outline(&lighting.fbo, lighting.output(), wall, proj * view * model);
         grid(&lighting.fbo, proj * view * model);
         colorGrade(lighting.output(), bloom.output());

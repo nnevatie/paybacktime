@@ -49,7 +49,8 @@ std::vector<float> noiseData(int size)
 
 Ssao::Ssao(int kernelSize,
            const Size<int>& renderSize,
-           const Size<int>& noiseSize) :
+           const Size<int>& noiseSize,
+           const gl::Texture& texDepth) :
     kernelSize(kernelSize),
     renderSize(renderSize),
     noiseSize(noiseSize),
@@ -66,16 +67,10 @@ Ssao::Ssao(int kernelSize,
 {
     auto fboSize  = {renderSize.w, renderSize.h};
 
-    // Alloc depth, normal, color and lighting textures
-    texDepth.bind().alloc(fboSize,         GL_DEPTH_COMPONENT32F,
-                                           GL_DEPTH_COMPONENT, GL_FLOAT);
-    texNormal.bind().alloc(fboSize,        GL_RGB16F,  GL_RGB, GL_FLOAT);
-    texNormalDenoise.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
-    texColor.bind().alloc(fboSize,         GL_RGB8,    GL_RGB, GL_UNSIGNED_BYTE);
-    texLight.bind().alloc(fboSize,         GL_RGB8,    GL_RGB, GL_UNSIGNED_BYTE);
-    texAo.bind().alloc(fboSize,            GL_R16F,    GL_RGB, GL_FLOAT);
-    texAoBlur.bind().alloc(fboSize,        GL_R16F,    GL_RGB, GL_FLOAT);
-    texLighting.bind().alloc(fboSize,      GL_RGB16F,  GL_RGB, GL_FLOAT);
+    // Alloc textures
+    texAo.bind().alloc(fboSize,       GL_R16F,    GL_RGB, GL_FLOAT);
+    texAoBlur.bind().alloc(fboSize,   GL_R16F,    GL_RGB, GL_FLOAT);
+    texLighting.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
@@ -85,14 +80,6 @@ Ssao::Ssao(int kernelSize,
                    .set(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // Attach textures to FBOs
-    fboGeometry.bind()
-               .attach(texDepth,         gl::Fbo::Attachment::Depth)
-               .attach(texNormal,        gl::Fbo::Attachment::Color, 0)
-               .attach(texColor,         gl::Fbo::Attachment::Color, 1)
-               .attach(texLight,         gl::Fbo::Attachment::Color, 2)
-               .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 3)
-               .unbind();
-
     fboAo.bind()
          .attach(texAo, gl::Fbo::Attachment::Color)
          .unbind();
@@ -113,7 +100,10 @@ glm::vec2 Ssao::noiseScale() const
                      float(renderSize.h) / noiseSize.h);
 }
 
-Ssao& Ssao::operator()(const glm::mat4& proj, float fov)
+Ssao& Ssao::operator()(gl::Texture* texDepth,
+                       gl::Texture* texNormal,
+                       const glm::mat4& proj,
+                       float fov)
 {
     {
         // AO pass
@@ -130,8 +120,8 @@ Ssao& Ssao::operator()(const glm::mat4& proj, float fov)
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_DEPTH_TEST);
 
-        texDepth.bindAs(GL_TEXTURE0);
-        texNormalDenoise.bindAs(GL_TEXTURE1);
+        texDepth->bindAs(GL_TEXTURE0);
+        texNormal->bindAs(GL_TEXTURE1);
         texNoise.bindAs(GL_TEXTURE2);
         rect.render();
     }

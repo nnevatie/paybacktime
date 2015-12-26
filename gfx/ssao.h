@@ -37,28 +37,26 @@ struct Ssao
     gl::ShaderProgram progAo,
                       progBlur;
 
-    gl::Fbo           fboGeometry,
-                      fboAo,
+    gl::Fbo           fboAo,
                       fboAoBlur,
                       fboOutput;
 
-    gl::Texture       texDepth,
-                      texNormal,
-                      texNormalDenoise,
-                      texColor,
-                      texLight,
-                      texAo,
+    gl::Texture       texAo,
                       texAoBlur,
                       texLighting,
                       texNoise;
 
     Ssao(int kernelSize,
          const Size<int>& renderSize,
-         const Size<int>& noiseSize);
+         const Size<int>& noiseSize,
+         const gl::Texture& texDepth);
 
     glm::vec2 noiseScale() const;
 
-    Ssao& operator()(const glm::mat4& proj, float fov);
+    Ssao& operator()(gl::Texture* texDepth,
+                     gl::Texture* texNormal,
+                     const glm::mat4& proj,
+                     float fov);
 };
 
 } // namespace gfx
