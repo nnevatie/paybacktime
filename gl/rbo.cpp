@@ -1,5 +1,3 @@
-#include <glad/glad.h>
-
 #include "rbo.h"
 
 namespace hc

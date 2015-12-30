@@ -19,14 +19,14 @@ Grid::Grid() :
 Grid& Grid::operator()(gl::Fbo* fboOut, const glm::mat4& mvp)
 {
     Binder<gl::Fbo> binder(fboOut);
-
     prog.bind()
-        .setUniform("albedo", glm::vec4(0.f, 0.75f, 0.f, 1.f))
+        .setUniform("albedo", glm::vec4(0.f, 0.05f, 0.f, 1.f))
         .setUniform("mvp",    mvp);
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(true);
+    glLineWidth(2.f);
 
     gl::Texture::unbind(GL_TEXTURE_2D, GL_TEXTURE0);
     grid.render(GL_LINES);
