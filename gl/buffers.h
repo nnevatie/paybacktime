@@ -14,7 +14,8 @@ struct Buffer
     enum class Type
     {
         Vertex,
-        Index
+        Index,
+        Texture
     };
 
     enum class Usage
@@ -26,6 +27,7 @@ struct Buffer
 
     Buffer(Type type);
 
+    GLuint id() const;
     int size() const;
 
     Buffer& bind();

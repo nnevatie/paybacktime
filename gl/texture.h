@@ -7,6 +7,7 @@
 
 #include "geom/size.h"
 #include "img/image.h"
+#include "buffers.h"
 
 namespace hc
 {
@@ -21,7 +22,8 @@ struct Texture
         Texture2d,
         Texture3d,
         Array1d,
-        Array2d
+        Array2d,
+        Buffer
     };
 
     Texture(Type type = Type::Texture2d);
@@ -40,6 +42,8 @@ struct Texture
     static void unbind(GLenum target, GLenum unit);
 
     Texture& set(GLenum name, GLint param);
+
+    Texture& alloc(GLint internalFormat, const Buffer& buffer);
 
     Texture& alloc(const std::vector<int>& dim,
                    GLint internalFormat, GLenum format,

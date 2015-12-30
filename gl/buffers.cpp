@@ -13,7 +13,8 @@ namespace
 GLenum bufferTarget(Buffer::Type type)
 {
     return type == Buffer::Type::Vertex ? GL_ARRAY_BUFFER :
-                                          GL_ELEMENT_ARRAY_BUFFER;
+           type == Buffer::Type::Index  ? GL_ELEMENT_ARRAY_BUFFER :
+                                          GL_TEXTURE_BUFFER;
 }
 
 GLenum bufferUsage(Buffer::Usage usage)
@@ -54,6 +55,11 @@ struct Buffer::Data
 Buffer::Buffer(Buffer::Type type) :
     d(new Data(type))
 {
+}
+
+GLuint Buffer::id() const
+{
+    return d->id;
 }
 
 int Buffer::size() const

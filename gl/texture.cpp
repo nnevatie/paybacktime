@@ -13,13 +13,14 @@ namespace
 
 GLenum textureTarget(Texture::Type type)
 {
-    const std::array<GLenum, 5> types =
+    const std::array<GLenum, 6> types =
     {
         GL_TEXTURE_1D,
         GL_TEXTURE_2D,
         GL_TEXTURE_3D,
         GL_TEXTURE_1D_ARRAY,
-        GL_TEXTURE_2D_ARRAY
+        GL_TEXTURE_2D_ARRAY,
+        GL_TEXTURE_BUFFER
     };
     const std::size_t index = std::size_t(type);
 
@@ -108,6 +109,12 @@ void Texture::unbind(GLenum target, GLenum unit)
 Texture &Texture::set(GLenum name, GLint param)
 {
     glTexParameteri(d->target, name, param);
+    return *this;
+}
+
+Texture& Texture::alloc(GLint internalFormat, const Buffer& buffer)
+{
+    glTexBuffer(GL_TEXTURE_BUFFER, internalFormat, buffer.id());
     return *this;
 }
 
