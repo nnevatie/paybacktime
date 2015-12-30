@@ -1,7 +1,9 @@
 #pragma once
 
+#include "common/common.h"
 #include "geom/mesh.h"
 #include "buffers.h"
+#include "vao.h"
 
 namespace hc
 {
@@ -14,11 +16,9 @@ struct Primitive
     explicit Primitive(const Mesh<V, I>& mesh) :
        vertexSpec {V::spec()}, indexSpec {sizeof(I)},
        vertices(Buffer::Type::Vertex),
-       indices(Buffer::Type::Index),
-       vao(0)
+       indices(Buffer::Type::Index)
     {
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+        Binder<gl::Vao> binder(vao);
 
         const std::size_t stride      = vertexSpec.size;
         const std::size_t attribCount = vertexSpec.attribs.size();
@@ -43,8 +43,6 @@ struct Primitive
                                   reinterpret_cast<const void*>(offset));
             offset += std::get<2>(attrib);
         }
-
-        glBindVertexArray(0);
     }
 
     void render(GLenum mode = GL_TRIANGLES) const
@@ -53,21 +51,22 @@ struct Primitive
         glCullFace(GL_BACK);
 
         // Draw elements with VAO
-        glBindVertexArray(vao);
+        Binder<gl::Vao> binder(vao);
         glDrawElements(mode,
                        indices.size() / int(indexSpec.size),
                        indexSpec.size == 4 ? GL_UNSIGNED_INT :
                        indexSpec.size == 2 ? GL_UNSIGNED_SHORT :
                                              GL_UNSIGNED_BYTE,
                        0);
-        glBindVertexArray(0);
     }
 
-    VertexSpec vertexSpec;
-    IndexSpec  indexSpec;
+    VertexSpec  vertexSpec;
+    IndexSpec   indexSpec;
 
-    Buffer     vertices, indices;
-    GLuint     vao;
+    Buffer      vertices, indices;
+
+    mutable
+    Vao         vao;
 };
 
 } // namespace gl
