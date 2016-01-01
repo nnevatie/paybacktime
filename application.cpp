@@ -65,8 +65,8 @@ bool Application::run(const std::string& input)
                    .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    gl::TextureAtlas texAtlas({256, 256});
-    gl::TextureAtlas lightAtlas({256, 256});
+    gl::TextureAtlas texAtlas({256, 256}, 2);
+    gl::TextureAtlas lightAtlas({256, 256}, 2);
 
     gl::TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
     lightAtlas.insert(lightCube);
