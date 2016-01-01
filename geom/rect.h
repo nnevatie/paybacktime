@@ -50,6 +50,11 @@ struct Rect
         return Rect(x * sx, y * sy, size.w * sx, size.h * sy);
     }
 
+    Rect extended(T ex, T ey) const
+    {
+        return Rect(x - ex, y - ey, size.w + 2 * ex , size.h + 2 * ey);
+    }
+
     Rect transposed() const
     {
         return Rect(y, x, size.h, size.w);
