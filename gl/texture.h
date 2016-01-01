@@ -42,6 +42,7 @@ struct Texture
     static void unbind(GLenum target, GLenum unit);
 
     Texture& set(GLenum name, GLint param);
+    Texture& set(GLenum name, GLfloat param);
 
     Texture& alloc(GLint internalFormat, const Buffer& buffer);
 
@@ -54,6 +55,8 @@ struct Texture
                    GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = 0);
 
     Texture& alloc(const Image& image);
+
+    static float anisotropyMax();
 
 private:
     struct Data;

@@ -106,9 +106,15 @@ void Texture::unbind(GLenum target, GLenum unit)
     glBindTexture(target, 0);
 }
 
-Texture &Texture::set(GLenum name, GLint param)
+Texture& Texture::set(GLenum name, GLint param)
 {
     glTexParameteri(d->target, name, param);
+    return *this;
+}
+
+Texture& Texture::set(GLenum name, GLfloat param)
+{
+    glTexParameterf(d->target, name, param);
     return *this;
 }
 
@@ -173,6 +179,13 @@ Texture& Texture::alloc(const Image& image)
                       f.internalFormat, f.format, GL_UNSIGNED_BYTE, image.bits());
     }
     return *this;
+}
+
+float Texture::anisotropyMax()
+{
+    GLfloat f = 0.f;
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &f);
+    return f;
 }
 
 } // namespace gl
