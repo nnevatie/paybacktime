@@ -50,5 +50,30 @@ Painter& Painter::drawImage(const Image& image, int x, int y)
     return *this;
 }
 
+Painter& Painter::drawImageClamped(const Image& image, int x, int y, int margin)
+{
+    const Size<int> s = image.size();
+    const int d       = margin;
+
+    // Left, right, top, bottom
+    // Top-left, top-right, bottom-left, bottom-right
+    SDL_Rect rects[8][2] = {
+        {{0,       0,       1,   s.h}, {x,           y + d,       d,   s.h}},
+        {{s.w - 1, 0,       1,   s.h}, {x + d + s.w, y + d,       d,   s.h}},
+        {{0,       0,       s.w, 1},   {x + d,       y,           s.w, d}},
+        {{0,       s.h - 1, s.w, 1},   {x + d,       y + d + s.h, s.w, d}},
+        {{0,       0,       1,   1},   {x,           y,           d,   d}},
+        {{s.w - 1, 0,       1,   1},   {x + d + s.w, y,           d,   d}},
+        {{0,       s.h - 1, 1,   1},   {x,           y + d + s.h, d,   d}},
+        {{s.w - 1, s.h - 1, 1,   1},   {x + d + s.w, y + d + s.h, d,   d}},
+    };
+
+    drawImage(image, x + margin, y + margin);
+    for (int i = 0; i < 8; ++i)
+        SDL_BlitScaled(image.surface(), &rects[i][0], surface_, &rects[i][1]);
+
+    return *this;
+}
+
 } // namespace
 

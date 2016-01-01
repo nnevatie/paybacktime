@@ -126,13 +126,13 @@ Image ImageAtlas::image(bool drawNodes) const
     return atlas;
 }
 
-Rect<int> ImageAtlas::insert(const Image& image)
+Rect<int> ImageAtlas::insert(const Image& image, int margin)
 {
-    if (Node* node = d->root.reserve(image.size()))
+    if (Node* node = d->root.reserve(image.size() + 2 * margin))
     {
         // Blit the image into atlas
         Painter painter(&d->atlas);
-        painter.drawImage(image, node->rect.x, node->rect.y);
+        painter.drawImageClamped(image, node->rect.x, node->rect.y, margin);
 
         // Mark node reserved
         node->reserved = true;
@@ -141,13 +141,13 @@ Rect<int> ImageAtlas::insert(const Image& image)
     return Rect<int>();
 }
 
-RectCube<int> ImageAtlas::insert(const ImageCube& imageCube)
+RectCube<int> ImageAtlas::insert(const ImageCube& imageCube, int margin)
 {
     HCTIME("cube");
 
     RectCube<int> cubeRect;
     for (std::size_t i = 0; i < imageCube.sides.size(); ++i)
-        cubeRect[i] = insert(imageCube.side(ImageCube::Side(i)));
+        cubeRect[i] = insert(imageCube.side(ImageCube::Side(i)), margin);
 
     return cubeRect;
 }

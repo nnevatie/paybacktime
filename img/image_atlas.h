@@ -17,8 +17,8 @@ struct ImageAtlas
     Size<int> size() const;
     Image image(bool drawNodes = false) const;
 
-    Rect<int> insert(const Image& image);
-    RectCube<int> insert(const ImageCube& imageCube);
+    Rect<int> insert(const Image& image, int margin = 0);
+    RectCube<int> insert(const ImageCube& imageCube, int margin = 0);
 
 private:
     struct Data;

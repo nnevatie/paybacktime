@@ -19,6 +19,7 @@ struct Painter
 
     Painter& drawRect(const Rect<int>& rect);
     Painter& drawImage(const Image& image, int x, int y);
+    Painter& drawImageClamped(const Image& image, int x, int y, int margin);
 
 private:
 
