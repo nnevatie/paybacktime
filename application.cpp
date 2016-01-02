@@ -120,8 +120,8 @@ bool Application::run(const std::string& input)
         glm::mat4 model;
 
         Time<ChronoClock> clock;
-
         std::vector<gfx::Geometry::Instance> instances;
+
         for (int y = 0; y < 5; ++y)
             for (int x = 0; x < 5; ++x)
             if (y == 0 || x == 4)

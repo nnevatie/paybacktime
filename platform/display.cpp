@@ -160,20 +160,7 @@ Image Display::capture() const
 
     Image image(size, 4, stride);
     glReadPixels(0, 0, size.w, size.h, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
-
-    // Flip vertically
-    // TODO: Use flip from Image
-    std::vector<uint8_t> t(static_cast<std::size_t>(stride));
-    uint8_t* b = image.bits();
-    for (int y = 0; y < size.h / 2; ++y)
-    {
-        uint8_t* r0 = b + y * stride;
-        uint8_t* r1 = b + (size.h - y - 1) * stride;
-        std::copy(r0, r0 + stride, t.data());
-        std::copy(r1, r1 + stride, r0);
-        std::copy(t.data(), t.data() + stride, r1);
-    }
-    return image;
+    return image.flipped();
 }
 
 } // namespace ui
