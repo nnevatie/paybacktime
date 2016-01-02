@@ -114,7 +114,7 @@ Ssao& Ssao::operator()(gl::Texture* texDepth,
                      .setUniform("kernel",      kernel)
                      .setUniform("noiseScale",  noiseScale())
                      .setUniform("p",           proj)
-                     .setUniform("tanHalfFov",  std::tan(radians(0.5f * fov)))
+                     .setUniform("tanHalfFov",  std::tan(0.5f * fov))
                      .setUniform("aspectRatio", renderSize.aspect<float>());
 
         glDrawBuffer(GL_COLOR_ATTACHMENT0);

@@ -31,6 +31,7 @@
 
 #include "scene/object_store.h"
 #include "scene/scene.h"
+#include "scene/camera.h"
 
 namespace hc
 {
@@ -101,22 +102,20 @@ bool Application::run(const std::string& input)
     ObjectStore objectStore(filesystem::path("objects"), &texAtlas);
     Scene scene;
 
+    Camera camera(
+        {0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
+        glm::radians(45.f), renderSize.aspect<float>(), 0.1, 500.f);
+
     int f = 0;
     float ay = 0, az = 0;
 
     bool running = true;
     while (running)
     {
-        const float fov = 45.f;
-        const float ar  = renderSize.aspect<float>();
-
-        glm::mat4 proj  = glm::perspective(glm::radians(fov), ar, 0.1f, 500.f);
-        glm::mat4 view  = glm::lookAt(glm::vec3(0.f, 250, 250),
-                                      glm::vec3(0.f, 0.f, 0.f),
-                                      glm::vec3(0, 1, 0)) *
+        glm::mat4 proj  = camera.matrixProj();
+        glm::mat4 view  = camera.matrixView() *
                          (glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
                           glm::rotate({}, az, glm::vec3(1.f, 0.f, 0.f)));
-
         glm::mat4 model;
 
         Time<ChronoClock> clock;
@@ -149,7 +148,7 @@ bool Application::run(const std::string& input)
         geometry(&texAtlas.texture, &lightAtlas.texture,
                  instances, view, proj);
 
-        ssao(&geometry.texDepth, &geometry.texNormalDenoise, proj, fov);
+        ssao(&geometry.texDepth, &geometry.texNormalDenoise, proj, camera.fov);
 
         lighting(&geometry.texDepth,
                  &geometry.texNormalDenoise,
