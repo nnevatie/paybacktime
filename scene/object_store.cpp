@@ -1,6 +1,6 @@
 #include "object_store.h"
 
-#include "common/clock.h"
+#include "platform/clock.h"
 #include "common/log.h"
 
 namespace hc

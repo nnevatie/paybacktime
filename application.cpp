@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/file_system.h"
-#include "common/clock.h"
+#include "platform/clock.h"
 
 #include "img/painter.h"
 #include "img/image_cube.h"
@@ -15,6 +15,7 @@
 #include "geom/image_mesher.h"
 
 #include "platform/display.h"
+#include "platform/scheduler.h"
 
 #include "gl/texture_atlas.h"
 
@@ -44,10 +45,25 @@ Application::~Application()
 {
 }
 
+bool sim(TimePoint time, Duration step)
+{
+    static int f = 0;
+    return (f++) < 1000;
+}
+
+bool render(float a)
+{
+    return true;
+}
+
 bool Application::run(const std::string& input)
 {
     platform::Display display("High Caliber", {1280, 720});
     display.open();
+
+    Scheduler scheduler(std::chrono::milliseconds(10), sim, render,
+                        Scheduler::OptionPreserveCpu);
+    scheduler.start();
 
     const ImageCube depthCube("objects/" + input + "/*.png", 1);
     const ImageCube albedoCube("objects/" + input + "/albedo.*.png");

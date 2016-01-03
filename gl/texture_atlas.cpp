@@ -1,6 +1,6 @@
 #include "texture_atlas.h"
 
-#include "common/clock.h"
+#include "platform/clock.h"
 #include "common/log.h"
 
 namespace hc

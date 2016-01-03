@@ -1,8 +1,5 @@
 #include "common.h"
 
-#include "log.h"
-#include "clock.h"
-
 namespace hc
 {
 

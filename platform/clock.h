@@ -1,9 +1,10 @@
 #pragma once
 
 #include <chrono>
+#include <SDL2/SDL.h>
 
-#include "common.h"
-#include "log.h"
+#include "common/common.h"
+#include "common/log.h"
 
 namespace hc
 {
@@ -23,6 +24,13 @@ struct Time
     Duration elapsed() const
     {
         return now() - tp0;
+    }
+    Time& sleep(const Duration& duration)
+    {
+        // No pthreads, for now
+        SDL_Delay(std::chrono::duration_cast
+                 <std::chrono::milliseconds>(duration).count());
+        return *this;
     }
 private:
     T impl;

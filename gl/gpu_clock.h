@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-#include "common/clock.h"
+#include "platform/clock.h"
 
 namespace hc
 {

@@ -4,7 +4,7 @@
 
 #include <glm/ext.hpp>
 
-#include "common/clock.h"
+#include "platform/clock.h"
 #include "common/log.h"
 
 #include "rect.h"

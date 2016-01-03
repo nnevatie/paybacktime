@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "common/clock.h"
+#include "platform/clock.h"
 
 namespace hc
 {

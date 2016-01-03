@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-#include "common/clock.h"
+#include "platform/clock.h"
 #include "common/log.h"
 
 namespace

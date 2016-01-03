@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/clock.h"
+#include "platform/clock.h"
 #include "common/statistics.h"
 
 struct NVGcontext;

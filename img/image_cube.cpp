@@ -2,7 +2,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "common/clock.h"
+#include "platform/clock.h"
 #include "common/log.h"
 
 namespace hc
