@@ -7,17 +7,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/file_system.h"
-#include "platform/clock.h"
-
 #include "img/painter.h"
 #include "img/image_cube.h"
-
 #include "geom/image_mesher.h"
+#include "gl/texture_atlas.h"
 
+#include "platform/clock.h"
+#include "platform/context.h"
 #include "platform/display.h"
 #include "platform/scheduler.h"
-
-#include "gl/texture_atlas.h"
 
 #include "gfx/geometry.h"
 #include "gfx/ssao.h"
@@ -45,10 +43,10 @@ Application::~Application()
 {
 }
 
-bool sim(TimePoint time, Duration step)
+bool simulate(TimePoint time, Duration step)
 {
     static int f = 0;
-    return (f++) < 1000;
+    return (f++) < 10;
 }
 
 bool render(float a)
@@ -58,10 +56,11 @@ bool render(float a)
 
 bool Application::run(const std::string& input)
 {
+    platform::Context context;
     platform::Display display("High Caliber", {1280, 720});
     display.open();
 
-    Scheduler scheduler(std::chrono::milliseconds(10), sim, render,
+    Scheduler scheduler(std::chrono::milliseconds(10), simulate, render,
                         Scheduler::OptionPreserveCpu);
     scheduler.start();
 
