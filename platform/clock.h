@@ -1,6 +1,8 @@
 #pragma once
 
 #include <chrono>
+#include <boost/thread/thread.hpp>
+
 #include <SDL2/SDL.h>
 
 #include "common/common.h"
@@ -27,9 +29,11 @@ struct Time
     }
     Time& sleep(const Duration& duration)
     {
-        // No pthreads, for now
-        SDL_Delay(std::chrono::duration_cast
-                 <std::chrono::milliseconds>(duration).count());
+        boost::chrono::nanoseconds durationBoost(
+            std::chrono::duration_cast
+                <std::chrono::nanoseconds>(duration).count());
+
+        boost::this_thread::sleep_for(durationBoost);
         return *this;
     }
 private:

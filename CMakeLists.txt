@@ -57,6 +57,8 @@ set(SYS_LIBS
 # Boost dependencies
 set(BOOST_LIBS
     boost_system
+    boost_chrono
+    boost_thread
     boost_filesystem
     boost_program_options
     )
@@ -80,7 +82,8 @@ include_directories(
     )
 
 # Build definitions
-add_definitions(-D_USE_MATH_DEFINES)
+add_definitions(-D_USE_MATH_DEFINES
+                -DBOOST_THREAD_VERSION=4)
 
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
                                ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES}
