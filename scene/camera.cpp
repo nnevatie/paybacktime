@@ -28,7 +28,7 @@ glm::vec3 Camera::forward() const
 
 glm::vec3 Camera::right() const
 {
-    return glm::cross(forward(), up());
+    return glm::normalize(glm::cross(forward(), up()));
 }
 
 glm::vec3 Camera::up() const
