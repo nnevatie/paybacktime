@@ -1,5 +1,5 @@
 #include "winuser.h"
-1 RT_MANIFEST res/highcaliber.exe.manifest
+1 RT_MANIFEST res/paybacktime.exe.manifest
 
 1 VERSIONINFO
 FILEVERSION 0,1,0,0
@@ -12,12 +12,12 @@ BLOCK "StringFileInfo"
     BLOCK "040904E4"
     {
         VALUE "CompanyName", "nnevatie\0"
-        VALUE "FileDescription", "High Caliber\0"
+        VALUE "FileDescription", "Payback Time\0"
         VALUE "FileVersion", "0.1.0.0\0"
         VALUE "InternalName", "nnevatie\0"
         VALUE "LegalCopyright", "Copyright 2015, Niko Nevatie\0"
-        VALUE "OriginalFilename", "highcaliber.exe\0"
-        VALUE "ProductName", "High Caliber\0"
+        VALUE "OriginalFilename", "paybacktime.exe\0"
+        VALUE "ProductName", "Payback Time\0"
         VALUE "ProductVersion", "0.1.0.0\0"
         //VALUE "Comments", "No Comments\0"
     }

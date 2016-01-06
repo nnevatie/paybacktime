@@ -4,11 +4,11 @@
 
     <assemblyIdentity version="0.1.0.0"
                       processorArchitecture="x86"
-                      name="High Caliber"
+                      name="Payback Time"
                       type="win32">
     </assemblyIdentity>
 
-    <description>High Caliber</description>
+    <description>Payback Time</description>
 
     <asmv3:application>
         <asmv3:windowsSettings

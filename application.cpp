@@ -57,7 +57,7 @@ bool render(float a)
 bool Application::run(const std::string& input)
 {
     platform::Context context;
-    platform::Display display("High Caliber", {1280, 720});
+    platform::Display display("Payback Time", {1280, 720});
     display.open();
 
     Scheduler scheduler(std::chrono::milliseconds(10), simulate, render,
