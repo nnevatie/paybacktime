@@ -89,6 +89,7 @@ struct CameraControl
                          (length(ang[0]) > 0.05f ? 1.f : 0.f);
         ang[1]          = vec3();
 
+        // Process input
         const float accPos = 1000.f, accAng = 10.f;
 
         const glm::vec3 right   = camera->right();
@@ -141,7 +142,7 @@ struct CameraControl
                 }
             }
             prevMousePos = mousePos;
-            prevDragPos  = camera->position() + mouseVec();
+            prevDragPos  = camera->position() + rayDrag;
         }
         else
         {
