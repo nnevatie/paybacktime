@@ -149,7 +149,8 @@ struct CameraControl
             mouse->setCursor(platform::Mouse::Cursor::Arrow);
 
             // Let position float after letting drag go
-            if (!glm::isNull(prevMousePos, 0.f))
+            if (!glm::isNull(prevMousePos, 0.f) &&
+                 glm::isNull(ang[0], 0.f))
                 pos[1] = md * accPos;
 
             prevMousePos = glm::vec4();
@@ -338,7 +339,7 @@ struct Impl
     bool run()
     {
         namespace arg = std::placeholders;
-        Scheduler scheduler(std::chrono::milliseconds(20),
+        Scheduler scheduler(std::chrono::milliseconds(100),
                             std::bind(&simulate, this, arg::_1, arg::_2),
                             std::bind(&render,   this, arg::_1),
                             Scheduler::OptionPreserveCpu);
