@@ -153,6 +153,18 @@ bool Display::swap()
     return false;
 }
 
+glm::vec3 Display::rayNdc(const glm::ivec2& p) const
+{
+    return glm::vec3((2.f * p.x) / size_.w - 1.f,
+                     1.f - (2.f * p.y) / size_.h, 1.f);
+}
+
+glm::vec4 Display::rayClip(const glm::ivec2& p) const
+{
+    const glm::vec3 n = rayNdc(p);
+    return glm::vec4(n.x, n.y, -1.f, 1.f);
+}
+
 Image Display::capture() const
 {
     const Size<int> size = this->size();

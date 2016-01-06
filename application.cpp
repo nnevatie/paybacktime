@@ -3,6 +3,8 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/intersect.hpp>
+#include <glm/gtx/vector_query.hpp>
 
 #include "common/file_system.h"
 #include "img/image_cube.h"
@@ -14,6 +16,7 @@
 #include "platform/context.h"
 #include "platform/display.h"
 #include "platform/scheduler.h"
+#include "platform/mouse.h"
 
 #include "gfx/geometry.h"
 #include "gfx/ssao.h"
@@ -105,6 +108,8 @@ struct Impl
                   floor,
                   wall;
 
+    platform::Mouse mouse;
+
     float ay = 0, az = 0;
 
     Impl(platform::Display* display,
@@ -162,12 +167,40 @@ struct Impl
         #endif
     }
 
+    glm::vec3 prevRayPos;
     bool simulate(TimePoint /*time*/, Duration step)
     {
         SDL_PumpEvents();
 
-        const float accPos = 1000.f, accAng = 12.f;
+        const float accPos = 1000.f, accAng = 10.f;
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
+
+        if (mouse.buttons()[0])
+        {
+            mouse.setCursor(platform::Mouse::Cursor::Hand);
+
+            glm::vec3 w = camera.rayWorld(camera.rayEye(
+                                          display->rayClip(mouse.position())));
+
+            float d = 0;
+            glm::intersectRayPlane(camera.position(), w,
+                                   glm::vec3(), glm::vec3(0, 1, 0), d);
+
+            glm::vec3 p  = camera.position() + d * w;
+            glm::vec3 md = p - prevRayPos;
+            md.y = 0;
+
+            if (!glm::isNull(prevRayPos, 0.f))
+                camera.target -= md;
+
+            prevRayPos = camera.position() + d * w;
+            //cameraControl.pos[1] = md * 100.f;
+        }
+        else
+        {
+            mouse.setCursor(platform::Mouse::Cursor::Arrow);
+            prevRayPos = glm::vec3();
+        }
 
         if (keyState[SDL_SCANCODE_LEFT]  || keyState[SDL_SCANCODE_A])
             cameraControl.pos[1].x = -accPos;

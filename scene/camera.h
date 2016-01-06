@@ -20,6 +20,9 @@ struct Camera
     glm::mat4 matrixProj() const;
     glm::mat4 matrixView() const;
 
+    glm::vec4 rayEye(const glm::vec4& rayClip) const;
+    glm::vec3 rayWorld(const glm::vec4& rayEye) const;
+
     glm::vec3 target;
     float     distance, yaw, pitch, fov, ar, zNear, zFar;
 };

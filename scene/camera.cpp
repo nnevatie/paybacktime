@@ -46,4 +46,16 @@ glm::mat4 Camera::matrixView() const
     return glm::lookAt(position(), target, up());
 }
 
+glm::vec4 Camera::rayEye(const glm::vec4& rayClip) const
+{
+    const glm::vec4 eye = glm::inverse(matrixProj()) * rayClip;
+    return glm::vec4(eye.x, eye.y, -1.f, 0.f);
+}
+
+glm::vec3 Camera::rayWorld(const glm::vec4& rayEye) const
+{
+    glm::vec3 world = (glm::inverse(matrixView()) * rayEye).xyz();
+    return glm::normalize(world);
+}
+
 } // namespace pt

@@ -80,7 +80,8 @@ include_directories(
 
 # Build definitions
 add_definitions(-D_USE_MATH_DEFINES
-                -DBOOST_THREAD_VERSION=4)
+                -DBOOST_THREAD_VERSION=4
+                -DGLM_SWIZZLE)
 
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
                                ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES}
