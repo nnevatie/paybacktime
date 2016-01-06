@@ -35,19 +35,34 @@ namespace pt
 
 struct CameraControl
 {
-    glm::vec3 v;
-    glm::vec3 a;
+    // Velocity & acceleration vectors
+    glm::vec3 pos[2], ang[2];
 
     CameraControl& operator()(Camera* camera, Duration step)
     {
-        const float t  = std::chrono::duration<float>(step).count();
-        v             += t * a;
-        camera->yaw    = std::fmod(camera->yaw + t * v.x, float(2 * M_PI));
-        camera->pitch  = glm::clamp(camera->pitch + t * v.y,
-                             -float(M_PI / 2 - 0.25f), -0.25f);
-        v             *= std::pow(0.025f, t) *
-                        (glm::length(v) > 0.05f ? 1.f : 0.f);
-        a              = glm::vec3();
+        using namespace glm;
+
+        const float t   = std::chrono::duration<float>(step).count();
+        const vec3 forw = normalize(vec3(camera->forward().x,
+                                         0,
+                                         camera->forward().z));
+        // Position
+        pos[0]         += t * pos[1];
+        camera->target += t * (camera->right() * pos[0].x + forw * pos[0].y);
+        pos[0]         *= std::pow(0.025f, t) *
+                         (length(pos[0]) > 10.0f ? 1.f : 0.f);
+        pos[1]          = vec3();
+
+        // Angular
+        ang[0]         += t * ang[1];
+        camera->yaw     = std::fmod(camera->yaw + t * ang[0].x,
+                                    float(2 * M_PI));
+        camera->pitch   = clamp(camera->pitch + t * ang[0].y,
+                               -float(M_PI / 2 - 0.25f), -0.5f);
+        ang[0]         *= std::pow(0.01f, t) *
+                         (length(ang[0]) > 0.05f ? 1.f : 0.f);
+        ang[1]          = vec3();
+
         return *this;
     }
 };
@@ -109,7 +124,7 @@ struct Impl
         antiAlias(renderSize),
 
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
-               glm::radians(45.f), renderSize.aspect<float>(), 0.1, 500.f),
+               glm::radians(45.f), renderSize.aspect<float>(), 0.1, 750.f),
 
         depthCube("objects/" + input + "/*.png", 1),
         albedoCube("objects/" + input + "/albedo.*.png"),
@@ -151,16 +166,27 @@ struct Impl
     {
         SDL_PumpEvents();
 
-        const float acc = 12.f;
+        const float accPos = 1000.f, accAng = 12.f;
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
-        if (keyState[SDL_SCANCODE_LEFT])
-            cameraControl.a.x = -acc;
-        if (keyState[SDL_SCANCODE_RIGHT])
-            cameraControl.a.x = +acc;
-        if (keyState[SDL_SCANCODE_UP])
-            cameraControl.a.y = -acc;
-        if (keyState[SDL_SCANCODE_DOWN])
-            cameraControl.a.y = +acc;
+
+        if (keyState[SDL_SCANCODE_LEFT]  || keyState[SDL_SCANCODE_A])
+            cameraControl.pos[1].x = -accPos;
+        if (keyState[SDL_SCANCODE_RIGHT] || keyState[SDL_SCANCODE_D])
+            cameraControl.pos[1].x = +accPos;
+        if (keyState[SDL_SCANCODE_UP]    || keyState[SDL_SCANCODE_W])
+            cameraControl.pos[1].y = +accPos;
+        if (keyState[SDL_SCANCODE_DOWN]  || keyState[SDL_SCANCODE_S])
+            cameraControl.pos[1].y = -accPos;
+
+        if (keyState[SDL_SCANCODE_DELETE] || keyState[SDL_SCANCODE_Q])
+            cameraControl.ang[1].x = -accAng;
+        if (keyState[SDL_SCANCODE_END]    || keyState[SDL_SCANCODE_E])
+            cameraControl.ang[1].x = +accAng;
+        if (keyState[SDL_SCANCODE_PAGEUP])
+            cameraControl.ang[1].y = 0.75f * -accAng;
+        if (keyState[SDL_SCANCODE_PAGEDOWN])
+            cameraControl.ang[1].y = 0.75f * +accAng;
+
         if (keyState[SDL_SCANCODE_ESCAPE])
             return false;
 
