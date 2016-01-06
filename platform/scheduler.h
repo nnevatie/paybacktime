@@ -35,7 +35,7 @@ public:
               const Renderer& renderer,
               Options options = OptionNone);
 
-    void start();
+    bool start();
     void stop();
 
 private:

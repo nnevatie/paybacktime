@@ -15,8 +15,11 @@ Scheduler::Scheduler(const Duration& timeStep,
 {
 }
 
-void Scheduler::start()
+bool Scheduler::start()
 {
+    if (state != StateStopped)
+        return false;
+
     state = StateRunning;
     Time<ChronoClock> clock;
 
@@ -46,6 +49,7 @@ void Scheduler::start()
             clock.sleep(std::chrono::milliseconds(1));
     }
     state = StateStopped;
+    return true;
 }
 
 void Scheduler::stop()
