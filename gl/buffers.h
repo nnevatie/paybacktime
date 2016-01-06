@@ -25,6 +25,7 @@ struct Buffer
         StreamDraw
     };
 
+    Buffer();
     Buffer(Type type);
 
     GLuint id() const;

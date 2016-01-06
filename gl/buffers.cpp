@@ -52,6 +52,10 @@ struct Buffer::Data
     Usage  usage;
 };
 
+Buffer::Buffer()
+{
+}
+
 Buffer::Buffer(Buffer::Type type) :
     d(new Data(type))
 {
