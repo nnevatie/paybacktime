@@ -33,6 +33,25 @@
 namespace pt
 {
 
+struct CameraControl
+{
+    glm::vec3 v;
+    glm::vec3 a;
+
+    CameraControl& operator()(Camera* camera, Duration step)
+    {
+        const float t  = std::chrono::duration<float>(step).count();
+        v             += t * a;
+        camera->yaw    = std::fmod(camera->yaw + t * v.x, float(2 * M_PI));
+        camera->pitch  = glm::clamp(camera->pitch + t * v.y,
+                             -float(M_PI / 2 - 0.25f), -0.25f);
+        v             *= std::pow(0.025f, t) *
+                        (glm::length(v) > 0.05f ? 1.f : 0.f);
+        a              = glm::vec3();
+        return *this;
+    }
+};
+
 struct Impl
 {
     platform::Display* display;
@@ -55,6 +74,7 @@ struct Impl
     gfx::RenderStats stats;
 
     Camera camera;
+    CameraControl cameraControl;
 
     ImageCube depthCube;
     ImageCube albedoCube;
@@ -127,25 +147,24 @@ struct Impl
         #endif
     }
 
-    bool simulate(TimePoint /*time*/, Duration /*step*/)
+    bool simulate(TimePoint /*time*/, Duration step)
     {
-        SDL_Event e;
-        while (SDL_PollEvent(&e))
-        {
-            if (e.type == SDL_KEYDOWN)
-            {
-                if (e.key.keysym.sym == SDLK_LEFT)
-                    ay += 0.05f;
-                if (e.key.keysym.sym == SDLK_RIGHT)
-                    ay -= 0.05f;
-                if (e.key.keysym.sym == SDLK_UP)
-                    az += 0.05f;
-                if (e.key.keysym.sym == SDLK_DOWN)
-                    az -= 0.05f;
-                if (e.key.keysym.sym == SDLK_ESCAPE)
-                    return false;
-            }
-        }
+        SDL_PumpEvents();
+
+        const float acc = 12.f;
+        const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
+        if (keyState[SDL_SCANCODE_LEFT])
+            cameraControl.a.x = -acc;
+        if (keyState[SDL_SCANCODE_RIGHT])
+            cameraControl.a.x = +acc;
+        if (keyState[SDL_SCANCODE_UP])
+            cameraControl.a.y = -acc;
+        if (keyState[SDL_SCANCODE_DOWN])
+            cameraControl.a.y = +acc;
+        if (keyState[SDL_SCANCODE_ESCAPE])
+            return false;
+
+        cameraControl(&camera, step);
         return true;
     }
 
@@ -216,7 +235,7 @@ struct Impl
     bool run()
     {
         namespace arg = std::placeholders;
-        Scheduler scheduler(std::chrono::milliseconds(10),
+        Scheduler scheduler(std::chrono::milliseconds(20),
                             std::bind(&simulate, this, arg::_1, arg::_2),
                             std::bind(&render,   this, arg::_1),
                             Scheduler::OptionPreserveCpu);
