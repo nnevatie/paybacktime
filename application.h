@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 namespace pt
@@ -8,7 +9,6 @@ namespace pt
 struct Application
 {
     Application();
-    virtual ~Application();
 
     bool run(const std::string& input);
 };

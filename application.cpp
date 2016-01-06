@@ -1,16 +1,14 @@
 #include "application.h"
 
-#include <stdexcept>
-
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/file_system.h"
-#include "img/painter.h"
 #include "img/image_cube.h"
 #include "geom/image_mesher.h"
 #include "gl/texture_atlas.h"
+#include "gl/gpu_clock.h"
 
 #include "platform/clock.h"
 #include "platform/context.h"
@@ -35,97 +33,123 @@
 namespace pt
 {
 
-Application::Application()
+struct Impl
 {
-}
+    platform::Display* display;
+    Size<int> renderSize;
 
-Application::~Application()
-{
-}
-
-bool simulate(TimePoint time, Duration step)
-{
-    static int f = 0;
-    return (f++) < 10;
-}
-
-bool render(float a)
-{
-    return true;
-}
-
-bool Application::run(const std::string& input)
-{
-    platform::Context context;
-    platform::Display display("Payback Time", {1280, 720});
-    display.open();
-
-    Scheduler scheduler(std::chrono::milliseconds(10), simulate, render,
-                        Scheduler::OptionPreserveCpu);
-    scheduler.start();
-
-    const ImageCube depthCube("objects/" + input + "/*.png", 1);
-    const ImageCube albedoCube("objects/" + input + "/albedo.*.png");
-    const ImageCube lightCube("objects/" + input + "/light.*.png");
-
-    const ImageCube floorCube("objects/floor/*.png", 1);
-    const ImageCube floorAlb("objects/floor/albedo.*.png");
-    const ImageCube floorLight("objects/floor/light.*.png");
-
-    const ImageCube wallCube("objects/wall/*.png", 1);
-    const ImageCube wallAlb("objects/wall/albedo.*.png");
-    const ImageCube wallLight("objects/wall/light.*.png");
+    gl::TextureAtlas texAtlas;
+    gl::TextureAtlas lightAtlas;
 
     gl::Texture lightmap;
-    lightmap.bind().alloc(Image("data/lightmap.png"))
-                   .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                   .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    gl::TextureAtlas texAtlas({256, 256}, 2);
-    gl::TextureAtlas lightAtlas({256, 256}, 2);
-
-    gl::TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
-    lightAtlas.insert(lightCube);
-    lightAtlas.insert(floorLight);
-    lightAtlas.insert(wallLight);
-
-    const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
-    const gl::Primitive primitive(mesh);
-
-    gl::TextureAtlas::EntryCube albedoFloor = texAtlas.insert(floorAlb);
-    const Mesh_P_N_UV floorMesh = ImageMesher::mesh(floorCube, albedoFloor.second);
-    const gl::Primitive floor(floorMesh);
-
-    gl::TextureAtlas::EntryCube albedoWall = texAtlas.insert(wallAlb);
-    const Mesh_P_N_UV wallMesh = ImageMesher::mesh(wallCube, albedoWall.second);
-    const gl::Primitive wall(wallMesh);
-
-    const Size<int> renderSize(display.size());
-
-    gfx::Geometry geometry(renderSize);
-    gfx::Ssao ssao(32, renderSize, {4, 4}, geometry.texDepth);
-    gfx::Lighting lighting(renderSize, geometry.texDepth);
-    gfx::Bloom bloom(renderSize);
-    gfx::Outline outline(renderSize, geometry.texDepth);
+    gfx::Geometry geometry;
+    gfx::Ssao ssao;
+    gfx::Lighting lighting;
+    gfx::Bloom bloom;
+    gfx::Outline outline;
     gfx::Grid grid;
-    gfx::ColorGrade colorGrade(renderSize);
-    gfx::AntiAlias antiAlias(renderSize);
+    gfx::ColorGrade colorGrade;
+    gfx::AntiAlias antiAlias;
     gfx::Output output;
-
     gfx::RenderStats stats;
 
-    ObjectStore objectStore(filesystem::path("objects"), &texAtlas);
-    Scene scene;
+    Camera camera;
 
-    Camera camera(
-        {0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
-        glm::radians(45.f), renderSize.aspect<float>(), 0.1, 500.f);
+    ImageCube depthCube;
+    ImageCube albedoCube;
+    ImageCube lightCube;
+    ImageCube floorCube;
+    ImageCube floorAlb;
+    ImageCube floorLight;
+    ImageCube wallCube;
+    ImageCube wallAlb;
+    ImageCube wallLight;
 
-    int f = 0;
+    gl::Primitive primitive,
+                  floor,
+                  wall;
+
     float ay = 0, az = 0;
 
-    bool running = true;
-    while (running)
+    Impl(platform::Display* display,
+         const std::string& input
+         ) :
+        display(display),
+        renderSize(display->size()),
+        texAtlas({256, 256}, 2),
+        lightAtlas({256, 256}, 2),
+
+        geometry(renderSize),
+        ssao(32, renderSize, {4, 4}, geometry.texDepth),
+        lighting(renderSize, geometry.texDepth),
+        bloom(renderSize),
+        outline(renderSize, geometry.texDepth),
+        colorGrade(renderSize),
+        antiAlias(renderSize),
+
+        camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
+               glm::radians(45.f), renderSize.aspect<float>(), 0.1, 500.f),
+
+        depthCube("objects/" + input + "/*.png", 1),
+        albedoCube("objects/" + input + "/albedo.*.png"),
+        lightCube("objects/" + input + "/light.*.png"),
+        floorCube("objects/floor/*.png", 1),
+        floorAlb("objects/floor/albedo.*.png"),
+        floorLight("objects/floor/light.*.png"),
+        wallCube("objects/wall/*.png", 1),
+        wallAlb("objects/wall/albedo.*.png"),
+        wallLight("objects/wall/light.*.png")
+    {
+        lightmap.bind().alloc(Image("data/lightmap.png"))
+                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        gl::TextureAtlas::EntryCube albedoEntry = texAtlas.insert(albedoCube);
+        lightAtlas.insert(lightCube);
+        lightAtlas.insert(floorLight);
+        lightAtlas.insert(wallLight);
+
+        const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedoEntry.second);
+        primitive = gl::Primitive(mesh);
+
+        gl::TextureAtlas::EntryCube albedoFloor = texAtlas.insert(floorAlb);
+        const Mesh_P_N_UV floorMesh = ImageMesher::mesh(floorCube, albedoFloor.second);
+        floor = gl::Primitive(floorMesh);
+
+        gl::TextureAtlas::EntryCube albedoWall = texAtlas.insert(wallAlb);
+        const Mesh_P_N_UV wallMesh = ImageMesher::mesh(wallCube, albedoWall.second);
+        wall = gl::Primitive(wallMesh);
+
+        #if 0
+        ObjectStore objectStore(filesystem::path("objects"), &texAtlas);
+        Scene scene;
+        #endif
+    }
+
+    bool simulate(TimePoint /*time*/, Duration /*step*/)
+    {
+        SDL_Event e;
+        while (SDL_PollEvent(&e))
+        {
+            if (e.type == SDL_KEYDOWN)
+            {
+                if (e.key.keysym.sym == SDLK_LEFT)
+                    ay += 0.05f;
+                if (e.key.keysym.sym == SDLK_RIGHT)
+                    ay -= 0.05f;
+                if (e.key.keysym.sym == SDLK_UP)
+                    az += 0.05f;
+                if (e.key.keysym.sym == SDLK_DOWN)
+                    az -= 0.05f;
+                if (e.key.keysym.sym == SDLK_ESCAPE)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    bool render(float /*a*/)
     {
         glm::mat4 proj  = camera.matrixProj();
         glm::mat4 view  = camera.matrixView() *
@@ -133,7 +157,7 @@ bool Application::run(const std::string& input)
                           glm::rotate({}, az, glm::vec3(1.f, 0.f, 0.f)));
         glm::mat4 model;
 
-        Time<ChronoClock> clock;
+        Time<GpuClock> clock;
         std::vector<gfx::Geometry::Instance> instances;
 
         for (int y = 0; y < 5; ++y)
@@ -180,30 +204,37 @@ bool Application::run(const std::string& input)
         colorGrade(lighting.output(), bloom.output());
         antiAlias(colorGrade.output());
         output(antiAlias.output());
+
+        stats.accumulate(clock.elapsed(), 0, 0);
         stats();
 
-        display.swap();
-        stats.accumulate(clock.elapsed(), 0, 0);
+        display->swap();
 
-        SDL_Event e;
-        while (SDL_PollEvent(&e) && f < 2000)
-        {
-            if (e.type == SDL_KEYDOWN)
-            {
-                if (e.key.keysym.sym == SDLK_LEFT)
-                    ay += 0.05f;
-                if (e.key.keysym.sym == SDLK_RIGHT)
-                    ay -= 0.05f;
-                if (e.key.keysym.sym == SDLK_UP)
-                    az += 0.05f;
-                if (e.key.keysym.sym == SDLK_DOWN)
-                    az -= 0.05f;
-                if (e.key.keysym.sym == SDLK_ESCAPE)
-                    running = false;
-            }
-        }
+        return true;
     }
-    return true;
+
+    bool run()
+    {
+        namespace arg = std::placeholders;
+        Scheduler scheduler(std::chrono::milliseconds(10),
+                            std::bind(&simulate, this, arg::_1, arg::_2),
+                            std::bind(&render,   this, arg::_1),
+                            Scheduler::OptionPreserveCpu);
+        return scheduler.start();
+    }
+};
+
+Application::Application()
+{
+}
+
+bool Application::run(const std::string& input)
+{
+    platform::Context context;
+    platform::Display display("Payback Time", {1280, 720});
+    display.open();
+
+    return Impl(&display, input).run();
 }
 
 } // namespace
