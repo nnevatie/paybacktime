@@ -12,6 +12,9 @@ namespace gl
 
 struct Primitive
 {
+    Primitive()
+    {}
+
     template <typename V, typename I>
     explicit Primitive(const Mesh<V, I>& mesh) :
        vertexSpec {V::spec()}, indexSpec {sizeof(I)},
