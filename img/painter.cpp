@@ -4,7 +4,7 @@
 
 #include "platform/clock.h"
 
-namespace hc
+namespace pt
 {
 
 Painter::Painter(SDL_Surface* surface) :

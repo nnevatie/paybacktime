@@ -5,7 +5,7 @@
 
 #include "platform/clock.h"
 
-namespace hc
+namespace pt
 {
 namespace platform
 {
@@ -38,4 +38,4 @@ Context::Context() :
 }
 
 } // namespace platform
-} // namespace hc
+} // namespace pt

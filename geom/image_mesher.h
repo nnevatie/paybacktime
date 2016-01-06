@@ -4,7 +4,7 @@
 #include "img/image.h"
 #include "mesh.h"
 
-namespace hc
+namespace pt
 {
 namespace ImageMesher
 {
@@ -17,4 +17,4 @@ Mesh_P_N_UV mesh(const ImageCube& imageCube,
             float interval = 1.f);
 
 } // namespace ImageMesher
-} // namespace hc
+} // namespace pt

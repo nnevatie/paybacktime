@@ -3,7 +3,7 @@
 #include <cmath>
 #include <boost/circular_buffer.hpp>
 
-namespace hc
+namespace pt
 {
 
 template <typename T>
@@ -47,7 +47,7 @@ struct MovingAvg
     }
     Scalar stdev() const
     {
-        return hc::stdev(size(), sum_, ssq_);
+        return pt::stdev(size(), sum_, ssq_);
     }
 
 private:
@@ -56,4 +56,4 @@ private:
     Scalar ssq_;
 };
 
-} // namespace hc
+} // namespace pt

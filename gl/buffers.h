@@ -4,7 +4,7 @@
 
 #include <glad/glad.h>
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -40,4 +40,4 @@ private:
 };
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

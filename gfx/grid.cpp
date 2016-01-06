@@ -2,7 +2,7 @@
 
 #include "common/common.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -34,4 +34,4 @@ Grid& Grid::operator()(gl::Fbo* fboOut, const glm::mat4& mvp)
 }
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace hc
+namespace pt
 {
 
 struct Application

@@ -2,7 +2,7 @@
 
 #include <boost/optional/optional.hpp>
 
-namespace hc
+namespace pt
 {
 template <class T>
 using optional = boost::optional<T>;

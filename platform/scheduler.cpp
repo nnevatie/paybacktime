@@ -1,6 +1,6 @@
 #include "scheduler.h"
 
-namespace hc
+namespace pt
 {
 
 Scheduler::Scheduler(const Duration& timeStep,

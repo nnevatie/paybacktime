@@ -6,7 +6,7 @@
 #include "common/log.h"
 #include "uniforms.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -153,4 +153,4 @@ ShaderProgram& ShaderProgram::bind()
 }
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

@@ -11,7 +11,7 @@
 #include "platform/clock.h"
 #include "common/log.h"
 
-namespace hc
+namespace pt
 {
 
 struct Image::Data

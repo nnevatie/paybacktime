@@ -10,7 +10,7 @@
 #include "rect.h"
 #include "sn_mesher.h"
 
-namespace hc
+namespace pt
 {
 namespace ImageMesher
 {
@@ -461,5 +461,5 @@ Mesh_P_N_UV mesh(const ImageCube& imageCube,
 }
 
 } // namespace ImageMesher
-} // namespace hc
+} // namespace pt
 

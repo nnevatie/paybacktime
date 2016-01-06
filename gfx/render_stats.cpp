@@ -13,7 +13,7 @@
 #include "common/common.h"
 #include "geom/mesh.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -33,7 +33,7 @@ RenderStats::~RenderStats()
     nvgDeleteGL3(vg);
 }
 
-void RenderStats::accumulate(const hc::Duration& frameTime,
+void RenderStats::accumulate(const pt::Duration& frameTime,
                              int vertexCount, int triangleCount)
 {
     const float timeUs = std::chrono::duration
@@ -86,4 +86,4 @@ RenderStats& RenderStats::operator()()
 }
 
 } // namespace ui
-} // namespace hc
+} // namespace pt

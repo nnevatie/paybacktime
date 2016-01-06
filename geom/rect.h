@@ -5,7 +5,7 @@
 
 #include "size.h"
 
-namespace hc
+namespace pt
 {
 
 template<typename T>

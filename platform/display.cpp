@@ -21,7 +21,7 @@ void debugCallback(
 
 } // namespace
 
-namespace hc
+namespace pt
 {
 namespace platform
 {
@@ -164,4 +164,4 @@ Image Display::capture() const
 }
 
 } // namespace ui
-} // namespace hc
+} // namespace pt

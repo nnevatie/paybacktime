@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -70,4 +70,4 @@ ShaderProgram& ShaderProgram::setUniform<std::vector<glm::vec3>>(
 }
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

@@ -8,7 +8,7 @@
 
 #include "common/common.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -137,4 +137,4 @@ Ssao& Ssao::operator()(gl::Texture* texDepth,
 }
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

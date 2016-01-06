@@ -7,7 +7,7 @@
 #include "img/image_cube.h"
 #include "img/image.h"
 
-namespace hc
+namespace pt
 {
 
 struct ImageAtlas
@@ -25,4 +25,4 @@ private:
     std::shared_ptr<Data> d;
 };
 
-} // namespace hc
+} // namespace pt

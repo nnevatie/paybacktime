@@ -3,7 +3,7 @@
 #include "common/log.h"
 #include "mesh.h"
 
-namespace hc
+namespace pt
 {
 namespace SnMesher
 {
@@ -199,5 +199,5 @@ Mesh_P_N_UV mesh(const V& vol)
 }
 
 } // namespace SnMesher
-} // namespace hc
+} // namespace pt
 

@@ -7,7 +7,7 @@
 #include "geom/rect.h"
 #include "img/image.h"
 
-namespace hc
+namespace pt
 {
 
 struct ImageCube

@@ -2,7 +2,7 @@
 
 #include "common/common.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -84,4 +84,4 @@ Outline& Outline::operator()(gl::Fbo* fboOut,
 }
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

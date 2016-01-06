@@ -3,7 +3,7 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
-namespace hc
+namespace pt
 {
 
 struct Camera
@@ -24,4 +24,4 @@ struct Camera
     float     distance, yaw, pitch, fov, ar, zNear, zFar;
 };
 
-} // namespace hc
+} // namespace pt

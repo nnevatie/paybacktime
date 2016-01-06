@@ -7,7 +7,7 @@
 #include "img/image_atlas.h"
 #include "gl/texture.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -29,4 +29,4 @@ struct TextureAtlas
 };
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

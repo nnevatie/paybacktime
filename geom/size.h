@@ -1,6 +1,6 @@
 #pragma once
 
-namespace hc
+namespace pt
 {
 
 template<typename T>

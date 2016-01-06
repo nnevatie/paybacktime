@@ -1,6 +1,6 @@
 #include "rbo.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -49,4 +49,4 @@ Rbo& Rbo::alloc(const Size<int>& size, GLint internalFormat)
 }
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

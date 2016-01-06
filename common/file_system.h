@@ -2,7 +2,7 @@
 
 #include <boost/filesystem.hpp>
 
-namespace hc
+namespace pt
 {
 namespace filesystem = boost::filesystem;
 } // namespace

@@ -19,7 +19,7 @@ int main(int argc, char** argv)
         variables_map args;
         store(parse_command_line(argc, argv, desc), args);
 
-        hc::Application app;
+        pt::Application app;
         app.run(args["input"].as<std::string>());
     }
     catch (const std::exception& e)

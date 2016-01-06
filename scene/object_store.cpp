@@ -3,7 +3,7 @@
 #include "platform/clock.h"
 #include "common/log.h"
 
-namespace hc
+namespace pt
 {
 
 ObjectStore::ObjectStore(const filesystem::path& path, gl::TextureAtlas* atlas)
@@ -19,4 +19,4 @@ ObjectStore::ObjectStore(const filesystem::path& path, gl::TextureAtlas* atlas)
         }
 }
 
-} // namespace hc
+} // namespace pt

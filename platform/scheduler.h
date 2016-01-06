@@ -4,7 +4,7 @@
 
 #include "clock.h"
 
-namespace hc
+namespace pt
 {
 
 class Simulation;

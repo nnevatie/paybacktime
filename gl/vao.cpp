@@ -1,6 +1,6 @@
 #include "vao.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -43,4 +43,4 @@ Vao& Vao::unbind()
 }
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

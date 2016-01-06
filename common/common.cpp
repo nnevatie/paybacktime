@@ -1,6 +1,6 @@
 #include "common.h"
 
-namespace hc
+namespace pt
 {
 
 SourceLocation::SourceLocation(const char* file, const char* func, int line) :

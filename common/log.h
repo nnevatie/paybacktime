@@ -5,9 +5,9 @@
 #include "common.h"
 
 #define HCLOG(priority)    \
-    hc::Logger(hc::Logger::priority, HCSOURCE())
+    pt::Logger(pt::Logger::priority, HCSOURCE())
 
-namespace hc
+namespace pt
 {
 
 struct Logger

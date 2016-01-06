@@ -4,7 +4,7 @@
 
 #include "platform/clock.h"
 
-namespace hc
+namespace pt
 {
 struct GpuClock
 {
@@ -32,6 +32,6 @@ private:
 };
 
 #define HCTIME_GPU(description) \
-    hc::ScopedClock<GpuClock> scopedClock_(HCSOURCE(), description)
+    pt::ScopedClock<GpuClock> scopedClock_(HCSOURCE(), description)
 
 }  // namespace

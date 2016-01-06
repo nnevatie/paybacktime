@@ -2,7 +2,7 @@
 
 #include "common/common.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -87,4 +87,4 @@ Geometry& Geometry::operator()(
 }
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

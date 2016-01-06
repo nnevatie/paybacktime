@@ -1,6 +1,6 @@
 #include "scene.h"
 
-namespace hc
+namespace pt
 {
 
 Scene::Scene()
@@ -12,4 +12,4 @@ Scene& Scene::render()
     return *this;
 }
 
-} // namespace hc
+} // namespace pt

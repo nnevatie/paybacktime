@@ -3,7 +3,7 @@
 #include "common/log.h"
 #include "geom/mesh.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -150,4 +150,4 @@ gl::Texture* Bloom::output()
 }
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

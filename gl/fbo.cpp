@@ -2,7 +2,7 @@
 
 #include "fbo.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -86,4 +86,4 @@ bool Fbo::unbind()
 }
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

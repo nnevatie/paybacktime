@@ -1,6 +1,6 @@
 #include "output.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -24,4 +24,4 @@ Output& Output::operator()(gl::Texture* tex)
 }
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

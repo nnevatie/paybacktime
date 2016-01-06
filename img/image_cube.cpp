@@ -5,7 +5,7 @@
 #include "platform/clock.h"
 #include "common/log.h"
 
-namespace hc
+namespace pt
 {
 
 ImageCube::ImageCube(const std::string& filename, int depth)

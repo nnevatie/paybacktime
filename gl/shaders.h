@@ -7,7 +7,7 @@
 
 #include "common/file_system.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -54,4 +54,4 @@ private:
 };
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

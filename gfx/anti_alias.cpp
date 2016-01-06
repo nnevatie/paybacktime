@@ -2,7 +2,7 @@
 
 #include "common/common.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -40,4 +40,4 @@ gl::Texture* AntiAlias::output()
 }
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

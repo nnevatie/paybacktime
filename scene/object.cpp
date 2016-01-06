@@ -1,10 +1,10 @@
 #include "object.h"
 
-namespace hc
+namespace pt
 {
 
 Object::Object(const filesystem::path& /*path*/, gl::TextureAtlas* /*atlas*/)
 {
 }
 
-} // namespace hc
+} // namespace pt

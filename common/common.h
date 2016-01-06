@@ -7,9 +7,9 @@
 #include "file_system.h"
 
 #define HCSOURCE() \
-    hc::SourceLocation(__FILE__, __FUNCTION__, __LINE__)
+    pt::SourceLocation(__FILE__, __FUNCTION__, __LINE__)
 
-namespace hc
+namespace pt
 {
 
 struct SourceLocation

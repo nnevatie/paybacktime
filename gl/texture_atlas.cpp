@@ -3,7 +3,7 @@
 #include "platform/clock.h"
 #include "common/log.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -44,4 +44,4 @@ TextureAtlas::EntryCube TextureAtlas::insert(const ImageCube& imageCube)
 }
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

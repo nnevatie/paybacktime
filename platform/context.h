@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace hc
+namespace pt
 {
 namespace platform
 {
@@ -17,4 +17,4 @@ private:
 };
 
 } // namespace platform
-} // namespace hc
+} // namespace pt

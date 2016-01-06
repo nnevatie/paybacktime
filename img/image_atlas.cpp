@@ -4,7 +4,7 @@
 #include "common/log.h"
 #include "painter.h"
 
-namespace hc
+namespace pt
 {
 
 namespace
@@ -152,4 +152,4 @@ RectCube<int> ImageAtlas::insert(const ImageCube& imageCube, int margin)
     return cubeRect;
 }
 
-} // namespace hc
+} // namespace pt

@@ -32,7 +32,7 @@
 #include "scene/scene.h"
 #include "scene/camera.h"
 
-namespace hc
+namespace pt
 {
 
 Application::Application()

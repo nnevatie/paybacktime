@@ -4,7 +4,7 @@
 
 #include "common/log.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -189,4 +189,4 @@ float Texture::anisotropyMax()
 }
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

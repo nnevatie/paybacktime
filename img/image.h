@@ -8,7 +8,7 @@
 #include "common/file_system.h"
 #include "geom/size.h"
 
-namespace hc
+namespace pt
 {
 
 struct Image

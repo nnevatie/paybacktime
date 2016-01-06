@@ -5,7 +5,7 @@
 
 struct NVGcontext;
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -30,4 +30,4 @@ private:
 };
 
 } // namespace ui
-} // namespace hc
+} // namespace pt

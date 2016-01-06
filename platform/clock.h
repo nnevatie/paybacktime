@@ -8,7 +8,7 @@
 #include "common/common.h"
 #include "common/log.h"
 
-namespace hc
+namespace pt
 {
 using ChronoClock = std::chrono::high_resolution_clock;
 using TimePoint   = std::chrono::time_point<ChronoClock>;
@@ -42,7 +42,7 @@ private:
 };
 
 #define HCTIME(description) \
-    hc::ScopedClock<ChronoClock> scopedClock_(HCSOURCE(), description)
+    pt::ScopedClock<ChronoClock> scopedClock_(HCSOURCE(), description)
 
 template <typename T>
 struct ScopedClock

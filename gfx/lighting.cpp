@@ -2,7 +2,7 @@
 
 #include "common/common.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -69,4 +69,4 @@ gl::Texture* Lighting::output()
 }
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

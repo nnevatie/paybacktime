@@ -8,7 +8,7 @@
 #include "gl/texture.h"
 #include "gl/fbo.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -43,4 +43,4 @@ struct Outline
 };
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

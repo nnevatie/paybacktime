@@ -3,7 +3,7 @@
 namespace
 {
 
-const char* priorityName(hc::Logger::Priority priority)
+const char* priorityName(pt::Logger::Priority priority)
 {
     const char* priorityNames[] =
         {"DEBUG", "INFO ", "WARN ", "ERROR", "FATAL"};
@@ -13,7 +13,7 @@ const char* priorityName(hc::Logger::Priority priority)
 
 }
 
-namespace hc
+namespace pt
 {
 
 Logger::Logger(Priority priority, const SourceLocation& source)

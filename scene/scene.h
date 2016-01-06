@@ -1,6 +1,6 @@
 #pragma once
 
-namespace hc
+namespace pt
 {
 
 struct Scene
@@ -10,4 +10,4 @@ struct Scene
     Scene& render();
 };
 
-} // namespace hc
+} // namespace pt

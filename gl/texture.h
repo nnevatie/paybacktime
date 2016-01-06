@@ -9,7 +9,7 @@
 #include "img/image.h"
 #include "buffers.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -64,4 +64,4 @@ private:
 };
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

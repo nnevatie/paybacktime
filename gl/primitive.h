@@ -5,7 +5,7 @@
 #include "buffers.h"
 #include "vao.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -70,4 +70,4 @@ struct Primitive
 };
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

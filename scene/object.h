@@ -3,7 +3,7 @@
 #include "common/file_system.h"
 #include "gl/texture_atlas.h"
 
-namespace hc
+namespace pt
 {
 
 struct Object
@@ -11,4 +11,4 @@ struct Object
     Object(const filesystem::path& path, gl::TextureAtlas* atlas);
 };
 
-} // namespace hc
+} // namespace pt

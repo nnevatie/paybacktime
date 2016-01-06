@@ -3,7 +3,7 @@
 #include "common/log.h"
 #include "buffers.h"
 
-namespace hc
+namespace pt
 {
 namespace gl
 {
@@ -97,4 +97,4 @@ Buffer& Buffer::alloc(const void* data, int size)
 }
 
 } // namespace gl
-} // namespace hc
+} // namespace pt

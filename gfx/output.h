@@ -4,7 +4,7 @@
 #include "gl/shaders.h"
 #include "gl/texture.h"
 
-namespace hc
+namespace pt
 {
 namespace gfx
 {
@@ -24,4 +24,4 @@ struct Output
 };
 
 } // namespace gfx
-} // namespace hc
+} // namespace pt

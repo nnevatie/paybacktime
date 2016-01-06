@@ -2,7 +2,7 @@
 
 #include <glm/ext.hpp>
 
-namespace hc
+namespace pt
 {
 
 Camera::Camera(const glm::vec3& target, float distance,
@@ -46,4 +46,4 @@ glm::mat4 Camera::matrixView() const
     return glm::lookAt(position(), target, up());
 }
 
-} // namespace hc
+} // namespace pt

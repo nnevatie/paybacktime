@@ -7,7 +7,7 @@
 #include "geom/size.h"
 #include "img/image.h"
 
-namespace hc
+namespace pt
 {
 namespace platform
 {
@@ -38,4 +38,4 @@ private:
 };
 
 } // namespace ui
-} // namespace hc
+} // namespace pt

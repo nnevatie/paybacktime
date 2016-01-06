@@ -4,7 +4,7 @@
 
 #include "object.h"
 
-namespace hc
+namespace pt
 {
 
 struct ObjectStore
@@ -14,4 +14,4 @@ struct ObjectStore
     std::vector<Object> objects;
 };
 
-} // namespace hc
+} // namespace pt

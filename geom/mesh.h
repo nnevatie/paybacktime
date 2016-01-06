@@ -11,7 +11,7 @@
 
 #include "rect.h"
 
-namespace hc
+namespace pt
 {
 
 typedef std::array<glm::vec3, 8>        Box;
