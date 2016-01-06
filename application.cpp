@@ -38,20 +38,96 @@ namespace pt
 
 struct CameraControl
 {
+    Camera*            camera;
+    platform::Display* display;
+    platform::Mouse*   mouse;
+
     // Velocity & acceleration vectors
     glm::vec3 pos[2], ang[2];
+    glm::vec3 prevDragPos;
 
-    CameraControl& operator()(Camera* camera, Duration step)
+    CameraControl(Camera* camera,
+                  platform::Display* display,
+                  platform::Mouse* mouse) :
+        camera(camera),
+        display(display),
+        mouse(mouse)
+    {}
+
+    void processInput()
+    {
+        const float accPos = 1000.f, accAng = 10.f;
+
+        const glm::vec3 rayWorld = camera->rayWorld(
+                                       camera->rayEye(display->rayClip(
+                                                      mouse->position())));
+        float di = 0;
+        glm::intersectRayPlane(camera->position(), rayWorld,
+                               glm::vec3(), glm::vec3(0, 1, 0), di);
+
+        const glm::vec3 rayDrag = di * rayWorld;
+        const bool dragging     = mouse->buttons()[0];
+        if (dragging)
+        {
+            mouse->setCursor(platform::Mouse::Cursor::Hand);
+
+            glm::vec3 p  = camera->position() + rayDrag;
+            glm::vec3 md = prevDragPos - p;
+            md.y         = 0;
+
+            if (!glm::isNull(prevDragPos, 0.f))
+            {
+                // Only move target absolutely while under no angular motion
+                if (glm::isNull(ang[0], 0.f))
+                    camera->target += md;
+
+                pos[1] = md * accPos;
+            }
+            prevDragPos = camera->position() + rayDrag;
+        }
+        else
+        {
+            mouse->setCursor(platform::Mouse::Cursor::Arrow);
+            prevDragPos = glm::vec3();
+        }
+
+        const glm::vec3 right   = camera->right();
+        const glm::vec3 forward = normalize(glm::vec3(camera->forward().x,
+                                                      0,
+                                                      camera->forward().z));
+
+        const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
+
+        if (keyState[SDL_SCANCODE_LEFT]  || keyState[SDL_SCANCODE_A])
+            pos[1] += -right * accPos;
+        if (keyState[SDL_SCANCODE_RIGHT] || keyState[SDL_SCANCODE_D])
+            pos[1] +=  right * accPos;
+        if (keyState[SDL_SCANCODE_UP]    || keyState[SDL_SCANCODE_W])
+            pos[1] +=  forward * accPos;
+        if (keyState[SDL_SCANCODE_DOWN]  || keyState[SDL_SCANCODE_S])
+            pos[1] += -forward * accPos;
+
+        if (keyState[SDL_SCANCODE_DELETE] || keyState[SDL_SCANCODE_Q])
+            ang[1].x = -accAng;
+        if (keyState[SDL_SCANCODE_END]    || keyState[SDL_SCANCODE_E])
+            ang[1].x = +accAng;
+        if (keyState[SDL_SCANCODE_PAGEUP])
+            ang[1].y = 0.75f * -accAng;
+        if (keyState[SDL_SCANCODE_PAGEDOWN])
+            ang[1].y = 0.75f * +accAng;
+    }
+
+    CameraControl& operator()(Duration step)
     {
         using namespace glm;
 
+        processInput();
+
         const float t   = std::chrono::duration<float>(step).count();
-        const vec3 forw = normalize(vec3(camera->forward().x,
-                                         0,
-                                         camera->forward().z));
+
         // Position
         pos[0]         += t * pos[1];
-        camera->target += t * (camera->right() * pos[0].x + forw * pos[0].y);
+        camera->target += t * pos[0];
         pos[0]         *= std::pow(0.025f, t) *
                          (length(pos[0]) > 10.0f ? 1.f : 0.f);
         pos[1]          = vec3();
@@ -131,6 +207,8 @@ struct Impl
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
                glm::radians(45.f), renderSize.aspect<float>(), 0.1, 750.f),
 
+        cameraControl(&camera, display, &mouse),
+
         depthCube("objects/" + input + "/*.png", 1),
         albedoCube("objects/" + input + "/albedo.*.png"),
         lightCube("objects/" + input + "/light.*.png"),
@@ -172,58 +250,11 @@ struct Impl
     {
         SDL_PumpEvents();
 
-        const float accPos = 1000.f, accAng = 10.f;
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
-
-        if (mouse.buttons()[0])
-        {
-            mouse.setCursor(platform::Mouse::Cursor::Hand);
-
-            glm::vec3 w = camera.rayWorld(camera.rayEye(
-                                          display->rayClip(mouse.position())));
-
-            float d = 0;
-            glm::intersectRayPlane(camera.position(), w,
-                                   glm::vec3(), glm::vec3(0, 1, 0), d);
-
-            glm::vec3 p  = camera.position() + d * w;
-            glm::vec3 md = p - prevRayPos;
-            md.y = 0;
-
-            if (!glm::isNull(prevRayPos, 0.f))
-                camera.target -= md;
-
-            prevRayPos = camera.position() + d * w;
-            //cameraControl.pos[1] = md * 100.f;
-        }
-        else
-        {
-            mouse.setCursor(platform::Mouse::Cursor::Arrow);
-            prevRayPos = glm::vec3();
-        }
-
-        if (keyState[SDL_SCANCODE_LEFT]  || keyState[SDL_SCANCODE_A])
-            cameraControl.pos[1].x = -accPos;
-        if (keyState[SDL_SCANCODE_RIGHT] || keyState[SDL_SCANCODE_D])
-            cameraControl.pos[1].x = +accPos;
-        if (keyState[SDL_SCANCODE_UP]    || keyState[SDL_SCANCODE_W])
-            cameraControl.pos[1].y = +accPos;
-        if (keyState[SDL_SCANCODE_DOWN]  || keyState[SDL_SCANCODE_S])
-            cameraControl.pos[1].y = -accPos;
-
-        if (keyState[SDL_SCANCODE_DELETE] || keyState[SDL_SCANCODE_Q])
-            cameraControl.ang[1].x = -accAng;
-        if (keyState[SDL_SCANCODE_END]    || keyState[SDL_SCANCODE_E])
-            cameraControl.ang[1].x = +accAng;
-        if (keyState[SDL_SCANCODE_PAGEUP])
-            cameraControl.ang[1].y = 0.75f * -accAng;
-        if (keyState[SDL_SCANCODE_PAGEDOWN])
-            cameraControl.ang[1].y = 0.75f * +accAng;
-
         if (keyState[SDL_SCANCODE_ESCAPE])
             return false;
 
-        cameraControl(&camera, step);
+        cameraControl(step);
         return true;
     }
 
