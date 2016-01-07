@@ -76,7 +76,7 @@ struct CameraControl
         pos[0]         += t * pos[1];
         camera->target += t * pos[0];
         pos[0]         *= std::pow(0.025f, t) *
-                         (length(pos[0]) > 10.0f ? 1.f : 0.f);
+                         (length(pos[0]) > 5.0f ? 1.f : 0.f);
         pos[1]          = vec3();
 
         // Angular
@@ -151,12 +151,11 @@ struct CameraControl
             // Let position float after letting drag go
             if (!glm::isNull(prevMousePos, 0.f) &&
                  glm::isNull(ang[0], 0.f))
-                pos[1] = md * accPos;
+                pos[1] = 0.5f * md * std::pow(1.f / t, 2.0f);
 
             prevMousePos = glm::vec4();
             prevDragPos  = glm::vec3();
         }
-
         return *this;
     }
 };
@@ -339,7 +338,7 @@ struct Impl
     bool run()
     {
         namespace arg = std::placeholders;
-        Scheduler scheduler(std::chrono::milliseconds(100),
+        Scheduler scheduler(std::chrono::milliseconds(10),
                             std::bind(&simulate, this, arg::_1, arg::_2),
                             std::bind(&render,   this, arg::_1),
                             Scheduler::OptionPreserveCpu);
