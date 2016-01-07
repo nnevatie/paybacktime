@@ -17,7 +17,11 @@ struct MovingAvg
 {
     explicit MovingAvg(int n) : sum_(0), ssq_(0)
     {
-        q_ = boost::circular_buffer<int>(n);
+        q_ = boost::circular_buffer<Scalar>(n);
+    }
+    void clear()
+    {
+        q_.clear();
     }
     void push(Scalar v)
     {
@@ -36,14 +40,14 @@ struct MovingAvg
     {
         return sum_;
     }
-    Scalar size() const
+    std::size_t size() const
     {
         return q_.size();
     }
     Scalar mean() const
     {
         const std::size_t s = size();
-        return s > 0 ? sum_ / s : 0;
+        return s > 0 ? sum_ / float(s) : Scalar();
     }
     Scalar stdev() const
     {
@@ -51,7 +55,7 @@ struct MovingAvg
     }
 
 private:
-    boost::circular_buffer<int> q_;
+    boost::circular_buffer<Scalar> q_;
     Scalar sum_;
     Scalar ssq_;
 };
