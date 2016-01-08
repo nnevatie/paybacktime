@@ -109,13 +109,13 @@ struct CameraControl
             pos[1] += -forward * accPos;
 
         if (keyState[SDL_SCANCODE_DELETE] || keyState[SDL_SCANCODE_Q])
-            ang[1].x = -accAng;
-        if (keyState[SDL_SCANCODE_END]    || keyState[SDL_SCANCODE_E])
             ang[1].x = +accAng;
-        if (keyState[SDL_SCANCODE_PAGEUP])
-            ang[1].y = 0.75f * -accAng;
-        if (keyState[SDL_SCANCODE_PAGEDOWN])
-            ang[1].y = 0.75f * +accAng;
+        if (keyState[SDL_SCANCODE_END]    || keyState[SDL_SCANCODE_E])
+            ang[1].x = -accAng;
+        if (keyState[SDL_SCANCODE_PAGEUP] || mouse->wheel() < 0)
+            ang[1].y = 0.75f * -accAng * (1 + 2 * std::abs(mouse->wheel()));
+        if (keyState[SDL_SCANCODE_PAGEDOWN] || mouse->wheel() > 0)
+            ang[1].y = 0.75f * +accAng * (1 + 2 * std::abs(mouse->wheel()));
 
         const glm::vec4 mousePos = display->rayClip(mouse->position());
         const glm::vec3 rayDrag  = mouseVec();
@@ -137,8 +137,8 @@ struct CameraControl
                 else
                 {
                     glm::vec4 mouseDiff = 32.f * (mousePos - prevMousePos);
-                    ang[1].x = mouseDiff.x * accAng;
-                    ang[1].y = mouseDiff.y * accAng;
+                    ang[1].x = mouseDiff.x * -accAng;
+                    ang[1].y = mouseDiff.y * +accAng;
                 }
             }
             prevMousePos = mousePos;
@@ -262,7 +262,10 @@ struct Impl
     glm::vec3 prevRayPos;
     bool simulate(TimePoint /*time*/, Duration step)
     {
-        SDL_PumpEvents();
+        mouse.reset();
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+            mouse.update(event);
 
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
         if (keyState[SDL_SCANCODE_ESCAPE])

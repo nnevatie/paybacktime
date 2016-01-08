@@ -5,6 +5,8 @@
 
 #include <glm/vec2.hpp>
 
+#include <SDL2/SDL.h>
+
 namespace pt
 {
 namespace platform
@@ -27,8 +29,12 @@ struct Mouse
 
     glm::ivec2 position() const;
     Buttons buttons() const;
+    int wheel() const;
 
     Mouse& setCursor(Cursor cursor);
+
+    Mouse& reset();
+    Mouse& update(const SDL_Event& event);
 
 private:
     struct Data;
