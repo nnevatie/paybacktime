@@ -12,7 +12,6 @@
 #include "geom/size.h"
 #include "img/image.h"
 
-// NanoVC context type
 struct NVGcontext;
 
 namespace pt
