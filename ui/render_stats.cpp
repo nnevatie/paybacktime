@@ -22,9 +22,11 @@ struct RenderStats::Data
         vg(vg), accumTime(0), meanTimeMs(0),
         frameTimes(100), vertexCount(0), triangleCount(0)
     {
+        nvgCreateFont(vg, "conradi", "data/conradi_square.ttf");
     }
     ~Data()
     {
+        // TODO: Free font?
     }
 
     NVGcontext* vg;
@@ -37,11 +39,6 @@ struct RenderStats::Data
 
 RenderStats::RenderStats(NVGcontext* vg) :
     d(new Data(vg))
-{
-    nvgCreateFont(vg, "conradi", "data/conradi_square.ttf");
-}
-
-RenderStats::~RenderStats()
 {
 }
 
@@ -69,7 +66,7 @@ RenderStats& RenderStats::operator()()
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     nvgBeginFrame(d->vg, viewport[2], viewport[3], 1.f);
-    nvgFontSize(d->vg, 24.0f);
+    nvgFontSize(d->vg, 22.0f);
     nvgFontFace(d->vg, "conradi");
     nvgFillColor(d->vg, nvgRGBA(255, 255, 255, 255));
 
