@@ -16,11 +16,29 @@ namespace ui
 
 const float UPDATE_INTERVAL_US = 1000.f * 200;
 
-RenderStats::RenderStats(NVGcontext* vg) :
-    vg(vg), accumTime(0), meanTimeMs(0),
-    frameTimes(100), vertexCount(0), triangleCount(0)
+struct RenderStats::Data
 {
-    nvgCreateFont(vg, "dejavu-sans", "data/deja_vu_sans.ttf");
+    explicit Data(NVGcontext* vg) :
+        vg(vg), accumTime(0), meanTimeMs(0),
+        frameTimes(100), vertexCount(0), triangleCount(0)
+    {
+    }
+    ~Data()
+    {
+    }
+
+    NVGcontext* vg;
+
+    float accumTime, meanTimeMs;
+    MovingAvg<float> frameTimes;
+
+    int vertexCount, triangleCount;
+};
+
+RenderStats::RenderStats(NVGcontext* vg) :
+    d(new Data(vg))
+{
+    nvgCreateFont(vg, "conradi", "data/conradi_square.ttf");
 }
 
 RenderStats::~RenderStats()
@@ -33,15 +51,15 @@ void RenderStats::accumulate(const pt::Duration& frameTime,
     const float timeUs = std::chrono::duration
                          <float, std::micro>(frameTime).count();
 
-    this->frameTimes.push(timeUs);
-    this->vertexCount   = vertexCount;
-    this->triangleCount = triangleCount;
+    d->frameTimes.push(timeUs);
+    d->vertexCount   = vertexCount;
+    d->triangleCount = triangleCount;
 
-    accumTime += timeUs;
-    if (accumTime >= UPDATE_INTERVAL_US || !meanTimeMs)
+    d->accumTime += timeUs;
+    if (d->accumTime >= UPDATE_INTERVAL_US || !d->meanTimeMs)
     {
-        meanTimeMs = frameTimes.mean() * 0.001f;
-        accumTime  = std::fmod(accumTime, UPDATE_INTERVAL_US);
+        d->meanTimeMs = d->frameTimes.mean() * 0.001f;
+        d->accumTime  = std::fmod(d->accumTime, UPDATE_INTERVAL_US);
     }
 }
 
@@ -50,19 +68,19 @@ RenderStats& RenderStats::operator()()
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    nvgBeginFrame(vg, viewport[2], viewport[3], 1.f);
-    nvgFontSize(vg, 16.0f);
-    nvgFontFace(vg, "dejavu-sans");
-    nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
+    nvgBeginFrame(d->vg, viewport[2], viewport[3], 1.f);
+    nvgFontSize(d->vg, 24.0f);
+    nvgFontFace(d->vg, "conradi");
+    nvgFillColor(d->vg, nvgRGBA(255, 255, 255, 255));
 
-    const float timeMs = meanTimeMs;
+    const float timeMs = d->meanTimeMs;
 
-    nvgText(vg, 10, 20, str(std::stringstream()
-                            << std::fixed << std::setprecision(1)
-                            << "Time: " << timeMs << " ms").c_str(), 0);
-    nvgText(vg, 140, 20, str(std::stringstream()
-                            << std::fixed << std::setprecision(1)
-                            << "FPS: " << (1000.f / timeMs)).c_str(), 0);
+    nvgText(d->vg, 10, 20, str(std::stringstream()
+                               << std::fixed << std::setprecision(1)
+                               << "Time: " << timeMs << " ms").c_str(), 0);
+    nvgText(d->vg, 140, 20, str(std::stringstream()
+                               << std::fixed << std::setprecision(1)
+                               << "FPS: " << (1000.f / timeMs)).c_str(), 0);
 #if 0
     nvgText(vg, 10, 40, str(std::stringstream()
                             << "Vertices: " << vertexCount).c_str(), 0);
@@ -75,7 +93,7 @@ RenderStats& RenderStats::operator()()
     nvgText(vg, 10, 60, str(std::stringstream()
                             << "Geometry: ~" << geomKb << " KB").c_str(), 0);
 #endif
-    nvgEndFrame(vg);
+    nvgEndFrame(d->vg);
     return *this;
 }
 

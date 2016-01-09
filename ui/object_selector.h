@@ -7,6 +7,7 @@ namespace ui
 
 struct ObjectSelector
 {
+    //ObjectSelector(NVGcontext* vg);
 };
 
 } // namespace ui

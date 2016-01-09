@@ -1,8 +1,11 @@
 #pragma once
 
+#include <memory>
+
 #include "platform/clock.h"
 #include "common/statistics.h"
 
+// NanoVG context
 struct NVGcontext;
 
 namespace pt
@@ -21,12 +24,8 @@ struct RenderStats
     RenderStats& operator()();
 
 private:
-    NVGcontext* vg;
-
-    float accumTime, meanTimeMs;
-    MovingAvg<float> frameTimes;
-
-    int vertexCount, triangleCount;
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace ui
