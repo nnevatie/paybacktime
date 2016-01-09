@@ -7,12 +7,12 @@ struct NVGcontext;
 
 namespace pt
 {
-namespace gfx
+namespace ui
 {
 
 struct RenderStats
 {
-    RenderStats();
+    RenderStats(NVGcontext* vg);
     ~RenderStats();
 
     void accumulate(const Duration& frameTime,

@@ -4,33 +4,27 @@
 #include <iomanip>
 
 #include <glad/glad.h>
-
-#include <glad/glad.h>
-
-#define NANOVG_GL3_IMPLEMENTATION
-#include <nanovg_gl.h>
+#include <nanovg.h>
 
 #include "common/common.h"
 #include "geom/mesh.h"
 
 namespace pt
 {
-namespace gfx
+namespace ui
 {
 
 const float UPDATE_INTERVAL_US = 1000.f * 200;
 
-RenderStats::RenderStats() :
-    accumTime(0), meanTimeMs(0),
+RenderStats::RenderStats(NVGcontext* vg) :
+    vg(vg), accumTime(0), meanTimeMs(0),
     frameTimes(100), vertexCount(0), triangleCount(0)
 {
-    vg = nvgCreateGL3(0);
     nvgCreateFont(vg, "dejavu-sans", "data/deja_vu_sans.ttf");
 }
 
 RenderStats::~RenderStats()
 {
-    nvgDeleteGL3(vg);
 }
 
 void RenderStats::accumulate(const pt::Duration& frameTime,
