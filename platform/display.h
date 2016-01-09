@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -10,6 +11,9 @@
 
 #include "geom/size.h"
 #include "img/image.h"
+
+// NanoVC context type
+struct NVGcontext;
 
 namespace pt
 {
@@ -23,6 +27,7 @@ struct Display
 
     Size<int> size() const;
 
+    NVGcontext* nanoVg() const;
     SDL_Surface* surface() const;
 
     bool open();
@@ -36,12 +41,8 @@ struct Display
     Image capture() const;
 
 private:
-
-    std::string title_;
-    Size<int> size_;
-
-    SDL_Window* window_;
-    SDL_GLContext glContext_;
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace ui

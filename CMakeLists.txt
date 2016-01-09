@@ -15,6 +15,7 @@ file(GLOB HEADER_FILES
     scene/*.h
     common/*.h
     gfx/*.h
+    ui/*.h
     gl/*.h
     )
 
@@ -26,6 +27,7 @@ file(GLOB SOURCE_FILES
     scene/*.cpp
     common/*.cpp
     gfx/*.cpp
+    ui/*.cpp
     gl/*.cpp
     )
 
@@ -80,6 +82,7 @@ include_directories(
 
 # Build definitions
 add_definitions(-D_USE_MATH_DEFINES
+                -DNANOVG_GL3_IMPLEMENTATION
                 -DBOOST_THREAD_VERSION=4
                 -DGLM_SWIZZLE)
 

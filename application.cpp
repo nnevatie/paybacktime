@@ -27,7 +27,8 @@
 #include "gfx/color_grade.h"
 #include "gfx/anti_alias.h"
 #include "gfx/output.h"
-#include "gfx/render_stats.h"
+
+#include "ui/render_stats.h"
 
 #include "scene/object_store.h"
 #include "scene/scene.h"
@@ -55,7 +56,8 @@ struct Impl
     gfx::ColorGrade colorGrade;
     gfx::AntiAlias antiAlias;
     gfx::Output output;
-    gfx::RenderStats stats;
+
+    ui::RenderStats stats;
 
     Camera camera;
     CameraControl cameraControl;
@@ -93,6 +95,7 @@ struct Impl
         outline(renderSize, geometry.texDepth),
         colorGrade(renderSize),
         antiAlias(renderSize),
+        stats(display->nanoVg()),
 
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
                glm::radians(45.f), renderSize.aspect<float>(), 0.1, 750.f),

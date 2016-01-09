@@ -2,6 +2,9 @@
 
 #include <glad/glad.h>
 
+#include <nanovg.h>
+#include <nanovg_gl.h>
+
 #include "platform/clock.h"
 #include "common/log.h"
 
@@ -26,11 +29,26 @@ namespace pt
 namespace platform
 {
 
+struct Display::Data
+{
+    Data(const std::string& title, const Size<int>& size) :
+        title(title), size(size),
+        window(nullptr), glContext(nullptr), nvgContext(nullptr)
+    {
+    }
+    ~Data()
+    {
+    }
+
+    std::string   title;
+    Size<int>     size;
+    SDL_Window*   window;
+    SDL_GLContext glContext;
+    NVGcontext*   nvgContext;
+};
+
 Display::Display(const std::string& title, const Size<int>& size) :
-    title_(title),
-    size_(size),
-    window_(nullptr),
-    glContext_(nullptr)
+    d(new Data(title, size))
 {
 }
 
@@ -41,18 +59,23 @@ Display::~Display()
 
 Size<int> Display::size() const
 {
-    return size_;
+    return d->size;
+}
+
+NVGcontext* Display::nanoVg() const
+{
+    return d->nvgContext;
 }
 
 SDL_Surface* Display::surface() const
 {
-    return SDL_GetWindowSurface(window_);
+    return SDL_GetWindowSurface(d->window);
 }
 
 bool Display::open()
 {
     HCTIME("");
-    if (!window_)
+    if (!d->window)
     {
         // Log available video drivers
         HCLOG(Debug) << "Video drivers:";
@@ -70,23 +93,23 @@ bool Display::open()
                             SDL_GL_CONTEXT_DEBUG_FLAG);
 
         // Set GL buffer attributes
-        SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
-        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,  8);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 0);
+        SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     8);
+        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   8);
+        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    8);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,   24);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
         // Create window
-        window_ = SDL_CreateWindow(title_.c_str(),
+        d->window = SDL_CreateWindow(d->title.c_str(),
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
-            size_.w,
-            size_.h,
+            d->size.w,
+            d->size.h,
             SDL_WINDOW_OPENGL |
             SDL_WINDOW_ALLOW_HIGHDPI);
 
         // Create OpenGL context
-        glContext_ = SDL_GL_CreateContext(window_);
+        d->glContext = SDL_GL_CreateContext(d->window);
 
         // Init GLAD
         const int gladStatus = gladLoadGLLoader((GLADloadproc)
@@ -116,6 +139,9 @@ bool Display::open()
                      << gpuRamTotal << ", "
                      << gpuRamAvail;
 
+        // init NanoVG
+        d->nvgContext = nvgCreateGL3(0);
+
         return gladStatus;
     }
     else
@@ -126,10 +152,14 @@ bool Display::open()
 
 bool Display::close()
 {
-    if (window_)
+    if (d->window)
     {
-        SDL_GL_DeleteContext(glContext_);
-        SDL_DestroyWindow(window_);
+        SDL_GL_DeleteContext(d->glContext);
+        SDL_DestroyWindow(d->window);
+        nvgDeleteGL3(d->nvgContext);
+        d->glContext  = nullptr;
+        d->window     = nullptr;
+        d->nvgContext = nullptr;
         return true;
     }
     else
@@ -140,14 +170,14 @@ bool Display::close()
 
 bool Display::update()
 {
-    return !SDL_UpdateWindowSurface(window_);
+    return !SDL_UpdateWindowSurface(d->window);
 }
 
 bool Display::swap()
 {
-    if (window_)
+    if (d->window)
     {
-        SDL_GL_SwapWindow(window_);
+        SDL_GL_SwapWindow(d->window);
         return true;
     }
     return false;
@@ -155,8 +185,8 @@ bool Display::swap()
 
 glm::vec3 Display::rayNdc(const glm::ivec2& p) const
 {
-    return glm::vec3((2.f * p.x) / size_.w - 1.f,
-                     1.f - (2.f * p.y) / size_.h, 1.f);
+    return glm::vec3((2.f * p.x) / d->size.w - 1.f,
+                     1.f - (2.f * p.y) / d->size.h, 1.f);
 }
 
 glm::vec4 Display::rayClip(const glm::ivec2& p) const
