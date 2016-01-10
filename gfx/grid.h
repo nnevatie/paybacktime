@@ -7,6 +7,8 @@
 #include "gl/texture.h"
 #include "gl/fbo.h"
 
+#include "scene/camera.h"
+
 namespace pt
 {
 namespace gfx
@@ -15,6 +17,7 @@ namespace gfx
 struct Grid
 {
     gl::Primitive     grid;
+    gl::Primitive     rect;
 
     gl::Shader        vsModel,
                       fsColor;
@@ -23,7 +26,8 @@ struct Grid
 
     Grid();
 
-    Grid& operator()(gl::Fbo* fboOut, const glm::mat4& mvp);
+    Grid& operator()(gl::Fbo* fboOut, gl::Texture* texDepth,
+                     const Camera& camera);
 };
 
 } // namespace gfx
