@@ -205,7 +205,7 @@ struct Impl
 
         bloom(&geometry.texColor, lighting.output(), &geometry.texLight);
         outline(&lighting.fbo, lighting.output(), wall, proj * view * model);
-        grid(&lighting.fbo, &geometry.texDepth, camera);
+        grid(&lighting.fbo, camera);
         colorGrade(lighting.output(), bloom.output());
         antiAlias(colorGrade.output());
         output(antiAlias.output());

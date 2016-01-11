@@ -16,7 +16,6 @@ namespace gfx
 
 struct Grid
 {
-    gl::Primitive     grid;
     gl::Primitive     rect;
 
     gl::Shader        vsModel,
@@ -26,8 +25,7 @@ struct Grid
 
     Grid();
 
-    Grid& operator()(gl::Fbo* fboOut, gl::Texture* texDepth,
-                     const Camera& camera);
+    Grid& operator()(gl::Fbo* fboOut, const Camera& camera);
 };
 
 } // namespace gfx

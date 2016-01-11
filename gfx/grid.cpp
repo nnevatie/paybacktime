@@ -8,7 +8,6 @@ namespace gfx
 {
 
 Grid::Grid() :
-    grid(gridMesh(16, 128, 128)),
     rect(squareMesh()),
     vsModel(gl::Shader::path("quad_uv.vs.glsl")),
     fsColor(gl::Shader::path("grid.fs.glsl")),
@@ -17,23 +16,21 @@ Grid::Grid() :
 {
 }
 
-Grid& Grid::operator()(gl::Fbo* fboOut, gl::Texture* texDepth,
-                       const Camera& camera)
+Grid& Grid::operator()(gl::Fbo* fboOut, const Camera& camera)
 {
     Binder<gl::Fbo> binder(fboOut);
     prog.bind()
-        .setUniform("texDepth",    0)
-        .setUniform("pos",         camera.position())
         .setUniform("v",           camera.matrixView())
+        .setUniform("pos",         camera.position())
+        .setUniform("z",           1.f)
         .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
         .setUniform("aspectRatio", camera.ar)
         .setUniform("gridColor",   glm::vec4(0, 0.5, 0, 1));
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glDepthMask(false);
 
-    texDepth->bindAs(GL_TEXTURE0);
     rect.render();
     return* this;
 }
