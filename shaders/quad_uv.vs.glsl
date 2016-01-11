@@ -3,6 +3,7 @@
 // Uniforms
 uniform float tanHalfFov;
 uniform float aspectRatio;
+uniform float z;
 
 // Input
 in vec3 position;
@@ -22,5 +23,5 @@ void main()
     ob.viewRay  = vec3(position.x * tanHalfFov * aspectRatio,
                        position.y * tanHalfFov,
                        -1.0);
-    gl_Position = vec4(position, 1.0);
+    gl_Position = vec4(position.xy, z, 1.0);
 }
