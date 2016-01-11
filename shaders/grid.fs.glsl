@@ -5,10 +5,9 @@ const float PI = 3.14159265358979323846;
 
 // Uniforms
 uniform sampler2D texDepth;
+uniform mat4      v;
 uniform vec3      pos;
-uniform float     yaw;
-uniform float     pitch;
-uniform vec4      albedo;
+uniform vec4      gridColor;
 
 // Input
 in Block
@@ -33,29 +32,12 @@ vec4 grid(vec2 p, vec4 color)
            max(sin((p.x) * frq), sin((p.y) * frq)));
 }
 
-mat3 mx(float beta)
-{
-    return mat3(1, 0, 0,
-                0,  cos(beta), sin(beta),
-                0, -sin(beta), cos(beta));
-}
-
-mat3 my(float beta)
-{
-    return mat3(cos(beta), 0, sin(beta),
-                0, 1, 0,
-               -sin(beta), 0, cos(beta));
-}
-
 void main(void)
 {
     if (texture(texDepth, ib.uv).r < 1.0)
         discard;
 
-    vec3  r = normalize(ib.viewRay);
-    vec3  p = pos;
-    r      *= mx(-pitch) * my(yaw - PI / 2);
-    float d = intersect(p, r);
-    vec4  t = grid((p + d * r).xz, albedo);
-    color   = max(0, 1 - d * 0.0015) * t;
+    vec3  r = normalize(ib.viewRay) * mat3(v);
+    float d = intersect(pos, r);
+    color   = max(0, 1 - d * 0.0015) * grid((pos + d * r).xz, gridColor);
 }

@@ -24,11 +24,10 @@ Grid& Grid::operator()(gl::Fbo* fboOut, gl::Texture* texDepth,
     prog.bind()
         .setUniform("texDepth",    0)
         .setUniform("pos",         camera.position())
-        .setUniform("yaw",         camera.yaw)
-        .setUniform("pitch",       camera.pitch)
+        .setUniform("v",           camera.matrixView())
         .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
         .setUniform("aspectRatio", camera.ar)
-        .setUniform("albedo",      glm::vec4(0, 0.5, 0, 1));
+        .setUniform("gridColor",   glm::vec4(0, 0.5, 0, 1));
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);
