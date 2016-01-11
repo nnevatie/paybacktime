@@ -27,9 +27,9 @@ float intersect(vec3 origin, vec3 dir)
 
 vec4 grid(vec2 p, vec4 color)
 {
-    float frq = 0.25;
+    float frq = PI / 8.0;
     return color * smoothstep(.98, 1.05,
-           max(sin((p.x) * frq), sin((p.y) * frq)));
+           max(sin((p.x + 4.0) * frq), sin((p.y + 4.0) * frq)));
 }
 
 void main(void)
