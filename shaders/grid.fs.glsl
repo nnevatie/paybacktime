@@ -4,6 +4,7 @@
 const float PI = 3.14159265358979323846;
 
 // Uniforms
+uniform sampler2D tex;
 uniform mat4      v;
 uniform vec3      pos;
 uniform vec4      gridColor;
@@ -33,10 +34,8 @@ vec4 grid(vec2 p, vec4 color)
 
 vec4 sphere(vec3 p)
 {
-    float t = 0.5 - asin(p.y) / PI;
-    float a = smoothstep(0.1, 0.99, clamp(t + 0.2, 0, 1));
-    vec3  c = mix(vec3(0.0, 0.025, 0.05), vec3(0.0, 0.0, 0.0), a);
-    return vec4(c, 1);
+    vec2 uv = vec2(0.5 - atan(p.z, p.x) / (2 * PI), 0.5 - asin(p.y) / PI);
+    return texture(tex, uv);
 }
 
 void main(void)

@@ -23,6 +23,8 @@ struct Grid
 
     gl::ShaderProgram prog;
 
+    gl::Texture       tex;
+
     Grid();
 
     Grid& operator()(gl::Fbo* fboOut, const Camera& camera);

@@ -14,12 +14,16 @@ Grid::Grid() :
     prog({vsModel, fsColor},
         {{0, "position"}, {1, "uv"}})
 {
+    tex.bind().alloc(Image("data/backdrop.png"))
+              .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+              .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 Grid& Grid::operator()(gl::Fbo* fboOut, const Camera& camera)
 {
     Binder<gl::Fbo> binder(fboOut);
     prog.bind()
+        .setUniform("tex",         0)
         .setUniform("v",           camera.matrixView())
         .setUniform("pos",         camera.position())
         .setUniform("z",           1.f)
@@ -31,6 +35,7 @@ Grid& Grid::operator()(gl::Fbo* fboOut, const Camera& camera)
     glEnable(GL_DEPTH_TEST);
     glDepthMask(false);
 
+    tex.bindAs(GL_TEXTURE0);
     rect.render();
     return* this;
 }
