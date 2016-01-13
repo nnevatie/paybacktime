@@ -23,7 +23,7 @@
 #include "gfx/lighting.h"
 #include "gfx/bloom.h"
 #include "gfx/outline.h"
-#include "gfx/grid.h"
+#include "gfx/backdrop.h"
 #include "gfx/color_grade.h"
 #include "gfx/anti_alias.h"
 #include "gfx/output.h"
@@ -52,7 +52,7 @@ struct Impl
     gfx::Lighting lighting;
     gfx::Bloom bloom;
     gfx::Outline outline;
-    gfx::Grid grid;
+    gfx::Backdrop backdrop;
     gfx::ColorGrade colorGrade;
     gfx::AntiAlias antiAlias;
     gfx::Output output;
@@ -205,7 +205,7 @@ struct Impl
 
         bloom(&geometry.texColor, lighting.output(), &geometry.texLight);
         outline(&lighting.fbo, lighting.output(), wall, proj * view * model);
-        grid(&lighting.fbo, camera);
+        backdrop(&lighting.fbo, camera);
         colorGrade(lighting.output(), bloom.output());
         antiAlias(colorGrade.output());
         output(antiAlias.output());

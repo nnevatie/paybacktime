@@ -14,7 +14,7 @@ namespace pt
 namespace gfx
 {
 
-struct Grid
+struct Backdrop
 {
     gl::Primitive     rect;
 
@@ -25,9 +25,9 @@ struct Grid
 
     gl::Texture       tex;
 
-    Grid();
+    Backdrop();
 
-    Grid& operator()(gl::Fbo* fboOut, const Camera& camera);
+    Backdrop& operator()(gl::Fbo* fboOut, const Camera& camera);
 };
 
 } // namespace gfx

@@ -20,7 +20,7 @@ ib;
 // Output
 out vec4 color;
 
-float intersect(vec3 origin, vec3 dir)
+float gridDistance(vec3 origin, vec3 dir)
 {
     return length(dir * origin.y / dir.y);
 }
@@ -32,7 +32,7 @@ vec4 grid(vec2 p, vec4 color)
            max(1.05 * sin((p.x + 4.0) * frq), 1.05 * sin((p.y + 4.0) * frq)));
 }
 
-vec4 sphere(vec3 p)
+vec4 sphere(vec3 p, sampler2D tex)
 {
     vec2 uv = vec2(0.5 - atan(p.z, p.x) / (2 * PI), 0.5 - asin(p.y) / PI);
     return texture(tex, uv);
@@ -41,8 +41,7 @@ vec4 sphere(vec3 p)
 void main(void)
 {
     vec3  ray = normalize(ib.viewRay) * mat3(v);
-    float dg  = intersect(pos, ray);
-    vec3  ps  = normalize(ray);
-    color     = sphere(ps) +
-                max(0, 1 - dg * 0.0015) * grid((pos + dg * ray).xz, gridColor);
+    float gd  = gridDistance(pos, ray);
+    color     = sphere(ray, tex) +
+                max(0, 1 - gd * 0.0015) * grid((pos + gd * ray).xz, gridColor);
 }

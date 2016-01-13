@@ -1,4 +1,4 @@
-#include "grid.h"
+#include "backdrop.h"
 
 #include "common/common.h"
 
@@ -7,10 +7,10 @@ namespace pt
 namespace gfx
 {
 
-Grid::Grid() :
+Backdrop::Backdrop() :
     rect(squareMesh()),
     vsModel(gl::Shader::path("quad_uv.vs.glsl")),
-    fsColor(gl::Shader::path("grid.fs.glsl")),
+    fsColor(gl::Shader::path("backdrop.fs.glsl")),
     prog({vsModel, fsColor},
         {{0, "position"}, {1, "uv"}})
 {
@@ -19,7 +19,7 @@ Grid::Grid() :
               .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-Grid& Grid::operator()(gl::Fbo* fboOut, const Camera& camera)
+Backdrop& Backdrop::operator()(gl::Fbo* fboOut, const Camera& camera)
 {
     Binder<gl::Fbo> binder(fboOut);
     prog.bind()
