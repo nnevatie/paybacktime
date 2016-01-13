@@ -90,7 +90,8 @@ bool Display::open()
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
-                            SDL_GL_CONTEXT_DEBUG_FLAG);
+                            SDL_GL_CONTEXT_DEBUG_FLAG |
+                            SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
         // Set GL buffer attributes
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     8);
