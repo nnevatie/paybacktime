@@ -80,10 +80,9 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/ext
     ${CMAKE_SOURCE_DIR}/ext/stb
     ${CMAKE_SOURCE_DIR}/ext/glad
+    ${CMAKE_SOURCE_DIR}/ext/eigen
     ${CMAKE_SOURCE_DIR}/ext/nanovg/src
     ${CMAKE_SOURCE_DIR}/ext/nanogui-sdl
-    ${CMAKE_SOURCE_DIR}/ext/nanogui-sdl/ext
-    ${CMAKE_SOURCE_DIR}/ext/nanogui-sdl/ext/eigen
     ${CMAKE_SOURCE_DIR}/ext/gsl-lite/include
     )
 
