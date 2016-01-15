@@ -32,12 +32,10 @@ file(GLOB SOURCE_FILES
     )
 
 file(GLOB EXT_HEADER_FILES
-    ext/*.h
     )
 
 file(GLOB EXT_SOURCE_FILES
-    ext/*.c
-    ext/*.cpp
+    ext/glad/*.c
     ext/nanovg/src/*.c
     )
 
@@ -80,6 +78,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/ext
     ${CMAKE_SOURCE_DIR}/ext/stb
+    ${CMAKE_SOURCE_DIR}/ext/glad
     ${CMAKE_SOURCE_DIR}/ext/nanovg/src
     ${CMAKE_SOURCE_DIR}/ext/gsl-lite/include
     )
