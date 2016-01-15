@@ -1,3 +1,6 @@
 [submodule "ext/nanovg"]
 	path = ext/nanovg
 	url = git@github.com:memononen/nanovg.git
+[submodule "ext/stb"]
+	path = ext/stb
+	url = git@github.com:nothings/stb.git

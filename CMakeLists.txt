@@ -79,6 +79,7 @@ set(OPENGL_LIBS
 include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/ext
+    ${CMAKE_SOURCE_DIR}/ext/stb
     ${CMAKE_SOURCE_DIR}/ext/nanovg/src
     )
 
