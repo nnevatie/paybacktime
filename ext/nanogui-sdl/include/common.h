@@ -162,7 +162,10 @@ public:
         return Color(luminance < 0.5f ? 1.f : 0.f, 1.f);
     }
 
-    inline operator const NVGcolor &() const;
+    inline operator const NVGcolor &() const
+    {
+        return reinterpret_cast<const NVGcolor &>(*this->data());
+    }
 };
 
 
