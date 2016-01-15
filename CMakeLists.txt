@@ -37,6 +37,7 @@ file(GLOB EXT_HEADER_FILES
 file(GLOB EXT_SOURCE_FILES
     ext/glad/*.c
     ext/nanovg/src/*.c
+    ext/nanogui-sdl/src/*.cpp
     )
 
 file(GLOB SHADER_FILES
@@ -80,11 +81,15 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/ext/stb
     ${CMAKE_SOURCE_DIR}/ext/glad
     ${CMAKE_SOURCE_DIR}/ext/nanovg/src
+    ${CMAKE_SOURCE_DIR}/ext/nanogui-sdl
+    ${CMAKE_SOURCE_DIR}/ext/nanogui-sdl/ext
+    ${CMAKE_SOURCE_DIR}/ext/nanogui-sdl/ext/eigen
     ${CMAKE_SOURCE_DIR}/ext/gsl-lite/include
     )
 
 # Build definitions
 add_definitions(-D_USE_MATH_DEFINES
+                -DEIGEN_DONT_PARALLELIZE
                 -DNANOVG_GL3_IMPLEMENTATION
                 -DBOOST_THREAD_VERSION=4
                 -DGLM_SWIZZLE)
