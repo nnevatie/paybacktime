@@ -38,6 +38,7 @@ file(GLOB EXT_HEADER_FILES
 file(GLOB EXT_SOURCE_FILES
     ext/*.c
     ext/*.cpp
+    ext/nanovg/src/*.c
     )
 
 file(GLOB SHADER_FILES
@@ -76,8 +77,9 @@ set(OPENGL_LIBS
 
 # Include paths
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/ext
+    ${CMAKE_SOURCE_DIR}/ext/nanovg/src
     )
 
 # Build definitions
