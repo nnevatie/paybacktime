@@ -3,8 +3,6 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/intersect.hpp>
-#include <glm/gtx/vector_query.hpp>
 
 #include "common/file_system.h"
 #include "img/image_cube.h"
