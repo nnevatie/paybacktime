@@ -26,6 +26,7 @@
 #include "gfx/anti_alias.h"
 #include "gfx/output.h"
 
+#include "ui/object_selector.h"
 #include "ui/render_stats.h"
 
 #include "scene/object_store.h"
@@ -56,6 +57,7 @@ struct Impl
     gfx::Output output;
 
     ui::RenderStats stats;
+    ui::ObjectSelector objectSelector;
 
     Camera camera;
     CameraControl cameraControl;
@@ -93,6 +95,8 @@ struct Impl
         outline(renderSize, geometry.texDepth),
         colorGrade(renderSize),
         antiAlias(renderSize),
+
+        objectSelector(display->nanoVg()),
         stats(display->nanoVg()),
 
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
@@ -208,6 +212,7 @@ struct Impl
         antiAlias(colorGrade.output());
         output(antiAlias.output());
 
+        objectSelector();
         stats.accumulate(clock.elapsed(), 0, 0);
         stats();
 

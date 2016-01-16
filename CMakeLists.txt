@@ -88,16 +88,19 @@ include_directories(
 
 # Build definitions
 add_definitions(-D_USE_MATH_DEFINES
+                -DEIGEN_NO_DEBUG
                 -DEIGEN_DONT_PARALLELIZE
                 -DNANOVG_GL3_IMPLEMENTATION
                 -DBOOST_THREAD_VERSION=4
                 -DGLM_SWIZZLE)
 
+add_library(${PROJECT_NAME}_ext ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES})
+
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
-                               ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES}
                                ${SHADER_FILES} ${RESOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME}
+                      ${PROJECT_NAME}_ext
                       ${SYS_LIBS}
                       ${BOOST_LIBS}
                       ${SDL_LIBS}
