@@ -13,6 +13,10 @@
 #include "img/image.h"
 
 struct NVGcontext;
+namespace nanogui
+{
+class Screen;
+}
 
 namespace pt
 {
@@ -24,10 +28,11 @@ struct Display
     Display(const std::string& title, const Size<int>& size);
     ~Display();
 
-    Size<int> size() const;
-
-    NVGcontext* nanoVg() const;
-    SDL_Surface* surface() const;
+    Size<int>         size() const;
+    SDL_Window*       window() const;
+    SDL_Surface*      surface() const;
+    NVGcontext*       nanoVg() const;
+    nanogui::Screen*  nanoGui() const;
 
     bool open();
     bool close();
@@ -36,6 +41,8 @@ struct Display
 
     glm::vec3 rayNdc(const glm::ivec2& p) const;
     glm::vec4 rayClip(const glm::ivec2& p) const;
+
+    Display& processEvent(SDL_Event* event);
 
     Image capture() const;
 

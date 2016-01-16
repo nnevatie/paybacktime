@@ -5,6 +5,8 @@
 #include <nanovg.h>
 #include <nanovg_gl.h>
 
+#include <include/screen.h>
+
 #include "platform/clock.h"
 #include "common/log.h"
 
@@ -33,18 +35,20 @@ struct Display::Data
 {
     Data(const std::string& title, const Size<int>& size) :
         title(title), size(size),
-        window(nullptr), glContext(nullptr), nvgContext(nullptr)
+        window(nullptr), glContext(nullptr),
+        nvgContext(nullptr), nanoguiScreen(nullptr)
     {
     }
     ~Data()
     {
     }
 
-    std::string   title;
-    Size<int>     size;
-    SDL_Window*   window;
-    SDL_GLContext glContext;
-    NVGcontext*   nvgContext;
+    std::string      title;
+    Size<int>        size;
+    SDL_Window*      window;
+    SDL_GLContext    glContext;
+    NVGcontext*      nvgContext;
+    nanogui::Screen* nanoguiScreen;
 };
 
 Display::Display(const std::string& title, const Size<int>& size) :
@@ -62,14 +66,24 @@ Size<int> Display::size() const
     return d->size;
 }
 
-NVGcontext* Display::nanoVg() const
+SDL_Window* Display::window() const
 {
-    return d->nvgContext;
+    return d->window;
 }
 
 SDL_Surface* Display::surface() const
 {
     return SDL_GetWindowSurface(d->window);
+}
+
+NVGcontext* Display::nanoVg() const
+{
+    return d->nvgContext;
+}
+
+nanogui::Screen*Display::nanoGui() const
+{
+    return d->nanoguiScreen;
 }
 
 bool Display::open()
@@ -98,6 +112,7 @@ bool Display::open()
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   8);
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    8);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,   24);
+        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
         // Create window
@@ -140,9 +155,11 @@ bool Display::open()
                      << gpuRamTotal << ", "
                      << gpuRamAvail;
 
-        // init NanoVG
+        // Init NanoVG
         d->nvgContext = nvgCreateGL3(0);
 
+        // Init NanoGUI
+        d->nanoguiScreen = new nanogui::Screen(d->nvgContext, d->window);
         return gladStatus;
     }
     else
@@ -158,9 +175,12 @@ bool Display::close()
         SDL_GL_DeleteContext(d->glContext);
         SDL_DestroyWindow(d->window);
         nvgDeleteGL3(d->nvgContext);
-        d->glContext  = nullptr;
-        d->window     = nullptr;
-        d->nvgContext = nullptr;
+        delete d->nanoguiScreen;
+
+        d->glContext     = nullptr;
+        d->window        = nullptr;
+        d->nvgContext    = nullptr;
+        d->nanoguiScreen = nullptr;
         return true;
     }
     else
@@ -194,6 +214,12 @@ glm::vec4 Display::rayClip(const glm::ivec2& p) const
 {
     const glm::vec3 n = rayNdc(p);
     return glm::vec4(n.x, n.y, -1.f, 1.f);
+}
+
+Display& Display::processEvent(SDL_Event* event)
+{
+    if (event) d->nanoguiScreen->onEvent(*event);
+    return *this;
 }
 
 Image Display::capture() const

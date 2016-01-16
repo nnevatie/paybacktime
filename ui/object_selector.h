@@ -2,16 +2,19 @@
 
 #include <memory>
 
-struct NVGcontext;
-
 namespace pt
 {
+namespace platform
+{
+struct Display;
+}
+
 namespace ui
 {
 
 struct ObjectSelector
 {
-    ObjectSelector(NVGcontext* vg);
+    ObjectSelector(platform::Display* display);
 
     ObjectSelector& operator()();
 

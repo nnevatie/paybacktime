@@ -96,7 +96,7 @@ struct Impl
         colorGrade(renderSize),
         antiAlias(renderSize),
 
-        objectSelector(display->nanoVg()),
+        objectSelector(display),
         stats(display->nanoVg()),
 
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
@@ -146,7 +146,10 @@ struct Impl
         mouse.reset();
         SDL_Event event;
         while (SDL_PollEvent(&event))
+        {
+            display->processEvent(&event);
             mouse.update(event);
+        }
 
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
         if (keyState[SDL_SCANCODE_ESCAPE])

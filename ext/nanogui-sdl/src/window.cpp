@@ -19,7 +19,8 @@
 NAMESPACE_BEGIN(nanogui)
 
 Window::Window(Widget *parent, const std::string &title)
-    : Widget(parent), mTitle(title), mButtonPanel(nullptr), mModal(false), mDrag(false) { }
+    : Widget(parent), mTitle(title), mButtonPanel(nullptr),
+      mMovable(false), mModal(false), mDrag(false) { }
 
 Vector2i Window::preferredSize(NVGcontext *ctx) const
 {
@@ -153,7 +154,7 @@ void Window::center() {
 
 bool Window::mouseDragEvent(const Vector2i &, const Vector2i &rel,
                             int button, int /* modifiers */) {
-    if (mDrag && (button & (1 << SDL_BUTTON_LEFT)) != 0) {
+    if (mMovable && mDrag && (button & (1 << SDL_BUTTON_LEFT)) != 0) {
         mPos += rel;
         mPos = mPos.cwiseMax(Vector2i::Zero());
         mPos = mPos.cwiseMin(parent()->size() - mSize);

@@ -31,8 +31,7 @@ class NANOGUI_EXPORT Screen : public Widget
     friend class Window;
 public:
     /// Create a new screen
-    Screen( SDL_Window* window, const Vector2i &size, const std::string &caption,
-            bool resizable = true, bool fullscreen = false);
+    Screen(NVGcontext* nvgContext, SDL_Window* window);
 
     /// Release all resources
     virtual ~Screen();
@@ -88,7 +87,7 @@ public:
     void performLayout();
 public:
     /// Initialize the \ref Screen
-    void initialize(SDL_Window *window);
+    void initialize(NVGcontext* nvgContext, SDL_Window *window);
 
     /* Event handlers */
     bool cursorPosCallbackEvent(double x, double y);

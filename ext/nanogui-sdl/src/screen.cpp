@@ -104,10 +104,7 @@
   PFNGLUNIFORM2FVPROC glUniform2fv;
 #endif
 
-/* Allow enforcing the GL2 implementation of NanoVG */
-#define NANOVG_GL2_IMPLEMENTATION
 #include <SDL2/SDL.h>
-#include <nanovg_gl.h>
 
 NAMESPACE_BEGIN(nanogui)
 static bool __glInit = false;
@@ -180,13 +177,12 @@ static void __initGl()
    }
 }
 
-Screen::Screen( SDL_Window* window, const Vector2i &size, const std::string &caption,
-               bool resizable, bool fullscreen)
-    : Widget(nullptr), _window(nullptr), mNVGContext(nullptr), mCaption(caption)
+Screen::Screen(NVGcontext* nvgContext,
+               SDL_Window* window)
+    : Widget(nullptr), _window(nullptr), mNVGContext(nullptr)
 {
     __initGl();
-    SDL_SetWindowTitle( window, caption.c_str() );
-    initialize( window );
+    initialize(nvgContext, window);
 }
 
 void Screen::onEvent(SDL_Event& event)
@@ -237,19 +233,13 @@ void Screen::onEvent(SDL_Event& event)
     }
 }
 
-void Screen::initialize(SDL_Window* window)
+void Screen::initialize(NVGcontext* nvgContext, SDL_Window* window)
 {
     _window = window;    
     SDL_GetWindowSize( window, &mSize[0], &mSize[1]);
     SDL_GetWindowSize( window, &mFBSize[0], &mFBSize[1]);
 
-#ifdef NDEBUG
-    mNVGContext = nvgCreateGL2(NVG_STENCIL_STROKES | NVG_ANTIALIAS);
-#else
-    mNVGContext = nvgCreateGL2(NVG_STENCIL_STROKES | NVG_ANTIALIAS | NVG_DEBUG);
-#endif
-    if (mNVGContext == nullptr)
-        throw std::runtime_error("Could not initialize NanoVG!");
+    mNVGContext = nvgContext;
 
     mVisible = true;
     mTheme = new Theme(mNVGContext);
@@ -265,8 +255,6 @@ void Screen::initialize(SDL_Window* window)
 Screen::~Screen()
 {
     __nanogui_screens.erase(_window);
-    if (mNVGContext)
-        nvgDeleteGL2(mNVGContext);
 }
 
 void Screen::setVisible(bool visible)

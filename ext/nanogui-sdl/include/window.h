@@ -59,6 +59,7 @@ protected:
 protected:
     std::string mTitle;
     Widget *mButtonPanel;
+    bool mMovable;
     bool mModal;
     bool mDrag;
 };
