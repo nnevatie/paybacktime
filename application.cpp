@@ -56,8 +56,8 @@ struct Impl
     gfx::AntiAlias antiAlias;
     gfx::Output output;
 
-    ui::RenderStats stats;
     ui::ObjectSelector objectSelector;
+    ui::RenderStats stats;
 
     Camera camera;
     CameraControl cameraControl;
@@ -77,8 +77,6 @@ struct Impl
                   wall;
 
     platform::Mouse mouse;
-
-    float ay = 0, az = 0;
 
     Impl(platform::Display* display,
          const std::string& input
@@ -162,9 +160,7 @@ struct Impl
     bool render(float /*a*/)
     {
         glm::mat4 proj  = camera.matrixProj();
-        glm::mat4 view  = camera.matrixView() *
-                         (glm::rotate({}, ay, glm::vec3(0.f, 1.f, 0.f)) *
-                          glm::rotate({}, az, glm::vec3(1.f, 0.f, 0.f)));
+        glm::mat4 view  = camera.matrixView();
         glm::mat4 model;
 
         Time<GpuClock> clock;
