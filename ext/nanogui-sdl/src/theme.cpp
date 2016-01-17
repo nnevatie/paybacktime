@@ -17,6 +17,17 @@
 
 NAMESPACE_BEGIN(nanogui)
 
+namespace
+{
+
+nanogui::Color color(int luma, int alpha)
+{
+    Eigen::Vector3f base(255.f, 230.f, 210.f);
+    return nanogui::Color((base * (luma / 255.f)).cast<int>(), alpha);
+}
+
+}
+
 Theme::Theme(NVGcontext *ctx) {
     mStandardFontSize                 = 16;
     mButtonFontSize                   = 20;
@@ -26,36 +37,36 @@ Theme::Theme(NVGcontext *ctx) {
     mWindowDropShadowSize             = 10;
     mButtonCornerRadius               = 2;
 
-    mDropShadow                       = Color(0, 128);
-    mTransparent                      = Color(0, 0);
-    mBorderDark                       = Color(29, 255);
-    mBorderLight                      = Color(92, 255);
-    mBorderMedium                     = Color(35, 255);
-    mTextColor                        = Color(255, 160);
-    mDisabledTextColor                = Color(255, 80);
-    mTextColorShadow                  = Color(0, 160);
+    mDropShadow                       = color(0, 128);
+    mTransparent                      = color(0, 0);
+    mBorderDark                       = color(29, 255);
+    mBorderLight                      = color(92, 255);
+    mBorderMedium                     = color(35, 255);
+    mTextColor                        = color(255, 160);
+    mDisabledTextColor                = color(255, 80);
+    mTextColorShadow                  = color(0, 160);
     mIconColor                        = mTextColor;
 
-    mButtonGradientTopFocused         = Color(64, 255);
-    mButtonGradientBotFocused         = Color(48, 255);
-    mButtonGradientTopUnfocused       = Color(74, 255);
-    mButtonGradientBotUnfocused       = Color(58, 255);
-    mButtonGradientTopPushed          = Color(41, 255);
-    mButtonGradientBotPushed          = Color(29, 255);
+    mButtonGradientTopFocused         = color(64, 255);
+    mButtonGradientBotFocused         = color(48, 255);
+    mButtonGradientTopUnfocused       = color(74, 255);
+    mButtonGradientBotUnfocused       = color(58, 255);
+    mButtonGradientTopPushed          = color(41, 255);
+    mButtonGradientBotPushed          = color(29, 255);
 
     /* Window-related */
-    mWindowFillUnfocused              = Color(43, 230);
-    mWindowFillFocused                = Color(45, 230);
-    mWindowTitleUnfocused             = Color(220, 160);
-    mWindowTitleFocused               = Color(255, 190);
+    mWindowFillUnfocused              = color(43, 230);
+    mWindowFillFocused                = color(45, 230);
+    mWindowTitleUnfocused             = color(220, 160);
+    mWindowTitleFocused               = color(255, 190);
 
     mWindowHeaderGradientTop          = mButtonGradientTopUnfocused;
     mWindowHeaderGradientBot          = mButtonGradientBotUnfocused;
     mWindowHeaderSepTop               = mBorderLight;
     mWindowHeaderSepBot               = mBorderDark;
 
-    mWindowPopup                      = Color(50, 255);
-    mWindowPopupTransparent           = Color(50, 0);
+    mWindowPopup                      = color(50, 255);
+    mWindowPopupTransparent           = color(50, 0);
 
     mFontNormal = nvgCreateFontMem(ctx, "sans", roboto_regular_ttf,
                                    roboto_regular_ttf_size, 0);
