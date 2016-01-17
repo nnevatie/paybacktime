@@ -8,6 +8,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#include <nanovg.h>
+
 #include "platform/clock.h"
 #include "common/log.h"
 
@@ -20,19 +22,27 @@ struct Image::Data
     int          depth, stride;
     uint8_t*     bits;
     SDL_Surface* surface;
+    NVGcontext*  nanoVg;
+    int          nvgImage;
 
-    Data() : depth(0), stride(0), bits(0), surface(0)
+    Data() :
+        depth(0), stride(0),
+        bits(nullptr), surface(nullptr), nanoVg(nullptr), nvgImage(0)
     {}
 
     Data(const Size<int>& size, int depth, int stride) :
         size(size), depth(depth), stride(stride),
         bits(new uint8_t[size.h * stride]),
-        surface(0)
+        surface(nullptr),
+        nanoVg(nullptr),
+        nvgImage(0)
     {}
 
     virtual ~Data()
     {
         SDL_FreeSurface(surface);
+        if (nanoVg)
+            nvgDeleteImage(nanoVg, nvgImage);
         delete bits;
     }
 };
@@ -97,6 +107,17 @@ SDL_Surface* Image::surface() const
                          d->bits, d->size.w, d->size.h, d->depth * 8, d->stride,
                          0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     return d->surface;
+}
+
+int Image::nvgImage(NVGcontext* nanoVg) const
+{
+    if (!d->nanoVg)
+    {
+        d->nanoVg   = nanoVg;
+        d->nvgImage = nvgCreateImageRGBA(
+                          nanoVg, d->size.w, d->size.h, 0, d->bits);
+    }
+    return d->nvgImage;
 }
 
 Image Image::flipped() const

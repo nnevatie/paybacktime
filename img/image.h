@@ -8,6 +8,8 @@
 #include "common/file_system.h"
 #include "geom/size.h"
 
+struct NVGcontext;
+
 namespace pt
 {
 
@@ -28,6 +30,7 @@ struct Image
     uint8_t* bits();
     const uint8_t* bits() const;
     SDL_Surface* surface() const;
+    int nvgImage(NVGcontext* nanoVg) const;
 
     Image flipped() const;
     Image clone() const;

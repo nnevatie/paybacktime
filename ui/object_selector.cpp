@@ -7,6 +7,7 @@
 #include <include/layout.h>
 #include <include/label.h>
 #include <include/button.h>
+#include <include/imageview.h>
 
 #include "platform/display.h"
 
@@ -25,7 +26,10 @@ struct ObjectSelector::Data
         window.setFixedSize({200, screen->size().y() - 16});
         window.setPosition({screen->size().x() - window.fixedSize().x() - 8, 8});
         window.setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
-        window.add<nanogui::Label>("Label", "sans-bold");
+
+        preview = Image("data/preview.png");
+        window.add<nanogui::ImageView>(preview.nvgImage(display->nanoVg()));
+
         screen->performLayout();
     }
 
@@ -34,6 +38,7 @@ struct ObjectSelector::Data
     }
 
     platform::Display* display;
+    Image preview;
 };
 
 ObjectSelector::ObjectSelector(platform::Display* display) :
