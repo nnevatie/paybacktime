@@ -36,6 +36,11 @@ glm::vec3 Camera::up() const
     return glm::vec3(0, 1, 0);
 }
 
+glm::mat4 Camera::matrix() const
+{
+    return matrixProj() * matrixView();
+}
+
 glm::mat4 Camera::matrixProj() const
 {
     return glm::perspective(fov, ar, zNear, zFar);

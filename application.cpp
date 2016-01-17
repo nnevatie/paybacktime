@@ -98,7 +98,7 @@ struct Impl
         stats(display->nanoVg()),
 
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
-               glm::radians(45.f), renderSize.aspect<float>(), 0.1, 750.f),
+               glm::radians(45.f), renderSize.aspect<float>(), 0.1f, 750.f),
 
         cameraControl(&camera, display, &mouse),
 

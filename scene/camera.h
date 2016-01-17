@@ -17,6 +17,7 @@ struct Camera
     glm::vec3 right() const;
     glm::vec3 up() const;
 
+    glm::mat4 matrix() const;
     glm::mat4 matrixProj() const;
     glm::mat4 matrixView() const;
 

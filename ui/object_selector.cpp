@@ -1,6 +1,8 @@
 #include "object_selector.h"
 
 #include <glad/glad.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/trigonometric.hpp>
 
 #include <include/screen.h>
 #include <include/window.h>
@@ -10,6 +12,10 @@
 #include <include/imageview.h>
 
 #include "platform/display.h"
+#include "geom/image_mesher.h"
+#include "gfx/preview.h"
+#include "gl/texture_atlas.h"
+#include "scene/camera.h"
 
 namespace pt
 {
@@ -27,8 +33,29 @@ struct ObjectSelector::Data
         window.setPosition({screen->size().x() - window.fixedSize().x() - 8, 8});
         window.setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 
-        preview = Image("data/preview.png");
-        window.add<nanogui::ImageView>(preview.nvgImage(display->nanoVg()));
+        const ImageCube depthCube("objects/box/*.png", 1);
+        const ImageCube albedoCube("objects/box/albedo.*.png");
+
+        gl::TextureAtlas atlas({256, 256}, 8);
+        gl::TextureAtlas::EntryCube albedo = atlas.insert(albedoCube);
+
+        const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedo.second);
+        const gl::Primitive primitive(mesh);
+
+        const Size<int> previewSize(128, 128);
+
+        Camera camera({0.f, 0.f, 0.f}, 100.f,
+                      M_PI / 4, -M_PI / 3,
+                      glm::radians(30.f),
+                      previewSize.aspect<float>(), 0.01f, 250.f);
+
+        gfx::Preview preview(previewSize);
+        preview(&atlas.texture, primitive, camera.matrix() *
+                                           glm::translate(glm::mat4x4(),
+                                                          glm::vec3(-16, 0, 0)));
+
+        image = preview.texColor.image().flipped();
+        window.add<nanogui::ImageView>(image.nvgImage(display->nanoVg()));
 
         screen->performLayout();
     }
@@ -38,7 +65,7 @@ struct ObjectSelector::Data
     }
 
     platform::Display* display;
-    Image preview;
+    Image image;
 };
 
 ObjectSelector::ObjectSelector(platform::Display* display) :

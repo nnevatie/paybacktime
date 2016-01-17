@@ -60,11 +60,13 @@ Geometry& Geometry::operator()(
                                   GL_COLOR_ATTACHMENT1,
                                   GL_COLOR_ATTACHMENT2};
     glDrawBuffers(3, drawBuffers);
+    glDisable(GL_POLYGON_OFFSET_FILL);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glDisable(GL_BLEND);
     glDepthMask(true);
 
+    glViewport(0, 0, renderSize.w, renderSize.h);
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     texAlbedo->bindAs(GL_TEXTURE0);
