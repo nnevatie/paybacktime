@@ -59,8 +59,6 @@ struct ObjectSelector::Data
         aa(&preview.texDenoise);
 
         image = aa.output()->image().flipped();
-        image.write("c:/temp/model.png");
-
         auto& img = window.add<nanogui::ImageView>(image.nvgImage(display->nanoVg()));
         img.setFixedSize({128, 128});
 
