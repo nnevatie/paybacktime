@@ -29,6 +29,7 @@ AntiAlias& AntiAlias::operator()(gl::Texture* texColor)
     prog.bind().setUniform("tex", 0);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);
+    glViewport(0, 0, renderSize.w, renderSize.h);
     texColor->bindAs(GL_TEXTURE0);
     rect.render();
     return* this;
