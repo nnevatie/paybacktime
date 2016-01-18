@@ -11,11 +11,13 @@
 #include <include/button.h>
 #include <include/imageview.h>
 
+#include "gl/texture_atlas.h"
 #include "platform/display.h"
 #include "geom/image_mesher.h"
-#include "gfx/preview.h"
-#include "gl/texture_atlas.h"
 #include "scene/camera.h"
+
+#include "gfx/preview.h"
+#include "gfx/anti_alias.h"
 
 namespace pt
 {
@@ -42,20 +44,25 @@ struct ObjectSelector::Data
         const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedo.second);
         const gl::Primitive primitive(mesh);
 
-        const Size<int> previewSize(128, 128);
+        const Size<int> previewSize(256, 256);
 
         Camera camera({0.f, 0.f, 0.f}, 100.f,
-                      M_PI / 4, -M_PI / 3,
+                      M_PI / 4, -M_PI / 4,
                       glm::radians(30.f),
-                      previewSize.aspect<float>(), 0.01f, 250.f);
+                      previewSize.aspect<float>(), 0.1f, 100.f);
 
         gfx::Preview preview(previewSize);
         preview(&atlas.texture, primitive, camera.matrix() *
                                            glm::translate(glm::mat4x4(),
                                                           glm::vec3(-16, 0, 0)));
+        gfx::AntiAlias aa(previewSize);
+        aa(&preview.texDenoise);
 
-        image = preview.texColor.image().flipped();
-        window.add<nanogui::ImageView>(image.nvgImage(display->nanoVg()));
+        image = aa.output()->image().flipped();
+        image.write("c:/temp/model.png");
+
+        auto& img = window.add<nanogui::ImageView>(image.nvgImage(display->nanoVg()));
+        img.setFixedSize({128, 128});
 
         screen->performLayout();
     }

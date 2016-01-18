@@ -20,14 +20,20 @@ struct Preview
     Size<int>         renderSize;
     gl::Primitive     rect;
 
-    gl::Shader        vsModel,
-                      fsModel;
+    gl::Shader        vsQuad,
+                      vsModel,
+                      fsModel,
+                      fsDenoise;
 
-    gl::ShaderProgram prog;
+    gl::ShaderProgram progModel,
+                      progDenoise;
 
     gl::Texture       texDepth,
-                      texColor;
-    gl::Fbo           fbo;
+                      texColor,
+                      texDenoise;
+
+    gl::Fbo           fboModel,
+                      fboDenoise;
 
     Preview(const Size<int>& renderSize);
 

@@ -2,6 +2,7 @@
 
 // Uniforms
 uniform sampler2D tex;
+uniform float     e = 0.5;
 
 // Input
 in Block
@@ -24,5 +25,5 @@ void main(void)
                        texture(tex, vec2(ib.uv.s,        ib.uv.t - ts.t)) +
                        texture(tex, vec2(ib.uv.s,        ib.uv.t + ts.t)));
     vec4 d   = abs(s - avg);
-    color    = length(d) > 0.5 ? avg : s;
+    color    = length(d) > e ? avg : s;
 }

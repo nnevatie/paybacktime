@@ -16,7 +16,6 @@ Geometry::Geometry(const Size<int>& renderSize) :
     fsGeometry(gl::Shader::path("geometry.fs.glsl")),
     fsDenoise(gl::Shader::path("denoise.fs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
-
     progGeometry({vsGeometry, gsWireframe, fsGeometry, fsCommon},
                 {{0, "position"}, {1, "normal"}, {2, "uv"}}),
     progDenoise({vsQuad, fsDenoise},
