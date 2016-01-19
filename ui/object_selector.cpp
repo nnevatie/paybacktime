@@ -10,6 +10,7 @@
 #include <include/label.h>
 #include <include/button.h>
 #include <include/imageview.h>
+#include <include/imagepanel.h>
 
 #include "gl/texture_atlas.h"
 #include "platform/display.h"
@@ -46,7 +47,7 @@ struct ObjectSelector::Data
 
         const Size<int> previewSize(256, 256);
 
-        Camera camera({0.f, 0.f, 0.f}, 100.f,
+        Camera camera({0.f, 0.f, 0.f}, 90.f,
                       M_PI / 4, -M_PI / 4,
                       glm::radians(30.f),
                       previewSize.aspect<float>(), 0.1f, 100.f);
@@ -54,13 +55,21 @@ struct ObjectSelector::Data
         gfx::Preview preview(previewSize);
         preview(&atlas.texture, primitive, camera.matrix() *
                                            glm::translate(glm::mat4x4(),
-                                                          glm::vec3(-16, 0, 0)));
+                                                          glm::vec3(-16, 4, 0)));
         gfx::AntiAlias aa(previewSize);
         aa(&preview.texDenoise);
 
         image = aa.output()->image().flipped();
-        auto& img = window.add<nanogui::ImageView>(image.nvgImage(display->nanoVg()));
-        img.setFixedSize({128, 128});
+        auto& img = window.add<nanogui::ImagePanel>(90, 5, 5);
+        img.setFixedSize({195, 512});
+
+        auto nvgImage = image.nvgImage(display->nanoVg());
+        nanogui::ImagePanel::Images images;
+        images.push_back({nvgImage, "box1"});
+        images.push_back({nvgImage, "box2"});
+        images.push_back({nvgImage, "box3"});
+        images.push_back({nvgImage, "box4"});
+        img.setImages(images);
 
         screen->performLayout();
     }

@@ -11,12 +11,14 @@
 */
 
 #include <include/imagepanel.h>
+#include <include/theme.h>
 #include <include/opengl.h>
 
 NAMESPACE_BEGIN(nanogui)
 
-ImagePanel::ImagePanel(Widget *parent)
-    : Widget(parent), mThumbSize(64), mSpacing(10), mMargin(10),
+ImagePanel::ImagePanel(Widget *parent,
+                       int thumbSize, int spacing, int margin)
+    : Widget(parent), mThumbSize(thumbSize), mSpacing(spacing), mMargin(margin),
       mMouseIndex(-1) {}
 
 Vector2i ImagePanel::gridSize() const
@@ -108,6 +110,20 @@ void ImagePanel::draw(NVGcontext* ctx) {
         nvgStrokeWidth(ctx, 1.0f);
         nvgStrokeColor(ctx, nvgRGBA(255,255,255,80));
         nvgStroke(ctx);
+
+        nvgFontSize(ctx, 16.0f);
+        nvgFontFace(ctx, "sans");
+        nvgTextAlign(ctx, NVG_ALIGN_BASELINE | NVG_ALIGN_LEFT);
+
+        nvgFontBlur(ctx, 2);
+        nvgFillColor(ctx, mTheme->mDropShadow);
+        nvgText(ctx, p.x() + ix + 4, p.y() + iy + ih - 4,
+                mImages[i].second.c_str(), nullptr);
+
+        nvgFontBlur(ctx, 0);
+        nvgFillColor(ctx, mTheme->mTextColor);
+        nvgText(ctx, p.x() + ix + 4, p.y() + iy + ih - 4,
+                mImages[i].second.c_str(), nullptr);
     }
 }
 
