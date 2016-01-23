@@ -4,5 +4,5 @@
 
 namespace pt
 {
-namespace filesystem = boost::filesystem;
+namespace fs = boost::filesystem;
 } // namespace
