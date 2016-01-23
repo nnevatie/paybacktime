@@ -62,10 +62,10 @@ Image::Image(const Size<int>& size, int depth, int stride) :
 {
 }
 
-Image::Image(const std::string& filename, int depth) :
+Image::Image(const fs::path& path, int depth) :
     d(new Data())
 {
-    d->bits   = stbi_load(filename.c_str(),
+    d->bits   = stbi_load(path.string().c_str(),
                           &d->size.w, &d->size.h, &d->depth, depth);
     d->stride = d->size.w * d->depth;
 }
@@ -157,7 +157,7 @@ Image& Image::fill(uint32_t value)
     return *this;
 }
 
-bool Image::write(const filesystem::path& path) const
+bool Image::write(const fs::path& path) const
 {
     const std::string ext(path.extension().string());
     if (ext == ".png")

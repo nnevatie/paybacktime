@@ -4,7 +4,6 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "common/file_system.h"
 #include "img/image_cube.h"
 #include "geom/image_mesher.h"
 #include "gl/texture_atlas.h"
@@ -29,9 +28,9 @@
 #include "ui/object_selector.h"
 #include "ui/render_stats.h"
 
-#include "scene/object_store.h"
 #include "scene/scene.h"
 #include "scene/camera_control.h"
+#include "scene/object_store.h"
 
 namespace pt
 {
@@ -59,6 +58,8 @@ struct Impl
     ui::ObjectSelector objectSelector;
     ui::RenderStats stats;
 
+    ObjectStore objectStore;
+
     Camera camera;
     CameraControl cameraControl;
 
@@ -78,9 +79,7 @@ struct Impl
 
     platform::Mouse mouse;
 
-    Impl(platform::Display* display,
-         const std::string& input
-         ) :
+    Impl(platform::Display* display, const std::string& input) :
         display(display),
         renderSize(display->size()),
         texAtlas({256, 256}, 2),
@@ -96,6 +95,8 @@ struct Impl
 
         objectSelector(display),
         stats(display->nanoVg()),
+
+        objectStore(fs::path("objects"), &texAtlas),
 
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
                glm::radians(45.f), renderSize.aspect<float>(), 0.1f, 750.f),
@@ -131,11 +132,6 @@ struct Impl
         gl::TextureAtlas::EntryCube albedoWall = texAtlas.insert(wallAlb);
         const Mesh_P_N_UV wallMesh = ImageMesher::mesh(wallCube, albedoWall.second);
         wall = gl::Primitive(wallMesh);
-
-        #if 0
-        ObjectStore objectStore(filesystem::path("objects"), &texAtlas);
-        Scene scene;
-        #endif
     }
 
     glm::vec3 prevRayPos;

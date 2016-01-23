@@ -30,7 +30,7 @@ GLenum shaderType(Shader::Type type)
     return types.at(index);
 }
 
-Shader::Type typeFromExt(const filesystem::path& path)
+Shader::Type typeFromExt(const fs::path& path)
 {
     typedef std::pair<std::string, Shader::Type> Type;
     const Type types[] =
@@ -108,12 +108,12 @@ Shader::Shader(Type type, const std::string& s) :
 {
 }
 
-Shader::Shader(Type type, const filesystem::path& path) :
+Shader::Shader(Type type, const fs::path& path) :
     d(new Data(type, readFile(path), path.string()))
 {
 }
 
-Shader::Shader(const filesystem::path& path) :
+Shader::Shader(const fs::path& path) :
     d(new Data(typeFromExt(path), readFile(path), path.string()))
 {
 }
@@ -123,9 +123,9 @@ GLuint Shader::id() const
     return d->id;
 }
 
-filesystem::path Shader::path(const std::string& filename)
+fs::path Shader::path(const std::string& filename)
 {
-    return filesystem::path("shaders/" + filename);
+    return fs::path("shaders/" + filename);
 }
 
 ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders,

@@ -18,7 +18,7 @@ struct Image
     Image();
     Image(const Size<int>& size, int depth);
     Image(const Size<int>& size, int depth, int stride);
-    Image(const std::string& filename, int depth = 0);
+    Image(const fs::path& path, int depth = 0);
 
     operator bool() const;
 
@@ -36,7 +36,7 @@ struct Image
     Image clone() const;
     Image& fill(uint32_t value);
 
-    bool write(const filesystem::path& path) const;
+    bool write(const fs::path& path) const;
 
 private:
     struct Data;

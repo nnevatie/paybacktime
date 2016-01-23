@@ -17,7 +17,7 @@ struct ImageCube
         Front, Back, Left, Right, Top, Bottom
     };
 
-    ImageCube(const std::string& filename, int depth = 0);
+    ImageCube(const fs::path& path, int depth = 0);
 
     const Image& side(Side s) const;
 

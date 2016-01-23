@@ -8,8 +8,10 @@
 namespace pt
 {
 
-ImageCube::ImageCube(const std::string& filename, int depth)
+ImageCube::ImageCube(const fs::path& path, int depth)
 {
+    HCLOG(Info) << path.string() << ", " << depth;
+
     struct SideImage
     {
         std::string name;
@@ -27,7 +29,9 @@ ImageCube::ImageCube(const std::string& filename, int depth)
     // Load images
     for (SideImage& sideImage : sideImages)
     {
-        const auto fn = boost::replace_all_copy(filename, "*", sideImage.name);
+        const auto fn = boost::replace_all_copy(
+            path.string(), "*", sideImage.name);
+
         sideImage.image = Image(fn, depth).flipped();
     }
 

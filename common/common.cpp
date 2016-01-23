@@ -13,15 +13,15 @@ std::string str(const std::ostream& ostr)
     return static_cast<const std::ostringstream&>(ostr).str();
 }
 
-std::string readFile(const filesystem::path& path, bool binary)
+std::string readFile(const fs::path& path, bool binary)
 {
-    if (!filesystem::exists(path))
+    if (!fs::exists(path))
         throw std::runtime_error("File does not exist: " + path.string());
 
     std::ifstream ifs(path.string().c_str(), std::ios::in |
                      (binary ? std::ios::binary : std::ios_base::openmode(0)));
 
-    const int size = int(filesystem::file_size(path));
+    const int size = int(fs::file_size(path));
     std::string buffer(size, 0);
     ifs.read(&buffer[0], size);
 

@@ -50,7 +50,7 @@ inline D bitCast(const S& src)
 
 std::string str(const std::ostream& ostr);
 
-std::string readFile(const filesystem::path& path, bool binary = true);
+std::string readFile(const fs::path& path, bool binary = true);
 
 template <typename T>
 inline T radians(T deg)

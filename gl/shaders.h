@@ -22,12 +22,12 @@ struct Shader
     };
 
     Shader(Type type, const std::string& s);
-    Shader(Type type, const filesystem::path& path);
-    Shader(const filesystem::path& path);
+    Shader(Type type, const fs::path& path);
+    Shader(const fs::path& path);
 
     GLuint id() const;
 
-    static filesystem::path path(const std::string& filename);
+    static fs::path path(const std::string& filename);
 
 private:
     struct Data;
