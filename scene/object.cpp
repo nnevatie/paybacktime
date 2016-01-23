@@ -3,7 +3,8 @@
 namespace pt
 {
 
-Object::Object(const filesystem::path& /*path*/, gl::TextureAtlas* /*atlas*/)
+Object::Object(const fs::path& path, gl::TextureAtlas* atlas) :
+    model(path, atlas)
 {
 }
 

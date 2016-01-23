@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
+#include <memory>
 
+#include "common/file_system.h"
 #include "object.h"
 
 namespace pt
@@ -9,9 +10,11 @@ namespace pt
 
 struct ObjectStore
 {
-    ObjectStore(const filesystem::path& path, gl::TextureAtlas* atlas);
+    ObjectStore(const fs::path& path, gl::TextureAtlas* atlas);
 
-    std::vector<Object> objects;
+private:
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace pt

@@ -1,21 +1,31 @@
 #include "object_store.h"
 
+#include <vector>
+
 #include "platform/clock.h"
 #include "common/log.h"
 
 namespace pt
 {
 
-ObjectStore::ObjectStore(const filesystem::path& path, gl::TextureAtlas* atlas)
+struct ObjectStore::Data
+{
+    std::vector<Object> objects;
+
+    Data()
+    {}
+};
+
+ObjectStore::ObjectStore(const fs::path& path, gl::TextureAtlas* atlas) :
+    d(std::make_shared<Data>())
 {
     HCTIME("create objects");
-    using namespace filesystem;
-    for (const directory_entry& e : directory_iterator(path))
-        if (e.path().extension() == ".json")
+    for (const fs::directory_entry& e : fs::directory_iterator(path))
+        if (is_directory(e))
         {
-            const std::string name(e.path().stem().string());
+            const std::string name(e.path().filename().string());
             HCLOG(Info) << name << " -> " << e.path().string();
-            objects.push_back(Object(e.path(), atlas));
+            d->objects.push_back(Object(e.path(), atlas));
         }
 }
 
