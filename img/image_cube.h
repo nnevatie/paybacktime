@@ -21,9 +21,9 @@ struct ImageCube
 
     const Image& side(Side s) const;
 
-    int width() const;
+    int width()  const;
     int height() const;
-    int depth() const;
+    int depth()  const;
 
     std::vector<Image> sides;
 };

@@ -16,17 +16,18 @@ struct ObjectStore::Data
     {}
 };
 
-ObjectStore::ObjectStore(const fs::path& path, gl::TextureAtlas* atlas) :
+ObjectStore::ObjectStore(const fs::path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>())
 {
     HCTIME("create objects");
+    int objectCount;
     for (const fs::directory_entry& e : fs::directory_iterator(path))
         if (is_directory(e))
         {
-            const std::string name(e.path().filename().string());
-            HCLOG(Info) << name << " -> " << e.path().string();
-            d->objects.push_back(Object(e.path(), atlas));
+            d->objects.push_back(Object(e.path(), textureStore));
+            ++objectCount;
         }
+    HCLOG(Info) << std::to_string(objectCount) + " objects";
 }
 
 } // namespace pt

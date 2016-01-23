@@ -58,6 +58,7 @@ struct Impl
     ui::ObjectSelector objectSelector;
     ui::RenderStats stats;
 
+    TextureStore textureStore;
     ObjectStore objectStore;
 
     Camera camera;
@@ -96,7 +97,8 @@ struct Impl
         objectSelector(display),
         stats(display->nanoVg()),
 
-        objectStore(fs::path("objects"), &texAtlas),
+        textureStore({256, 256}),
+        objectStore(fs::path("objects"), &textureStore),
 
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
                glm::radians(45.f), renderSize.aspect<float>(), 0.1f, 750.f),
@@ -134,7 +136,6 @@ struct Impl
         wall = gl::Primitive(wallMesh);
     }
 
-    glm::vec3 prevRayPos;
     bool simulate(TimePoint /*time*/, Duration step)
     {
         mouse.reset();
