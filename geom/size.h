@@ -52,6 +52,16 @@ struct Size
         return Size(T(w / d), T(h / d));
     }
 
+    bool operator==(const Size& other) const
+    {
+        return w == other.w && h == other.h;
+    }
+
+    bool operator!=(const Size& other) const
+    {
+        return !operator==(other);
+    }
+
     T w {}, h {};
 };
 
