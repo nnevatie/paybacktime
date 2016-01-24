@@ -140,6 +140,11 @@ bool Display::open()
         // Set swap interval
         SDL_GL_SetSwapInterval(0);
 
+        // Clear screen
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        SDL_GL_SwapWindow(d->window);
+
         // Log renderer info
         HCLOG(Debug) << "OpenGL vendor: '" << glGetString(GL_VENDOR)
                      << "', renderer: '"   << glGetString(GL_RENDERER)

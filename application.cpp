@@ -24,6 +24,7 @@
 #include "gfx/color_grade.h"
 #include "gfx/anti_alias.h"
 #include "gfx/output.h"
+#include "gfx/fader.h"
 
 #include "ui/object_selector.h"
 #include "ui/render_stats.h"
@@ -54,6 +55,7 @@ struct Impl
     gfx::ColorGrade colorGrade;
     gfx::AntiAlias antiAlias;
     gfx::Output output;
+    gfx::Fader fader;
 
     ui::ObjectSelector objectSelector;
     ui::RenderStats stats;
@@ -154,8 +156,11 @@ struct Impl
         return true;
     }
 
-    bool render(float /*a*/)
+    bool render(TimePoint time, float /*a*/)
     {
+        const float timeSec =
+            std::chrono::duration<float>(time - TimePoint()).count();
+
         glm::mat4 proj  = camera.matrixProj();
         glm::mat4 view  = camera.matrixView();
         glm::mat4 model;
@@ -212,6 +217,8 @@ struct Impl
         stats.accumulate(clock.elapsed(), 0, 0);
         stats();
 
+        fader(1.f - timeSec);
+
         display->swap();
         return true;
     }
@@ -221,7 +228,7 @@ struct Impl
         namespace arg = std::placeholders;
         Scheduler scheduler(std::chrono::milliseconds(10),
                             std::bind(&simulate, this, arg::_1, arg::_2),
-                            std::bind(&render,   this, arg::_1),
+                            std::bind(&render,   this, arg::_1, arg::_2),
                             Scheduler::OptionPreserveCpu);
         return scheduler.start();
     }

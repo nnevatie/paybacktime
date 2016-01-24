@@ -9,9 +9,9 @@ namespace gfx
 
 Backdrop::Backdrop() :
     rect(squareMesh()),
-    vsModel(gl::Shader::path("quad_uv.vs.glsl")),
-    fsColor(gl::Shader::path("backdrop.fs.glsl")),
-    prog({vsModel, fsColor},
+    vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
+    fsBackdrop(gl::Shader::path("backdrop.fs.glsl")),
+    prog({vsQuad, fsBackdrop},
         {{0, "position"}, {1, "uv"}})
 {
     tex.bind().alloc(Image("data/backdrop.png"))

@@ -18,8 +18,8 @@ struct Backdrop
 {
     gl::Primitive     rect;
 
-    gl::Shader        vsModel,
-                      fsColor;
+    gl::Shader        vsQuad,
+                      fsBackdrop;
 
     gl::ShaderProgram prog;
 

@@ -43,7 +43,7 @@ bool Scheduler::start()
             timeSim += timeStep;
             durAcc  -= timeStep;
         }
-        renderer(float(durAcc.count()) / timeStep.count());
+        renderer(timeSim, float(durAcc.count()) / timeStep.count());
 
         if (options & OptionPreserveCpu)
             clock.sleep(std::chrono::milliseconds(1));
