@@ -99,14 +99,9 @@ ImageCube ImageCube::scaled(const ImageCube& refCube) const
         const Image& i1 = refCube.sides[i];
         if (i0.size() != i1.size())
         {
-            if (i0)
-                imageCube.sides[i] = i0.scaled(i1.size());
-            else
-            {
-                Image image(i1.size(), i1.depth());
-                image.fill(0x0);
-                imageCube.sides[i] = image;
-            }
+            imageCube.sides[i] = i0 ? i0.scaled(i1.size()) :
+                                      Image(i1.size(), i1.depth()).fill(0x0);
+
             HCLOG(Info) << "size mismatch on side " << i;
         }
     }
