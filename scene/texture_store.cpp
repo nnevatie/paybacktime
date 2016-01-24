@@ -6,7 +6,7 @@ namespace pt
 {
 
 TextureStore::TextureStore(const Size<int>& size) :
-    albedo(size), light(size)
+    albedo(size, 2), light(size, 2)
 {
     HCLOG(Info) << "size: " << size.w << "x" << size.h;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "common/file_system.h"
 
 #include "texture_store.h"
@@ -12,7 +14,8 @@ struct Object
 {
     Object(const fs::path& path, TextureStore* textureStore);
 
-    Model model;
+    std::string name;
+    Model       model;
 };
 
 } // namespace pt

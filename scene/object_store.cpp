@@ -30,4 +30,13 @@ ObjectStore::ObjectStore(const fs::path& path, TextureStore* textureStore) :
     HCLOG(Info) << std::to_string(objectCount) + " objects";
 }
 
+Object* ObjectStore::object(const std::string& name) const
+{
+    for (auto& obj : d->objects)
+        if (obj.name == name)
+            return &obj;
+
+    return nullptr;
+}
+
 } // namespace pt

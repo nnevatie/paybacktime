@@ -18,12 +18,12 @@ ImageCube::ImageCube(const fs::path& path, int depth)
         Image image;
     }
     sideImages[] = {
-        {"front",  Image()},
-        {"back",   Image()},
-        {"left",   Image()},
-        {"right",  Image()},
-        {"top",    Image()},
-        {"bottom", Image()}
+        {"front",  {}},
+        {"back",   {}},
+        {"left",   {}},
+        {"right",  {}},
+        {"top",    {}},
+        {"bottom", {}}
     };
 
     // Load images
@@ -55,8 +55,6 @@ ImageCube::ImageCube(const fs::path& path, int depth)
                 if (fallback.image)
                 {
                     sideImages[i].image = fallback.image;
-                    //HCLOG(Debug) << __FUNCTION__ << " using " << fallback.name
-                    //                             << " as "    << sideImages[i].name;
                     break;
                 }
             }
@@ -90,6 +88,22 @@ int ImageCube::depth() const
     int d0 = std::min(side(Left).size().w, side(Right).size().w);
     int d1 = std::min(side(Top).size().h, side(Bottom).size().h);
     return std::min(d0, d1);
+}
+
+ImageCube ImageCube::scaled(const ImageCube& refCube) const
+{
+    ImageCube imageCube(*this);
+    for (int i = 0; i < 6; ++i)
+    {
+        const Image& i0 = imageCube.sides[i];
+        const Image& i1 = refCube.sides[i];
+        if (i0.size() != i1.size())
+        {
+            imageCube.sides[i] = i0.scaled(i1.size());
+            HCLOG(Info) << "size mismatch on side " << i;
+        }
+    }
+    return imageCube;
 }
 
 } // namespace

@@ -25,6 +25,8 @@ struct ImageCube
     int height() const;
     int depth()  const;
 
+    ImageCube scaled(const ImageCube& refCube) const;
+
     std::vector<Image> sides;
 };
 

@@ -8,8 +8,8 @@ namespace pt
 Object::Object(const fs::path& path, TextureStore* textureStore) :
     model(path, textureStore)
 {
-    const std::string name(path.filename().string());
-    HCLOG(Info) << name;
+    // TODO: Parse json properties
+    name = path.filename().string();
 }
 
 } // namespace pt
