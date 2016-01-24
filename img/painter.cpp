@@ -50,6 +50,14 @@ Painter& Painter::drawImage(const Image& image, int x, int y)
     return *this;
 }
 
+Painter& Painter::drawImageScaled(const Image& image, const Rect<int>& rect)
+{
+    SDL_Rect rectSrc = {0, 0, image.size().w, image.size().h};
+    SDL_Rect rectDst = {rect.x, rect.y, rect.size.w, rect.size.h};
+    SDL_BlitScaled(image.surface(), &rectSrc, surface_, &rectDst);
+    return *this;
+}
+
 Painter& Painter::drawImageClamped(const Image& image, int x, int y, int margin)
 {
     const Size<int> s = image.size();
