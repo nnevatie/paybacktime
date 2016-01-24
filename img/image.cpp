@@ -13,6 +13,8 @@
 #include "platform/clock.h"
 #include "common/log.h"
 
+#include "painter.h"
+
 namespace pt
 {
 
@@ -118,6 +120,14 @@ int Image::nvgImage(NVGcontext* nanoVg) const
                           nanoVg, d->size.w, d->size.h, 0, d->bits);
     }
     return d->nvgImage;
+}
+
+Image Image::scaled(const Size<int>& size) const
+{
+    Image image(size, d->depth);
+    Painter painter(&image);
+    painter.drawImageScaled(*this, size);
+    return image;
 }
 
 Image Image::flipped() const

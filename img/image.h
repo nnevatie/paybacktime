@@ -32,6 +32,7 @@ struct Image
     SDL_Surface* surface() const;
     int nvgImage(NVGcontext* nanoVg) const;
 
+    Image scaled(const Size<int>& size) const;
     Image flipped() const;
     Image clone() const;
     Image& fill(uint32_t value);
