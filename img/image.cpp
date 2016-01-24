@@ -54,7 +54,7 @@ Image::Image() :
 {
 }
 
-Image::Image(const Size<int> &size, int depth) :
+Image::Image(const Size<int>& size, int depth) :
     Image(size, depth, size.w * depth)
 {
 }
@@ -108,6 +108,7 @@ SDL_Surface* Image::surface() const
         d->surface = SDL_CreateRGBSurfaceFrom(
                          d->bits, d->size.w, d->size.h, d->depth * 8, d->stride,
                          0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+
     return d->surface;
 }
 
