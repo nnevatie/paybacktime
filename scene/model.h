@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <glm/vec3.hpp>
+
 #include "common/file_system.h"
 #include "gl/primitive.h"
 
@@ -13,6 +15,8 @@ namespace pt
 struct Model
 {
     Model(const fs::path& path, TextureStore* textureStore);
+
+    glm::vec3 dimensions() const;
 
     gl::Primitive primitive() const;
 

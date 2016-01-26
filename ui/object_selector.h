@@ -4,6 +4,9 @@
 
 namespace pt
 {
+struct ObjectStore;
+struct TextureStore;
+
 namespace platform
 {
 struct Display;
@@ -14,7 +17,9 @@ namespace ui
 
 struct ObjectSelector
 {
-    ObjectSelector(platform::Display* display);
+    ObjectSelector(platform::Display* display,
+                   ObjectStore* objectStore,
+                   TextureStore* textureStore);
 
     ObjectSelector& operator()();
 

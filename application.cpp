@@ -54,11 +54,11 @@ struct Impl
     gfx::Output output;
     gfx::Fader fader;
 
-    ui::ObjectSelector objectSelector;
-    ui::RenderStats stats;
-
     TextureStore textureStore;
     ObjectStore objectStore;
+
+    ui::ObjectSelector objectSelector;
+    ui::RenderStats stats;
 
     Camera camera;
     CameraControl cameraControl;
@@ -76,11 +76,11 @@ struct Impl
         colorGrade(renderSize),
         antiAlias(renderSize),
 
-        objectSelector(display),
-        stats(display->nanoVg()),
-
         textureStore({256, 256}),
         objectStore(fs::path("objects"), &textureStore),
+
+        objectSelector(display, &objectStore, &textureStore),
+        stats(display->nanoVg()),
 
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
                glm::radians(45.f), renderSize.aspect<float>(), 0.1f, 750.f),

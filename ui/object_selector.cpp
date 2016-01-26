@@ -15,10 +15,15 @@
 #include "gl/texture_atlas.h"
 #include "platform/display.h"
 #include "geom/image_mesher.h"
+
 #include "scene/camera.h"
+#include "scene/object_store.h"
+#include "scene/texture_store.h"
 
 #include "gfx/preview.h"
 #include "gfx/anti_alias.h"
+
+#include "common/log.h"
 
 namespace pt
 {
@@ -27,7 +32,9 @@ namespace ui
 
 struct ObjectSelector::Data
 {
-    explicit Data(platform::Display* display) :
+    explicit Data(platform::Display* display,
+                  ObjectStore* objectStore,
+                  TextureStore* textureStore) :
         display(display)
     {
         nanogui::Screen* screen = display->nanoGui();
@@ -36,40 +43,41 @@ struct ObjectSelector::Data
         window.setPosition({screen->size().x() - window.fixedSize().x() - 8, 8});
         window.setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 
-        const ImageCube depthCube("objects/box/*.png", 1);
-        const ImageCube albedoCube("objects/box/albedo.*.png");
-
-        gl::TextureAtlas atlas({256, 256}, 8);
-        gl::TextureAtlas::EntryCube albedo = atlas.insert(albedoCube);
-
-        const Mesh_P_N_UV mesh = ImageMesher::mesh(depthCube, albedo.second);
-        const gl::Primitive primitive(mesh);
-
         const Size<int> previewSize(256, 256);
-
-        Camera camera({0.f, 0.f, 0.f}, 90.f,
-                      M_PI / 4, -M_PI / 4,
-                      glm::radians(30.f),
-                      previewSize.aspect<float>(), 0.1f, 100.f);
+        const Camera camera({0.f, 0.f, 0.f}, 90.f,
+                             M_PI / 4, -M_PI / 4,
+                             glm::radians(30.f),
+                             previewSize.aspect<float>(), 0.1f, 100.f);
 
         gfx::Preview preview(previewSize);
-        preview(&atlas.texture, primitive, camera.matrix() *
-                                           glm::translate(glm::mat4x4(),
-                                                          glm::vec3(-16, 4, 0)));
-        gfx::AntiAlias aa(previewSize);
-        aa(&preview.texDenoise);
 
-        image = aa.output()->image().flipped();
+        nanogui::ImagePanel::Images nvgImages;
+        for (const auto& object : objectStore->objects())
+        {
+            const glm::vec3 dims = object.model.dimensions();
+            const gl::Primitive primitive = object.model.primitive();
+
+            const float s = std::pow(16.f / std::max(
+                                            std::max(dims.x, dims.y), dims.z),
+                                     0.4f);
+
+            preview(&textureStore->albedo.texture, primitive,
+                    camera.matrix() * glm::scale({}, glm::vec3(s, s, s)) *
+                    glm::translate({}, glm::vec3(-dims.x, 4 - (1 - s) * 60.f, 0)));
+
+            gfx::AntiAlias aa(previewSize);
+            aa(&preview.texDenoise);
+
+            const Image image = aa.output()->image().flipped();
+            images.push_back(image);
+
+            auto nvgImage = image.nvgImage(display->nanoVg());
+            nvgImages.push_back({nvgImage, object.name});
+        }
+
         auto& img = window.add<nanogui::ImagePanel>(90, 5, 5);
         img.setFixedSize({195, 512});
-
-        auto nvgImage = image.nvgImage(display->nanoVg());
-        nanogui::ImagePanel::Images images;
-        images.push_back({nvgImage, "box1"});
-        images.push_back({nvgImage, "box2"});
-        images.push_back({nvgImage, "box3"});
-        images.push_back({nvgImage, "box4"});
-        img.setImages(images);
+        img.setImages(nvgImages);
 
         screen->performLayout();
     }
@@ -79,11 +87,13 @@ struct ObjectSelector::Data
     }
 
     platform::Display* display;
-    Image image;
+    std::vector<Image> images;
 };
 
-ObjectSelector::ObjectSelector(platform::Display* display) :
-    d(new Data(display))
+ObjectSelector::ObjectSelector(platform::Display* display,
+                               ObjectStore* objectStore,
+                               TextureStore* textureStore) :
+    d(new Data(display, objectStore, textureStore))
 {
 }
 

@@ -39,4 +39,9 @@ Object* ObjectStore::object(const std::string& name) const
     return nullptr;
 }
 
+std::vector<Object> ObjectStore::objects() const
+{
+    return d->objects;
+}
+
 } // namespace pt

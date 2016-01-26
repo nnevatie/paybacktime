@@ -39,6 +39,11 @@ Model::Model(const fs::path& path, TextureStore* textureStore) :
     d->primitive = gl::Primitive(mesh);
 }
 
+glm::vec3 Model::dimensions() const
+{
+    return {d->cubeDepth.width(), d->cubeDepth.height(), d->cubeDepth.depth()};
+}
+
 gl::Primitive Model::primitive() const
 {
     return d->primitive;
