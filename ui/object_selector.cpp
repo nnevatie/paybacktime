@@ -11,19 +11,18 @@
 #include <include/button.h>
 #include <include/imageview.h>
 #include <include/imagepanel.h>
+#include <include/vscrollpanel.h>
 
 #include "gl/texture_atlas.h"
 #include "platform/display.h"
 #include "geom/image_mesher.h"
+#include "common/log.h"
 
 #include "scene/camera.h"
 #include "scene/object_store.h"
 #include "scene/texture_store.h"
 
 #include "gfx/preview.h"
-#include "gfx/anti_alias.h"
-
-#include "common/log.h"
 
 namespace pt
 {
@@ -39,8 +38,8 @@ struct ObjectSelector::Data
     {
         nanogui::Screen* screen = display->nanoGui();
         auto& window = screen->add<nanogui::Window>("Objects");
-        window.setFixedSize({200, screen->size().y() - 16});
-        window.setPosition({screen->size().x() - window.fixedSize().x() - 8, 8});
+        window.setFixedSize({220, screen->size().y() - 16});
+        window.setPosition({screen->size().x() - window.fixedWidth() - 8, 8});
         window.setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 
         const Size<int> previewSize(256, 256);
@@ -52,6 +51,7 @@ struct ObjectSelector::Data
         gfx::Preview preview(previewSize);
 
         nanogui::ImagePanel::Images nvgImages;
+        for (int i = 0; i < 5; ++i)
         for (const auto& object : objectStore->objects())
         {
             const glm::vec3 dims = object.model.dimensions();
@@ -65,17 +65,17 @@ struct ObjectSelector::Data
                     camera.matrix() * glm::scale({}, glm::vec3(s, s, s)) *
                     glm::translate({}, glm::vec3(-dims.x, 4 - (1 - s) * 60.f, 0)));
 
-            gfx::AntiAlias aa(previewSize);
-            aa(&preview.texDenoise);
-
-            const Image image = aa.output()->image().flipped();
+            const Image image = preview.output()->image().flipped();
             images.push_back(image);
 
             auto nvgImage = image.nvgImage(display->nanoVg());
             nvgImages.push_back({nvgImage, object.name});
         }
 
-        auto& img = window.add<nanogui::ImagePanel>(90, 5, 5);
+        auto& vscroll = window.add<nanogui::VScrollPanel>();
+        vscroll.setFixedSize({210, window.fixedHeight() - 36});
+
+        auto& img = vscroll.add<nanogui::ImagePanel>(90, 5, 5);
         img.setFixedSize({195, 512});
         img.setImages(nvgImages);
 

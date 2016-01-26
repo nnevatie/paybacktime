@@ -187,6 +187,9 @@ Screen::Screen(NVGcontext* nvgContext,
 
 void Screen::onEvent(SDL_Event& event)
 {
+    if (!mProcessEvents)
+      return;
+
     auto it = __nanogui_screens.find(_window);
     if (it == __nanogui_screens.end())
        return;
@@ -195,8 +198,6 @@ void Screen::onEvent(SDL_Event& event)
     {
     case SDL_MOUSEMOTION:
     {
-      if (!mProcessEvents)
-         return;
       cursorPosCallbackEvent(event.motion.x, event.motion.y);
     }
     break;
@@ -204,20 +205,20 @@ void Screen::onEvent(SDL_Event& event)
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
     {
-      if (!mProcessEvents)
-        return;
-
       SDL_Keymod mods = SDL_GetModState();
       mouseButtonCallbackEvent(event.button.button, event.button.type, mods);
+    }
+    break;
+
+    case SDL_MOUSEWHEEL:
+    {
+      scrollCallbackEvent(event.wheel.x, event.wheel.y);
     }
     break;
 
     case SDL_KEYDOWN:
     case SDL_KEYUP:
     {
-      if (!mProcessEvents)
-        return;
-
       SDL_Keymod mods = SDL_GetModState();
       keyCallbackEvent(event.key.keysym.mod, event.key.keysym.scancode, event.key.state, mods);
     }
@@ -225,8 +226,6 @@ void Screen::onEvent(SDL_Event& event)
 
     case SDL_TEXTINPUT:
     {
-      if (!mProcessEvents)
-        return;
       charCallbackEvent(event.text.text[0]);
     }
     break;

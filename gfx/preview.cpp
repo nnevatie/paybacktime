@@ -17,7 +17,8 @@ Preview::Preview(const Size<int>& renderSize) :
     progModel({vsModel, fsModel},
              {{0, "position"}, {1, "normal"}, {2, "uv"}}),
     progDenoise({vsQuad, fsDenoise},
-               {{0, "position"}, {1, "uv"}})
+               {{0, "position"}, {1, "uv"}}),
+    antiAlias(renderSize)
 {
     auto fboSize = {renderSize.w, renderSize.h};
     texDepth.bind().alloc(fboSize, GL_DEPTH_COMPONENT32F,
@@ -69,7 +70,15 @@ Preview& Preview::operator()(
         texColor.bindAs(GL_TEXTURE0);
         rect.render();
     }
+    {
+        antiAlias(&texDenoise);
+    }
     return *this;
+}
+
+gl::Texture* Preview::output()
+{
+    return antiAlias.output();
 }
 
 } // namespace gfx
