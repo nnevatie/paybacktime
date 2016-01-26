@@ -37,7 +37,7 @@ struct ObjectSelector::Data
         display(display)
     {
         nanogui::Screen* screen = display->nanoGui();
-        auto& window = screen->add<nanogui::Window>("Objects");
+        auto& window = screen->add<nanogui::Window>("objects");
         window.setFixedSize({220, screen->size().y() - 16});
         window.setPosition({screen->size().x() - window.fixedWidth() - 8, 8});
         window.setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));

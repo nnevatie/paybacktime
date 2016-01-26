@@ -118,7 +118,7 @@ void Window::draw(NVGcontext *ctx) {
         nvgStrokeColor(ctx, mTheme->mWindowHeaderSepBot);
         nvgStroke(ctx);
 
-        nvgFontSize(ctx, 18.0f);
+        nvgFontSize(ctx, 20.0f);
         nvgFontFace(ctx, "sans-bold");
         nvgTextAlign(ctx, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 
