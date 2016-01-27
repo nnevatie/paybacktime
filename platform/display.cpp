@@ -161,7 +161,7 @@ bool Display::open()
                      << gpuRamAvail;
 
         // Init NanoVG
-        d->nvgContext = nvgCreateGL3(0);
+        d->nvgContext = nvgCreateGL3(NVG_ANTIALIAS);
 
         // Init NanoGUI
         d->nanoguiScreen = new nanogui::Screen(d->nvgContext, d->window);

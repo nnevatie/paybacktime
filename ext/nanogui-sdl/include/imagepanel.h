@@ -26,6 +26,8 @@ public:
     void setImages(const Images &data) { mImages = data; }
     const Images& images() const { return mImages; }
 
+    void setSelection(int selectionIndex) { mSelectionIndex = selectionIndex; }
+
     std::function<void(int)> callback() const { return mCallback; }
     void setCallback(const std::function<void(int)> &callback) { mCallback = callback; }
 
@@ -41,6 +43,7 @@ protected:
 protected:
     Images mImages;
     std::function<void(int)> mCallback;
+    int mSelectionIndex;
     int mThumbSize;
     int mSpacing;
     int mMargin;

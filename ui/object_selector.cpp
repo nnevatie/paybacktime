@@ -37,6 +37,7 @@ struct ObjectSelector::Data
         display(display)
     {
         nanogui::Screen* screen = display->nanoGui();
+
         auto& window = screen->add<nanogui::Window>("objects");
         window.setFixedSize({220, screen->size().y() - 16});
         window.setPosition({screen->size().x() - window.fixedWidth() - 8, 8});
@@ -75,9 +76,11 @@ struct ObjectSelector::Data
         auto& vscroll = window.add<nanogui::VScrollPanel>();
         vscroll.setFixedSize({210, window.fixedHeight() - 36});
 
-        auto& img = vscroll.add<nanogui::ImagePanel>(90, 5, 5);
-        img.setFixedSize({195, 512});
-        img.setImages(nvgImages);
+        auto& imagePanel = vscroll.add<nanogui::ImagePanel>(90, 5, 5);
+        imagePanel.setFixedSize({195, 512});
+        imagePanel.setImages(nvgImages);
+        imagePanel.setCallback(
+            [&imagePanel](int i) {imagePanel.setSelection(i);});
 
         screen->performLayout();
     }

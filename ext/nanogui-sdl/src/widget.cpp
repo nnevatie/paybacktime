@@ -76,8 +76,12 @@ Widget *Widget::findWidget(const Vector2i &p) {
 bool Widget::mouseButtonEvent(const Vector2i &p, int button, bool down, int modifiers) {
     for (auto it = mChildren.rbegin(); it != mChildren.rend(); ++it) {
         Widget *child = *it;
+        Vector2i shift = dynamic_cast<Window*>(child->parent()) ?
+                         Vector2i(0, -theme()->mWindowHeaderHeight) :
+                         Vector2i(0, 0);
+
         if (child->visible() && child->contains(p - mPos) &&
-            child->mouseButtonEvent(p - mPos, button, down, modifiers))
+            child->mouseButtonEvent(p - mPos + shift, button, down, modifiers))
             return true;
     }
     if (button == SDL_BUTTON_LEFT && down && !mFocused)
@@ -88,13 +92,18 @@ bool Widget::mouseButtonEvent(const Vector2i &p, int button, bool down, int modi
 bool Widget::mouseMotionEvent(const Vector2i &p, const Vector2i &rel, int button, int modifiers) {
     for (auto it = mChildren.rbegin(); it != mChildren.rend(); ++it) {
         Widget *child = *it;
+        Vector2i shift = dynamic_cast<Window*>(child->parent()) ?
+                         Vector2i(0, -theme()->mWindowHeaderHeight) :
+                         Vector2i(0, 0);
+
         if (!child->visible())
             continue;
-        bool contained = child->contains(p - mPos), prevContained = child->contains(p - mPos - rel);
+        bool contained = child->contains(p - mPos + shift),
+                         prevContained = child->contains(p - mPos - rel + shift);
         if (contained != prevContained)
-            child->mouseEnterEvent(p, contained);
+            child->mouseEnterEvent(p + shift, contained);
         if ((contained || prevContained) &&
-            child->mouseMotionEvent(p - mPos, rel, button, modifiers))
+            child->mouseMotionEvent(p - mPos + shift, rel, button, modifiers))
             return true;
     }
     return false;
@@ -103,9 +112,14 @@ bool Widget::mouseMotionEvent(const Vector2i &p, const Vector2i &rel, int button
 bool Widget::scrollEvent(const Vector2i &p, const Vector2f &rel) {
     for (auto it = mChildren.rbegin(); it != mChildren.rend(); ++it) {
         Widget *child = *it;
+        Vector2i shift = dynamic_cast<Window*>(child->parent()) ?
+                         Vector2i(0, -theme()->mWindowHeaderHeight) :
+                         Vector2i(0, 0);
+
         if (!child->visible())
             continue;
-        if (child->contains(p - mPos) && child->scrollEvent(p - mPos, rel))
+        if (child->contains(p - mPos + shift) &&
+            child->scrollEvent(p - mPos + shift, rel))
             return true;
     }
     return false;

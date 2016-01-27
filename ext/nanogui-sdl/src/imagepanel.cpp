@@ -18,7 +18,8 @@ NAMESPACE_BEGIN(nanogui)
 
 ImagePanel::ImagePanel(Widget *parent,
                        int thumbSize, int spacing, int margin)
-    : Widget(parent), mThumbSize(thumbSize), mSpacing(spacing), mMargin(margin),
+    : Widget(parent), mSelectionIndex(-1),
+      mThumbSize(thumbSize), mSpacing(spacing), mMargin(margin),
       mMouseIndex(-1) {}
 
 Vector2i ImagePanel::gridSize() const
@@ -31,14 +32,20 @@ Vector2i ImagePanel::gridSize() const
 }
 
 int ImagePanel::indexForPosition(const Vector2i &p) const {
-    Vector2f pp = (p.cast<float>() - Vector2f::Constant(mMargin)) /
-                  (float)(mThumbSize + mSpacing);
-    float iconRegion = mThumbSize / (float)(mThumbSize + mSpacing);
-    bool overImage = pp.x() - std::floor(pp.x()) < iconRegion &&
-                    pp.y() - std::floor(pp.y()) < iconRegion;
+
+    Vector2f pp = (p.cast<float>() - Vector2f(2 * mMargin, mMargin)) /
+                  float(mThumbSize + mSpacing);
+
+    float iconRegion = mThumbSize / float(mThumbSize + mSpacing);
+
+    bool overImage = pp.x() >= 0 && pp.y() >= 0 &&
+                     pp.x() - std::floor(pp.x()) < iconRegion &&
+                     pp.y() - std::floor(pp.y()) < iconRegion;
+
     Vector2i gridPos = pp.cast<int>(), grid = gridSize();
     overImage &= ((gridPos.array() >= 0).all() &&
-                 (gridPos.array() < grid.array()).all());
+                  (gridPos.array() < grid.array()).all());
+
     return overImage ? (gridPos.x() + gridPos.y() * grid.x()) : -1;
 }
 
@@ -86,9 +93,12 @@ void ImagePanel::draw(NVGcontext* ctx) {
             iy = 0;
         }
 
+        const bool hovered  = mMouseIndex     == int(i);
+        const bool selected = mSelectionIndex == int(i);
+
         NVGpaint imgPaint = nvgImagePattern(
             ctx, p.x() + ix, p.y()+ iy, iw, ih, 0, mImages[i].first,
-            mMouseIndex == (int)i ? 1.0 : 0.7);
+            hovered ? 1.0 : 0.7);
 
         nvgBeginPath(ctx);
         nvgRoundedRect(ctx, p.x(), p.y(), mThumbSize, mThumbSize, 5);
@@ -107,8 +117,9 @@ void ImagePanel::draw(NVGcontext* ctx) {
 
         nvgBeginPath(ctx);
         nvgRoundedRect(ctx, p.x()+0.5f,p.y()+0.5f, mThumbSize-1,mThumbSize-1, 4-0.5f);
-        nvgStrokeWidth(ctx, 1.0f);
-        nvgStrokeColor(ctx, nvgRGBA(255,255,255,80));
+        nvgStrokeWidth(ctx, selected ? 2.5f : 1.0f);
+        nvgStrokeColor(ctx, selected ? nvgRGBA(190,220,255,128) :
+                                       nvgRGBA(255,255,255,64));
         nvgStroke(ctx);
 
         nvgFontSize(ctx, 16.0f);
