@@ -41,9 +41,8 @@ Lighting& Lighting::operator()(
                .setUniform("texNormal",   1)
                .setUniform("texColor",    2)
                .setUniform("texLight",    3)
-               .setUniform("texEmissive", 4)
-               .setUniform("texAo",       5)
-               .setUniform("texGi",       6)
+               .setUniform("texAo",       4)
+               .setUniform("texGi",       5)
                .setUniform("v",           v)
                .setUniform("p",           p);
 
@@ -56,9 +55,8 @@ Lighting& Lighting::operator()(
     texNormal->bindAs(GL_TEXTURE1);
     texColor->bindAs(GL_TEXTURE2);
     texLight->bindAs(GL_TEXTURE3);
-    texBloom->bindAs(GL_TEXTURE4);
-    texSsao->bindAs(GL_TEXTURE5);
-    texLightmap->bindAs(GL_TEXTURE6);
+    texSsao->bindAs(GL_TEXTURE4);
+    texLightmap->bindAs(GL_TEXTURE5);
     rect.render();
     return *this;
 }
