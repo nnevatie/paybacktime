@@ -163,7 +163,6 @@ struct Impl
                  &geometry.texNormalDenoise,
                  &geometry.texColor,
                  &geometry.texLight,
-                 bloom.output(),
                  &ssao.texAoBlur,
                  &lightmap,
                  view, proj);

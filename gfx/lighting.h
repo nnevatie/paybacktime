@@ -34,7 +34,6 @@ struct Lighting
         gl::Texture* texNormal,
         gl::Texture* texColor,
         gl::Texture* texLight,
-        gl::Texture* texBloom,
         gl::Texture* texSsao,
         gl::Texture* texLightmap,
         const glm::mat4& v,
