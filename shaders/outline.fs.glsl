@@ -19,7 +19,7 @@ out vec4 color;
 vec3 s(int dx, int dy, sampler2D t, vec2 uv)
 {
     vec2 tsi = 1.0 / textureSize(t, 0);
-    return texture2D(outline, uv + vec2(dx * tsi.x, dy * tsi.y)).rgb;
+    return texture(outline, uv + vec2(dx * tsi.x, dy * tsi.y)).rgb;
 }
 
 float sobel(sampler2D t, vec2 uv)

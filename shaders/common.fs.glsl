@@ -66,7 +66,7 @@ vec4 textureBicubicBell(sampler2D sampler, vec2 uv0)
     for(int m = -1; m <= 2; ++m)
         for(int n = -1; n <= 2; ++n)
         {
-            vec4 s  = texture2D(sampler, uv1 + vec2(txs.x * float(m),
+            vec4 s  = texture(sampler, uv1 + vec2(txs.x * float(m),
                                                     txs.y * float(n)));
             vec2 f  = vec2(bell(float(m) - ab.x), bell(float(n) - ab.y));
             vec4 c1 = vec4(f.x);
