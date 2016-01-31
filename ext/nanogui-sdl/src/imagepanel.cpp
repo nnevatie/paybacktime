@@ -98,7 +98,7 @@ void ImagePanel::draw(NVGcontext* ctx) {
 
         NVGpaint imgPaint = nvgImagePattern(
             ctx, p.x() + ix, p.y()+ iy, iw, ih, 0, mImages[i].first,
-            hovered ? 1.0 : 0.7);
+            hovered || selected ? 1.0 : 0.7);
 
         nvgBeginPath(ctx);
         nvgRoundedRect(ctx, p.x(), p.y(), mThumbSize, mThumbSize, 5);
