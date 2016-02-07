@@ -43,6 +43,7 @@ struct Display
     glm::vec4 rayClip(const glm::ivec2& p) const;
 
     Display& processEvent(SDL_Event* event);
+    Display& renderWidgets();
 
     Image capture() const;
 

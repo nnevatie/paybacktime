@@ -174,7 +174,7 @@ struct Impl
         antiAlias(colorGrade.output());
         output(antiAlias.output());
 
-        objectSelector();
+        display->renderWidgets();
         stats.accumulate(clock.elapsed(), 0, 0);
         stats();
 

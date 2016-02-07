@@ -36,7 +36,7 @@ struct Display::Data
     Data(const std::string& title, const Size<int>& size) :
         title(title), size(size),
         window(nullptr), glContext(nullptr),
-        nvgContext(nullptr), nanoguiScreen(nullptr)
+        nvgContext(nullptr), nanoGuiScreen(nullptr)
     {
     }
     ~Data()
@@ -48,7 +48,7 @@ struct Display::Data
     SDL_Window*      window;
     SDL_GLContext    glContext;
     NVGcontext*      nvgContext;
-    nanogui::Screen* nanoguiScreen;
+    nanogui::Screen* nanoGuiScreen;
 };
 
 Display::Display(const std::string& title, const Size<int>& size) :
@@ -83,7 +83,7 @@ NVGcontext* Display::nanoVg() const
 
 nanogui::Screen*Display::nanoGui() const
 {
-    return d->nanoguiScreen;
+    return d->nanoGuiScreen;
 }
 
 bool Display::open()
@@ -164,7 +164,7 @@ bool Display::open()
         d->nvgContext = nvgCreateGL3(NVG_ANTIALIAS);
 
         // Init NanoGUI
-        d->nanoguiScreen = new nanogui::Screen(d->nvgContext, d->window);
+        d->nanoGuiScreen = new nanogui::Screen(d->nvgContext, d->window);
         return gladStatus;
     }
     else
@@ -180,12 +180,12 @@ bool Display::close()
         SDL_GL_DeleteContext(d->glContext);
         SDL_DestroyWindow(d->window);
         nvgDeleteGL3(d->nvgContext);
-        delete d->nanoguiScreen;
+        delete d->nanoGuiScreen;
 
         d->glContext     = nullptr;
         d->window        = nullptr;
         d->nvgContext    = nullptr;
-        d->nanoguiScreen = nullptr;
+        d->nanoGuiScreen = nullptr;
         return true;
     }
     else
@@ -223,7 +223,13 @@ glm::vec4 Display::rayClip(const glm::ivec2& p) const
 
 Display& Display::processEvent(SDL_Event* event)
 {
-    if (event) d->nanoguiScreen->onEvent(*event);
+    if (event) d->nanoGuiScreen->onEvent(*event);
+    return *this;
+}
+
+Display& Display::renderWidgets()
+{
+    d->nanoGuiScreen->drawAll();
     return *this;
 }
 

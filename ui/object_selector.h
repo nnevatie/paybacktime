@@ -21,8 +21,6 @@ struct ObjectSelector
                    ObjectStore* objectStore,
                    TextureStore* textureStore);
 
-    ObjectSelector& operator()();
-
 private:
     struct Data;
     std::shared_ptr<Data> d;

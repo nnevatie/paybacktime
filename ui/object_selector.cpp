@@ -100,11 +100,5 @@ ObjectSelector::ObjectSelector(platform::Display* display,
 {
 }
 
-ObjectSelector& ObjectSelector::operator()()
-{
-    d->display->nanoGui()->drawAll();
-    return *this;
-}
-
 } // namespace ui
 } // namespace pt
