@@ -52,7 +52,6 @@ struct ObjectSelector::Data
         gfx::Preview preview(previewSize);
 
         nanogui::ImagePanel::Images nvgImages;
-        for (int i = 0; i < 5; ++i)
         for (const auto& object : objectStore->objects())
         {
             const glm::vec3 dims = object.model.dimensions();
