@@ -10,7 +10,7 @@ struct Application
 {
     Application();
 
-    bool run(const std::string& input);
+    bool run();
 };
 
 } // namespace

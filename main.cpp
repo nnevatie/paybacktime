@@ -20,7 +20,7 @@ int main(int argc, char** argv)
         store(parse_command_line(argc, argv, desc), args);
 
         pt::Application app;
-        app.run(args["input"].as<std::string>());
+        app.run();
     }
     catch (const std::exception& e)
     {

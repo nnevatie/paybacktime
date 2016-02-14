@@ -30,6 +30,7 @@
 #include "ui/render_stats.h"
 
 #include "scene/scene.h"
+#include "scene/scene_control.h"
 #include "scene/camera_control.h"
 #include "scene/object_store.h"
 
@@ -62,10 +63,11 @@ struct Impl
 
     Camera camera;
     CameraControl cameraControl;
+    SceneControl sceneControl;
 
     platform::Mouse mouse;
 
-    Impl(platform::Display* display, const std::string& input) :
+    Impl(platform::Display* display) :
         display(display),
         renderSize(display->size()),
         geometry(renderSize),
@@ -199,13 +201,13 @@ Application::Application()
 {
 }
 
-bool Application::run(const std::string& input)
+bool Application::run()
 {
     platform::Context context;
     platform::Display display("Payback Time", {1280, 720});
     display.open();
 
-    return Impl(&display, input).run();
+    return Impl(&display).run();
 }
 
 } // namespace
