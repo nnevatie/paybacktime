@@ -35,17 +35,17 @@ CameraControl& CameraControl::operator()(Duration step)
     pos[0]         += t * pos[1];
     camera->target += t * pos[0];
     pos[0]         *= std::pow(0.025f, t) *
-            (length(pos[0]) > 5.0f ? 1.f : 0.f);
+                     (length(pos[0]) > 5.0f ? 1.f : 0.f);
     pos[1]          = vec3();
 
     // Angular
     ang[0]         += t * ang[1];
     camera->yaw     = std::fmod(camera->yaw + t * ang[0].x,
-            float(2 * M_PI));
+                                float(2 * M_PI));
     camera->pitch   = clamp(camera->pitch + t * ang[0].y,
-            -float(M_PI / 2 - 0.25f), -0.5f);
+                           -float(M_PI / 2 - 0.25f), -0.5f);
     ang[0]         *= std::pow(0.01f, t) *
-            (length(ang[0]) > 0.05f ? 1.f : 0.f);
+                     (length(ang[0]) > 0.05f ? 1.f : 0.f);
     ang[1]          = vec3();
 
     // Process input
@@ -100,8 +100,8 @@ CameraControl& CameraControl::operator()(Duration step)
                 else
                 {
                     glm::vec4 mouseDiff = 32.f * (rayMouse - prevMousePos);
-                    ang[1].x = mouseDiff.x * -accAng;
-                    ang[1].y = mouseDiff.y * +accAng;
+                    ang[1].x = mouseDiff.x * -accAng * 2;
+                    ang[1].y = mouseDiff.y * +accAng * 2;
                 }
             }
             prevMousePos = rayMouse;
