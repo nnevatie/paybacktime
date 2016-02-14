@@ -78,6 +78,8 @@ struct ObjectSelector::Data
         auto& imagePanel = vscroll.add<nanogui::ImagePanel>(90, 5, 5);
         imagePanel.setFixedSize({195, 512});
         imagePanel.setImages(nvgImages);
+        imagePanel.setSelection(0);
+
         imagePanel.setCallback(
             [&imagePanel](int i) {imagePanel.setSelection(i);});
 
