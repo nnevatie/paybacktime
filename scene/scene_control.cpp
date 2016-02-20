@@ -88,9 +88,13 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
     const Object object = d->selectedObject;
     if (object)
     {
-        auto dim = object.model().dimensions();
-        auto c   = glm::vec3(0.5f * dim.x, 0.f, 0.5f * dim.z);
-        auto m   = glm::translate({}, d->intersection.pos - c);
+        auto t   = d->intersection.pos;
+        auto mx  = std::fmod(t.x, 16.f);
+        auto mz  = std::fmod(t.z, 16.f);
+        t.x     -= mx > 0 ? mx : (15.f + mx);
+        t.z     -= mz > 0 ? mz : (15.f + mz);
+
+        auto m   = glm::translate({}, t);
         auto v   = d->camera->matrixView();
         auto p   = d->camera->matrixProj();
 
