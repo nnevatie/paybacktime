@@ -15,7 +15,9 @@ struct ObjectStore
 {
     ObjectStore(const fs::path& path, TextureStore* textureStore);
 
+    Object object(int index) const;
     Object object(const std::string& name) const;
+
     std::vector<Object> objects() const;
 
 private:

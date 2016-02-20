@@ -26,6 +26,7 @@ public:
     void setImages(const Images &data) { mImages = data; }
     const Images& images() const { return mImages; }
 
+    int selection() const { return mSelectionIndex; }
     void setSelection(int selectionIndex) { mSelectionIndex = selectionIndex; }
 
     std::function<void(int)> callback() const { return mCallback; }

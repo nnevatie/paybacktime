@@ -34,7 +34,8 @@ struct ObjectSelector::Data
     explicit Data(platform::Display* display,
                   ObjectStore* objectStore,
                   TextureStore* textureStore) :
-        display(display)
+        display(display),
+        objectStore(objectStore)
     {
         nanogui::Screen* screen = display->nanoGui();
 
@@ -76,6 +77,7 @@ struct ObjectSelector::Data
         vscroll.setFixedSize({210, window.fixedHeight() - 36});
 
         auto& imagePanel = vscroll.add<nanogui::ImagePanel>(90, 5, 5);
+
         imagePanel.setCallback(
             [&imagePanel](int i)
         {
@@ -86,6 +88,7 @@ struct ObjectSelector::Data
         imagePanel.setImages(nvgImages);
         imagePanel.setSelection(0);
 
+        this->imagePanel = &imagePanel;
         screen->performLayout();
     }
 
@@ -93,9 +96,11 @@ struct ObjectSelector::Data
     {
     }
 
-    platform::Display* display;
-    std::vector<Image> images;
-    Object             selectedObject;
+    platform::Display*   display;
+    ObjectStore*         objectStore;
+
+    nanogui::ImagePanel* imagePanel;
+    std::vector<Image>   images;
 };
 
 ObjectSelector::ObjectSelector(platform::Display* display,
@@ -107,7 +112,7 @@ ObjectSelector::ObjectSelector(platform::Display* display,
 
 Object ObjectSelector::selectedObject() const
 {
-    return d->selectedObject;
+    return d->objectStore->object(d->imagePanel->selection());
 }
 
 } // namespace ui

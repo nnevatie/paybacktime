@@ -30,6 +30,12 @@ ObjectStore::ObjectStore(const fs::path& path, TextureStore* textureStore) :
     HCLOG(Info) << std::to_string(objectCount) + " objects";
 }
 
+Object ObjectStore::object(int index) const
+{
+    return index >= 0 && index < int(d->objects.size()) ?
+           d->objects.at(index) : Object();
+}
+
 Object ObjectStore::object(const std::string& name) const
 {
     for (auto& obj : d->objects)
