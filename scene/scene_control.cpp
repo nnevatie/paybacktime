@@ -3,14 +3,29 @@
 namespace pt
 {
 
+struct SceneControl::Data
+{
+    Data(Scene* scene,
+         Camera* camera,
+         platform::Display* display,
+         platform::Mouse* mouse) :
+        scene(scene),
+        camera(camera),
+        display(display),
+        mouse(mouse)
+    {}
+
+    Scene*             scene;
+    Camera*            camera;
+    platform::Display* display;
+    platform::Mouse*   mouse;
+};
+
 SceneControl::SceneControl(Scene* scene,
                            Camera* camera,
                            platform::Display* display,
                            platform::Mouse* mouse) :
-    scene(scene),
-    camera(camera),
-    display(display),
-    mouse(mouse)
+    d(std::make_shared<Data>(scene, camera, display, mouse))
 {}
 
 SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
@@ -18,21 +33,21 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
     const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
 
     if (keyState[SDL_SCANCODE_LSHIFT])
-        mouse->setCursor(platform::Mouse::Cursor::Crosshair);
+        d->mouse->setCursor(platform::Mouse::Cursor::Crosshair);
     else
     if (keyState[SDL_SCANCODE_LCTRL])
-        mouse->setCursor(platform::Mouse::Cursor::No);
+        d->mouse->setCursor(platform::Mouse::Cursor::No);
 
-    const glm::ivec2 mousePos = mouse->position();
-    const bool mouseOnScene   = mousePos.x < display->size().w - 225;
+    const glm::ivec2 mousePos = d->mouse->position();
+    const bool mouseOnScene   = mousePos.x < d->display->size().w - 225;
 
     if (mouseOnScene)
     {
-        const glm::vec4 clipRay  = display->rayClip(mouse->position());
-        const glm::vec3 rayWorld = camera->rayWorld(camera->rayEye(clipRay));
+        const glm::vec4 clipRay  = d->display->rayClip(d->mouse->position());
+        const glm::vec3 rayWorld = d->camera->rayWorld(d->camera->rayEye(clipRay));
 
         const Intersection intersection =
-            scene->intersect(camera->position(), rayWorld);
+            d->scene->intersect(d->camera->position(), rayWorld);
     }
     return *this;
 }

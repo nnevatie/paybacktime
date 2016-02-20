@@ -92,10 +92,6 @@ struct ObjectSelector::Data
         screen->performLayout();
     }
 
-    ~Data()
-    {
-    }
-
     platform::Display*   display;
     ObjectStore*         objectStore;
 
