@@ -78,7 +78,7 @@ CameraControl& CameraControl::operator()(Duration step)
     const glm::ivec2 mousePos = d->mouse->position();
     const bool mouseOnScene   = mousePos.x < d->display->size().w - 225;
 
-    if (keyState[SDL_SCANCODE_LSHIFT] || keyState[SDL_SCANCODE_L])
+    if (keyState[SDL_SCANCODE_LSHIFT] || keyState[SDL_SCANCODE_LCTRL])
         return *this;
 
     if (keyState[SDL_SCANCODE_LEFT]  || keyState[SDL_SCANCODE_A])

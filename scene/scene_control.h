@@ -6,6 +6,7 @@
 #include "platform/display.h"
 #include "platform/mouse.h"
 
+#include "gl/texture.h"
 #include "gl/fbo.h"
 
 #include "camera.h"
@@ -19,10 +20,12 @@ struct SceneControl
     SceneControl(Scene* scene,
                  Camera* camera,
                  platform::Display* display,
-                 platform::Mouse* mouse);
+                 platform::Mouse* mouse,
+                 const gl::Texture& texDepth);
 
     SceneControl& operator()(Duration step, Object selectedObject);
-    SceneControl& operator()(gl::Fbo* fboOut);
+    SceneControl& operator()(gl::Fbo* fboOut,
+                             gl::Texture* texColor);
 
 private:
     struct Data;

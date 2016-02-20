@@ -89,7 +89,7 @@ struct Impl
                glm::radians(45.f), renderSize.aspect<float>(), 0.1f, 750.f),
 
         cameraControl(&camera, display, &mouse),
-        sceneControl(&scene, &camera, display, &mouse)
+        sceneControl(&scene, &camera, display, &mouse, geometry.texDepth)
     {
         lightmap.bind().alloc(Image("data/lightmap.png"))
                        .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
@@ -174,11 +174,10 @@ struct Impl
                  view, proj);
 
         bloom(&geometry.texColor, lighting.output(), &geometry.texLight);
-
-        outline(&lighting.fbo, lighting.output(), wall, proj * view * model);
-        sceneControl(&lighting.fbo);
-
         backdrop(&lighting.fbo, camera);
+
+        sceneControl(&lighting.fbo, lighting.output());
+
         colorGrade(lighting.output(), bloom.output());
         antiAlias(colorGrade.output());
         output(antiAlias.output());
