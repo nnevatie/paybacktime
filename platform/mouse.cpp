@@ -23,6 +23,7 @@ struct Mouse::Data
             SDL_SYSTEM_CURSOR_ARROW,
             SDL_SYSTEM_CURSOR_WAITARROW,
             SDL_SYSTEM_CURSOR_CROSSHAIR,
+            SDL_SYSTEM_CURSOR_NO,
             SDL_SYSTEM_CURSOR_HAND,
             SDL_SYSTEM_CURSOR_SIZEALL
         };

@@ -21,6 +21,7 @@ struct Mouse
         Arrow,
         ArrowWait,
         Crosshair,
+        No,
         Hand,
         Size
     };

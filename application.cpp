@@ -87,7 +87,8 @@ struct Impl
         camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
                glm::radians(45.f), renderSize.aspect<float>(), 0.1f, 750.f),
 
-        cameraControl(&camera, display, &mouse)
+        cameraControl(&camera, display, &mouse),
+        sceneControl(&camera, display, &mouse)
     {
         lightmap.bind().alloc(Image("data/lightmap.png"))
                        .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
@@ -112,6 +113,8 @@ struct Impl
             return false;
 
         cameraControl(step);
+        sceneControl(step);
+
         return true;
     }
 
