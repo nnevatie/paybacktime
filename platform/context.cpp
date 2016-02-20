@@ -33,7 +33,7 @@ struct Context::Data
 };
 
 Context::Context() :
-    d(new Data())
+    d(std::make_shared<Data>())
 {
 }
 

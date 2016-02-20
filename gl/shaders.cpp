@@ -104,17 +104,17 @@ struct ShaderProgram::Data
 };
 
 Shader::Shader(Type type, const std::string& s) :
-    d(new Data(type, s))
+    d(std::make_shared<Data>(type, s))
 {
 }
 
 Shader::Shader(Type type, const fs::path& path) :
-    d(new Data(type, readFile(path), path.string()))
+    d(std::make_shared<Data>(type, readFile(path), path.string()))
 {
 }
 
 Shader::Shader(const fs::path& path) :
-    d(new Data(typeFromExt(path), readFile(path), path.string()))
+    d(std::make_shared<Data>(typeFromExt(path), readFile(path), path.string()))
 {
 }
 
@@ -130,7 +130,7 @@ fs::path Shader::path(const std::string& filename)
 
 ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders,
                              const std::vector<AttribLocation>& attribs) :
-    d(new Data())
+    d(std::make_shared<Data>())
 {
     for (const Shader& shader : shaders)
         glAttachShader(d->id, shader.id());

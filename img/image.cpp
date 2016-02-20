@@ -50,7 +50,7 @@ struct Image::Data
 };
 
 Image::Image() :
-    d(new Data())
+    d(std::make_shared<Data>())
 {
 }
 
@@ -60,12 +60,12 @@ Image::Image(const Size<int>& size, int depth) :
 }
 
 Image::Image(const Size<int>& size, int depth, int stride) :
-    d(new Data(size, depth, stride))
+    d(std::make_shared<Data>(size, depth, stride))
 {
 }
 
 Image::Image(const fs::path& path, int depth) :
-    d(new Data())
+    d(std::make_shared<Data>())
 {
     d->bits   = stbi_load(path.string().c_str(),
                           &d->size.w, &d->size.h, &d->depth, depth);

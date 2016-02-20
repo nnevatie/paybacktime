@@ -105,7 +105,7 @@ struct ImageAtlas::Data
 };
 
 ImageAtlas::ImageAtlas(const Size<int>& size) :
-    d(new Data(size))
+    d(std::make_shared<Data>(size))
 {
 }
 

@@ -4,6 +4,7 @@
 
 namespace pt
 {
+struct Object;
 struct ObjectStore;
 struct TextureStore;
 
@@ -20,6 +21,8 @@ struct ObjectSelector
     ObjectSelector(platform::Display* display,
                    ObjectStore* objectStore,
                    TextureStore* textureStore);
+
+    Object selectedObject() const;
 
 private:
     struct Data;

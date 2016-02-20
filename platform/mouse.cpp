@@ -38,7 +38,7 @@ struct Mouse::Data
 };
 
 Mouse::Mouse() :
-    d(new Data())
+    d(std::make_shared<Data>())
 {
 }
 

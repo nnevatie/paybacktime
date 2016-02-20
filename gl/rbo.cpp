@@ -21,7 +21,7 @@ struct Rbo::Data
 };
 
 Rbo::Rbo() :
-    d(new Data())
+    d(std::make_shared<Data>())
 {
 }
 

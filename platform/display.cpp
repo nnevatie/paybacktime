@@ -52,7 +52,7 @@ struct Display::Data
 };
 
 Display::Display(const std::string& title, const Size<int>& size) :
-    d(new Data(title, size))
+    d(std::make_shared<Data>(title, size))
 {
 }
 

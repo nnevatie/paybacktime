@@ -44,7 +44,7 @@ struct Fbo::Data
 };
 
 Fbo::Fbo() :
-    d(new Data())
+    d(std::make_shared<Data>())
 {
 }
 

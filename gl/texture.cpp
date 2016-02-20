@@ -51,7 +51,7 @@ struct Texture::Data
 };
 
 Texture::Texture(Type type) :
-    d(new Data(type))
+    d(std::make_shared<Data>(type))
 {
 }
 

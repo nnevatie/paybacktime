@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "common/file_system.h"
@@ -12,10 +13,17 @@ namespace pt
 
 struct Object
 {
+    Object();
     Object(const fs::path& path, TextureStore* textureStore);
 
-    std::string name;
-    Model       model;
+    operator bool() const;
+
+    std::string name()  const;
+    Model       model() const;
+
+private:
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace pt

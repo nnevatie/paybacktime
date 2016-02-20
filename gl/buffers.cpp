@@ -57,7 +57,7 @@ Buffer::Buffer()
 }
 
 Buffer::Buffer(Buffer::Type type) :
-    d(new Data(type))
+    d(std::make_shared<Data>(type))
 {
 }
 

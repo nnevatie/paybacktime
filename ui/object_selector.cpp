@@ -54,8 +54,8 @@ struct ObjectSelector::Data
         nanogui::ImagePanel::Images nvgImages;
         for (const auto& object : objectStore->objects())
         {
-            const glm::vec3 dims = object.model.dimensions();
-            const gl::Primitive primitive = object.model.primitive();
+            const glm::vec3 dims = object.model().dimensions();
+            const gl::Primitive primitive = object.model().primitive();
 
             const float s = std::pow(16.f / std::max(
                                             std::max(dims.x, dims.y), dims.z),
@@ -69,19 +69,22 @@ struct ObjectSelector::Data
             images.push_back(image);
 
             auto nvgImage = image.nvgImage(display->nanoVg());
-            nvgImages.push_back({nvgImage, object.name});
+            nvgImages.push_back({nvgImage, object.name()});
         }
 
         auto& vscroll = window.add<nanogui::VScrollPanel>();
         vscroll.setFixedSize({210, window.fixedHeight() - 36});
 
         auto& imagePanel = vscroll.add<nanogui::ImagePanel>(90, 5, 5);
+        imagePanel.setCallback(
+            [&imagePanel](int i)
+        {
+            imagePanel.setSelection(i);
+        });
+
         imagePanel.setFixedSize({195, 512});
         imagePanel.setImages(nvgImages);
         imagePanel.setSelection(0);
-
-        imagePanel.setCallback(
-            [&imagePanel](int i) {imagePanel.setSelection(i);});
 
         screen->performLayout();
     }
@@ -92,13 +95,19 @@ struct ObjectSelector::Data
 
     platform::Display* display;
     std::vector<Image> images;
+    Object             selectedObject;
 };
 
 ObjectSelector::ObjectSelector(platform::Display* display,
                                ObjectStore* objectStore,
                                TextureStore* textureStore) :
-    d(new Data(display, objectStore, textureStore))
+    d(std::make_shared<Data>(display, objectStore, textureStore))
 {
+}
+
+Object ObjectSelector::selectedObject() const
+{
+    return d->selectedObject;
 }
 
 } // namespace ui

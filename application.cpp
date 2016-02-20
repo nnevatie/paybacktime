@@ -61,6 +61,7 @@ struct Impl
     ui::ObjectSelector objectSelector;
     ui::RenderStats stats;
 
+    Scene scene;
     Camera camera;
     CameraControl cameraControl;
     SceneControl sceneControl;
@@ -88,7 +89,7 @@ struct Impl
                glm::radians(45.f), renderSize.aspect<float>(), 0.1f, 750.f),
 
         cameraControl(&camera, display, &mouse),
-        sceneControl(&camera, display, &mouse)
+        sceneControl(&scene, &camera, display, &mouse)
     {
         lightmap.bind().alloc(Image("data/lightmap.png"))
                        .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
@@ -113,7 +114,7 @@ struct Impl
             return false;
 
         cameraControl(step);
-        sceneControl(step);
+        sceneControl(step, objectSelector.selectedObject());
 
         return true;
     }
@@ -130,9 +131,9 @@ struct Impl
         Time<GpuClock> clock;
         std::vector<gfx::Geometry::Instance> instances;
 
-        gl::Primitive floor = objectStore.object("floor")->model.primitive();
-        gl::Primitive wall  = objectStore.object("wall")->model.primitive();
-        gl::Primitive box   = objectStore.object("box")->model.primitive();
+        gl::Primitive floor = objectStore.object("floor").model().primitive();
+        gl::Primitive wall  = objectStore.object("wall").model().primitive();
+        gl::Primitive box   = objectStore.object("box").model().primitive();
 
         for (int y = 0; y < 5; ++y)
             for (int x = 0; x < 5; ++x)
@@ -173,7 +174,10 @@ struct Impl
                  view, proj);
 
         bloom(&geometry.texColor, lighting.output(), &geometry.texLight);
+
         outline(&lighting.fbo, lighting.output(), wall, proj * view * model);
+        sceneControl(&lighting.fbo);
+
         backdrop(&lighting.fbo, camera);
         colorGrade(lighting.output(), bloom.output());
         antiAlias(colorGrade.output());

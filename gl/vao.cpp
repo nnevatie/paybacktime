@@ -21,7 +21,7 @@ struct Vao::Data
 };
 
 Vao::Vao() :
-    d(new Data())
+    d(std::make_shared<Data>())
 {
 }
 

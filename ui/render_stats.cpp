@@ -38,7 +38,7 @@ struct RenderStats::Data
 };
 
 RenderStats::RenderStats(NVGcontext* vg) :
-    d(new Data(vg))
+    d(std::make_shared<Data>(vg))
 {
 }
 
