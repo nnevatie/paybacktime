@@ -1,26 +1,36 @@
 #pragma once
 
-#include <glm/vec3.hpp>
+#include <memory>
 
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+
+#include "gfx/geometry.h"
 #include "object.h"
 
 namespace pt
 {
 
-struct Intersection
-{
-    glm::vec3 pos;
-    Object    object;
-};
-
 struct Scene
 {
+    struct Item
+    {
+        Object    obj;
+        glm::vec3 pos;
+    };
+
     Scene();
 
-    Intersection intersect(const glm::vec3& origin,
-                           const glm::vec3& ray) const;
+    Scene& add(const Item& item);
 
-    Scene& render();
+    Item intersect(const glm::vec3& origin,
+                   const glm::vec3& ray) const;
+
+    gfx::Geometry::Instances geometryInstances() const;
+
+private:
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace pt

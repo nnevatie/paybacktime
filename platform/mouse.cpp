@@ -15,6 +15,7 @@ struct Mouse::Data
 {
     std::vector<SDL_Cursor*> cursors;
     int                      wheel;
+    Buttons                  transitions;
 
     Data() :
         wheel(0)
@@ -54,7 +55,12 @@ Mouse::Buttons Mouse::buttons() const
     const uint32_t mask = SDL_GetMouseState(nullptr, nullptr);
     return {(mask & SDL_BUTTON_LMASK) > 0,
             (mask & SDL_BUTTON_MMASK) > 0,
-                (mask & SDL_BUTTON_RMASK) > 0};
+            (mask & SDL_BUTTON_RMASK) > 0};
+}
+
+Mouse::Buttons Mouse::buttonTransitions() const
+{
+    return d->transitions;
 }
 
 int Mouse::wheel() const
@@ -73,15 +79,24 @@ Mouse& Mouse::setCursor(Mouse::Cursor cursor)
 
 Mouse& Mouse::reset()
 {
-    d->wheel = 0;
+    d->wheel       = {};
+    d->transitions = {};
     return *this;
 }
 
 Mouse& Mouse::update(const SDL_Event& event)
 {
-    if(event.type == SDL_MOUSEWHEEL)
+    if (event.type == SDL_MOUSEWHEEL)
         d->wheel += event.wheel.y;
 
+    if (event.type == SDL_MOUSEBUTTONDOWN ||
+        event.type == SDL_MOUSEBUTTONUP)
+    {
+        const int index = event.button.button == SDL_BUTTON_LEFT   ? 0 :
+                          event.button.button == SDL_BUTTON_MIDDLE ? 1 : 2;
+
+        d->transitions[index] = event.type == SDL_MOUSEBUTTONDOWN ? 1 : -1;
+    }
     return *this;
 }
 

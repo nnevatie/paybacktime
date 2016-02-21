@@ -129,7 +129,7 @@ struct Impl
         glm::mat4 model;
 
         Time<GpuClock> clock;
-        std::vector<gfx::Geometry::Instance> instances;
+        gfx::Geometry::Instances instances;
 
         gl::Primitive floor = objectStore.object("floor").model().primitive();
         gl::Primitive wall  = objectStore.object("wall").model().primitive();
@@ -161,7 +161,7 @@ struct Impl
 
         geometry(&textureStore.albedo.texture,
                  &textureStore.light.texture,
-                 instances, view, proj);
+                 scene.geometryInstances(), view, proj);
 
         ssao(&geometry.texDepth, &geometry.texNormalDenoise, proj, camera.fov);
 

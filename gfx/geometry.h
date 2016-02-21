@@ -40,12 +40,13 @@ struct Geometry
     gl::Fbo           fbo;
 
     typedef std::pair<gl::Primitive, glm::mat4> Instance;
+    typedef std::vector<Instance>               Instances;
 
     Geometry(const Size<int>& renderSize);
 
     Geometry& operator()(gl::Texture* texAlbedo,
                          gl::Texture* texLightmap,
-                         const std::vector<Instance>& instances,
+                         const Instances& instances,
                          const glm::mat4& v,
                          const glm::mat4& p);
 };
