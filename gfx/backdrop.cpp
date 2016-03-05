@@ -33,6 +33,7 @@ Backdrop& Backdrop::operator()(gl::Fbo* fboOut, const Camera& camera)
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     glDepthMask(false);
 
     tex.bindAs(GL_TEXTURE0);

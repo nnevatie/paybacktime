@@ -61,7 +61,7 @@ Geometry& Geometry::operator()(
     glDrawBuffers(3, drawBuffers);
     glDisable(GL_POLYGON_OFFSET_FILL);
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
+    glDepthFunc(GL_LESS);
     glDisable(GL_BLEND);
     glDepthMask(true);
 
