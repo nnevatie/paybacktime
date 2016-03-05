@@ -14,9 +14,6 @@
 namespace pt
 {
 
-typedef std::array<glm::vec3, 8>        Box;
-typedef std::pair<glm::vec3, glm::vec3> BoundingBox;
-
 struct VertexSpec
 {
     // Component count, type, size in bytes
