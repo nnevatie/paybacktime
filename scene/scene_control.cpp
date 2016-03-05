@@ -84,10 +84,11 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
             auto mx = std::fmod(t.x, 16.f);
             auto mz = std::fmod(t.z, 16.f);
             t.x    -= mx > 0 ? mx : (15.f + mx);
+            t.y     = 0;
             t.z    -= mz > 0 ? mz : (15.f + mz);
 
             if (mouseButtons[0] &&
-               !containsObject(intersection.second, selectedObject))
+               !d->scene->contains({selectedObject, intersection.first}))
                 d->scene->add({selectedObject, intersection.first});
 
             d->objectPos = intersection.first;
