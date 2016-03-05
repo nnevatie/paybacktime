@@ -23,6 +23,11 @@ Scene::Scene() :
 {
 }
 
+bool Scene::contains(const Scene::Item& item) const
+{
+    return containsItem(d->items, item);
+}
+
 Scene& Scene::add(const Item& item)
 {
     d->items.emplace_back(item);
@@ -38,7 +43,7 @@ Scene::Intersection Scene::intersect(const Ray& ray) const
     Items items;
     for (const auto& item : d->items)
         if (item.bounds().intersect(ray))
-            items.push_back({item.obj, pos});
+            items.emplace_back(item);
 
     return {pos, items};
 }
@@ -54,6 +59,11 @@ gfx::Geometry::Instances Scene::geometryInstances() const
     }
     HCLOG(Info) << instances.size();
     return instances;
+}
+
+bool containsItem(const Scene::Items& items, const Scene::Item& item)
+{
+    return std::find(items.begin(), items.end(), item) != items.end();
 }
 
 bool containsObject(const Scene::Items& items, const Object& object)

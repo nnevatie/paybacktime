@@ -26,11 +26,21 @@ struct Scene
         {
             return {pos, obj.model().dimensions()};
         }
+        operator==(const Item& other) const
+        {
+            return obj == other.obj && pos == other.pos;
+        }
+        operator!=(const Item& other) const
+        {
+            return !operator==(other);
+        }
     };
     typedef std::vector<Item>           Items;
     typedef std::pair<glm::vec3, Items> Intersection;
 
     Scene();
+
+    bool contains(const Item& item) const;
 
     Scene& add(const Item& item);
 
@@ -43,6 +53,7 @@ private:
     std::shared_ptr<Data> d;
 };
 
+bool containsItem(const Scene::Items& items, const Scene::Item& item);
 bool containsObject(const Scene::Items& items, const Object& object);
 
 } // namespace pt
