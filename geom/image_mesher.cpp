@@ -280,26 +280,6 @@ bool visible(const V& vol, int x, int y, int z)
 }
 
 template <typename V>
-Box box(const V& vol, int x, int y, int z)
-{
-    int c[8][3];
-    collapseConstants(c, vol.g(x, y, z));
-
-    const float s = vol.interval;
-    return
-    {
-        glm::vec3(x + c[0][0], y + c[0][1], z + c[0][2]) * s,
-        glm::vec3(x + c[1][0], y + c[1][1], z + c[1][2]) * s,
-        glm::vec3(x + c[2][0], y + c[2][1], z + c[2][2]) * s,
-        glm::vec3(x + c[3][0], y + c[3][1], z + c[3][2]) * s,
-        glm::vec3(x + c[4][0], y + c[4][1], z + c[4][2]) * s,
-        glm::vec3(x + c[5][0], y + c[5][1], z + c[5][2]) * s,
-        glm::vec3(x + c[6][0], y + c[6][1], z + c[6][2]) * s,
-        glm::vec3(x + c[7][0], y + c[7][1], z + c[7][2]) * s,
-    };
-}
-
-template <typename V>
 Mesh_P_N_UV meshGreedy(const V& vol, const RectCube<float>& uvCube)
 {
     struct Cell
