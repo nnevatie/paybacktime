@@ -25,6 +25,16 @@ Object::Object(const fs::path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {}
 
+Object::operator==(const Object& other) const
+{
+    return d == other.d;
+}
+
+Object::operator!=(const Object& other) const
+{
+    return !operator==(other);
+}
+
 Object::operator bool() const
 {
     return d.operator bool();

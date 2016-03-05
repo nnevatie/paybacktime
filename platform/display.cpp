@@ -209,15 +209,15 @@ bool Display::swap()
     return false;
 }
 
-glm::vec3 Display::rayNdc(const glm::ivec2& p) const
+glm::vec3 Display::ndc(const glm::ivec2& p) const
 {
     return glm::vec3((2.f * p.x) / d->size.w - 1.f,
-                     1.f - (2.f * p.y) / d->size.h, 1.f);
+               1.f - (2.f * p.y) / d->size.h, 1.f);
 }
 
-glm::vec4 Display::rayClip(const glm::ivec2& p) const
+glm::vec4 Display::clip(const glm::ivec2& p) const
 {
-    const glm::vec3 n = rayNdc(p);
+    const glm::vec3 n = ndc(p);
     return glm::vec4(n.x, n.y, -1.f, 1.f);
 }
 

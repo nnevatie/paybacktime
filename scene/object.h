@@ -18,6 +18,9 @@ struct Object
 
     operator bool() const;
 
+    operator==(const Object& other) const;
+    operator!=(const Object& other) const;
+
     std::string name()  const;
     Model       model() const;
 

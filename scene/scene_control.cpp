@@ -3,6 +3,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/log.h"
+#include "geom/box.h"
+#include "geom/ray.h"
 #include "gfx/outline.h"
 
 namespace pt
@@ -36,9 +38,9 @@ struct SceneControl::Data
     platform::Mouse*   mouse;
 
     State              state;
-    Scene::Item        sceneItem;
     Object             selectedObject;
     gfx::Outline       outline;
+    glm::vec3          objectPos;
 };
 
 SceneControl::SceneControl(Scene* scene,
@@ -51,7 +53,7 @@ SceneControl::SceneControl(Scene* scene,
 
 SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
 {
-    const auto mouseButtons = d->mouse->buttonTransitions();
+    const auto mouseButtons = d->mouse->buttons();
     const auto mousePos     = d->mouse->position();
     const bool mouseOnScene = mousePos.x < d->display->size().w - 225;
 
@@ -74,20 +76,21 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
 
         if (d->state == Data::State::Adding)
         {
-            const auto clipRay  = d->display->rayClip(d->mouse->position());
-            const auto rayWorld = d->camera->rayWorld(d->camera->rayEye(clipRay));
-            auto sceneItem      = d->scene->intersect(d->camera->position(),
-                                                      rayWorld);
-            auto& t = sceneItem.pos;
+            const auto clipRay  = d->display->clip(d->mouse->position());
+            const auto rayWorld = d->camera->world(d->camera->eye(clipRay));
+            auto intersection   = d->scene->intersect(rayWorld);
+
+            auto& t = intersection.first;
             auto mx = std::fmod(t.x, 16.f);
             auto mz = std::fmod(t.z, 16.f);
             t.x    -= mx > 0 ? mx : (15.f + mx);
             t.z    -= mz > 0 ? mz : (15.f + mz);
 
-            if (mouseButtons[0] == -1)
-                d->scene->add({selectedObject, sceneItem.pos});
+            if (mouseButtons[0] &&
+               !containsObject(intersection.second, selectedObject))
+                d->scene->add({selectedObject, intersection.first});
 
-            d->sceneItem = sceneItem;
+            d->objectPos = intersection.first;
         }
     }
     else
@@ -102,7 +105,7 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
     const Object object = d->selectedObject;
     if (object)
     {
-        auto m = glm::translate({}, d->sceneItem.pos);
+        auto m = glm::translate({}, d->objectPos);
         auto v = d->camera->matrixView();
         auto p = d->camera->matrixProj();
 

@@ -3,6 +3,8 @@
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/vector_query.hpp>
 
+#include "geom/ray.h"
+
 namespace pt
 {
 
@@ -18,12 +20,12 @@ struct CameraControl::Data
 
     glm::vec3 mousePlanePos() const
     {
-        const glm::vec4 mousePos = display->rayClip(mouse->position());
-        const glm::vec3 rayWorld = camera->rayWorld(camera->rayEye(mousePos));
+        const auto mousePos = display->clip(mouse->position());
+        const auto rayWorld = camera->world(camera->eye(mousePos));
         float di = 0;
-        glm::intersectRayPlane(camera->position(), rayWorld,
+        glm::intersectRayPlane(rayWorld.pos, rayWorld.dir,
                                glm::vec3(), glm::vec3(0, 1, 0), di);
-        return di * rayWorld;
+        return di * rayWorld.dir;
     }
 
     Camera*            camera;
@@ -101,7 +103,7 @@ CameraControl& CameraControl::operator()(Duration step)
 
     if (mouseOnScene)
     {
-        const glm::vec4 rayMouse = d->display->rayClip(mousePos);
+        const glm::vec4 rayMouse = d->display->clip(mousePos);
         const glm::vec3 rayDrag  = d->mousePlanePos();
         const glm::vec3 dragPos  = d->camera->position() + rayDrag;
         glm::vec3 md             = d->prevDragPos - dragPos;

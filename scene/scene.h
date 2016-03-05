@@ -1,11 +1,15 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+#include <utility>
 
 #include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
 
+#include "geom/box.h"
+#include "geom/ray.h"
 #include "gfx/geometry.h"
+
 #include "object.h"
 
 namespace pt
@@ -17,14 +21,20 @@ struct Scene
     {
         Object    obj;
         glm::vec3 pos;
+
+        Box bounds() const
+        {
+            return {pos, obj.model().dimensions()};
+        }
     };
+    typedef std::vector<Item>           Items;
+    typedef std::pair<glm::vec3, Items> Intersection;
 
     Scene();
 
     Scene& add(const Item& item);
 
-    Item intersect(const glm::vec3& origin,
-                   const glm::vec3& ray) const;
+    Intersection intersect(const Ray& ray) const;
 
     gfx::Geometry::Instances geometryInstances() const;
 
@@ -32,5 +42,7 @@ private:
     struct Data;
     std::shared_ptr<Data> d;
 };
+
+bool containsObject(const Scene::Items& items, const Object& object);
 
 } // namespace pt

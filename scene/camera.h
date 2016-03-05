@@ -3,6 +3,8 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
+#include "geom/ray.h"
+
 namespace pt
 {
 
@@ -21,8 +23,8 @@ struct Camera
     glm::mat4 matrixProj() const;
     glm::mat4 matrixView() const;
 
-    glm::vec4 rayEye(const glm::vec4& rayClip) const;
-    glm::vec3 rayWorld(const glm::vec4& rayEye) const;
+    glm::vec4 eye(const glm::vec4& clip) const;
+    Ray     world(const glm::vec4& eye)  const;
 
     glm::vec3 target;
     float     distance, yaw, pitch, fov, ar, zNear, zFar;

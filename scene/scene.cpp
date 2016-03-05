@@ -29,13 +29,18 @@ Scene& Scene::add(const Item& item)
     return *this;
 }
 
-Scene::Item Scene::intersect(const glm::vec3& origin,
-                             const glm::vec3& ray) const
+Scene::Intersection Scene::intersect(const Ray& ray) const
 {
     float di = 0;
-    glm::intersectRayPlane(origin, ray, glm::vec3(), glm::vec3(0, 1, 0), di);
-    const glm::vec3 pos = origin + di * ray;
-    return {{}, pos};
+    glm::intersectRayPlane(ray.pos, ray.dir, glm::vec3(), glm::vec3(0, 1, 0), di);
+    const auto pos = ray.pos + di * ray.dir;
+
+    Items items;
+    for (const auto& item : d->items)
+        if (item.bounds().intersect(ray))
+            items.push_back({item.obj, pos});
+
+    return {pos, items};
 }
 
 gfx::Geometry::Instances Scene::geometryInstances() const
@@ -49,6 +54,15 @@ gfx::Geometry::Instances Scene::geometryInstances() const
     }
     HCLOG(Info) << instances.size();
     return instances;
+}
+
+bool containsObject(const Scene::Items& items, const Object& object)
+{
+    for (const auto& item : items)
+        if (item.obj == object)
+            return true;
+
+    return false;
 }
 
 } // namespace pt

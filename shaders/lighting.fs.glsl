@@ -40,7 +40,8 @@ void main(void)
     vec3 fragPos    = linearDepth(texture(texDepth, ib.uv).r, p) * ib.viewRay;
 
     vec3 worldPos   = world(texDepth, ib.uv, v, p);
-    worldPos.xz    /= vec2(16.0 * 5, 16.0 * 5);
+    worldPos.xz    /= vec2(16.0 * 10, 16.0 * 10);
+    worldPos.xz    -= vec2(1 / 20.0, 1 / 20.0);
 
     vec3 normal     = texture(texNormal, ib.uv).rgb;
     vec3 albedo     = texture(texColor, ib.uv).rgb;
