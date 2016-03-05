@@ -43,6 +43,7 @@ struct Scene
     bool contains(const Item& item) const;
 
     Scene& add(const Item& item);
+    bool remove(const Item& item);
 
     Intersection intersect(const Ray& ray) const;
 

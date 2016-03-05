@@ -34,6 +34,17 @@ Scene& Scene::add(const Item& item)
     return *this;
 }
 
+bool Scene::remove(const Item& item)
+{
+    const auto i = std::find(d->items.begin(), d->items.end(), item);
+    if (i != d->items.end())
+    {
+        d->items.erase(i);
+        return true;
+    }
+    return false;
+}
+
 Scene::Intersection Scene::intersect(const Ray& ray) const
 {
     float di = 0;
@@ -57,7 +68,7 @@ gfx::Geometry::Instances Scene::geometryInstances() const
         glm::mat4x4 m = glm::translate({}, item.pos);
         instances.push_back({item.obj.model().primitive(), m});
     }
-    HCLOG(Info) << instances.size();
+    //HCLOG(Info) << instances.size();
     return instances;
 }
 

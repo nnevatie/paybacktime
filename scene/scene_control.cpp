@@ -74,7 +74,8 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
         else
             d->state = Data::State::Idle;
 
-        if (d->state == Data::State::Adding)
+        if (d->state == Data::State::Adding ||
+            d->state == Data::State::Removing)
         {
             const auto clipRay  = d->display->clip(d->mouse->position());
             const auto rayWorld = d->camera->world(d->camera->eye(clipRay));
@@ -89,8 +90,15 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
 
             if (mouseButtons[0] &&
                !d->scene->contains({selectedObject, intersection.first}))
+            {
                 d->scene->add({selectedObject, intersection.first});
-
+            }
+            else
+            if (mouseButtons[2] && !intersection.second.empty())
+            {
+                Object intersectedObj = intersection.second.front().obj;
+                bool r = d->scene->remove({intersectedObj, intersection.first});
+            }
             d->objectPos = intersection.first;
         }
     }
