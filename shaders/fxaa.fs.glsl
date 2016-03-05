@@ -4,7 +4,7 @@
 #define FXAA_PC              1
 #define FXAA_GLSL_130        1
 #define FXAA_GATHER4_ALPHA   1
-#define FXAA_QUALITY__PRESET 15
+#define FXAA_QUALITY__PRESET 23
 
 uniform sampler2D tex;
 
