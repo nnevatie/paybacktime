@@ -15,13 +15,13 @@ ib;
 // Output
 out vec4 color;
 
-float A = 0.15;
-float B = 0.50;
-float C = 0.10;
-float D = 0.20;
-float E = 0.02;
-float F = 0.30;
-float W = 11.2;
+float A = 0.15; // shoulder str
+float B = 0.50; // linear str
+float C = 0.10; // linear ang
+float D = 0.20; // toe str
+float E = 0.02; // toe num
+float F = 0.30; // toe den
+float W = 11.2; // linear white pt
 
 vec3 tonemap(vec3 x)
 {
