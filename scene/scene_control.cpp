@@ -96,8 +96,8 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
             else
             if (mouseButtons[2] && !intersection.second.empty())
             {
-                Object intersectedObj = intersection.second.front().obj;
-                bool r = d->scene->remove({intersectedObj, intersection.first});
+                for (const auto& item : intersection.second)
+                    d->scene->remove({item.obj, intersection.first});
             }
             d->objectPos = intersection.first;
         }
