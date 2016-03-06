@@ -47,7 +47,7 @@ void main(void)
     vec3 albedo     = texture(texColor, ib.uv).rgb;
     vec3 light      = texture(texLight, ib.uv).rgb;
     vec3 ao         = texture(texAo, ib.uv).r *
-                      textureBicubic(texGi, worldPos.xz).rgb;
+                      2.0 * pow(textureBicubic(texGi, worldPos.xz).rgb, vec3(2.0));
     // Ambient
     vec3 ambient    = vec3(0);
 
