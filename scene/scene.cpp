@@ -67,7 +67,8 @@ gfx::Geometry::Instances Scene::geometryInstances() const
     for (const auto& item : d->items)
     {
         auto m = static_cast<glm::mat4x4>(item.trRot);
-        instances.push_back({item.obj.model().primitive(), m});
+        auto t = glm::translate(m, item.obj.origin());
+        instances.push_back({item.obj.model().primitive(), t});
     }
     //HCLOG(Info) << instances.size();
     return instances;
@@ -75,7 +76,11 @@ gfx::Geometry::Instances Scene::geometryInstances() const
 
 bool containsItem(const Scene::Items& items, const Scene::Item& item)
 {
-    return std::find(items.begin(), items.end(), item) != items.end();
+    for (const auto& i : items)
+        if (i.obj == item.obj && i.trRot.tr == item.trRot.tr)
+            return true;
+
+    return false;
 }
 
 bool containsObject(const Scene::Items& items, const Object& object)

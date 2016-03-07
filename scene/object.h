@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 
+#include <glm/vec3.hpp>
+
 #include "common/file_system.h"
 
 #include "texture_store.h"
@@ -21,8 +23,9 @@ struct Object
     operator==(const Object& other) const;
     operator!=(const Object& other) const;
 
-    std::string name()  const;
-    Model       model() const;
+    Model       model()  const;
+    std::string name()   const;
+    glm::vec3   origin() const;
 
 private:
     struct Data;
