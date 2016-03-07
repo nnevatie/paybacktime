@@ -46,7 +46,7 @@ struct ObjectSelector::Data
 
         const Size<int> previewSize(256, 256);
         const Camera camera({0.f, 0.f, 0.f}, 90.f,
-                             M_PI / 4, -M_PI / 4,
+                             glm::quarter_pi<float>(), -glm::quarter_pi<float>(),
                              glm::radians(30.f),
                              previewSize.aspect<float>(), 0.1f, 100.f);
 

@@ -36,12 +36,13 @@ Scene& Scene::add(const Item& item)
 
 bool Scene::remove(const Item& item)
 {
-    const auto i = std::find(d->items.begin(), d->items.end(), item);
-    if (i != d->items.end())
-    {
-        d->items.erase(i);
-        return true;
-    }
+    for (int i = 0; i < int(d->items.size()); ++i)
+        if (d->items.at(i).trRot.tr == item.trRot.tr)
+        {
+            d->items.erase(d->items.begin() + i);
+            return true;
+        }
+
     return false;
 }
 
@@ -65,7 +66,7 @@ gfx::Geometry::Instances Scene::geometryInstances() const
     instances.reserve(d->items.size());
     for (const auto& item : d->items)
     {
-        glm::mat4x4 m = glm::translate({}, item.pos);
+        auto m = static_cast<glm::mat4x4>(item.trRot);
         instances.push_back({item.obj.model().primitive(), m});
     }
     //HCLOG(Info) << instances.size();

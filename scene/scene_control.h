@@ -23,7 +23,7 @@ struct SceneControl
                  platform::Mouse* mouse,
                  const gl::Texture& texDepth);
 
-    SceneControl& operator()(Duration step, Object selectedObject);
+    SceneControl& operator()(Duration step, Object object);
     SceneControl& operator()(gl::Fbo* fboOut,
                              gl::Texture* texColor);
 

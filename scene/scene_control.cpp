@@ -3,8 +3,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/log.h"
+
 #include "geom/box.h"
 #include "geom/ray.h"
+#include "geom/transform.h"
+
 #include "gfx/outline.h"
 
 namespace pt
@@ -15,6 +18,7 @@ struct SceneControl::Data
     enum class State
     {
         Idle,
+        Hovering,
         Adding,
         Removing
     };
@@ -28,8 +32,8 @@ struct SceneControl::Data
         camera(camera),
         display(display),
         mouse(mouse),
-        state(State::Idle),
-        outline(display->size(), texDepth)
+        outline(display->size(), texDepth),
+        state(State::Idle)
     {}
 
     Scene*             scene;
@@ -37,10 +41,12 @@ struct SceneControl::Data
     platform::Display* display;
     platform::Mouse*   mouse;
 
-    State              state;
-    Object             selectedObject;
     gfx::Outline       outline;
-    glm::vec3          objectPos;
+
+    State              state;
+
+    Object             object;
+    TransformTrRot     objectTransform;
 };
 
 SceneControl::SceneControl(Scene* scene,
@@ -51,9 +57,10 @@ SceneControl::SceneControl(Scene* scene,
     d(std::make_shared<Data>(scene, camera, display, mouse, texDepth))
 {}
 
-SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
+SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
 {
     const auto mouseButtons = d->mouse->buttons();
+    const auto mouseWheel   = d->mouse->wheel();
     const auto mousePos     = d->mouse->position();
     const bool mouseOnScene = mousePos.x < d->display->size().w - 225;
 
@@ -62,20 +69,16 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
         if (keyState[SDL_SCANCODE_LSHIFT])
         {
-            d->state = Data::State::Adding;
+            d->state = mouseButtons[0] ? Data::State::Adding   :
+                       mouseButtons[2] ? Data::State::Removing :
+                                         Data::State::Hovering;
+
             d->mouse->setCursor(platform::Mouse::Cursor::Crosshair);
-        }
-        else
-        if (keyState[SDL_SCANCODE_LCTRL])
-        {
-            d->state = Data::State::Removing;
-            d->mouse->setCursor(platform::Mouse::Cursor::No);
         }
         else
             d->state = Data::State::Idle;
 
-        if (d->state == Data::State::Adding ||
-            d->state == Data::State::Removing)
+        if (d->state != Data::State::Idle)
         {
             const auto clipRay  = d->display->clip(d->mouse->position());
             const auto rayWorld = d->camera->world(d->camera->eye(clipRay));
@@ -88,37 +91,39 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object selectedObject)
             t.y     = 0;
             t.z    -= mz > 0 ? mz : (15.f + mz);
 
-            if (mouseButtons[0] &&
-               !d->scene->contains({selectedObject, intersection.first}))
+            if (d->state == Data::State::Adding &&
+               !d->scene->contains({object, intersection.first}))
             {
-                d->scene->add({selectedObject, intersection.first});
+                d->scene->add({object, {intersection.first,
+                                        d->objectTransform.rot}});
             }
             else
-            if (mouseButtons[2] && !intersection.second.empty())
+            if (d->state == Data::State::Removing &&
+                !intersection.second.empty())
             {
                 for (const auto& item : intersection.second)
                     d->scene->remove({item.obj, intersection.first});
             }
-            d->objectPos = intersection.first;
+            d->objectTransform.tr  = intersection.first;
+            d->objectTransform.rot = umod(d->objectTransform.rot + mouseWheel, 4);
         }
     }
     else
         d->state = Data::State::Idle;
 
-    d->selectedObject = selectedObject;
+    d->object = object;
     return *this;
 }
 
 SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
 {
-    const Object object = d->selectedObject;
-    if (object)
+    if (const Object object = d->object)
     {
-        auto m = glm::translate({}, d->objectPos);
+        auto m = static_cast<glm::mat4x4>(d->objectTransform);
         auto v = d->camera->matrixView();
         auto p = d->camera->matrixProj();
 
-        if (d->state == Data::State::Adding)
+        if (d->state != Data::State::Idle)
             d->outline(fboOut, texColor, object.model().primitive(), p * v * m);
     }
     return *this;

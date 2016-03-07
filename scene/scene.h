@@ -8,6 +8,8 @@
 
 #include "geom/box.h"
 #include "geom/ray.h"
+#include "geom/transform.h"
+
 #include "gfx/geometry.h"
 
 #include "object.h"
@@ -19,16 +21,16 @@ struct Scene
 {
     struct Item
     {
-        Object    obj;
-        glm::vec3 pos;
+        Object         obj;
+        TransformTrRot trRot;
 
         Box bounds() const
         {
-            return {pos, obj.model().dimensions()};
+            return {trRot.tr, obj.model().dimensions()};
         }
         operator==(const Item& other) const
         {
-            return obj == other.obj && pos == other.pos;
+            return obj == other.obj && trRot == other.trRot;
         }
         operator!=(const Item& other) const
         {

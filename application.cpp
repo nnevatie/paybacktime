@@ -85,7 +85,8 @@ struct Impl
         objectSelector(display, &objectStore, &textureStore),
         stats(display->nanoVg()),
 
-        camera({0.f, 0.f, 0.f}, 350.f, M_PI / 2, -M_PI / 4,
+        camera({0.f, 0.f, 0.f}, 350.f,
+               glm::half_pi<float>(), -glm::quarter_pi<float>(),
                glm::radians(45.f), renderSize.aspect<float>(), 100.f, 550.f),
 
         cameraControl(&camera, display, &mouse),
@@ -143,7 +144,8 @@ struct Impl
                 if (x == 4)
                 {
                     m = glm::translate(m, glm::vec3(16, 0, 0));
-                    m = glm::rotate(m, -0.5f * float(M_PI), glm::vec3(0.f, 1.f, 0.f));
+                    m = glm::rotate(m, -glm::half_pi<float>(),
+                                        glm::vec3(0.f, 1.f, 0.f));
                 }
                 instances.push_back({wall, m});
             }

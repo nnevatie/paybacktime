@@ -1,5 +1,6 @@
 #include "camera_control.h"
 
+#include <glm/gtc/constants.hpp>
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/vector_query.hpp>
 
@@ -61,9 +62,9 @@ CameraControl& CameraControl::operator()(Duration step)
     // Angular
     d->ang[0]         += t * d->ang[1];
     d->camera->yaw     = std::fmod(d->camera->yaw + t * d->ang[0].x,
-                                   float(2 * M_PI));
+                                   2 * glm::pi<float>());
     d->camera->pitch   = clamp(d->camera->pitch + t * d->ang[0].y,
-                              -float(M_PI / 2 - 0.25f), -0.5f);
+                              -float(glm::half_pi<float>() - 0.25f), -0.5f);
     d->ang[0]         *= std::pow(0.01f, t) *
                                  (length(d->ang[0]) > 0.05f ? 1.f : 0.f);
     d->ang[1]          = vec3();
