@@ -87,8 +87,7 @@ include_directories(
     )
 
 # Build definitions
-add_definitions(-D_USE_MATH_DEFINES
-                -DEIGEN_NO_DEBUG
+add_definitions(-DEIGEN_NO_DEBUG
                 -DEIGEN_DONT_PARALLELIZE
                 -DNANOVG_GL3_IMPLEMENTATION
                 -DBOOST_THREAD_VERSION=4
