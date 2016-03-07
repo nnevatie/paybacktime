@@ -48,14 +48,13 @@ inline D bitCast(const S& src)
   return dst;
 }
 
+inline int umod(int x, int y)
+{
+    return ((x < 0) ? ((x % y) + y) : x) % y;
+}
+
 std::string str(const std::ostream& ostr);
 
 std::string readFile(const fs::path& path, bool binary = true);
-
-template <typename T>
-inline T radians(T deg)
-{
-     return T(deg * (M_PI / 180));
-}
 
 }  // namespace
