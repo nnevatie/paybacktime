@@ -10,6 +10,7 @@
 #include "geom/ray.h"
 #include "geom/transform.h"
 
+#include "img/image.h"
 #include "gfx/geometry.h"
 
 #include "object.h"
@@ -24,19 +25,11 @@ struct Scene
         Object         obj;
         TransformTrRot trRot;
 
-        Box bounds() const
-        {
-            return {trRot.tr, obj.model().dimensions()};
-        }
-        operator==(const Item& other) const
-        {
-            return obj == other.obj && trRot == other.trRot;
-        }
-        operator!=(const Item& other) const
-        {
-            return !operator==(other);
-        }
+        Box bounds() const;
+        operator==(const Item& other) const;
+        operator!=(const Item& other) const;
     };
+
     typedef std::vector<Item>           Items;
     typedef std::pair<glm::vec3, Items> Intersection;
 
@@ -48,6 +41,8 @@ struct Scene
     bool remove(const Item& item);
 
     Intersection intersect(const Ray& ray) const;
+
+    Image lightmap() const;
 
     gfx::Geometry::Instances geometryInstances() const;
 

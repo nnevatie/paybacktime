@@ -10,6 +10,21 @@
 namespace pt
 {
 
+Box Scene::Item::bounds() const
+{
+    return {trRot.tr, obj.model().dimensions()};
+}
+
+Scene::Item::operator==(const Scene::Item& other) const
+{
+    return obj == other.obj && trRot == other.trRot;
+}
+
+Scene::Item::operator!=(const Scene::Item& other) const
+{
+    return !operator==(other);
+}
+
 struct Scene::Data
 {
     Data()
@@ -58,6 +73,11 @@ Scene::Intersection Scene::intersect(const Ray& ray) const
             items.emplace_back(item);
 
     return {pos, items};
+}
+
+Image Scene::lightmap() const
+{
+    return Image();
 }
 
 gfx::Geometry::Instances Scene::geometryInstances() const
