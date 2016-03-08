@@ -4,6 +4,7 @@
 #include <string>
 
 #include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 
 #include "common/file_system.h"
 
@@ -23,9 +24,10 @@ struct Object
     operator==(const Object& other) const;
     operator!=(const Object& other) const;
 
-    Model       model()  const;
-    std::string name()   const;
-    glm::vec3   origin() const;
+    Model       model()     const;
+    std::string name()      const;
+    glm::vec3   origin()    const;
+    glm::mat4x4 transform() const;
 
 private:
     struct Data;

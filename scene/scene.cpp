@@ -67,8 +67,7 @@ gfx::Geometry::Instances Scene::geometryInstances() const
     for (const auto& item : d->items)
     {
         auto m = static_cast<glm::mat4x4>(item.trRot);
-        auto t = glm::translate(m, item.obj.origin());
-        instances.push_back({item.obj.model().primitive(), t});
+        instances.push_back({item.obj.model().primitive(), m});
     }
     //HCLOG(Info) << instances.size();
     return instances;

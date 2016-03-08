@@ -45,6 +45,7 @@ Outline& Outline::operator()(gl::Fbo* fboOut,
         Binder<gl::Fbo> binder(fboModel);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
         glDepthMask(false);
 
         glEnable(GL_POLYGON_OFFSET_FILL);

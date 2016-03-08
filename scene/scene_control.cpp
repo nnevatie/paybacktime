@@ -90,6 +90,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             t.x    -= mx > 0 ? mx : (15.f + mx);
             t.y     = 0;
             t.z    -= mz > 0 ? mz : (15.f + mz);
+            t      += object.origin();
 
             if (d->state == Data::State::Adding &&
                !d->scene->contains({object, intersection.first}))

@@ -3,6 +3,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <glm/gtx/transform.hpp>
+
 #include "common/log.h"
 
 namespace bpt = boost::property_tree;
@@ -94,6 +96,11 @@ std::string Object::name() const
 glm::vec3 Object::origin() const
 {
     return d->origin;
+}
+
+glm::mat4x4 Object::transform() const
+{
+    return glm::translate(d->origin);
 }
 
 Model Object::model() const
