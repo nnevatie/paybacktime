@@ -128,9 +128,11 @@ Ssao& Ssao::operator()(gl::Texture* texDepth,
     {
         // Blur pass
         Binder<gl::Fbo> binder(fboAoBlur);
-        progBlur.bind().setUniform("tex", 0);
+        progBlur.bind().setUniform("texDepth", 0)
+                       .setUniform("texAo",    1);
         glDisable(GL_DEPTH_TEST);
-        texAo.bindAs(GL_TEXTURE0);
+        texDepth->bindAs(GL_TEXTURE0);
+        texAo.bindAs(GL_TEXTURE1);
         rect.render();
     }
     return *this;
