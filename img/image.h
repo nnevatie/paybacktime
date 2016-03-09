@@ -29,6 +29,8 @@ struct Image
 
     uint8_t* bits();
     const uint8_t* bits() const;
+    uint8_t* bits(int x, int y);
+
     SDL_Surface* surface() const;
     int nvgImage(NVGcontext* nanoVg) const;
 

@@ -92,7 +92,7 @@ int Image::stride() const
     return d->stride;
 }
 
-uint8_t *Image::bits()
+uint8_t* Image::bits()
 {
     return d->bits;
 }
@@ -100,6 +100,11 @@ uint8_t *Image::bits()
 const uint8_t* Image::bits() const
 {
     return d->bits;
+}
+
+uint8_t* Image::bits(int x, int y)
+{
+    return d->bits + y * d->stride + d->depth * x;
 }
 
 SDL_Surface* Image::surface() const
