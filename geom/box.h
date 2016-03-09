@@ -30,6 +30,26 @@ struct Box
         return pos + size;
     }
 
+    inline operator bool() const
+    {
+        return pos != V() || size != V();
+    }
+
+    inline Box operator|(const Box& box) const
+    {
+        if (!*this) return box;
+        if (!box)   return *this;
+        auto posMin = glm::min(pos, box.pos);
+        auto posMax = glm::max(pos + size, box.pos + box.size);
+        return {posMin, posMax - posMin};
+    }
+
+    inline Box& operator|=(const Box& box)
+    {
+        *this = *this | box;
+        return *this;
+    }
+
     inline bool intersect(const Ray& ray) const
     {
         V t0         = (min() - ray.pos) * ray.dirInv;
