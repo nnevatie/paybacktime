@@ -7,6 +7,8 @@ uniform sampler2D texColor;
 uniform sampler2D texLight;
 uniform sampler2D texAo;
 uniform sampler2D texGi;
+uniform vec3      boundsMin;
+uniform vec3      boundsSize;
 uniform mat4      v;
 uniform mat4      p;
 
@@ -40,14 +42,14 @@ void main(void)
     vec3 fragPos    = linearDepth(texture(texDepth, ib.uv).r, p) * ib.viewRay;
 
     vec3 worldPos   = world(texDepth, ib.uv, v, p);
-    worldPos.xz    /= vec2(16.0 * 10, 16.0 * 10);
-    worldPos.xz    -= vec2(1 / 20.0, 1 / 20.0);
+    vec2 giUv       = ((worldPos - boundsMin) / boundsSize).xz;
+    vec3 gi         = 2.0 * pow(textureBicubic(texGi, giUv).rgb, vec3(2.0));
 
+    vec3 ao         = texture(texAo, ib.uv).r * gi;
     vec3 normal     = texture(texNormal, ib.uv).rgb;
-    vec3 albedo     = texture(texColor, ib.uv).rgb;
-    vec3 light      = texture(texLight, ib.uv).rgb;
-    vec3 ao         = texture(texAo, ib.uv).r *
-                      2.0 * pow(textureBicubic(texGi, worldPos.xz).rgb, vec3(2.0));
+    vec3 albedo     = texture(texColor,  ib.uv).rgb;
+    vec3 light      = texture(texLight,  ib.uv).rgb;
+
     // Ambient
     vec3 ambient    = vec3(0);
 
