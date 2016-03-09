@@ -192,8 +192,7 @@ struct Impl
         namespace arg = std::placeholders;
         Scheduler scheduler(std::chrono::milliseconds(10),
                             std::bind(&simulate, this, arg::_1, arg::_2),
-                            std::bind(&render,   this, arg::_1, arg::_2),
-                            Scheduler::OptionPreserveCpu);
+                            std::bind(&render,   this, arg::_1, arg::_2));
         return scheduler.start();
     }
 };
