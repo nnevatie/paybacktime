@@ -4,8 +4,10 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/intersect.hpp>
+#include <glm/gtx/random.hpp>
 
 #include "common/log.h"
+#include "img/color.h"
 
 namespace pt
 {
@@ -31,11 +33,22 @@ struct Scene::Data
     {}
 
     std::vector<Item> items;
+    Image             lightmap;
+    gl::Texture       lightTex;
 };
 
 Scene::Scene() :
     d(std::make_shared<Data>())
 {
+    updateLightmap();
+}
+
+Box Scene::bounds() const
+{
+    Box box;
+    for (const auto& item : d->items)
+        box |= item.bounds();
+    return box;
 }
 
 bool Scene::contains(const Scene::Item& item) const
@@ -46,6 +59,7 @@ bool Scene::contains(const Scene::Item& item) const
 Scene& Scene::add(const Item& item)
 {
     d->items.emplace_back(item);
+    updateLightmap();
     return *this;
 }
 
@@ -55,6 +69,7 @@ bool Scene::remove(const Item& item)
         if (d->items.at(i).trRot.tr == item.trRot.tr)
         {
             d->items.erase(d->items.begin() + i);
+            updateLightmap();
             return true;
         }
 
@@ -75,11 +90,6 @@ Scene::Intersection Scene::intersect(const Ray& ray) const
     return {pos, items};
 }
 
-Image Scene::lightmap() const
-{
-    return Image();
-}
-
 gfx::Geometry::Instances Scene::geometryInstances() const
 {
     gfx::Geometry::Instances instances;
@@ -91,6 +101,37 @@ gfx::Geometry::Instances Scene::geometryInstances() const
     }
     //HCLOG(Info) << instances.size();
     return instances;
+}
+
+gl::Texture* Scene::lightmap() const
+{
+    return &d->lightTex;
+}
+
+Scene& Scene::updateLightmap()
+{
+    auto box  = bounds();
+    auto size = glm::ceil(box.size.xz() / 8.f);
+
+    HCLOG(Info) << "size: " << box.size.x << ", "
+                            << box.size.y << ", "
+                            << box.size.z << " -> "
+                            << size.x     << " x "
+                            << size.y     << " px";
+
+    d->lightmap = Image(Size<int>(size.x, size.y), 4);
+    for (int y = 0; y < size.y; ++y)
+        for (int x = 0; x < size.x; ++x)
+        {
+            uint32_t* p = reinterpret_cast<uint32_t*>(d->lightmap.bits(x, y));
+            *p = argb(glm::linearRand(0, 255));
+        }
+
+    d->lightmap.write("c:/temp/lightmap.png");
+    d->lightTex.bind().alloc(d->lightmap)
+                      .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                      .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    return *this;
 }
 
 bool containsItem(const Scene::Items& items, const Scene::Item& item)

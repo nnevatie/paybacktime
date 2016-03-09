@@ -12,6 +12,7 @@
 
 #include "img/image.h"
 #include "gfx/geometry.h"
+#include "gl/texture.h"
 
 #include "object.h"
 
@@ -35,6 +36,8 @@ struct Scene
 
     Scene();
 
+    Box bounds() const;
+
     bool contains(const Item& item) const;
 
     Scene& add(const Item& item);
@@ -42,9 +45,10 @@ struct Scene
 
     Intersection intersect(const Ray& ray) const;
 
-    Image lightmap() const;
-
     gfx::Geometry::Instances geometryInstances() const;
+
+    gl::Texture* lightmap() const;
+    Scene& updateLightmap();
 
 private:
     struct Data;
