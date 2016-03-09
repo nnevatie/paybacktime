@@ -42,8 +42,6 @@ struct Impl
     platform::Display* display;
     Size<int> renderSize;
 
-    gl::Texture lightmap;
-
     gfx::Geometry geometry;
     gfx::Ssao ssao;
     gfx::Lighting lighting;
@@ -92,12 +90,6 @@ struct Impl
         cameraControl(&camera, display, &mouse),
         sceneControl(&scene, &camera, display, &mouse, geometry.texDepth)
     {
-        lightmap.bind().alloc(Image("data/lightmap.png"))
-                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        textureStore.albedo.atlas.image(true).write("c:/temp/albedo.png");
-        textureStore.light.atlas.image(true).write("c:/temp/light.png");
     }
 
     bool simulate(TimePoint /*time*/, Duration step)
@@ -172,7 +164,8 @@ struct Impl
                  &geometry.texColor,
                  &geometry.texLight,
                  &ssao.texAoBlur,
-                 &lightmap,
+                 scene.lightmap(),
+                 scene.bounds(),
                  view, proj);
 
         bloom(&geometry.texColor, lighting.output(), &geometry.texLight);
