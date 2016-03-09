@@ -87,9 +87,9 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             auto& t = intersection.first;
             auto mx = std::fmod(t.x, 16.f);
             auto mz = std::fmod(t.z, 16.f);
-            t.x    -= mx > 0 ? mx : (15.f + mx);
+            t.x    -= mx > 0 ? mx : (16.f + mx);
             t.y     = 0;
-            t.z    -= mz > 0 ? mz : (15.f + mz);
+            t.z    -= mz > 0 ? mz : (16.f + mz);
             t      += object.origin();
 
             if (d->state == Data::State::Adding &&
