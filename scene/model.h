@@ -5,6 +5,7 @@
 #include <glm/vec3.hpp>
 
 #include "common/file_system.h"
+#include "img/image.h"
 #include "gl/primitive.h"
 
 #include "texture_store.h"
@@ -19,6 +20,8 @@ struct Model
     glm::vec3 dimensions() const;
 
     gl::Primitive primitive() const;
+
+    Image emission() const;
 
 private:
     struct Data;

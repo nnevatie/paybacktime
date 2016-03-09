@@ -33,10 +33,8 @@ Model::Model(const fs::path& path, TextureStore* textureStore) :
 {
     d->entryAlbedo = textureStore->albedo.insert(d->cubeAlbedo);
     d->entryLight  = textureStore->light.insert(d->cubeLight);
-
-    const Mesh_P_N_UV mesh = ImageMesher::mesh(d->cubeDepth,
-                                               d->entryAlbedo.second);
-    d->primitive = gl::Primitive(mesh);
+    auto mesh      = ImageMesher::mesh(d->cubeDepth, d->entryAlbedo.second);
+    d->primitive   = gl::Primitive(mesh);
 }
 
 glm::vec3 Model::dimensions() const
@@ -47,6 +45,11 @@ glm::vec3 Model::dimensions() const
 gl::Primitive Model::primitive() const
 {
     return d->primitive;
+}
+
+Image Model::emission() const
+{
+    return Image();
 }
 
 } // namespace pt
