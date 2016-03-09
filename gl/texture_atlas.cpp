@@ -37,8 +37,7 @@ TextureAtlas::EntryCube TextureAtlas::insert(const ImageCube& imageCube)
         entryCube.first[i]   = ri;
         entryCube.second[i]  = rt;
     }
-    // Update texture. TODO: Add clamp margins for bilinear filtering.
-    //                       Only update dirty regions.
+    // Update texture. TODO: Only update dirty regions.
     update();
     return entryCube;
 }
