@@ -118,17 +118,28 @@ Scene& Scene::updateLightmap()
     HCTIME("generate lighting");
 
     auto box  = bounds();
-    auto size = glm::ceil(box.size.xz() / 8.f);
+    auto size = Size<int>(glm::ceil(box.size.xz() / 8.f));
 
-    d->lightmap = Image(Size<int>(size.x, size.y), 4);
-    for (int y = 0; y < size.y; ++y)
-        for (int x = 0; x < size.x; ++x)
+    // Emissive
+    d->emissive = Image(size, 4);
+    d->emissive.fill(0x00000000);
+    for (const auto& item : d->items)
+    {
+
+    }
+
+    // Lightmap
+    d->lightmap = Image(size, 4);
+    for (int y = 0; y < size.h; ++y)
+        for (int x = 0; x < size.w; ++x)
         {
             uint32_t* p = reinterpret_cast<uint32_t*>(d->lightmap.bits(x, y));
             *p = argb(glm::linearRand(0, 255));
         }
 
-    //d->lightmap.write("c:/temp/lightmap.png");
+    d->emissive.write("c:/temp/emissive.png");
+    d->lightmap.write("c:/temp/lightmap.png");
+
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);

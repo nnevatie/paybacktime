@@ -49,7 +49,12 @@ gl::Primitive Model::primitive() const
 
 Image Model::emission() const
 {
-    return Image();
+    const auto size = dimensions().xz() / 8.f;
+    Image map(Size<int>(size.x, size.y), 4);
+
+    HCLOG(Info) << "size: " << size.x << " x " << size.y;
+
+    return map;
 }
 
 } // namespace pt
