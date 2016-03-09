@@ -1,6 +1,7 @@
 #include "lighting.h"
 
 #include "common/common.h"
+#include "common/log.h"
 
 namespace pt
 {
@@ -32,18 +33,21 @@ Lighting& Lighting::operator()(
     gl::Texture* texLight,
     gl::Texture* texSsao,
     gl::Texture* texLightmap,
+    const Box& bounds,
     const glm::mat4& v,
     const glm::mat4& p)
 {
     Binder<gl::Fbo> binder(fbo);
-    prog.bind().setUniform("texDepth",    0)
-               .setUniform("texNormal",   1)
-               .setUniform("texColor",    2)
-               .setUniform("texLight",    3)
-               .setUniform("texAo",       4)
-               .setUniform("texGi",       5)
-               .setUniform("v",           v)
-               .setUniform("p",           p);
+    prog.bind().setUniform("texDepth",   0)
+               .setUniform("texNormal",  1)
+               .setUniform("texColor",   2)
+               .setUniform("texLight",   3)
+               .setUniform("texAo",      4)
+               .setUniform("texGi",      5)
+               .setUniform("boundsMin",  glm::floor(bounds.pos))
+               .setUniform("boundsSize", glm::ceil(bounds.size))
+               .setUniform("v",          v)
+               .setUniform("p",          p);
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);

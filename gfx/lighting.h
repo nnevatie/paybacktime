@@ -3,6 +3,8 @@
 #include <glm/mat4x4.hpp>
 
 #include "geom/size.h"
+#include "geom/box.h"
+
 #include "gl/primitive.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"
@@ -36,6 +38,7 @@ struct Lighting
         gl::Texture* texLight,
         gl::Texture* texSsao,
         gl::Texture* texLightmap,
+        const Box& bounds,
         const glm::mat4& v,
         const glm::mat4& p);
 
