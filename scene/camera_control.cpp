@@ -79,7 +79,8 @@ CameraControl& CameraControl::operator()(Duration step)
 
     const uint8_t* keyState   = SDL_GetKeyboardState(nullptr);
     const glm::ivec2 mousePos = d->mouse->position();
-    const bool mouseOnScene   = mousePos.x < d->display->size().w - 225;
+    const bool mouseOnScene   = SDL_GetMouseFocus() &&
+                                mousePos.x < d->display->size().w - 225;
 
     if (keyState[SDL_SCANCODE_LSHIFT] || keyState[SDL_SCANCODE_LCTRL])
         return *this;
@@ -137,8 +138,8 @@ CameraControl& CameraControl::operator()(Duration step)
 
             // Let position float after letting drag go
             if (!glm::isNull(d->prevMousePos, 0.f) &&
-                    glm::isNull(d->ang[0], 0.f))
-                d->pos[1] = 0.5f * md * std::pow(1.f / t, 2.0f);
+                 glm::isNull(d->ang[0], 0.f))
+                d->pos[1] = 0.5f * glm::min(md, 10.f) * std::pow(1.f / t, 2.0f);
 
             d->prevMousePos = glm::vec4();
             d->prevDragPos  = glm::vec3();
