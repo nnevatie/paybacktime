@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/vec2.hpp>
+
 namespace pt
 {
 
@@ -11,6 +13,10 @@ struct Size
 
     Size(T w, T h) :
         w(w), h(h)
+    {}
+
+    Size(const glm::ivec2& v) :
+        w(v.x), h(v.y)
     {}
 
     operator bool() const
