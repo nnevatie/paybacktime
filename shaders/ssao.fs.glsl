@@ -1,6 +1,6 @@
 #version 150
 
-#define RADIUS           10.0
+#define RADIUS           5.0
 #define KERNEL_SIZE      32
 #define POW              4
 
