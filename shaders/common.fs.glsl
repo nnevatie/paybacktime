@@ -34,7 +34,7 @@ vec4 textureBicubic(sampler2D sampler, vec2 uv)
 {
     vec2 ts      = textureSize(sampler, 0);
     vec2 tsInv   = 1.0 / ts;
-    uv          *= ts - 0.5;
+    uv          *= ts - 0.0; // 0.5?
     vec2 fxy     = fract(uv);
     uv          -= fxy;
     vec4 xcubic  = cubic(fxy.x);
