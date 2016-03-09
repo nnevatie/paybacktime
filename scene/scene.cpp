@@ -6,6 +6,7 @@
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/random.hpp>
 
+#include "platform/clock.h"
 #include "common/log.h"
 #include "img/color.h"
 
@@ -33,7 +34,11 @@ struct Scene::Data
     {}
 
     std::vector<Item> items;
+
+    Image             visibility;
+    Image             emissive;
     Image             lightmap;
+
     gl::Texture       lightTex;
 };
 
@@ -110,14 +115,10 @@ gl::Texture* Scene::lightmap() const
 
 Scene& Scene::updateLightmap()
 {
+    HCTIME("generate lighting");
+
     auto box  = bounds();
     auto size = glm::ceil(box.size.xz() / 8.f);
-
-    HCLOG(Info) << "size: " << box.size.x << ", "
-                            << box.size.y << ", "
-                            << box.size.z << " -> "
-                            << size.x     << " x "
-                            << size.y     << " px";
 
     d->lightmap = Image(Size<int>(size.x, size.y), 4);
     for (int y = 0; y < size.y; ++y)
@@ -127,7 +128,7 @@ Scene& Scene::updateLightmap()
             *p = argb(glm::linearRand(0, 255));
         }
 
-    d->lightmap.write("c:/temp/lightmap.png");
+    //d->lightmap.write("c:/temp/lightmap.png");
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
