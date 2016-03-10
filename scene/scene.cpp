@@ -13,6 +13,33 @@
 namespace pt
 {
 
+namespace
+{
+
+void accumulateEmission(Image* map, const glm::ivec2& pos, const Image& emission)
+{
+    auto const size = emission.size();
+    for (int y = 0; y < size.h; ++y)
+    {
+        uint32_t* __restrict__ rowOut =
+            reinterpret_cast<uint32_t*>(map->bits(0, pos.y + y));
+
+        const uint32_t* __restrict__ rowEmis =
+            reinterpret_cast<const uint32_t*>(emission.bits(0, y));
+
+        for (int x = 0; x < size.w; ++x)
+        {
+            const int x1 = pos.x + x;
+            auto argb0   = argbTuple(rowOut[x1]);
+            auto argb1   = argbTuple(rowEmis[x]);
+            auto argb2   = argb0 + argb1;
+            rowOut[x1]   = argb(glm::min(glm::uvec4(255), argb2));
+        }
+    }
+}
+
+}
+
 Box Scene::Item::bounds() const
 {
     return {trRot.tr, obj.model().dimensions()};
@@ -125,7 +152,10 @@ Scene& Scene::updateLightmap()
     d->emissive.fill(0x00000000);
     for (const auto& item : d->items)
     {
-
+        const auto emission = item.obj.model().emission();
+        const auto pos      = glm::ivec2(((item.trRot.tr - box.pos) / 8.f).xz());
+        accumulateEmission(&d->emissive, pos, emission);
+        //emission.write("c:/temp/emis_" + item.obj.name() + ".png");
     }
 
     // Lightmap
@@ -133,14 +163,16 @@ Scene& Scene::updateLightmap()
     for (int y = 0; y < size.h; ++y)
         for (int x = 0; x < size.w; ++x)
         {
-            uint32_t* p = reinterpret_cast<uint32_t*>(d->lightmap.bits(x, y));
-            *p = argb(glm::linearRand(0, 255));
+            //uint32_t* p = reinterpret_cast<uint32_t*>(d->lightmap.bits(x, y));
+            //*p = argb(glm::linearRand(0, 255));
         }
 
+    /*
     d->emissive.write("c:/temp/emissive.png");
     d->lightmap.write("c:/temp/lightmap.png");
+    */
 
-    d->lightTex.bind().alloc(d->lightmap)
+    d->lightTex.bind().alloc(d->emissive)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     return *this;

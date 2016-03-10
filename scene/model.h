@@ -22,6 +22,7 @@ struct Model
     gl::Primitive primitive() const;
 
     Image emission() const;
+    Model& updateEmission();
 
 private:
     struct Data;
