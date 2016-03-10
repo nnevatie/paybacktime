@@ -33,6 +33,12 @@ struct Image
     const uint8_t* bits(int x, int y) const;
     uint8_t*       bits(int x, int y);
 
+    template <typename T>
+    T* bits(int x, int y)
+    {
+        return reinterpret_cast<T*>(bits(x, y));
+    }
+
     SDL_Surface* surface() const;
     int nvgImage(NVGcontext* nanoVg) const;
 

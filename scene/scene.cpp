@@ -154,8 +154,8 @@ Scene& Scene::updateLightmap()
     {
         const auto emission = item.obj.model().emission();
         const auto pos      = glm::ivec2(((item.trRot.tr - box.pos) / 8.f).xz());
-        accumulateEmission(&d->emissive, pos, emission);
-        //emission.write("c:/temp/emis_" + item.obj.name() + ".png");
+        //accumulateEmission(&d->emissive, pos, emission);
+        emission.write("c:/temp/emis_" + item.obj.name() + ".png");
     }
 
     // Lightmap

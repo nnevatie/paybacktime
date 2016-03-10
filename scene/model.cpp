@@ -17,7 +17,7 @@ namespace pt
 namespace
 {
 
-typedef std::function<glm::ivec2(glm::ivec2)> Projection;
+typedef std::function<glm::ivec2(const glm::vec3&)> Projection;
 
 void accumulateEmission(Image* map, const Projection& p,
                                     const Image& depth,
@@ -33,10 +33,14 @@ void accumulateEmission(Image* map, const Projection& p,
 
     for (int y = 0; y < sizeLight.h; ++y)
     {
-        const int y1 = y / float(sizeLight.h) * sizeOut.h;
+        const int yOut   = y / float(sizeLight.h) * sizeOut.h;
+        const int yDepth = y / float(sizeLight.h) * sizeDepth.h;
 
         uint32_t* __restrict__ rowOut =
-            reinterpret_cast<uint32_t*>(map->bits(0, y1));
+            reinterpret_cast<uint32_t*>(map->bits(0, yOut));
+
+        const uint8_t* __restrict__ rowDepth =
+            depth.bits(0, yDepth);
 
         const uint32_t* __restrict__ rowAlbedo =
             reinterpret_cast<const uint32_t*>(albedo.bits(0, y));
@@ -46,12 +50,27 @@ void accumulateEmission(Image* map, const Projection& p,
 
         for (int x = 0; x < sizeLight.w; ++x)
         {
-            const int x1 = x / float(sizeLight.w) * sizeOut.w;
-            auto argb0   = glm::vec4(argbTuple(rowOut[x1]));
-            auto argb1   = glm::vec4(argbTuple(rowAlbedo[x]));
-            auto emis    = (exp / 255) * argbTuple(rowLight[x]).b / scaleLight;
-            auto argb2   = glm::uvec4(argb0 + emis * argb1);
-            rowOut[x1]   = argb(glm::min(glm::uvec4(255), argb2));
+            const int xOut   = x / float(sizeLight.w) * sizeOut.w;
+            const int xDepth = x / float(sizeLight.w) * sizeDepth.w;
+
+            auto d = int(rowDepth[xDepth]);
+
+            auto out = p({x / float(sizeLight.w),
+                          y / float(sizeLight.h),
+                          d / 256.f});
+
+
+            auto argb0 = glm::vec4(argbTuple(*map->bits<int32_t>(out.x, out.y)));
+            auto argb1 = glm::vec4(argbTuple(rowAlbedo[x]));
+            auto emis  = (exp / 255) * argbTuple(rowLight[x]).b / scaleLight;
+            auto argb2 = glm::uvec4(argb0 + emis * argb1);
+
+            *map->bits<int32_t>(out.x, out.y) = argb(glm::min(glm::uvec4(255),
+                                                              argb2));
+
+            if (emis > 0)
+            HCLOG(Info) << "in: " << x << ", " << y << ", " << d
+                        << " -> " << out.x << ", " << out.y;
         }
     }
 }
@@ -106,17 +125,27 @@ Image Model::emission() const
 
 Model& Model::updateEmission()
 {
-    const auto size = dimensions().xz() / 8.f;
+    const auto size = dimensions().xz() / 1.f;
     Image map(Size<int>(size.x, size.y), 4);
     map.fill(0x00000000);
 
     for (int i = 0; i < 6; ++i)
     {
-        auto side    = ImageCube::Side(i);
-        Projection p = [](glm::ivec2 v) {return v;};
-        accumulateEmission(&map, p, d->cubeDepth.side(side),
-                                    d->cubeAlbedo.side(side),
-                                    d->cubeLight.side(side));
+        auto side = ImageCube::Side(i);
+        if (i > 1) continue;
+
+        Projection p[] =
+        {
+            // Front
+            [&size](const glm::vec3& v)
+            {return glm::ivec2(size.x * v.x, size.y * v.z);},
+            // Back
+            [&size](const glm::vec3& v)
+            {return glm::ivec2(size.x * v.x, size.y - size.y * v.z);}
+        };
+        accumulateEmission(&map, p[i], d->cubeDepth.side(side),
+                                       d->cubeAlbedo.side(side),
+                                       d->cubeLight.side(side));
     }
     d->emission = map;
     return *this;
