@@ -92,14 +92,19 @@ int Image::stride() const
     return d->stride;
 }
 
+const uint8_t* Image::bits() const
+{
+    return d->bits;
+}
+
 uint8_t* Image::bits()
 {
     return d->bits;
 }
 
-const uint8_t* Image::bits() const
+const uint8_t* Image::bits(int x, int y) const
 {
-    return d->bits;
+    return d->bits + y * d->stride + d->depth * x;
 }
 
 uint8_t* Image::bits(int x, int y)
