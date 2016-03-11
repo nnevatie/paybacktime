@@ -116,8 +116,10 @@ struct Cubefield
         interval(interval)
     {
         const int depths[6] = {depth, depth, width, width, height, height};
+        const int sides[]   = {0, 1, 3, 2, 4, 5}; // Left & right swapped
         for (int i = 0; i < int(imageCube.sides.size()); ++i)
-            hfields[i] = Heightfield(imageCube.sides[i], depths[i], interval);
+            hfields[i] = Heightfield(imageCube.sides[sides[i]],
+                                     depths[sides[i]], interval);
     }
 
     inline int g(int x, int y, int z) const
@@ -132,7 +134,6 @@ struct Cubefield
             {x, z, height - y - 1}
         };
         int gradient = 0;
-
         for (int i = 0; i < 6; ++i)
             gradient |= hfields[i].g(c[i][0], c[i][1], c[i][2]) << (i << 2);
 
@@ -198,7 +199,7 @@ void emitBoxFace(Mesh_P_N_UV* g, float scale, int axis, int cc[8][3],
                           s[axisUV[axis][0]] / d[axisUV[axis][0]],
                           s[axisUV[axis][1]] / d[axisUV[axis][1]]);
 
-    const int axisSide[6] = {3, 2, 5, 4, 1, 0};
+    const int axisSide[6] = {2, 3, 5, 4, 1, 0};
     const Rect<float> uv(uvCube[axisSide[axis]].rect(
                          uvn.x, uvn.y, uvn.size.w, uvn.size.h));
 
@@ -223,7 +224,6 @@ void emitBoxFace(Mesh_P_N_UV* g, float scale, int axis, int cc[8][3],
     {
         const v n0 = glm::normalize(glm::cross(vb - va, vc - va));
         const v n1 = glm::normalize(glm::cross(vd - vc, va - vc));
-
         g->vertices.insert(g->vertices.end(), {{va, n0, uvs[axis][0]},
                                                {vb, n0, uvs[axis][1]},
                                                {vc, n0, uvs[axis][2]},

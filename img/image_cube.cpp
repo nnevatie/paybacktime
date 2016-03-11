@@ -27,12 +27,16 @@ ImageCube::ImageCube(const fs::path& path, int depth)
     };
 
     // Load images
-    for (SideImage& sideImage : sideImages)
+    for (int i = 0; i < 6; ++i)
     {
+        const auto side      = Side(i);
+        SideImage& sideImage = sideImages[i];
+
         const auto fn = boost::replace_all_copy(
             path.string(), "*", sideImage.name);
 
-        sideImage.image = Image(fn, depth).flipped();
+        sideImage.image = side != Side::Top && side != Side::Bottom ?
+                          Image(fn, depth).flipped() : Image(fn, depth);
     }
 
     // Mirror missing images with priority ordered fallbacks
