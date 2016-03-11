@@ -59,7 +59,6 @@ void accumulateEmission(Image* map, const Projection& p,
                           y / float(sizeLight.h),
                           d / 256.f});
 
-
             auto argb0 = glm::vec4(argbTuple(*map->bits<int32_t>(out.x, out.y)));
             auto argb1 = glm::vec4(argbTuple(rowAlbedo[x]));
             auto emis  = (exp / 255) * argbTuple(rowLight[x]).b / scaleLight;
@@ -125,15 +124,13 @@ Image Model::emission() const
 
 Model& Model::updateEmission()
 {
-    const auto size = dimensions().xz() / 1.f;
+    const auto size = dimensions().xz() / 8.f;
     Image map(Size<int>(size.x, size.y), 4);
     map.fill(0x00000000);
 
     for (int i = 0; i < 6; ++i)
     {
-        auto side = ImageCube::Side(i);
-        if (i > 1) continue;
-
+        const auto side = ImageCube::Side(i);
         Projection p[] =
         {
             // Front
@@ -141,7 +138,19 @@ Model& Model::updateEmission()
             {return glm::ivec2(size.x * v.x, size.y * v.z);},
             // Back
             [&size](const glm::vec3& v)
-            {return glm::ivec2(size.x * v.x, size.y - size.y * v.z);}
+            {return glm::ivec2(size.x * v.x, size.y - size.y * v.z);},
+            // Left
+            [&size](const glm::vec3& v)
+            {return glm::ivec2(size.x - size.x * v.z, size.y * v.x);},
+            // Right
+            [&size](const glm::vec3& v)
+            {return glm::ivec2(size.x * v.z, size.y * v.x);},
+            // Top
+            [&size](const glm::vec3& v)
+            {return glm::ivec2(size.x * v.x, size.y * v.y);},
+            // Bottom
+            [&size](const glm::vec3& v)
+            {return glm::ivec2(size.x * v.x, size.y * v.y);}
         };
         accumulateEmission(&map, p[i], d->cubeDepth.side(side),
                                        d->cubeAlbedo.side(side),

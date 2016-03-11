@@ -154,7 +154,7 @@ Scene& Scene::updateLightmap()
     {
         const auto emission = item.obj.model().emission();
         const auto pos      = glm::ivec2(((item.trRot.tr - box.pos) / 8.f).xz());
-        //accumulateEmission(&d->emissive, pos, emission);
+        accumulateEmission(&d->emissive, pos, emission);
         emission.write("c:/temp/emis_" + item.obj.name() + ".png");
     }
 
@@ -163,14 +163,12 @@ Scene& Scene::updateLightmap()
     for (int y = 0; y < size.h; ++y)
         for (int x = 0; x < size.w; ++x)
         {
-            //uint32_t* p = reinterpret_cast<uint32_t*>(d->lightmap.bits(x, y));
-            //*p = argb(glm::linearRand(0, 255));
+            uint32_t* p = reinterpret_cast<uint32_t*>(d->lightmap.bits(x, y));
+            *p = argb(glm::linearRand(0, 255));
         }
 
-    /*
     d->emissive.write("c:/temp/emissive.png");
     d->lightmap.write("c:/temp/lightmap.png");
-    */
 
     d->lightTex.bind().alloc(d->emissive)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
