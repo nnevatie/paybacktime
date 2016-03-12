@@ -7,6 +7,7 @@
 
 #include "common/log.h"
 #include "geom/image_mesher.h"
+#include "geom/volume.h"
 #include "img/image_cube.h"
 #include "img/color.h"
 #include "gl/primitive.h"
@@ -24,8 +25,7 @@ void accumulateEmission(Image* map, const Projection& p,
                                     const Image& albedo,
                                     const Image& light)
 {
-    auto const exp        = 0.10f;
-    auto const sizeOut    = map->size();
+    auto const exp        = 0.025f;
     auto const sizeDepth  = depth.size();
     auto const sizeLight  = light.size();
     auto const scaleLight = (sizeLight.as<glm::vec2>() /
@@ -33,14 +33,10 @@ void accumulateEmission(Image* map, const Projection& p,
 
     for (int y = 0; y < sizeLight.h; ++y)
     {
-        const int yOut   = y / float(sizeLight.h) * sizeOut.h;
-        const int yDepth = y / float(sizeLight.h) * sizeDepth.h;
-
-        uint32_t* __restrict__ rowOut =
-            reinterpret_cast<uint32_t*>(map->bits(0, yOut));
+        auto yd = int(y / float(sizeLight.h) * sizeDepth.h);
 
         const uint8_t* __restrict__ rowDepth =
-            depth.bits(0, yDepth);
+            depth.bits(0, yd);
 
         const uint32_t* __restrict__ rowAlbedo =
             reinterpret_cast<const uint32_t*>(albedo.bits(0, y));
@@ -50,26 +46,19 @@ void accumulateEmission(Image* map, const Projection& p,
 
         for (int x = 0; x < sizeLight.w; ++x)
         {
-            const int xOut   = x / float(sizeLight.w) * sizeOut.w;
-            const int xDepth = x / float(sizeLight.w) * sizeDepth.w;
-
-            auto d = int(rowDepth[xDepth]);
-
-            auto out = p({x / float(sizeLight.w),
-                          y / float(sizeLight.h),
-                          d / 256.f});
+            auto xd    = int(x / float(sizeLight.w) * sizeDepth.w);
+            auto d     = int(rowDepth[xd]);
+            auto out   = p({x / float(sizeLight.w),
+                            y / float(sizeLight.h),
+                            d / 256.f});
 
             auto argb0 = glm::vec4(argbTuple(*map->bits<int32_t>(out.x, out.y)));
             auto argb1 = glm::vec4(argbTuple(rowAlbedo[x]));
             auto emis  = (exp / 255) * argbTuple(rowLight[x]).b / scaleLight;
             auto argb2 = glm::uvec4(argb0 + emis * argb1);
 
-            *map->bits<int32_t>(out.x, out.y) = argb(glm::min(glm::uvec4(255),
-                                                              argb2));
-
-            if (emis > 0)
-            HCLOG(Info) << "in: " << x << ", " << y << ", " << d
-                        << " -> " << out.x << ", " << out.y;
+            *map->bits<int32_t>(out.x, out.y) =
+                argb(glm::min(glm::uvec4(255), argb2));
         }
     }
 }
@@ -85,6 +74,7 @@ struct Model::Data
     gl::TextureAtlas::EntryCube entryAlbedo,
                                 entryLight;
     gl::Primitive primitive;
+    Image         visibility;
     Image         emission;
 
     Data(const fs::path& path) :
@@ -104,6 +94,8 @@ Model::Model(const fs::path& path, TextureStore* textureStore) :
     d->entryLight  = textureStore->light.insert(d->cubeLight);
     auto mesh      = ImageMesher::mesh(d->cubeDepth, d->entryAlbedo.second);
     d->primitive   = gl::Primitive(mesh);
+
+    updateVisibility();
     updateEmission();
 }
 
@@ -115,6 +107,25 @@ glm::vec3 Model::dimensions() const
 gl::Primitive Model::primitive() const
 {
     return d->primitive;
+}
+
+Image Model::visibility() const
+{
+    return d->visibility;
+}
+
+Model& Model::updateVisibility()
+{
+    const auto size = dimensions().xz() / 8.f;
+    Image map(Size<int>(size.x, size.y), 1);
+    map.fill(0x00000000);
+
+    const Cubefield cfield(d->cubeDepth);
+
+    HCLOG(Info) << cfield.width << ", " << cfield.height << ", " << cfield.depth;
+
+    d->visibility = map;
+    return *this;
 }
 
 Image Model::emission() const

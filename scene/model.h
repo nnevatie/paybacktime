@@ -21,6 +21,9 @@ struct Model
 
     gl::Primitive primitive() const;
 
+    Image visibility() const;
+    Model& updateVisibility();
+
     Image emission() const;
     Model& updateEmission();
 

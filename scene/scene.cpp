@@ -38,6 +38,43 @@ void accumulateEmission(Image* map, const glm::ivec2& pos, const Image& emission
     }
 }
 
+void accumulateLightmap(Image* map, const Image& emissive)
+{
+    auto const exp     = 1.f;
+    auto const falloff = 1.25f;
+    auto const ambient = 25.f;
+
+    auto const size = map->size();
+    for (int y = 0; y < size.h; ++y)
+    {
+        uint32_t* __restrict__ rowOut =
+            reinterpret_cast<uint32_t*>(map->bits(0, y));
+
+        for (int x = 0; x < size.w; ++x)
+        {
+            glm::vec4 sum;
+            for (int ey = 0; ey < size.h; ++ey)
+            {
+                const uint32_t* __restrict__ rowEmis =
+                    reinterpret_cast<const uint32_t*>(emissive.bits(0, ey));
+
+                for (int ex = 0; ex < size.w; ++ex)
+                {
+                    auto argb = rowEmis[ex];
+                    if (argb != 0)
+                    {
+                        auto e = glm::vec4(argbTuple(argb));
+                        auto d = glm::max(1.f, glm::length(glm::vec2(x, y) -
+                                                           glm::vec2(ex, ey)));
+                        sum   += exp * e / glm::pow(d, falloff);
+                    }
+                }
+            }
+            rowOut[x] = argb(glm::min(glm::vec4(255.f), ambient + sum));;
+        }
+    }
+}
+
 }
 
 Box Scene::Item::bounds() const
@@ -155,22 +192,17 @@ Scene& Scene::updateLightmap()
         const auto emission = item.obj.model().emission();
         const auto pos      = glm::ivec2(((item.trRot.tr - box.pos) / 8.f).xz());
         accumulateEmission(&d->emissive, pos, emission);
-        emission.write("c:/temp/emis_" + item.obj.name() + ".png");
+        //emission.write("c:/temp/emis_" + item.obj.name() + ".png");
     }
 
     // Lightmap
     d->lightmap = Image(size, 4);
-    for (int y = 0; y < size.h; ++y)
-        for (int x = 0; x < size.w; ++x)
-        {
-            uint32_t* p = reinterpret_cast<uint32_t*>(d->lightmap.bits(x, y));
-            *p = argb(glm::linearRand(0, 255));
-        }
+    accumulateLightmap(&d->lightmap, d->emissive);
 
-    d->emissive.write("c:/temp/emissive.png");
-    d->lightmap.write("c:/temp/lightmap.png");
+    //d->emissive.write("c:/temp/emissive.png");
+    //d->lightmap.write("c:/temp/lightmap.png");
 
-    d->lightTex.bind().alloc(d->emissive)
+    d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     return *this;
