@@ -62,7 +62,7 @@ void main(void)
                                 albedo * max(dot(normal, lightDir), 0.0));
     // Specular
     vec3 halfwayDir = normalize(lightDir + ib.viewRay);
-    float spec      = 1.0 * pow(max(dot(normal, halfwayDir), 0.0), 16.0);
+    float spec      = 1.0 * pow(max(dot(normal, halfwayDir), 0.0), 2.0);
     vec3 specular   = light.r * vec3(spec);
 
     vec3 lighting   = ambient + ao * diffuse + ao * specular;
