@@ -25,7 +25,7 @@ void accumulateEmission(Image* map, const Projection& p,
                                     const Image& albedo,
                                     const Image& light)
 {
-    auto const exp        = 0.025f;
+    auto const exp        = 0.05f;
     auto const sizeDepth  = depth.size();
     auto const sizeLight  = light.size();
     auto const scaleLight = (sizeLight.as<glm::vec2>() /
@@ -116,13 +116,27 @@ Image Model::visibility() const
 
 Model& Model::updateVisibility()
 {
-    const auto size = dimensions().xz() / 8.f;
+    const int height = 64;
+    const int step   = 4;
+    const auto size  = dimensions().xz() / 8.f;
+
     Image map(Size<int>(size.x, size.y), 1);
     map.fill(0x00000000);
 
     const Cubefield cfield(d->cubeDepth);
+    for (int z = 0; z < cfield.depth; ++z)
+        for (int x = 0; x < cfield.width; ++x)
+        {
+            int sum = 0;
+            for (int y = 0; y < height; y += step)
+                sum += cfield(x, y, z);
 
-    HCLOG(Info) << cfield.width << ", " << cfield.height << ", " << cfield.depth;
+            auto xo = int(x / float(cfield.width) * size.x);
+            auto yo = int(z / float(cfield.depth) * size.y);
+            auto d0 = float(*map.bits<uint8_t>(xo, yo));
+            auto d1 = 255 * step * float(sum) / height;
+            *map.bits<uint8_t>(xo, yo) = glm::max(d0, d1);
+        }
 
     d->visibility = map;
     return *this;

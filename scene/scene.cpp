@@ -16,7 +16,50 @@ namespace pt
 namespace
 {
 
-void accumulateEmission(Image* map, const glm::ivec2& pos, const Image& emission)
+float vis(const Image& map, glm::ivec2 p0, glm::ivec2 p1)
+{
+    // TODO: find out whether useful
+    if (p0.y > p1.y) std::swap(p0, p1);
+
+    const glm::ivec2 d = p1 - p0;
+    const int n        = glm::abs(d.x) > glm::abs(d.y) ?
+                         glm::abs(d.x) : glm::abs(d.y);
+    const glm::vec2 s  = {float(d.x) / n, float(d.y) / n};
+
+    float v     = 1.f;
+    glm::vec2 p = glm::vec2(p0) + 0.5f;
+
+    for (int i = 0; i < n - 1 && v > 0; ++i)
+    {
+        p += s;
+        if (uint8_t b = *map.bits(p.x, p.y))
+            v -= b / 255.f;
+    }
+    return glm::max(0.f, v);
+}
+
+void accumulateVisibility(
+    Image* map, const glm::ivec2& pos, const Image& visibility)
+{
+    auto const size = visibility.size();
+    for (int y = 0; y < size.h; ++y)
+    {
+        uint8_t* __restrict__ rowOut =
+            reinterpret_cast<uint8_t*>(map->bits(0, pos.y + y));
+
+        const uint8_t* __restrict__ rowVis =
+            reinterpret_cast<const uint8_t*>(visibility.bits(0, y));
+
+        for (int x = 0; x < size.w; ++x)
+        {
+            const int x1 = pos.x + x;
+            rowOut[x1]   = glm::min(255, rowOut[x1] + rowVis[x]);
+        }
+    }
+}
+
+void accumulateEmission(
+    Image* map, const glm::ivec2& pos, const Image& emission)
 {
     auto const size = emission.size();
     for (int y = 0; y < size.h; ++y)
@@ -38,11 +81,12 @@ void accumulateEmission(Image* map, const glm::ivec2& pos, const Image& emission
     }
 }
 
-void accumulateLightmap(Image* map, const Image& emissive)
+void accumulateLightmap(
+    Image* map, const Image& visibility, const Image& emissive)
 {
     auto const exp     = 1.f;
-    auto const falloff = 1.25f;
-    auto const ambient = 25.f;
+    auto const falloff = 1.0f;
+    auto const ambient = 20.f;
 
     auto const size = map->size();
     for (int y = 0; y < size.h; ++y)
@@ -52,7 +96,7 @@ void accumulateLightmap(Image* map, const Image& emissive)
 
         for (int x = 0; x < size.w; ++x)
         {
-            glm::vec4 sum;
+            glm::vec3 sum;
             for (int ey = 0; ey < size.h; ++ey)
             {
                 const uint32_t* __restrict__ rowEmis =
@@ -63,14 +107,16 @@ void accumulateLightmap(Image* map, const Image& emissive)
                     auto argb = rowEmis[ex];
                     if (argb != 0)
                     {
-                        auto e = glm::vec4(argbTuple(argb));
-                        auto d = glm::max(1.f, glm::length(glm::vec2(x, y) -
+                        auto e = glm::vec3(argbTuple(argb).rgb());
+                        auto d = glm::max(1.f, glm::length(glm::vec2(x,   y) -
                                                            glm::vec2(ex, ey)));
-                        sum   += exp * e / glm::pow(d, falloff);
+                        auto v = vis(visibility, glm::ivec2(ex, ey), glm::ivec2(x, y));
+                        sum   += (v * exp * e) / glm::pow(d, falloff);
                     }
                 }
             }
-            rowOut[x] = argb(glm::min(glm::vec4(255.f), ambient + sum));;
+            rowOut[x] = argb(glm::min(glm::vec4(255.f),
+                                      glm::vec4(ambient + sum, 1.f)));
         }
     }
 }
@@ -184,24 +230,31 @@ Scene& Scene::updateLightmap()
     auto box  = bounds();
     auto size = Size<int>(glm::ceil(box.size.xz() / 8.f));
 
-    // Emissive
-    d->emissive = Image(size, 4);
+    // Visibility and emissive
+    d->visibility = Image(size, 1);
+    d->emissive   = Image(size, 4);
+    d->visibility.fill(0x00000000);
     d->emissive.fill(0x00000000);
+
     for (const auto& item : d->items)
     {
-        const auto emission = item.obj.model().emission();
-        const auto pos      = glm::ivec2(((item.trRot.tr - box.pos) / 8.f).xz());
+        const auto visibility = item.obj.model().visibility();
+        const auto emission   = item.obj.model().emission();
+        const auto pos        = glm::ivec2(((item.trRot.tr - box.pos) / 8.f).xz());
+
+        accumulateVisibility(&d->visibility, pos, visibility);
         accumulateEmission(&d->emissive, pos, emission);
-        //emission.write("c:/temp/emis_" + item.obj.name() + ".png");
     }
 
     // Lightmap
     d->lightmap = Image(size, 4);
-    accumulateLightmap(&d->lightmap, d->emissive);
+    accumulateLightmap(&d->lightmap, d->visibility, d->emissive);
 
-    //d->emissive.write("c:/temp/emissive.png");
-    //d->lightmap.write("c:/temp/lightmap.png");
-
+    /*
+    d->visibility.write("c:/temp/visibility.png");
+    d->emissive.write("c:/temp/emissive.png");
+    d->lightmap.write("c:/temp/lightmap.png");
+    */
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
