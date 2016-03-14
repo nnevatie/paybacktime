@@ -15,13 +15,15 @@ ib;
 // Output
 out vec4 color;
 
-float A = 0.15; // shoulder str
-float B = 0.50; // linear str
-float C = 0.10; // linear ang
-float D = 0.20; // toe str
-float E = 0.02; // toe num
-float F = 0.20; // toe den
-float W = 11.2; // linear white pt
+float EXPA = 12.0; // exposure adjustment
+float EXPB = 1.00; // exposure bias
+float A    = 0.15; // shoulder str
+float B    = 0.50; // linear str
+float C    = 0.10; // linear ang
+float D    = 0.20; // toe str
+float E    = 0.02; // toe num
+float F    = 0.20; // toe den
+float W    = 11.2; // linear white pt
 
 vec3 tonemap(vec3 x)
 {
@@ -30,8 +32,9 @@ vec3 tonemap(vec3 x)
 
 void main(void)
 {
-   vec3 c0 = 12 * (texture(tex0, ib.uv) + texture(tex1, ib.uv)).rgb;
-   vec3 c1 = tonemap(c0 * (vec3(1.0) / tonemap(vec3(W))));
-   vec3 c2 = pow(c1, vec3(1.0 / 2.2));
-   color   = vec4(c2, dot(c2.rgb, vec3(0.299, 0.587, 0.114)));
+   vec3 c0 = EXPA * (texture(tex0, ib.uv) + texture(tex1, ib.uv)).rgb;
+   vec3 c1 = tonemap(EXPB * c0);
+   vec3 c2 = vec3(1.0) / tonemap(vec3(W));
+   vec3 c3 = pow(c1 * c2, vec3(1.0 / 2.2));
+   color   = vec4(c3, dot(c3.rgb, vec3(0.299, 0.587, 0.114)));
 }
