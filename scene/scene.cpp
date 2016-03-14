@@ -85,8 +85,8 @@ void accumulateLightmap(
     Image* map, const Image& visibility, const Image& emissive)
 {
     auto const exp     = 1.f;
-    auto const falloff = 1.0f;
-    auto const ambient = 20.f;
+    auto const falloff = 1.f;
+    auto const ambient = 1.f;
 
     auto const size = map->size();
     for (int y = 0; y < size.h; ++y)
@@ -108,15 +108,15 @@ void accumulateLightmap(
                     if (argb != 0)
                     {
                         auto e = glm::vec3(argbTuple(argb).rgb());
-                        auto d = glm::max(1.f, glm::length(glm::vec2(x,   y) -
-                                                           glm::vec2(ex, ey)));
+                        auto d = glm::max(1.f, glm::distance(glm::vec2(x,   y),
+                                                             glm::vec2(ex, ey)));
                         auto v = vis(visibility, glm::ivec2(ex, ey), glm::ivec2(x, y));
                         sum   += (v * exp * e) / glm::pow(d, falloff);
                     }
                 }
             }
             rowOut[x] = argb(glm::min(glm::vec4(255.f),
-                                      glm::vec4(ambient + sum, 1.f)));
+                                      glm::vec4(ambient + sum, 255.f)));
         }
     }
 }
@@ -255,6 +255,7 @@ Scene& Scene::updateLightmap()
     d->emissive.write("c:/temp/emissive.png");
     d->lightmap.write("c:/temp/lightmap.png");
     */
+
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
