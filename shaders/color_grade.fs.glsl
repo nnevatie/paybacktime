@@ -20,7 +20,7 @@ float B = 0.50; // linear str
 float C = 0.10; // linear ang
 float D = 0.20; // toe str
 float E = 0.02; // toe num
-float F = 0.30; // toe den
+float F = 0.20; // toe den
 float W = 11.2; // linear white pt
 
 vec3 tonemap(vec3 x)
