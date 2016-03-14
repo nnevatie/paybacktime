@@ -117,42 +117,10 @@ struct Impl
         const float timeSec =
             std::chrono::duration<float>(time - TimePoint()).count();
 
-        glm::mat4 proj  = camera.matrixProj();
-        glm::mat4 view  = camera.matrixView();
-        glm::mat4 model;
+        const glm::mat4 proj = camera.matrixProj();
+        const glm::mat4 view = camera.matrixView();
 
         Time<GpuClock> clock;
-        gfx::Geometry::Instances instances;
-
-        gl::Primitive floor = objectStore.object("floor").model().primitive();
-        gl::Primitive wall  = objectStore.object("wall").model().primitive();
-        gl::Primitive box   = objectStore.object("box").model().primitive();
-
-        for (int y = 0; y < 5; ++y)
-            for (int x = 0; x < 5; ++x)
-            if (y == 0 || x == 4)
-            {
-                glm::mat4 m = glm::translate(model, glm::vec3(x * 16, 0, y * 16));
-                if (x == 4)
-                {
-                    m = glm::translate(m, glm::vec3(16, 0, 0));
-                    m = glm::rotate(m, -glm::half_pi<float>(),
-                                        glm::vec3(0.f, 1.f, 0.f));
-                }
-                instances.push_back({wall, m});
-            }
-        for (int y = 0; y < 5; ++y)
-            for (int x = 0; x < 5; ++x)
-                instances.push_back({floor,
-                                     glm::translate(model,
-                                        glm::vec3(x * 16, 0, y * 16))});
-        for (int y = 0; y < 5; ++y)
-            for (int x = 0; x < 5; ++x)
-                if (y % 2 && x % 2)
-                    instances.push_back({box,
-                                         glm::translate(model,
-                                             glm::vec3(x * 16, 2, y * 16))});
-
         geometry(&textureStore.albedo.texture,
                  &textureStore.light.texture,
                  scene.geometryInstances(), view, proj);
@@ -201,10 +169,15 @@ Application::Application()
 {
 }
 
-bool Application::run()
+bool Application::run(const boost::program_options::variables_map& args)
 {
     platform::Context context;
-    platform::Display display("Payback Time", {1280, 720});
+
+    const auto fullscreen = args.count("fullscreen");
+    const Size<int> size(fullscreen ? 1920 : 1280,
+                         fullscreen ? 1080 : 720);
+
+    platform::Display display("Payback Time", size, fullscreen);
     display.open();
 
     return Impl(&display).run();
