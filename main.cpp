@@ -12,15 +12,13 @@ int main(int argc, char** argv)
         using namespace boost::program_options;
         options_description desc("Allowed options");
         desc.add_options()
-            ("input,i",
-             value<std::string>()->default_value("box"),
-             "Input name");
+            ("fullscreen,f", "Full screen mode");
 
         variables_map args;
         store(parse_command_line(argc, argv, desc), args);
 
         pt::Application app;
-        app.run();
+        app.run(args);
     }
     catch (const std::exception& e)
     {

@@ -33,8 +33,8 @@ namespace platform
 
 struct Display::Data
 {
-    Data(const std::string& title, const Size<int>& size) :
-        title(title), size(size),
+    Data(const std::string& title, const Size<int>& size, bool fullscreen) :
+        title(title), size(size), fullscreen(fullscreen),
         window(nullptr), glContext(nullptr),
         nvgContext(nullptr), nanoGuiScreen(nullptr)
     {
@@ -45,14 +45,15 @@ struct Display::Data
 
     std::string      title;
     Size<int>        size;
+    bool             fullscreen;
     SDL_Window*      window;
     SDL_GLContext    glContext;
     NVGcontext*      nvgContext;
     nanogui::Screen* nanoGuiScreen;
 };
 
-Display::Display(const std::string& title, const Size<int>& size) :
-    d(std::make_shared<Data>(title, size))
+Display::Display(const std::string& title, const Size<int>& size, bool fullscreen) :
+    d(std::make_shared<Data>(title, size, fullscreen))
 {
 }
 
@@ -121,6 +122,7 @@ bool Display::open()
             SDL_WINDOWPOS_UNDEFINED,
             d->size.w,
             d->size.h,
+           (d->fullscreen ? SDL_WINDOW_FULLSCREEN : 0) |
             SDL_WINDOW_OPENGL |
             SDL_WINDOW_ALLOW_HIGHDPI);
 
@@ -143,6 +145,7 @@ bool Display::open()
         // Clear screen
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_FRAMEBUFFER_SRGB);
         SDL_GL_SwapWindow(d->window);
 
         // Log renderer info

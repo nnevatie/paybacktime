@@ -25,7 +25,7 @@ namespace platform
 
 struct Display
 {
-    Display(const std::string& title, const Size<int>& size);
+    Display(const std::string& title, const Size<int>& size, bool fullscreen);
     ~Display();
 
     Size<int>         size()    const;
