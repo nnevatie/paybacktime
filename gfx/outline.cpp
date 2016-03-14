@@ -49,7 +49,7 @@ Outline& Outline::operator()(gl::Fbo* fboOut,
         glDepthMask(false);
 
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(0, -1);
+        glPolygonOffset(0, -1000.f);
 
         glClear(GL_COLOR_BUFFER_BIT);
         gl::Texture::unbind(GL_TEXTURE_2D, GL_TEXTURE0);
