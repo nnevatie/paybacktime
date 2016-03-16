@@ -238,8 +238,8 @@ Scene& Scene::updateLightmap()
 
     for (const auto& item : d->items)
     {
-        const auto visibility = item.obj.model().visibility();
-        const auto emission   = item.obj.model().emission();
+        const auto visibility = item.obj.visibility();
+        const auto emission   = item.obj.emission();
         const auto pos        = glm::ivec2(((item.trRot.tr - box.pos) / 8.f).xz());
 
         accumulateVisibility(&d->visibility, pos, visibility);
@@ -250,11 +250,9 @@ Scene& Scene::updateLightmap()
     d->lightmap = Image(size, 4);
     accumulateLightmap(&d->lightmap, d->visibility, d->emissive);
 
-    /*
     d->visibility.write("c:/temp/visibility.png");
     d->emissive.write("c:/temp/emissive.png");
     d->lightmap.write("c:/temp/lightmap.png");
-    */
 
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
