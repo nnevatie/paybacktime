@@ -7,6 +7,7 @@
 #include <glm/mat4x4.hpp>
 
 #include "common/file_system.h"
+#include "img/image.h"
 
 #include "texture_store.h"
 #include "model.h"
@@ -28,6 +29,12 @@ struct Object
     std::string name()      const;
     glm::vec3   origin()    const;
     glm::mat4x4 transform() const;
+
+    Image visibility() const;
+    Object& updateVisibility();
+
+    Image emission() const;
+    Object& updateEmission();
 
 private:
     struct Data;

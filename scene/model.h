@@ -21,11 +21,9 @@ struct Model
 
     gl::Primitive primitive() const;
 
-    Image visibility() const;
-    Model& updateVisibility();
-
-    Image emission() const;
-    Model& updateEmission();
+    const ImageCube* depthCube()  const;
+    const ImageCube* albedoCube() const;
+    const ImageCube* lightCube()  const;
 
 private:
     struct Data;
