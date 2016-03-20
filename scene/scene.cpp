@@ -237,11 +237,9 @@ Scene& Scene::updateLightmap()
     d->lightmap = Grid<glm::vec3>(size);
     accumulateLightmap(&d->lightmap, d->visibility, d->emissive);
 
-    /*
     image(d->visibility).write("c:/temp/visibility.png");
     image(d->emissive).write("c:/temp/emissive.png");
     image(d->lightmap).write("c:/temp/lightmap.png");
-    */
 
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
