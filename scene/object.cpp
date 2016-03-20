@@ -18,7 +18,7 @@ namespace pt
 namespace
 {
 
-typedef std::function<glm::ivec2(const glm::vec3&)> Projection;
+typedef std::function<glm::vec2(const glm::vec3&)> Projection;
 
 bpt::ptree readJson(const fs::path& path)
 {
@@ -56,7 +56,8 @@ T getVec(const bpt::ptree& tree, const std::string& key)
 void accumulateEmission(Grid<glm::vec3>* map, const Projection& p,
                                               const Image& depth,
                                               const Image& albedo,
-                                              const Image& light)
+                                              const Image& light,
+                                              const float objScale)
 {
     auto const exp        = 0.025f;
     auto const rgbScale   = 1.f / 255;
@@ -84,7 +85,7 @@ void accumulateEmission(Grid<glm::vec3>* map, const Projection& p,
             auto d     = int(rowDepth[xd]);
             auto out   = p({x / float(sizeLight.w - 1) + 0.5f,
                             y / float(sizeLight.h - 1) + 0.5f,
-                            d / 255.f + 0.5f});
+                            d / 255.f + 0.5f}) * objScale;
 
             auto argb0 = map->at(out.x, out.y);
             auto argb1 = glm::vec3(argbTuple(rowAlbedo[x]).rgb()) * rgbScale;
@@ -98,20 +99,30 @@ void accumulateEmission(Grid<glm::vec3>* map, const Projection& p,
 
 }
 
-struct Object::Data
+struct Meta
 {
-    Data(const fs::path& path, TextureStore* textureStore) :
-        model(path, textureStore)
+    Meta(const fs::path& path)
     {
         bpt::ptree tree(readJson(path / "object.json"));
-        // TODO: Parse json properties
         name   = path.filename().string();
+        scale  = tree.get("scale", 1.f);
         origin = getVec<glm::vec3>(tree, "origin");
     }
 
+    std::string name;
+    float       scale;
+    glm::vec3   origin;
+};
+
+struct Object::Data
+{
+    Data(const fs::path& path, TextureStore* textureStore) :
+        meta(path),
+        model(path, textureStore, meta.scale)
+    {}
+
+    Meta            meta;
     Model           model;
-    std::string     name;
-    glm::vec3       origin;
     Grid<float>     visibility;
     Grid<glm::vec3> emission;
 };
@@ -143,17 +154,22 @@ Object::operator bool() const
 
 std::string Object::name() const
 {
-    return d->name;
+    return d->meta.name;
+}
+
+float Object::scale() const
+{
+    return d->meta.scale;
 }
 
 glm::vec3 Object::origin() const
 {
-    return d->origin;
+    return d->meta.origin;
 }
 
 glm::mat4x4 Object::transform() const
 {
-    return glm::translate(d->origin);
+    return glm::translate(d->meta.origin);
 }
 
 Model Object::model() const
@@ -184,7 +200,7 @@ Object& Object::updateVisibility()
             int width = fx1 - fx0 + 1;
 
             int sum = 0;
-            for (int fy = -d->origin.y; fy < height; ++fy)
+            for (int fy = -d->meta.origin.y; fy < height; ++fy)
                 for (int fx = fx0; fx <= fx1; ++fx)
                     for (int fz = fy0; fz <= fy1; ++fz)
                         if (cfield(fx, fy, fz) || cfield(fz, fy, fx))
@@ -193,7 +209,7 @@ Object& Object::updateVisibility()
                             break;
                         }
 
-            map.at(x, y) = float(sum) / ((height + d->origin.y) * width);
+            map.at(x, y) = float(sum) / ((height + d->meta.origin.y) * width);
         }
 
     //image(map).write("c:/temp/vis_" + d->name + ".png");
@@ -241,7 +257,8 @@ Object& Object::updateEmission()
         };
         accumulateEmission(&map, p[i], cubeDepth->side(side),
                                        cubeAlbedo->side(side),
-                                       cubeLight->side(side));
+                                       cubeLight->side(side),
+                                       d->meta.scale);
     }
     d->emission = map;
     //image(map).write("c:/temp/emis_" + d->name + ".png");

@@ -142,7 +142,8 @@ bool visible(const V& vol, int x, int y, int z)
 }
 
 template <typename V>
-Mesh_P_N_UV meshGreedy(const V& vol, const RectCube<float>& uvCube)
+Mesh_P_N_UV meshGreedy(const V& vol,
+                       const RectCube<float>& uvCube, float scale = 1.f)
 {
     struct Cell
     {
@@ -254,7 +255,7 @@ Mesh_P_N_UV meshGreedy(const V& vol, const RectCube<float>& uvCube)
                         const int axis = d * 2 + (m.d > 0 ? 1 : 0);
 
                         // Emit quad
-                        emitBoxFace(&mesh, vol.interval,
+                        emitBoxFace(&mesh, scale,
                                      axis, cc, pos, size,
                                     {dims[0], dims[1], dims[2]},
                                      uvCube);
@@ -281,25 +282,21 @@ Mesh_P_N_UV meshGreedy(const V& vol, const RectCube<float>& uvCube)
 
 } // namespace
 
-Mesh_P_N_UV mesh(const Image& image, float interval)
+Mesh_P_N_UV mesh(const Image& image, float scale)
 {
     HCTIME("image");
-    const Heightfield hfield(image, std::min(image.size().w,
-                                             image.size().h) / interval, interval);
-    return meshGreedy(hfield, RectCube<float>());
-    //return meshCubes(hfield);
+    const Heightfield hfield(image, std::min(image.size().w, image.size().h));
+    return meshGreedy(hfield, RectCube<float>(), scale);
 }
 
 Mesh_P_N_UV mesh(const ImageCube& imageCube,
             const RectCube<float>& uvCube,
-            float interval)
+            float scale)
 {
     HCTIME("cube");
-    const Cubefield cfield(imageCube, interval);
-
-    //return meshGreedy(cfield, uvCube);
-    //return meshCubes(cfield);
-    return SnMesher::mesh(cfield);
+    const Cubefield cfield(imageCube);
+    return meshGreedy(cfield, uvCube, scale);
+    //return SnMesher::mesh(cfield);
 }
 
 } // namespace ImageMesher

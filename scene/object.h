@@ -28,6 +28,7 @@ struct Object
 
     Model       model()     const;
     std::string name()      const;
+    float       scale()     const;
     glm::vec3   origin()    const;
     glm::mat4x4 transform() const;
 

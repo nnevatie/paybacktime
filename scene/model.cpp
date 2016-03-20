@@ -33,12 +33,12 @@ struct Model::Data
     }
 };
 
-Model::Model(const fs::path& path, TextureStore* textureStore) :
+Model::Model(const fs::path& path, TextureStore* textureStore, float scale) :
     d(std::make_shared<Data>(path))
 {
     d->entryAlbedo = textureStore->albedo.insert(d->cubeAlbedo);
     d->entryLight  = textureStore->light.insert(d->cubeLight);
-    auto mesh      = ImageMesher::mesh(d->cubeDepth, d->entryAlbedo.second);
+    auto mesh      = ImageMesher::mesh(d->cubeDepth, d->entryAlbedo.second, scale);
     d->primitive   = gl::Primitive(mesh);
 }
 

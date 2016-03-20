@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/random.hpp>
+#include <glm/gtx/transform.hpp>
 
 #include "platform/clock.h"
 #include "common/log.h"
@@ -113,7 +114,7 @@ void accumulateLightmap(Grid<glm::vec3>* map,
 
 Box Scene::Item::bounds() const
 {
-    return {trRot.tr, obj.model().dimensions()};
+    return {trRot.tr, obj.model().dimensions() / obj.scale()};
 }
 
 Scene::Item::operator==(const Scene::Item& other) const

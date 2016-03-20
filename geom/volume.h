@@ -10,21 +10,17 @@ namespace pt
 
 struct Heightfield
 {
-    Heightfield() : width(0), height(0), depth(0), interval(0)
-    {
-    }
+    Heightfield() : width(0), height(0), depth(0)
+    {}
 
     Heightfield(int width, int height) :
         width(width), height(height), depth(0),
-        interval(1.f),
         values(width * height, 0.f)
-    {
-    }
+    {}
 
-    Heightfield(const Image& image, int depth, float interval = 1.f) :
-        width(image.size().w / interval), height(image.size().h / interval),
+    Heightfield(const Image& image, int depth) :
+        width(image.size().w), height(image.size().h),
         depth(depth),
-        interval(interval),
         values(width * height)
     {
         const uint8_t* __restrict__ bits   = image.bits();
@@ -32,13 +28,13 @@ struct Heightfield
 
         for (int sy = 0; sy < height; ++sy)
         {
-            const float                  fy = sy * interval;
+            const float                  fy = sy;
             const int                     y = int(fy);
             const uint8_t* __restrict__ row = bits + y * stride;
 
             for (int sx = 0; sx < width; ++sx)
             {
-                const int fx            = int(sx * interval);
+                const int fx            = int(sx);
                 const int x             = int(fx);
                 const int p             = row[x];
                 const float v           = std::pow(float(p) / 255.f, 0.45f);
@@ -91,25 +87,22 @@ struct Heightfield
         return f(x, y) > z;
     }
 
-    int   width, height, depth;
-    float interval;
-
+    int width, height, depth;
     std::vector<int> values;
 };
 
 struct Cubefield
 {
-    Cubefield(const ImageCube& imageCube, float interval = 1.f) :
-        width(imageCube.width()   / interval),
-        height(imageCube.height() / interval),
-        depth(imageCube.depth()   / interval),
-        interval(interval)
+    Cubefield(const ImageCube& imageCube) :
+        width(imageCube.width()),
+        height(imageCube.height()),
+        depth(imageCube.depth())
     {
         const int depths[6] = {depth, depth, width, width, height, height};
         const int sides[]   = {0, 1, 3, 2, 4, 5}; // Left & right swapped
         for (int i = 0; i < int(imageCube.sides.size()); ++i)
             hfields[i] = Heightfield(imageCube.sides[sides[i]],
-                                     depths[sides[i]], interval);
+                                     depths[sides[i]]);
     }
 
     inline int g(int x, int y, int z) const
@@ -142,9 +135,7 @@ struct Cubefield
 
     // Front, back, left, right, top, bottom
     Heightfield hfields[6];
-
-    int   width, height, depth;
-    float interval;
+    int width, height, depth;
 };
 
 } // namespace pt

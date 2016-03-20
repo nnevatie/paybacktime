@@ -15,7 +15,7 @@ namespace pt
 
 struct Model
 {
-    Model(const fs::path& path, TextureStore* textureStore);
+    Model(const fs::path& path, TextureStore* textureStore, float scale = 1.f);
 
     glm::vec3 dimensions() const;
 
