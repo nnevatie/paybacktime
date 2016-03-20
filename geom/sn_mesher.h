@@ -61,7 +61,7 @@ Mesh_P_N_UV mesh(const V& vol)
 
     std::vector<int> buffer(r[2] * 2, 0);
 
-    Mesh_P_N_UV geom;
+    Mesh_P_N_UV mesh;
 
     //March over the voxel grid
     int bufNo = 1;
@@ -132,8 +132,8 @@ Mesh_P_N_UV mesh(const V& vol)
 
                 // Add vertex to buffer,
                 // store pointer to vertex index in buffer
-                buffer[m] = geom.vertices.size();
-                geom.vertices.push_back({glm::vec3(v[0], v[1], v[2])});
+                buffer[m] = mesh.vertices.size();
+                mesh.vertices.push_back({glm::vec3(v[0], v[1], v[2])});
 
                 // Now we need to add faces together,
                 // to do this we just loop over 3 basis components
@@ -157,10 +157,10 @@ Mesh_P_N_UV mesh(const V& vol)
                     int du = r[iu];
                     int dv = r[iv];
 
-                    Mesh_P_N_UV::Vertex& va = geom.vertices[buffer[m]];
-                    Mesh_P_N_UV::Vertex& vb = geom.vertices[buffer[m - du]];
-                    Mesh_P_N_UV::Vertex& vc = geom.vertices[buffer[m - du - dv]];
-                    Mesh_P_N_UV::Vertex& vd = geom.vertices[buffer[m - dv]];
+                    Mesh_P_N_UV::Vertex& va = mesh.vertices[buffer[m]];
+                    Mesh_P_N_UV::Vertex& vb = mesh.vertices[buffer[m - du]];
+                    Mesh_P_N_UV::Vertex& vc = mesh.vertices[buffer[m - du - dv]];
+                    Mesh_P_N_UV::Vertex& vd = mesh.vertices[buffer[m - dv]];
 
                     const glm::vec3 n0 =
                         glm::normalize(glm::cross(vc.p - va.p, vb.p - va.p));
@@ -174,7 +174,7 @@ Mesh_P_N_UV mesh(const V& vol)
                     if (mask & 1)
                     {
                         va.n = vb.n = vc.n = vd.n = -0.5 * (n0 + n1);
-                        geom.indices.insert(geom.indices.end(),
+                        mesh.indices.insert(mesh.indices.end(),
                                            {buffer[m],
                                             buffer[m - du],
                                             buffer[m - dv],
@@ -185,7 +185,7 @@ Mesh_P_N_UV mesh(const V& vol)
                     else
                     {
                         va.n = vb.n = vc.n = vd.n = 0.5 * (n0 + n1);
-                        geom.indices.insert(geom.indices.end(),
+                        mesh.indices.insert(mesh.indices.end(),
                                            {buffer[m],
                                             buffer[m - dv],
                                             buffer[m - du],
@@ -196,7 +196,7 @@ Mesh_P_N_UV mesh(const V& vol)
                 }
             }
     }
-    return geom;
+    return mesh;
 }
 
 } // namespace SnMesher
