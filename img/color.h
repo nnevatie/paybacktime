@@ -22,6 +22,11 @@ inline uint32_t argb(const glm::uvec4& v)
     return (v.r << 0) | (v.g << 8) | (v.b << 16) | (v.a << 24);
 }
 
+inline uint32_t argb(const glm::uvec3& v)
+{
+    return argb(glm::uvec4(v, 255));
+}
+
 inline glm::uvec4 argbTuple(uint32_t v)
 {
     return {(v & 0x000000ff) >> 0,
