@@ -16,7 +16,7 @@ namespace pt
 namespace
 {
 
-float vis(const Image& map, glm::ivec2 p0, glm::ivec2 p1)
+float vis(const Grid<float>& map, glm::ivec2 p0, glm::ivec2 p1)
 {
     // TODO: find out whether useful
     if (p0.y > p1.y) std::swap(p0, p1);
@@ -32,82 +32,71 @@ float vis(const Image& map, glm::ivec2 p0, glm::ivec2 p1)
     for (int i = 0; i < n - 1 && v > 0; ++i)
     {
         p += s;
-        if (uint8_t b = *map.bits(p.x, p.y))
-            v -= b / 255.f;
+        v -= map.at(p.x, p.y);
     }
     return glm::max(0.f, v);
 }
 
 void accumulateVisibility(
-    Image* map, const glm::ivec2& pos, const Image& visibility)
+    Grid<float>* map, const glm::ivec2& pos, const Grid<float>& visibility)
 {
-    auto const size = visibility.size();
+    auto const size = visibility.size;
     for (int y = 0; y < size.h; ++y)
     {
-        uint8_t* __restrict__ rowOut =
-            reinterpret_cast<uint8_t*>(map->bits(0, pos.y + y));
-
-        const uint8_t* __restrict__ rowVis =
-            reinterpret_cast<const uint8_t*>(visibility.bits(0, y));
-
+        float* __restrict__ rowOut       = map->ptr(pos.y + y);
+        const float* __restrict__ rowVis = visibility.ptr(y);
         for (int x = 0; x < size.w; ++x)
         {
             const int x1 = pos.x + x;
-            rowOut[x1]   = glm::min(255, rowOut[x1] + rowVis[x]);
+            rowOut[x1]   = glm::min(1.f, rowOut[x1] + rowVis[x]);
         }
     }
 }
 
 void accumulateEmission(
-    Image* map, const glm::ivec2& pos, const Image& emission)
+    Grid<glm::vec3>* map, const glm::ivec2& pos, const Grid<glm::vec3>& emission)
 {
-    auto const size = emission.size();
+    auto const size = emission.size;
     for (int y = 0; y < size.h; ++y)
     {
-        uint32_t* __restrict__ rowOut =
-            reinterpret_cast<uint32_t*>(map->bits(0, pos.y + y));
-
-        const uint32_t* __restrict__ rowEmis =
-            reinterpret_cast<const uint32_t*>(emission.bits(0, y));
+        glm::vec3* __restrict__ rowOut        = map->ptr(pos.y + y);
+        const glm::vec3* __restrict__ rowEmis = emission.ptr(y);
 
         for (int x = 0; x < size.w; ++x)
         {
             const int x1 = pos.x + x;
-            auto argb0   = argbTuple(rowOut[x1]);
-            auto argb1   = argbTuple(rowEmis[x]);
+            auto argb0   = rowOut[x1];
+            auto argb1   = rowEmis[x];
             auto argb2   = argb0 + argb1;
-            rowOut[x1]   = argb(glm::min(glm::uvec4(255), argb2));
+            rowOut[x1]   = argb2;
         }
     }
 }
 
-void accumulateLightmap(
-    Image* map, const Image& visibility, const Image& emissive)
+void accumulateLightmap(Grid<glm::vec3>* map,
+                        const Grid<float>& visibility,
+                        const Grid<glm::vec3>& emissive)
 {
     auto const exp     = 1.f;
-    auto const falloff = 1.f;
-    auto const ambient = 1.f;
+    auto const falloff = 2.f;
+    auto const ambient = 0.f;
 
-    auto const size = map->size();
+    auto const size = map->size;
     for (int y = 0; y < size.h; ++y)
     {
-        uint32_t* __restrict__ rowOut =
-            reinterpret_cast<uint32_t*>(map->bits(0, y));
-
+        glm::vec3* __restrict__ rowOut = map->ptr(y);
         for (int x = 0; x < size.w; ++x)
         {
             glm::vec3 sum;
             for (int ey = 0; ey < size.h; ++ey)
             {
-                const uint32_t* __restrict__ rowEmis =
-                    reinterpret_cast<const uint32_t*>(emissive.bits(0, ey));
-
+                const glm::vec3* __restrict__ rowEmis = emissive.ptr(ey);
                 for (int ex = 0; ex < size.w; ++ex)
                 {
                     auto argb = rowEmis[ex];
-                    if (argb != 0)
+                    if (argb != glm::zero<glm::vec3>())
                     {
-                        auto e = glm::vec3(argbTuple(argb).rgb());
+                        auto e = argb;
                         auto d = glm::max(1.f, glm::distance(glm::vec2(x,   y),
                                                              glm::vec2(ex, ey)));
                         auto v = vis(visibility, glm::ivec2(ex, ey), glm::ivec2(x, y));
@@ -115,8 +104,7 @@ void accumulateLightmap(
                     }
                 }
             }
-            rowOut[x] = argb(glm::min(glm::vec4(255.f),
-                                      glm::vec4(ambient + sum, 255.f)));
+            rowOut[x] = ambient + sum;
         }
     }
 }
@@ -145,9 +133,9 @@ struct Scene::Data
 
     std::vector<Item> items;
 
-    Image             visibility;
-    Image             emissive;
-    Image             lightmap;
+    Grid<float>       visibility;
+    Grid<glm::vec3>   emissive;
+    Grid<glm::vec3>   lightmap;
 
     gl::Texture       lightTex;
 };
@@ -231,10 +219,8 @@ Scene& Scene::updateLightmap()
     auto size = Size<int>(glm::ceil(box.size.xz() / 8.f));
 
     // Visibility and emissive
-    d->visibility = Image(size, 1);
-    d->emissive   = Image(size, 4);
-    d->visibility.fill(0x00000000);
-    d->emissive.fill(0x00000000);
+    d->visibility = Grid<float>(size);
+    d->emissive   = Grid<glm::vec3>(size);
 
     for (const auto& item : d->items)
     {
@@ -247,12 +233,14 @@ Scene& Scene::updateLightmap()
     }
 
     // Lightmap
-    d->lightmap = Image(size, 4);
+    d->lightmap = Grid<glm::vec3>(size);
     accumulateLightmap(&d->lightmap, d->visibility, d->emissive);
 
-    d->visibility.write("c:/temp/visibility.png");
-    d->emissive.write("c:/temp/emissive.png");
-    d->lightmap.write("c:/temp/lightmap.png");
+    /*
+    image(d->visibility).write("c:/temp/visibility.png");
+    image(d->emissive).write("c:/temp/emissive.png");
+    image(d->lightmap).write("c:/temp/lightmap.png");
+    */
 
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)

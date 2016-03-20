@@ -181,6 +181,12 @@ Texture& Texture::alloc(const Image& image)
     return *this;
 }
 
+Texture& Texture::alloc(const Grid<glm::vec3>& grid)
+{
+    return alloc({grid.size.w, grid.size.h},
+                  GL_RGB32F, GL_RGB, GL_FLOAT, grid.ptr());
+}
+
 float Texture::anisotropyMax()
 {
     GLfloat f = 0.f;

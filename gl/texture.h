@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 
 #include "geom/size.h"
+#include "geom/grid.h"
 #include "img/image.h"
 #include "buffers.h"
 
@@ -55,6 +56,7 @@ struct Texture
                    GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = 0);
 
     Texture& alloc(const Image& image);
+    Texture& alloc(const Grid<glm::vec3>& grid);
 
     static float anisotropyMax();
 

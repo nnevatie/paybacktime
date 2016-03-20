@@ -53,12 +53,13 @@ T getVec(const bpt::ptree& tree, const std::string& key)
     return {};
 }
 
-void accumulateEmission(Image* map, const Projection& p,
-                                    const Image& depth,
-                                    const Image& albedo,
-                                    const Image& light)
+void accumulateEmission(Grid<glm::vec3>* map, const Projection& p,
+                                              const Image& depth,
+                                              const Image& albedo,
+                                              const Image& light)
 {
-    auto const exp        = 0.05f;
+    auto const exp        = 0.025f;
+    auto const rgbScale   = 1.f / 255;
     auto const sizeDepth  = depth.size();
     auto const sizeLight  = light.size();
     auto const scaleLight = (sizeLight.as<glm::vec2>() /
@@ -81,17 +82,16 @@ void accumulateEmission(Image* map, const Projection& p,
         {
             auto xd    = int(x / float(sizeLight.w) * sizeDepth.w);
             auto d     = int(rowDepth[xd]);
-            auto out   = p({x / float(sizeLight.w),
-                            y / float(sizeLight.h),
-                            d / 256.f});
+            auto out   = p({x / float(sizeLight.w - 1) + 0.5f,
+                            y / float(sizeLight.h - 1) + 0.5f,
+                            d / 255.f + 0.5f});
 
-            auto argb0 = glm::vec4(argbTuple(*map->bits<int32_t>(out.x, out.y)));
-            auto argb1 = glm::vec4(argbTuple(rowAlbedo[x]));
-            auto emis  = (exp / 255) * argbTuple(rowLight[x]).b / scaleLight;
-            auto argb2 = glm::uvec4(argb0 + emis * argb1);
-
-            *map->bits<int32_t>(out.x, out.y) =
-                argb(glm::min(glm::uvec4(255), argb2));
+            auto argb0 = map->at(out.x, out.y);
+            auto argb1 = glm::vec3(argbTuple(rowAlbedo[x]).rgb()) * rgbScale;
+            auto light = argbTuple(rowLight[x]).b * rgbScale / scaleLight;
+            auto emis  = exp * light;
+            auto argb2 = argb0 + emis * argb1;
+            map->at(out.x, out.y) = argb2;
         }
     }
 }
@@ -109,11 +109,11 @@ struct Object::Data
         origin = getVec<glm::vec3>(tree, "origin");
     }
 
-    Model       model;
-    std::string name;
-    glm::vec3   origin;
-    Image       visibility;
-    Image       emission;
+    Model           model;
+    std::string     name;
+    glm::vec3       origin;
+    Grid<float>     visibility;
+    Grid<glm::vec3> emission;
 };
 
 Object::Object()
@@ -161,7 +161,7 @@ Model Object::model() const
     return d->model;
 }
 
-Image Object::visibility() const
+Grid<float> Object::visibility() const
 {
     return d->visibility;
 }
@@ -169,32 +169,39 @@ Image Object::visibility() const
 Object& Object::updateVisibility()
 {
     const int height = 64;
-    const int step   = 4;
     const auto size  = d->model.dimensions().xz() / 8.f;
 
-    Image map(Size<int>(size.x, size.y), 1);
-    map.fill(0x00000000);
-
+    Grid<float> map(Size<int>(size.x, size.y));
     const Cubefield cfield(*d->model.depthCube());
-    for (int z = 0; z < cfield.depth; ++z)
-        for (int x = 0; x < cfield.width; ++x)
-        {
-            int sum = 0;
-            for (int y = -d->origin.y; y < height; y += step)
-                sum += cfield(x, y, z);
 
-            auto xo = int(x / float(cfield.width) * size.x);
-            auto yo = int(z / float(cfield.depth) * size.y);
-            auto d0 = float(*map.bits<uint8_t>(xo, yo));
-            auto d1 = 255 * step * float(sum) / (height + d->origin.y);
-            *map.bits<uint8_t>(xo, yo) = glm::max(d0, d1);
+    for (int y = 0; y < size.x; ++y)
+        for (int x = 0; x < size.y; ++x)
+        {
+            int fx0   = x * cfield.width / size.x;
+            int fy0   = y * cfield.depth / size.y;
+            int fx1   = (x + 1) * cfield.width / size.x - 1;
+            int fy1   = (y + 1) * cfield.depth / size.y - 1;
+            int width = fx1 - fx0 + 1;
+
+            int sum = 0;
+            for (int fy = -d->origin.y; fy < height; ++fy)
+                for (int fx = fx0; fx <= fx1; ++fx)
+                    for (int fz = fy0; fz <= fy1; ++fz)
+                        if (cfield(fx, fy, fz) || cfield(fz, fy, fx))
+                        {
+                            ++sum;
+                            break;
+                        }
+
+            map.at(x, y) = float(sum) / ((height + d->origin.y) * width);
         }
 
+    //image(map).write("c:/temp/vis_" + d->name + ".png");
     d->visibility = map;
     return *this;
 }
 
-Image Object::emission() const
+Grid<glm::vec3> Object::emission() const
 {
     return d->emission;
 }
@@ -202,42 +209,42 @@ Image Object::emission() const
 Object& Object::updateEmission()
 {
     const auto size = d->model.dimensions().xz() / 8.f;
-    Image map(Size<int>(size.x, size.y), 4);
-    map.fill(0x00000000);
-
+    const auto pmax = size - 1.f;
     auto cubeDepth  = d->model.depthCube();
     auto cubeAlbedo = d->model.albedoCube();
     auto cubeLight  = d->model.lightCube();
 
+    Grid<glm::vec3> map(Size<int>(size.x, size.y));
     for (int i = 0; i < 6; ++i)
     {
         const auto side = ImageCube::Side(i);
         Projection p[] =
         {
             // Front
-            [&size](const glm::vec3& v)
-            {return glm::ivec2(size.x * v.x, size.y * v.z);},
+            [&pmax](const glm::vec3& v)
+            {return glm::ivec2(pmax.x * v.x, pmax.y * v.z);},
             // Back
-            [&size](const glm::vec3& v)
-            {return glm::ivec2(size.x * v.x, size.y - size.y * v.z);},
+            [&pmax](const glm::vec3& v)
+            {return glm::ivec2(pmax.x * v.x, pmax.y - pmax.y * v.z);},
             // Left
-            [&size](const glm::vec3& v)
-            {return glm::ivec2(size.x - size.x * v.z, size.y * v.x);},
+            [&pmax](const glm::vec3& v)
+            {return glm::ivec2(pmax.x - pmax.x * v.z, pmax.y * v.x);},
             // Right
-            [&size](const glm::vec3& v)
-            {return glm::ivec2(size.x * v.z, size.y * v.x);},
+            [&pmax](const glm::vec3& v)
+            {return glm::ivec2(pmax.x * v.z, pmax.y * v.x);},
             // Top
-            [&size](const glm::vec3& v)
-            {return glm::ivec2(size.x * v.x, size.y * v.y);},
+            [&pmax](const glm::vec3& v)
+            {return glm::ivec2(pmax.x * v.x, pmax.y * v.y);},
             // Bottom
-            [&size](const glm::vec3& v)
-            {return glm::ivec2(size.x * v.x, size.y * v.y);}
+            [&pmax](const glm::vec3& v)
+            {return glm::ivec2(pmax.x * v.x, pmax.y * v.y);}
         };
         accumulateEmission(&map, p[i], cubeDepth->side(side),
                                        cubeAlbedo->side(side),
                                        cubeLight->side(side));
     }
     d->emission = map;
+    //image(map).write("c:/temp/emis_" + d->name + ".png");
     return *this;
 }
 

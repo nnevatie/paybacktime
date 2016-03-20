@@ -7,6 +7,7 @@
 #include <glm/mat4x4.hpp>
 
 #include "common/file_system.h"
+#include "geom/grid.h"
 #include "img/image.h"
 
 #include "texture_store.h"
@@ -30,10 +31,10 @@ struct Object
     glm::vec3   origin()    const;
     glm::mat4x4 transform() const;
 
-    Image visibility() const;
+    Grid<float> visibility() const;
     Object& updateVisibility();
 
-    Image emission() const;
+    Grid<glm::vec3> emission() const;
     Object& updateEmission();
 
 private:
