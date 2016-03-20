@@ -297,9 +297,9 @@ Mesh_P_N_UV mesh(const ImageCube& imageCube,
     HCTIME("cube");
     const Cubefield cfield(imageCube, interval);
 
-    return meshGreedy(cfield, uvCube);
+    //return meshGreedy(cfield, uvCube);
     //return meshCubes(cfield);
-    //return SnMesher::mesh(cfield);
+    return SnMesher::mesh(cfield);
 }
 
 } // namespace ImageMesher
