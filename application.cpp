@@ -37,7 +37,7 @@
 namespace pt
 {
 
-struct Impl
+struct Data
 {
     platform::Display* display;
     Size<int> renderSize;
@@ -66,7 +66,7 @@ struct Impl
 
     platform::Mouse mouse;
 
-    Impl(platform::Display* display) :
+    Data(platform::Display* display) :
         display(display),
         renderSize(display->size()),
         geometry(renderSize),
@@ -159,8 +159,8 @@ struct Impl
     {
         namespace arg = std::placeholders;
         Scheduler scheduler(std::chrono::milliseconds(10),
-                            std::bind(&simulate, this, arg::_1, arg::_2),
-                            std::bind(&render,   this, arg::_1, arg::_2));
+                            std::bind(&Data::simulate, this, arg::_1, arg::_2),
+                            std::bind(&Data::render,   this, arg::_1, arg::_2));
         return scheduler.start();
     }
 };
@@ -180,7 +180,7 @@ bool Application::run(const boost::program_options::variables_map& args)
     platform::Display display("Payback Time", size, fullscreen);
     display.open();
 
-    return Impl(&display).run();
+    return Data(&display).run();
 }
 
 } // namespace

@@ -27,8 +27,8 @@ struct Scene
         TransformTrRot trRot;
 
         Box bounds() const;
-        operator==(const Item& other) const;
-        operator!=(const Item& other) const;
+        bool operator==(const Item& other) const;
+        bool operator!=(const Item& other) const;
     };
 
     typedef std::vector<Item>           Items;

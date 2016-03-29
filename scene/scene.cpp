@@ -33,7 +33,7 @@ float vis(const Grid<float>& map, glm::ivec2 p0, glm::ivec2 p1)
     for (int i = 0; i < n - 1 && v > 0; ++i)
     {
         p += s;
-        v -= map.at(p.x, p.y);
+        v -= map.at(int(p.x), int(p.y));
     }
     return glm::max(0.f, v);
 }
@@ -117,12 +117,12 @@ Box Scene::Item::bounds() const
     return {trRot.tr, obj.model().dimensions() / obj.scale()};
 }
 
-Scene::Item::operator==(const Scene::Item& other) const
+bool Scene::Item::operator==(const Scene::Item& other) const
 {
     return obj == other.obj && trRot == other.trRot;
 }
 
-Scene::Item::operator!=(const Scene::Item& other) const
+bool Scene::Item::operator!=(const Scene::Item& other) const
 {
     return !operator==(other);
 }
