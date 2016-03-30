@@ -58,6 +58,8 @@ struct Texture
     Texture& alloc(const Image& image);
     Texture& alloc(const Grid<glm::vec3>& grid);
 
+    Texture& alloc3d(const Grid<glm::vec3>& grid);
+
     static float anisotropyMax();
 
 private:

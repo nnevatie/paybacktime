@@ -155,6 +155,7 @@ Texture& Texture::alloc(int level, const std::vector<int>& dim,
     set(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     return *this;
 }
 
@@ -184,7 +185,18 @@ Texture& Texture::alloc(const Image& image)
 Texture& Texture::alloc(const Grid<glm::vec3>& grid)
 {
     return alloc({grid.size.w, grid.size.h},
-                  GL_RGB32F, GL_RGB, GL_FLOAT, grid.ptr());
+                 GL_RGB32F, GL_RGB, GL_FLOAT, grid.ptr());
+}
+
+Texture& Texture::alloc3d(const Grid<glm::vec3>& grid)
+{
+    std::vector<glm::vec3> data;
+    data.resize(grid.data.size() * 2);
+    std::copy(grid.data.begin(), grid.data.end(), data.data());
+    //std::fill(data.begin(), data.begin() + grid.data.size(), glm::vec3(1.f));
+
+    return alloc({grid.size.w, grid.size.h, 2},
+                 GL_RGB32F, GL_RGB, GL_FLOAT, data.data());
 }
 
 float Texture::anisotropyMax()
