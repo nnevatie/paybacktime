@@ -79,8 +79,11 @@ void accumulateLightmap(Grid<glm::vec3>* map,
                         const Grid<glm::vec3>& emissive)
 {
     auto const exp     = 1.f;
-    auto const falloff = 2.f;
     auto const ambient = 0.f;
+    auto const k0      = 1.f;
+    auto const k1      = 0.05f;
+    auto const k2      = 0.01f;
+    auto const st      = glm::vec3(8.f, 8.f, 32.f);
 
     auto const size = map->size;
     for (int y = 0; y < size.h; ++y)
@@ -97,11 +100,15 @@ void accumulateLightmap(Grid<glm::vec3>* map,
                     auto argb = rowEmis[ex];
                     if (argb != glm::zero<glm::vec3>())
                     {
-                        auto e = argb;
-                        auto d = glm::max(1.f, glm::distance(glm::vec2(x,   y),
-                                                             glm::vec2(ex, ey)));
-                        auto v = vis(visibility, glm::ivec2(ex, ey), glm::ivec2(x, y));
-                        sum   += (v * exp * e) / glm::pow(d, falloff);
+                        auto e  = argb;
+                        auto w0 = glm::vec2(x  * st.x, y  * st.y);
+                        auto w1 = glm::vec2(ex * st.x, ey * st.y);
+                        auto d  = glm::max(0.f, glm::distance(w0, w1));
+                        auto v  = vis(visibility, glm::ivec2(ex, ey),
+                                                  glm::ivec2(x,  y));
+
+                        auto att = 1.f / (k0 + k1 * d + k2 * d * d);
+                        sum     += v * exp * e * att;
                     }
                 }
             }
@@ -129,7 +136,7 @@ bool Scene::Item::operator!=(const Scene::Item& other) const
 
 struct Scene::Data
 {
-    Data()
+    Data() : lightTex(gl::Texture::Type::Texture3d)
     {}
 
     std::vector<Item> items;
@@ -241,7 +248,7 @@ Scene& Scene::updateLightmap()
     image(d->emissive).write("c:/temp/emissive.png");
     image(d->lightmap).write("c:/temp/lightmap.png");
 
-    d->lightTex.bind().alloc(d->lightmap)
+    d->lightTex.bind().alloc3d(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     return *this;
