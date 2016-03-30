@@ -6,7 +6,7 @@ uniform sampler2D texNormal;
 uniform sampler2D texColor;
 uniform sampler2D texLight;
 uniform sampler2D texAo;
-uniform sampler2D texGi;
+uniform sampler3D texGi;
 uniform vec3      boundsMin;
 uniform vec3      boundsSize;
 uniform mat4      v;
@@ -25,7 +25,7 @@ out vec4 color;
 
 // Externals
 float linearDepth(float depth, mat4 proj);
-vec4 textureBicubic(sampler2D, vec2);
+vec4 textureBicubic(sampler3D, vec3);
 
 vec3 world(sampler2D depthSampler, vec2 uv, mat4 v, mat4 p)
 {
@@ -42,9 +42,12 @@ void main(void)
     vec3 fragPos    = linearDepth(texture(texDepth, ib.uv).r, p) * ib.viewRay;
 
     vec3 worldPos   = world(texDepth, ib.uv, v, p);
-    vec2 giUv       = ((worldPos - boundsMin) / boundsSize).xz -
-                      0.5 / vec2(textureSize(texGi, 0));
-    vec3 gi         = textureBicubic(texGi, giUv).rgb;
+
+    vec3 giUv       = ((worldPos - boundsMin) / boundsSize).xzy;
+    giUv.xy        -= 0.5 / vec2(textureSize(texGi, 0).xy);
+    giUv.z          = 0.25 + 0.5 * giUv.z;
+
+    vec3 gi         = 2.0 * pow(textureBicubic(texGi, giUv).rgb, vec3(2.2));
 
     vec3 ao         = texture(texAo, ib.uv).r * gi;
     vec3 normal     = texture(texNormal, ib.uv).rgb;

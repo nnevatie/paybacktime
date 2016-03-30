@@ -30,23 +30,23 @@ float bell(float x)
     return 0.0;
 }
 
-vec4 textureBicubic(sampler2D sampler, vec2 uv)
+vec4 textureBicubic(sampler3D sampler, vec3 uv)
 {
-    vec2 ts      = textureSize(sampler, 0);
+    vec2 ts      = textureSize(sampler, 0).xy;
     vec2 tsInv   = 1.0 / ts;
-    uv          *= ts - 0.0; // 0.5?
-    vec2 fxy     = fract(uv);
-    uv          -= fxy;
+    uv.xy       *= ts - 0.0; // 0.5?
+    vec2 fxy     = fract(uv.xy);
+    uv.xy       -= fxy;
     vec4 xcubic  = cubic(fxy.x);
     vec4 ycubic  = cubic(fxy.y);
     vec4 c       = uv.xxyy + vec2(-0.5, +1.5).xyxy;
     vec4 s       = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);
     vec4 offset  = c + vec4(xcubic.yw, ycubic.yw) / s;
     offset      *= tsInv.xxyy;
-    vec4 sample0 = texture(sampler, offset.xz);
-    vec4 sample1 = texture(sampler, offset.yz);
-    vec4 sample2 = texture(sampler, offset.xw);
-    vec4 sample3 = texture(sampler, offset.yw);
+    vec4 sample0 = texture(sampler, vec3(offset.xz, uv.z));
+    vec4 sample1 = texture(sampler, vec3(offset.yz, uv.z));
+    vec4 sample2 = texture(sampler, vec3(offset.xw, uv.z));
+    vec4 sample3 = texture(sampler, vec3(offset.yw, uv.z));
     float sx     = s.x / (s.x + s.y);
     float sy     = s.z / (s.z + s.w);
     return mix(mix(sample3, sample2, sx), mix(sample1, sample0, sx), sy);
