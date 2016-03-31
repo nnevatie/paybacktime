@@ -57,10 +57,12 @@ void main(void)
     // Ambient
     vec3 ambient    = vec3(0);
 
-    // Diffuse
+    // Light dir
     vec3 viewDir    = normalize(ib.viewRay);
     vec3 lightPos   = vec3(1.0, 1.0, 5.0);
     vec3 lightDir   = normalize(lightPos - viewDir);
+
+    // Diffuse
     vec3 diffuse    = 1.0 * max(albedo * ao,
                                 albedo * max(dot(normal, lightDir), 0.0));
     // Specular

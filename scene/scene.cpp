@@ -42,11 +42,11 @@ void accumulateVisibility(
     Grid<float>* map, const glm::ivec2& pos, const Grid<float>& visibility)
 {
     auto const size = visibility.size;
-    for (int y = 0; y < size.h; ++y)
+    for (int y = 0; y < size.x; ++y)
     {
         float* __restrict__ rowOut       = map->ptr(pos.y + y);
         const float* __restrict__ rowVis = visibility.ptr(y);
-        for (int x = 0; x < size.w; ++x)
+        for (int x = 0; x < size.y; ++x)
         {
             const int x1 = pos.x + x;
             rowOut[x1]   = glm::min(1.f, rowOut[x1] + rowVis[x]);
@@ -58,12 +58,12 @@ void accumulateEmission(
     Grid<glm::vec3>* map, const glm::ivec2& pos, const Grid<glm::vec3>& emission)
 {
     auto const size = emission.size;
-    for (int y = 0; y < size.h; ++y)
+    for (int y = 0; y < size.y; ++y)
     {
         glm::vec3* __restrict__ rowOut        = map->ptr(pos.y + y);
         const glm::vec3* __restrict__ rowEmis = emission.ptr(y);
 
-        for (int x = 0; x < size.w; ++x)
+        for (int x = 0; x < size.x; ++x)
         {
             const int x1 = pos.x + x;
             auto argb0   = rowOut[x1];
@@ -86,16 +86,16 @@ void accumulateLightmap(Grid<glm::vec3>* map,
     auto const st      = glm::vec3(8.f, 8.f, 32.f);
 
     auto const size = map->size;
-    for (int y = 0; y < size.h; ++y)
+    for (int y = 0; y < size.y; ++y)
     {
         glm::vec3* __restrict__ rowOut = map->ptr(y);
-        for (int x = 0; x < size.w; ++x)
+        for (int x = 0; x < size.x; ++x)
         {
             glm::vec3 sum;
-            for (int ey = 0; ey < size.h; ++ey)
+            for (int ey = 0; ey < size.y; ++ey)
             {
                 const glm::vec3* __restrict__ rowEmis = emissive.ptr(ey);
-                for (int ex = 0; ex < size.w; ++ex)
+                for (int ex = 0; ex < size.x; ++ex)
                 {
                     auto argb = rowEmis[ex];
                     if (argb != glm::zero<glm::vec3>())
@@ -223,12 +223,13 @@ Scene& Scene::updateLightmap()
 {
     HCTIME("generate lighting");
 
-    auto box  = bounds();
-    auto size = Size<int>(glm::ceil(box.size.xz() / 8.f));
+    auto box = bounds();
+    glm::ivec3 size(glm::ceil(box.size.xz() / 8.f),
+                    glm::ceil(box.size.y    / 50.f));
 
     // Visibility and emissive
-    d->visibility = Grid<float>(size);
-    d->emissive   = Grid<glm::vec3>(size);
+    d->visibility = Grid<float>(size.xy());
+    d->emissive   = Grid<glm::vec3>(size.xy());
 
     for (const auto& item : d->items)
     {
@@ -248,7 +249,7 @@ Scene& Scene::updateLightmap()
     image(d->emissive).write("c:/temp/emissive.png");
     image(d->lightmap).write("c:/temp/lightmap.png");
 
-    d->lightTex.bind().alloc3d(d->lightmap)
+    d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     return *this;

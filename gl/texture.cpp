@@ -74,6 +74,18 @@ Size<int> Texture::size()
     return size;
 }
 
+int Texture::dimensions() const
+{
+    switch (d->target)
+    {
+        case GL_TEXTURE_1D: return 1;
+        case GL_TEXTURE_2D: return 2;
+        case GL_TEXTURE_3D: return 3;
+        default:
+            return 2;
+    }
+}
+
 Image Texture::image()
 {
     Image image(size(), 4);
@@ -184,19 +196,9 @@ Texture& Texture::alloc(const Image& image)
 
 Texture& Texture::alloc(const Grid<glm::vec3>& grid)
 {
-    return alloc({grid.size.w, grid.size.h},
-                 GL_RGB32F, GL_RGB, GL_FLOAT, grid.ptr());
-}
-
-Texture& Texture::alloc3d(const Grid<glm::vec3>& grid)
-{
-    std::vector<glm::vec3> data;
-    data.resize(grid.data.size() * 2);
-    std::copy(grid.data.begin(), grid.data.end(), data.data());
-    //std::fill(data.begin(), data.begin() + grid.data.size(), glm::vec3(1.f));
-
-    return alloc({grid.size.w, grid.size.h, 2},
-                 GL_RGB32F, GL_RGB, GL_FLOAT, data.data());
+    std::vector<int> dv;
+    dv.insert(dv.begin(), &grid.size[0], &grid.size[dimensions() - 1] + 1);
+    return alloc(dv, GL_RGB32F, GL_RGB, GL_FLOAT, grid.ptr());
 }
 
 float Texture::anisotropyMax()
