@@ -100,12 +100,12 @@ void accumulateLightmap(Grid<glm::vec3>* map,
                     auto argb = rowEmis[ex];
                     if (argb != glm::zero<glm::vec3>())
                     {
-                        auto e  = argb;
-                        auto w0 = glm::vec2(x  * st.x, y  * st.y);
-                        auto w1 = glm::vec2(ex * st.x, ey * st.y);
-                        auto d  = glm::max(0.f, glm::distance(w0, w1));
-                        auto v  = vis(visibility, glm::ivec2(ex, ey),
-                                                  glm::ivec2(x,  y));
+                        auto e   = argb;
+                        auto w0  = glm::vec2(x  * st.x, y  * st.y);
+                        auto w1  = glm::vec2(ex * st.x, ey * st.y);
+                        auto d   = glm::max(0.f, glm::distance(w0, w1));
+                        auto v   = vis(visibility, glm::ivec2(ex, ey),
+                                                   glm::ivec2(x,  y));
 
                         auto att = 1.f / (k0 + k1 * d + k2 * d * d);
                         sum     += v * exp * e * att;
