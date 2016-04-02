@@ -225,34 +225,44 @@ gl::Texture* Scene::lightmap() const
 
 Scene& Scene::updateLightmap()
 {
-    HCTIME("generate lighting");
-
     auto box = bounds();
     glm::ivec3 size(glm::ceil(box.size.xz() / 8.f),
                     glm::ceil(box.size.y    / 32.f));
 
+    HCTIME("generate lighting " + std::to_string(size.x) + "x"
+                                + std::to_string(size.y) + "x"
+                                + std::to_string(size.z));
+
     // Visibility and emissive
     d->visibility = Grid<float>(size);
     d->emissive   = Grid<glm::vec3>(size);
-
-    for (const auto& item : d->items)
     {
-        const auto visibility = item.obj.visibility();
-        const auto emission   = item.obj.emission();
-        const auto pos        = glm::ivec3(((item.trRot.tr - box.pos) / 8.f).xz(),
-                                           ((item.trRot.tr - box.pos) / 32.f).y);
+        HCTIME("precalc vis+emis maps");
+        for (const auto& item : d->items)
+        {
+            const auto visibility = item.obj.visibility();
+            const auto emission   = item.obj.emission();
+            const auto pos        = glm::ivec3(
+                                        ((item.trRot.tr - box.pos) / 8.f).xz(),
+                                        ((item.trRot.tr - box.pos) / 32.f).y);
 
-        accumulateVisibility(&d->visibility, pos, visibility);
-        accumulateEmission(&d->emissive, pos, emission);
+            accumulateVisibility(&d->visibility, pos, visibility);
+            accumulateEmission(&d->emissive, pos, emission);
+        }
     }
 
     // Lightmap
-    d->lightmap = Grid<glm::vec3>(size);
-    accumulateLightmap(&d->lightmap, d->visibility, d->emissive);
+    {
+        HCTIME("acc lightmap");
+        d->lightmap = Grid<glm::vec3>(size);
+        accumulateLightmap(&d->lightmap, d->visibility, d->emissive);
+    }
 
+    /*
     image(d->visibility).write("c:/temp/visibility.png");
     image(d->emissive).write("c:/temp/emissive.png");
     image(d->lightmap).write("c:/temp/lightmap.png");
+    */
 
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
