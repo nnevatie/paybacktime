@@ -45,9 +45,8 @@ void main(void)
 
     vec3 giUv       = ((worldPos - boundsMin) / boundsSize).xzy;
     giUv.xy        -= 0.5 / vec2(textureSize(texGi, 0).xy);
-    giUv.z          = 0.25 + 0.5 * giUv.z;
 
-    vec3 gi         = 2.0 * pow(textureBicubic(texGi, giUv).rgb, vec3(2.2));
+    vec3 gi         = 1.0 * pow(textureBicubic(texGi, giUv).rgb, vec3(1.0));
 
     vec3 ao         = texture(texAo, ib.uv).r * gi;
     vec3 normal     = texture(texNormal, ib.uv).rgb;
