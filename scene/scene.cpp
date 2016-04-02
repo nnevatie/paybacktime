@@ -91,6 +91,7 @@ void accumulateLightmap(Grid<glm::vec3>* map,
     auto const st      = glm::vec3(8.f, 8.f, 32.f);
 
     auto const size = map->size;
+    //#pragma omp parallel for
     for (int z = 0; z < size.z; ++z)
         for (int y = 0; y < size.y; ++y)
             for (int x = 0; x < size.x; ++x)
@@ -250,7 +251,6 @@ Scene& Scene::updateLightmap()
             accumulateEmission(&d->emissive, pos, emission);
         }
     }
-
     // Lightmap
     {
         HCTIME("acc lightmap");
