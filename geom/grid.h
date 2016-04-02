@@ -31,9 +31,19 @@ struct Grid
         return data.at(y * size.x + x);
     }
 
+    const T& at(int x, int y, int z) const
+    {
+        return data.at(z * size.x * size.y + y * size.x + x);
+    }
+
     T& at(int x, int y)
     {
-        return data.at(y * size.y + x);
+        return data.at(y * size.x + x);
+    }
+
+    T& at(int x, int y, int z)
+    {
+        return data.at(z * size.x * size.y + y * size.x + x);
     }
 
     const T* ptr() const
