@@ -48,6 +48,7 @@ struct Scene
     gfx::Geometry::Instances geometryInstances() const;
 
     gl::Texture* lightmap() const;
+    gl::Texture* incidence() const;
     Scene& updateLightmap();
 
 private:

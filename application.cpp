@@ -133,6 +133,7 @@ struct Data
                  &geometry.texLight,
                  &ssao.texAoBlur,
                  scene.lightmap(),
+                 scene.incidence(),
                  scene.bounds(),
                  view, proj);
 

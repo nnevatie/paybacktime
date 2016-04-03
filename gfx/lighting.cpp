@@ -33,6 +33,7 @@ Lighting& Lighting::operator()(
     gl::Texture* texLight,
     gl::Texture* texSsao,
     gl::Texture* texLightmap,
+    gl::Texture* texIncidence,
     const Box& bounds,
     const glm::mat4& v,
     const glm::mat4& p)
@@ -44,6 +45,7 @@ Lighting& Lighting::operator()(
                .setUniform("texLight",   3)
                .setUniform("texAo",      4)
                .setUniform("texGi",      5)
+               .setUniform("texIncid",   6)
                .setUniform("boundsMin",  glm::floor(bounds.pos))
                .setUniform("boundsSize", glm::ceil(bounds.size))
                .setUniform("v",          v)
@@ -60,6 +62,7 @@ Lighting& Lighting::operator()(
     texLight->bindAs(GL_TEXTURE3);
     texSsao->bindAs(GL_TEXTURE4);
     texLightmap->bindAs(GL_TEXTURE5);
+    texIncidence->bindAs(GL_TEXTURE6);
     rect.render();
     return *this;
 }

@@ -7,6 +7,7 @@ uniform sampler2D texColor;
 uniform sampler2D texLight;
 uniform sampler2D texAo;
 uniform sampler3D texGi;
+uniform sampler3D texIncid;
 uniform vec3      boundsMin;
 uniform vec3      boundsSize;
 uniform mat4      v;
@@ -40,22 +41,22 @@ vec3 world(sampler2D depthSampler, vec2 uv, mat4 v, mat4 p)
   return world.xyz / world.w;
 }
 
-vec3 sampleGi(vec3 worldPos)
+vec3 giUvw(vec3 worldPos)
 {
-    vec3 uvw = ((worldPos - boundsMin) / boundsSize).xzy -
-                 vec3(0.5 / sizeTexGi.xy, 0);
+    vec3 uvw = ((worldPos - boundsMin) / boundsSize).xzy;
     float zs = 1.0 / sizeTexGi.z;
     uvw.z    = 0.5 * zs + uvw.z * zs * (sizeTexGi.z - 1);
-    return textureBicubic(texGi, uvw).rgb;
+    return uvw;
 }
 
 void main(void)
 {
     vec3 fragPos    = linearDepth(texture(texDepth, ib.uv).r, p) * ib.viewRay;
     vec3 worldPos   = world(texDepth, ib.uv, v, p);
-
-    vec3 gi         = sampleGi(worldPos);
-    vec3 ao         = texture(texAo, ib.uv).r * gi;
+    vec3 uvwGi      = giUvw(worldPos);
+    vec3 uvwGiBic   = uvwGi - vec3(0.5 / sizeTexGi.xy, 0);
+    vec3 gi         = textureBicubic(texGi, uvwGiBic).rgb;
+    vec3 ao         = texture(texAo, ib.uv).r * gi.rgb;
     vec3 normal     = texture(texNormal, ib.uv).rgb;
     vec3 albedo     = texture(texColor,  ib.uv).rgb;
     vec3 light      = texture(texLight,  ib.uv).rgb;
@@ -63,18 +64,22 @@ void main(void)
     // Ambient
     vec3 ambient    = vec3(0);
 
-    // Light dir
+    // View dir
     vec3 viewDir    = normalize(ib.viewRay);
-    vec3 lightPos   = vec3(1.0, 1.0, 5.0);
-    vec3 lightDir   = normalize(lightPos - viewDir);
+
+    // Light dir
+    mat3 normalMat  = transpose(inverse(mat3(v)));
+    vec3 incident   = normalize(texture(texIncid, uvwGi)).xzy;
+    vec3 lightDir   = normalize(normalMat * incident);
 
     // Diffuse
     vec3 diffuse    = 1.0 * max(albedo * ao,
                                 albedo * max(dot(normal, lightDir), 0.0));
+
     // Specular
-    vec3 halfwayDir = normalize(lightDir + ib.viewRay);
-    float spec      = 1.0 * pow(max(dot(normal, halfwayDir), 0.0), 2.0);
-    vec3 specular   = light.r * vec3(spec);
+    vec3 reflectDir = reflect(lightDir, normal);
+    float spec      = pow(max(dot(viewDir, reflectDir), 0.0), 2.f);
+    vec3 specular   = 1.f * light.r * vec3(spec);
 
     vec3 lighting   = ambient + ao * diffuse + ao * specular;
     color           = vec4(lighting, 1.0);

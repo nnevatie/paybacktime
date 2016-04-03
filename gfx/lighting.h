@@ -38,6 +38,7 @@ struct Lighting
         gl::Texture* texLight,
         gl::Texture* texSsao,
         gl::Texture* texLightmap,
+        gl::Texture* texIncidence,
         const Box& bounds,
         const glm::mat4& v,
         const glm::mat4& p);

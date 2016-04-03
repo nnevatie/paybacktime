@@ -20,7 +20,6 @@ void main(void)
 {
     vec4 a = texture(texAlbedo, ib.uv);
     vec4 c = texture(texColor,  ib.uv);
-    vec4 b = smoothstep(vec4(1.0), vec4(5.0), c);
+    vec4 b = smoothstep(vec4(0.9), vec4(2.5), c);
     color  = b + a * pow(texture(texLight, ib.uv).b * 4.0, 1.0);
-    //color = vec4(0);
 }

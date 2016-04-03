@@ -201,6 +201,13 @@ Texture& Texture::alloc(const Grid<glm::vec3>& grid)
     return alloc(dv, GL_RGB32F, GL_RGB, GL_FLOAT, grid.ptr());
 }
 
+Texture& Texture::alloc(const Grid<glm::vec4>& grid)
+{
+    std::vector<int> dv;
+    dv.insert(dv.begin(), &grid.size[0], &grid.size[dimensions() - 1] + 1);
+    return alloc(dv, GL_RGBA32F, GL_RGBA, GL_FLOAT, grid.ptr());
+}
+
 float Texture::anisotropyMax()
 {
     GLfloat f = 0.f;

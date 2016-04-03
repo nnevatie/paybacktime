@@ -17,6 +17,13 @@ namespace pt
 namespace
 {
 
+inline float pack(const glm::vec3& v)
+{
+    glm::ivec3 iv = glm::ivec3(255.f * ((v + 1.f) * 0.5f));
+    uint32_t i    = (iv.x << 16) | (iv.y << 8) | iv.z;
+    return float(i) / float(1 << 24);
+}
+
 float vis(const Grid<float>& map, glm::ivec3 p0, glm::ivec3 p1)
 {
     // TODO: find out whether useful
@@ -78,7 +85,8 @@ void accumulateEmission(
     }
 }
 
-void accumulateLightmap(Grid<glm::vec3>* map,
+void accumulateLightmap(Grid<glm::vec3>* lightmap,
+                        Grid<glm::vec3>* incidence,
                         const Grid<float>& visibility,
                         const Grid<glm::vec3>& emissive)
 {
@@ -90,13 +98,14 @@ void accumulateLightmap(Grid<glm::vec3>* map,
     auto const k2      = 0.02f;
     auto const st      = glm::vec3(8.f, 8.f, 32.f);
 
-    auto const size = map->size;
+    auto const size = lightmap->size;
     //#pragma omp parallel for
     for (int z = 0; z < size.z; ++z)
         for (int y = 0; y < size.y; ++y)
             for (int x = 0; x < size.x; ++x)
             {
-                glm::vec3 sum;
+                glm::vec3 light;
+                glm::vec3 incid;
                 for (int ez = 0; ez < size.z; ++ez)
                     for (int ey = 0; ey < size.y; ++ey)
                         for (int ex = 0; ex < size.x; ++ex)
@@ -111,14 +120,17 @@ void accumulateLightmap(Grid<glm::vec3>* map,
                                 auto att = 1.f / (k0 + k1 * d + k2 * d * d);
                                 if (att > attMin)
                                 {
-                                    auto v = vis(visibility, glm::ivec3(ex, ey, ez),
-                                                             glm::ivec3(x,  y,  z));
-                                    sum   += v * exp * e * att;
+                                    auto v = vis(visibility,
+                                                 glm::ivec3(ex, ey, ez),
+                                                 glm::ivec3(x,  y,  z));
+                                    light += v * exp * e * att;
+                                    incid += att * (w1 - w0);
                                 }
                             }
                         }
 
-                map->at(x, y, z) = ambient + sum;
+                lightmap->at(x, y, z)  = ambient + light;
+                incidence->at(x, y, z) = glm::normalize(incid);
             }
 }
 
@@ -141,7 +153,8 @@ bool Scene::Item::operator!=(const Scene::Item& other) const
 
 struct Scene::Data
 {
-    Data() : lightTex(gl::Texture::Type::Texture3d)
+    Data() : lightTex(gl::Texture::Type::Texture3d),
+             incidenceTex(gl::Texture::Type::Texture3d)
     {}
 
     std::vector<Item> items;
@@ -149,8 +162,10 @@ struct Scene::Data
     Grid<float>       visibility;
     Grid<glm::vec3>   emissive;
     Grid<glm::vec3>   lightmap;
+    Grid<glm::vec3>   incidence;
 
     gl::Texture       lightTex;
+    gl::Texture       incidenceTex;
 };
 
 Scene::Scene() :
@@ -224,6 +239,11 @@ gl::Texture* Scene::lightmap() const
     return &d->lightTex;
 }
 
+gl::Texture* Scene::incidence() const
+{
+    return &d->incidenceTex;
+}
+
 Scene& Scene::updateLightmap()
 {
     auto box = bounds();
@@ -254,19 +274,23 @@ Scene& Scene::updateLightmap()
     // Lightmap
     {
         HCTIME("acc lightmap");
-        d->lightmap = Grid<glm::vec3>(size);
-        accumulateLightmap(&d->lightmap, d->visibility, d->emissive);
+        d->lightmap  = Grid<glm::vec3>(size);
+        d->incidence = Grid<glm::vec3>(size);
+        accumulateLightmap(&d->lightmap, &d->incidence,
+                           d->visibility, d->emissive);
     }
 
-    /*
     image(d->visibility).write("c:/temp/visibility.png");
     image(d->emissive).write("c:/temp/emissive.png");
     image(d->lightmap).write("c:/temp/lightmap.png");
-    */
+    image(d->incidence).write("c:/temp/incidence.png");
 
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    d->incidenceTex.bind().alloc(d->incidence)
+                          .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                          .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     return *this;
 }
 
