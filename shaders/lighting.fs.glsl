@@ -12,6 +12,9 @@ uniform vec3      boundsSize;
 uniform mat4      v;
 uniform mat4      p;
 
+// Const
+vec3 sizeTexGi = textureSize(texGi, 0);
+
 // Input
 in Block
 {
@@ -37,17 +40,21 @@ vec3 world(sampler2D depthSampler, vec2 uv, mat4 v, mat4 p)
   return world.xyz / world.w;
 }
 
+vec3 sampleGi(vec3 worldPos)
+{
+    vec3 uvw = ((worldPos - boundsMin) / boundsSize).xzy -
+                 vec3(0.5 / sizeTexGi.xy, 0);
+    float zs = 1.0 / sizeTexGi.z;
+    uvw.z    = 0.5 * zs + uvw.z * zs * (sizeTexGi.z - 1);
+    return textureBicubic(texGi, uvw).rgb;
+}
+
 void main(void)
 {
     vec3 fragPos    = linearDepth(texture(texDepth, ib.uv).r, p) * ib.viewRay;
-
     vec3 worldPos   = world(texDepth, ib.uv, v, p);
 
-    vec3 giUv       = ((worldPos - boundsMin) / boundsSize).xzy;
-    giUv.xy        -= 0.5 / vec2(textureSize(texGi, 0).xy);
-
-    vec3 gi         = 1.0 * pow(textureBicubic(texGi, giUv).rgb, vec3(1.0));
-
+    vec3 gi         = sampleGi(worldPos);
     vec3 ao         = texture(texAo, ib.uv).r * gi;
     vec3 normal     = texture(texNormal, ib.uv).rgb;
     vec3 albedo     = texture(texColor,  ib.uv).rgb;
