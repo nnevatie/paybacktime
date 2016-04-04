@@ -67,20 +67,19 @@ void main(void)
     // View dir
     vec3 viewDir    = normalize(ib.viewRay);
 
-    // Light dir
+    // Light dir & incident
     mat3 normalMat  = transpose(inverse(mat3(v)));
     vec3 incidVec   = texture(texIncid, uvwGi).xzy;
     vec3 incident   = normalize(incidVec);
     vec3 lightDir   = normalize(normalMat * incident);
+    float incid     = smoothstep(0, 4, length(incidVec));
 
     // Diffuse
     vec3 diffuse    = 1.0 * max(albedo * ao,
                                 albedo * max(dot(normal, lightDir), 0.0));
-
     // Specular
     vec3 reflectDir = reflect(lightDir, normal);
-    float spec      = smoothstep(0, 4, length(incidVec)) *
-                      pow(max(dot(viewDir, reflectDir), 0.0), 2.f);
+    float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0), 2.f);
     vec3 specular   = 1.f * light.r * vec3(spec);
 
     vec3 lighting   = ambient + ao * diffuse + ao * specular;
