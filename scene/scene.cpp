@@ -130,7 +130,7 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
                         }
 
                 lightmap->at(x, y, z)  = ambient + light;
-                incidence->at(x, y, z) = glm::normalize(incid);
+                incidence->at(x, y, z) = incid;
             }
 }
 
