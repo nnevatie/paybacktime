@@ -50,8 +50,34 @@ struct EdgeTable
 
 static EdgeTable edgeTable;
 
+inline int dominantAxis(const glm::vec3& v)
+{
+    const glm::vec3 axes[] =
+    {
+        glm::vec3( 0,  0, +1),
+        glm::vec3( 0,  0, -1),
+        glm::vec3(-1,  0,  0),
+        glm::vec3(+1,  0,  0),
+        glm::vec3( 0, +1,  0),
+        glm::vec3( 0, -1,  0)
+    };
+
+    int axisIndex = -1;
+    float score   = 0.f;
+    for (int i = 0; i < 6; ++i)
+    {
+        const auto d = glm::dot(axes[i], v);
+        if (d >= score)
+        {
+            axisIndex = i;
+            score     = d;
+        }
+    }
+    return axisIndex;
+}
+
 template <typename V>
-Mesh_P_N_UV mesh(const V& vol)
+Mesh_P_N_UV mesh(const V& vol, const RectCube<float>& uvCube, float scale = 1.f)
 {
     const std::array<int, 3>& dims = {vol.width + 2, vol.height + 2, vol.depth + 2};
 
@@ -61,7 +87,12 @@ Mesh_P_N_UV mesh(const V& vol)
 
     std::vector<int> buffer(r[2] * 2, 0);
 
+    std::vector<glm::vec3> vertices;
+    vertices.reserve(buffer.size());
+
     Mesh_P_N_UV mesh;
+    mesh.vertices.reserve(buffer.size() * 16);
+    mesh.indices.reserve(buffer.size()  * 4);
 
     //March over the voxel grid
     int bufNo = 1;
@@ -107,9 +138,7 @@ Mesh_P_N_UV mesh(const V& vol)
                     float t  = g0 - g1;
 
                     if (std::abs(t) > 0)
-                    {
                         t = g0 / t;
-                    }
                     else
                         continue;
 
@@ -132,8 +161,8 @@ Mesh_P_N_UV mesh(const V& vol)
 
                 // Add vertex to buffer,
                 // store pointer to vertex index in buffer
-                buffer[m] = mesh.vertices.size();
-                mesh.vertices.push_back({glm::vec3(v[0], v[1], v[2])});
+                buffer[m] = vertices.size();
+                vertices.push_back({glm::vec3(v[0], v[1], v[2]) * scale});
 
                 // Now we need to add faces together,
                 // to do this we just loop over 3 basis components
@@ -157,42 +186,39 @@ Mesh_P_N_UV mesh(const V& vol)
                     int du = r[iu];
                     int dv = r[iv];
 
-                    Mesh_P_N_UV::Vertex& va = mesh.vertices[buffer[m]];
-                    Mesh_P_N_UV::Vertex& vb = mesh.vertices[buffer[m - du]];
-                    Mesh_P_N_UV::Vertex& vc = mesh.vertices[buffer[m - du - dv]];
-                    Mesh_P_N_UV::Vertex& vd = mesh.vertices[buffer[m - dv]];
-
-                    const glm::vec3 n0 =
-                        glm::normalize(glm::cross(vc.p - va.p, vb.p - va.p));
-
-                    const glm::vec3 n1 =
-                        glm::normalize(glm::cross(va.p - vc.p, vd.p - vc.p));
-
+                    const auto& va = vertices[buffer[m]];
+                    const auto& vb = vertices[buffer[m - du]];
+                    const auto& vc = vertices[buffer[m - du - dv]];
+                    const auto& vd = vertices[buffer[m - dv]];
+                    const auto ns  = mask & 1 ? 1 : -1;
+                    const auto n0  = ns * glm::normalize(
+                                          glm::cross(vb - va, vc - va));
+                    const auto n1  = ns * glm::normalize(
+                                          glm::cross(vd - vc, va - vc));
 
                     // Remember to flip orientation
                     // depending on the sign of the corner
+                    const Mesh_P_N_UV::Index ib = mesh.vertices.size();
                     if (mask & 1)
-                    {
-                        va.n = vb.n = vc.n = vd.n = -0.5 * (n0 + n1);
-                        mesh.indices.insert(mesh.indices.end(),
-                                           {buffer[m],
-                                            buffer[m - du],
-                                            buffer[m - dv],
-                                            buffer[m - dv],
-                                            buffer[m - du],
-                                            buffer[m - du - dv]});
-                    }
+                        mesh.vertices.insert(mesh.vertices.begin(),
+                                           {{va, n0},
+                                            {vb, n0},
+                                            {vc, n0},
+                                            {vc, n1},
+                                            {vd, n1},
+                                            {va, n1}});
                     else
-                    {
-                        va.n = vb.n = vc.n = vd.n = 0.5 * (n0 + n1);
-                        mesh.indices.insert(mesh.indices.end(),
-                                           {buffer[m],
-                                            buffer[m - dv],
-                                            buffer[m - du],
-                                            buffer[m - du],
-                                            buffer[m - dv],
-                                            buffer[m - du - dv]});
-                    }
+                        mesh.vertices.insert(mesh.vertices.begin(),
+                                           {{vc, n0},
+                                            {vb, n0},
+                                            {va, n0},
+                                            {va, n1},
+                                            {vd, n1},
+                                            {vc, n1}});
+
+                    mesh.indices.insert(mesh.indices.end(),
+                                       {ib + 0, ib + 1, ib + 2,
+                                        ib + 3, ib + 4, ib + 5});
                 }
             }
     }
