@@ -59,7 +59,7 @@ void accumulateEmission(Grid<glm::vec3>* map, const Projection& p,
                                               const Image& light,
                                               const float objScale)
 {
-    auto const exp        = 0.05f;
+    auto const exp        = 0.1f;
     auto const rgbScale   = 1.f / 255;
     auto const sizeDepth  = depth.size();
     auto const sizeLight  = light.size();

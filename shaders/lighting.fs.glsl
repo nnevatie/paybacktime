@@ -61,9 +61,6 @@ void main(void)
     vec3 albedo     = texture(texColor,  ib.uv).rgb;
     vec3 light      = texture(texLight,  ib.uv).rgb;
 
-    // Ambient
-    vec3 ambient    = vec3(0);
-
     // View dir
     vec3 viewDir    = normalize(ib.viewRay);
 
@@ -72,16 +69,19 @@ void main(void)
     vec3 incidVec   = texture(texIncid, uvwGi).xzy;
     vec3 incident   = normalize(incidVec);
     vec3 lightDir   = normalize(normalMat * incident);
-    float incid     = smoothstep(0, 4, length(incidVec));
+    float incid     = smoothstep(0, 8, length(incidVec));
+
+    // Ambient
+    vec3 ambient    = 0.25f * albedo;
 
     // Diffuse
-    vec3 diffuse    = 1.0 * max(albedo * ao,
-                                albedo * max(dot(normal, lightDir), 0.0));
+    vec3 diffuse    = 8.f * incid * albedo * max(dot(normal, lightDir), 0.0);
+
     // Specular
     vec3 reflectDir = reflect(lightDir, normal);
-    float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0), 2.f);
-    vec3 specular   = 1.f * light.r * vec3(spec);
+    float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0), 4.f);
+    vec3 specular   = 16.f * albedo * light.r * spec;
 
-    vec3 lighting   = ambient + ao * diffuse + ao * specular;
+    vec3 lighting   = ao * ambient + ao * diffuse + ao * specular;
     color           = vec4(lighting, 1.0);
 }

@@ -94,8 +94,8 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
     auto const ambient = 0.f;
     auto const attMin  = 0.005f;
     auto const k0      = 1.f;
-    auto const k1      = 0.0f;
-    auto const k2      = 0.02f;
+    auto const k1      = 0.5f;
+    auto const k2      = 0.05f;
     auto const st      = glm::vec3(8.f, 8.f, 32.f);
 
     auto const size = lightmap->size;
@@ -123,7 +123,7 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
                                     auto v = vis(visibility,
                                                  glm::ivec3(ex, ey, ez),
                                                  glm::ivec3(x,  y,  z));
-                                    light += v * exp * e * att;
+                                    light += v * v * exp * e * att;
                                     incid += att * (w1 - w0);
                                 }
                             }
