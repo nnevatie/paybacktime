@@ -295,8 +295,8 @@ Mesh_P_N_UV mesh(const ImageCube& imageCube,
 {
     HCTIME("cube");
     const Cubefield cfield(imageCube);
-    //return meshGreedy(cfield, uvCube, scale);
-    return SnMesher::mesh(cfield, uvCube, scale);
+    return meshGreedy(cfield, uvCube, scale);
+    //return SnMesher::mesh(cfield, uvCube, scale);
 }
 
 } // namespace ImageMesher
