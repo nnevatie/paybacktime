@@ -44,9 +44,7 @@ struct Bloom
 
     Bloom(const Size<int>& renderSize);
 
-    Bloom& operator()(gl::Texture* texAlbedo,
-                      gl::Texture* texColor,
-                      gl::Texture* texLight);
+    Bloom& operator()(gl::Texture* texColor);
 
     gl::Texture* output();
 };

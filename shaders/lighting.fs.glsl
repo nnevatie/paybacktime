@@ -86,6 +86,9 @@ void main(void)
     vec3 ref        = 8.f * light.g *
                       texture(texGi, uvwGi + normal.xzy / sizeTexGi * 10.f).rgb;
 
-    vec3 lighting   = ao * ambient + ao * diffuse + ao * specular + ao * ref;
+    // Emissive
+    vec3 emis       = 32.f * light.b * albedo;
+
+    vec3 lighting   = ao * ambient + ao * diffuse + ao * specular + ao * ref + emis;
     color           = vec4(lighting, 1.0);
 }

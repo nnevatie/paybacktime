@@ -137,7 +137,7 @@ struct Data
                  scene.bounds(),
                  view, proj);
 
-        bloom(&geometry.texColor, lighting.output(), &geometry.texLight);
+        bloom(lighting.output());
         backdrop(&lighting.fbo, camera);
 
         sceneControl(&lighting.fbo, lighting.output());

@@ -1,9 +1,7 @@
 #version 150
 
 // Uniforms
-uniform sampler2D texAlbedo;
 uniform sampler2D texColor;
-uniform sampler2D texLight;
 
 // Input
 in Block
@@ -18,8 +16,6 @@ out vec4 color;
 
 void main(void)
 {
-    vec4 a = texture(texAlbedo, ib.uv);
     vec4 c = texture(texColor,  ib.uv);
-    vec4 b = smoothstep(vec4(0.9), vec4(2.5), c);
-    color  = b + a * pow(texture(texLight, ib.uv).b * 8.0, 1.0);
+    color  = smoothstep(vec4(1.25), vec4(8.0), c);
 }

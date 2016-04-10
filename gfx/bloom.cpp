@@ -68,22 +68,16 @@ Bloom::Bloom(const Size<int>& renderSize) :
     }
 }
 
-Bloom& Bloom::operator()(gl::Texture* texAlbedo,
-                         gl::Texture* texColor,
-                         gl::Texture* texLight)
+Bloom& Bloom::operator()(gl::Texture* texColor)
 {
     // Setup common GL states
     glDisable(GL_DEPTH_TEST);
 
     // Produce bloom bright map
-    progBloom.bind().setUniform("texAlbedo", 0)
-                    .setUniform("texColor",  1)
-                    .setUniform("texLight",  2);
+    progBloom.bind().setUniform("texColor",  0);
     {
         Binder<gl::Fbo> binder(fboBloom);
-        texAlbedo->bindAs(GL_TEXTURE0);
-        texColor->bindAs(GL_TEXTURE1);
-        texLight->bindAs(GL_TEXTURE2);
+        texColor->bindAs(GL_TEXTURE0);
         rect.render();
     }
 
