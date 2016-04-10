@@ -82,6 +82,10 @@ void main(void)
     float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0), 4.f);
     vec3 specular   = 16.f * albedo * light.r * spec;
 
-    vec3 lighting   = ao * ambient + ao * diffuse + ao * specular;
+    // Reflective
+    vec3 ref        = 8.f * light.g *
+                      texture(texGi, uvwGi + normal.xzy / sizeTexGi * 10.f).rgb;
+
+    vec3 lighting   = ao * ambient + ao * diffuse + ao * specular + ao * ref;
     color           = vec4(lighting, 1.0);
 }
