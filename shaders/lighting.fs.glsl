@@ -72,7 +72,7 @@ void main(void)
     float incid     = smoothstep(0, 8, length(incidVec));
 
     // Ambient
-    vec3 ambient    = 0.25f * albedo;
+    vec3 ambient    = 0.5f * albedo;
 
     // Diffuse
     vec3 diffuse    = 8.f * incid * albedo * max(dot(normal, lightDir), 0.0);
