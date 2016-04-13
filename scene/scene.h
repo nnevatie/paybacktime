@@ -49,6 +49,7 @@ struct Scene
 
     gl::Texture* lightmap() const;
     gl::Texture* incidence() const;
+
     Scene& updateLightmap();
 
 private:

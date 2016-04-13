@@ -43,10 +43,10 @@ float vis(const Grid<float>& map, glm::ivec3 p0, glm::ivec3 p1)
     return glm::max(0.f, v);
 }
 
-void accumulateVisibility(
-    Grid<float>* map, const glm::ivec3& pos, const Grid<float>& visibility)
+void accumulateDensity(
+    Grid<float>* map, const glm::ivec3& pos, const Grid<float>& density)
 {
-    auto const size = visibility.size;
+    auto const size = density.size;
     for (int z = 0; z < size.z; ++z)
     {
         const auto z1 = pos.z + z;
@@ -57,7 +57,7 @@ void accumulateVisibility(
             {
                 const auto x1 = pos.x + x;
                 map->at(x1, y1, z1) = glm::min(1.f, map->at(x1, y1, z1) +
-                                                    visibility.at(x, y, z));
+                                                    density.at(x, y, z));
             }
         }
     }
@@ -87,7 +87,7 @@ void accumulateEmission(
 
 void accumulateLightmap(Grid<glm::vec3>* lightmap,
                         Grid<glm::vec3>* incidence,
-                        const Grid<float>& visibility,
+                        const Grid<float>& density,
                         const Grid<glm::vec3>& emissive)
 {
     auto const exp     = 1.f;
@@ -120,7 +120,7 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
                                 auto att = 1.f / (k0 + k1 * d + k2 * d * d);
                                 if (att > attMin)
                                 {
-                                    auto v = vis(visibility,
+                                    auto v = vis(density,
                                                  glm::ivec3(ex, ey, ez),
                                                  glm::ivec3(x,  y,  z));
                                     light += v * v * exp * e * att;
@@ -159,7 +159,7 @@ struct Scene::Data
 
     std::vector<Item> items;
 
-    Grid<float>       visibility;
+    Grid<float>       density;
     Grid<glm::vec3>   emissive;
     Grid<glm::vec3>   lightmap;
     Grid<glm::vec3>   incidence;
@@ -254,20 +254,20 @@ Scene& Scene::updateLightmap()
                                 + std::to_string(size.y) + "x"
                                 + std::to_string(size.z));
 
-    // Visibility and emissive
-    d->visibility = Grid<float>(size);
-    d->emissive   = Grid<glm::vec3>(size);
+    // Density and emissive
+    d->density  = Grid<float>(size);
+    d->emissive = Grid<glm::vec3>(size);
     {
-        HCTIME("precalc vis+emis maps");
+        HCTIME("precalc dens+emis maps");
         for (const auto& item : d->items)
         {
-            const auto visibility = item.obj.visibility();
-            const auto emission   = item.obj.emission();
-            const auto pos        = glm::ivec3(
-                                        ((item.trRot.tr - box.pos) / 8.f).xz(),
-                                        ((item.trRot.tr - box.pos) / 32.f).y);
+            const auto density  = item.obj.density();
+            const auto emission = item.obj.emission();
+            const auto pos      = glm::ivec3(
+                                     ((item.trRot.tr - box.pos) / 8.f).xz(),
+                                     ((item.trRot.tr - box.pos) / 32.f).y);
 
-            accumulateVisibility(&d->visibility, pos, visibility);
+            accumulateDensity(&d->density, pos, density);
             accumulateEmission(&d->emissive, pos, emission);
         }
     }
@@ -277,10 +277,10 @@ Scene& Scene::updateLightmap()
         d->lightmap  = Grid<glm::vec3>(size);
         d->incidence = Grid<glm::vec3>(size);
         accumulateLightmap(&d->lightmap, &d->incidence,
-                           d->visibility, d->emissive);
+                           d->density, d->emissive);
     }
 
-    image(d->visibility).write("c:/temp/visibility.png");
+    image(d->density).write("c:/temp/density.png");
     image(d->emissive).write("c:/temp/emissive.png");
     image(d->lightmap).write("c:/temp/lightmap.png");
     image(d->incidence).write("c:/temp/incidence.png");

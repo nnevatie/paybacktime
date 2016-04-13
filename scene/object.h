@@ -32,8 +32,8 @@ struct Object
     glm::vec3   origin()    const;
     glm::mat4x4 transform() const;
 
-    Grid<float> visibility() const;
-    Object& updateVisibility();
+    Grid<float> density() const;
+    Object& updateDensity();
 
     Grid<glm::vec3> emission() const;
     Object& updateEmission();

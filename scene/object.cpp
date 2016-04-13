@@ -123,7 +123,7 @@ struct Object::Data
 
     Meta            meta;
     Model           model;
-    Grid<float>     visibility;
+    Grid<float>     density;
     Grid<glm::vec3> emission;
 };
 
@@ -133,7 +133,7 @@ Object::Object()
 Object::Object(const fs::path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {
-    updateVisibility();
+    updateDensity();
     updateEmission();
 }
 
@@ -177,12 +177,12 @@ Model Object::model() const
     return d->model;
 }
 
-Grid<float> Object::visibility() const
+Grid<float> Object::density() const
 {
-    return d->visibility;
+    return d->density;
 }
 
-Object& Object::updateVisibility()
+Object& Object::updateDensity()
 {
     const int height = 32;
     const auto size  = glm::vec3(d->model.dimensions().xz() / 8.f,
@@ -218,7 +218,7 @@ Object& Object::updateVisibility()
             }
 
     //image(map).write("c:/temp/vis_" + d->name + ".png");
-    d->visibility = map;
+    d->density = map;
     return *this;
 }
 
