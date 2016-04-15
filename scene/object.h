@@ -32,6 +32,9 @@ struct Object
     glm::vec3   origin()    const;
     glm::mat4x4 transform() const;
 
+    bool transparent() const;
+    Object& updateTransparency();
+
     Grid<float> density() const;
     Object& updateDensity();
 

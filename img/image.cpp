@@ -92,6 +92,18 @@ int Image::stride() const
     return d->stride;
 }
 
+bool Image::transparent() const
+{
+    for (int y = 0; y < d->size.h; ++y)
+    {
+        const uint32_t* __restrict__ row = bits<const uint32_t>(y, 0);
+        for (int x = 0; x < d->size.w; ++x)
+            if (((row[x] & 0xff000000) >> 24) < 0xff)
+                return true;
+    }
+    return false;
+}
+
 const uint8_t* Image::bits() const
 {
     return d->bits;

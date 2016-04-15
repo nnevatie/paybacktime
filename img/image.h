@@ -27,12 +27,19 @@ struct Image
     int depth() const;
     int stride() const;
 
+    bool transparent() const;
+
     const uint8_t* bits() const;
     uint8_t*       bits();
 
     const uint8_t* bits(int x, int y) const;
     uint8_t*       bits(int x, int y);
 
+    template <typename T>
+    T* bits(int x, int y) const
+    {
+        return reinterpret_cast<T*>(bits(x, y));
+    }
     template <typename T>
     T* bits(int x, int y)
     {

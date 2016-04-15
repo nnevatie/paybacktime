@@ -221,14 +221,20 @@ Scene::Intersection Scene::intersect(const Ray& ray) const
     return {pos, items};
 }
 
-gfx::Geometry::Instances Scene::geometryInstances() const
+gfx::Geometry::Instances Scene::geometryInstances(GeometryType type) const
 {
     gfx::Geometry::Instances instances;
     instances.reserve(d->items.size());
     for (const auto& item : d->items)
     {
-        auto m = static_cast<glm::mat4x4>(item.trRot);
-        instances.push_back({item.obj.model().primitive(), m});
+        auto gt = item.obj.transparent() ? GeometryType::Transparent :
+                                           GeometryType::Opaque;
+
+        if (type == GeometryType::Any || gt == type)
+        {
+            auto m = static_cast<glm::mat4x4>(item.trRot);
+            instances.push_back({item.obj.model().primitive(), m});
+        }
     }
     //HCLOG(Info) << instances.size();
     return instances;

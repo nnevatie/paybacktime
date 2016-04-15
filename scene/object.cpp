@@ -118,11 +118,13 @@ struct Object::Data
 {
     Data(const fs::path& path, TextureStore* textureStore) :
         meta(path),
-        model(path, textureStore, meta.scale)
+        model(path, textureStore, meta.scale),
+        transparent(false)
     {}
 
     Meta            meta;
     Model           model;
+    bool            transparent;
     Grid<float>     density;
     Grid<glm::vec3> emission;
 };
@@ -133,6 +135,7 @@ Object::Object()
 Object::Object(const fs::path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {
+    updateTransparency();
     updateDensity();
     updateEmission();
 }
@@ -170,6 +173,18 @@ glm::vec3 Object::origin() const
 glm::mat4x4 Object::transform() const
 {
     return glm::translate(d->meta.origin);
+}
+
+bool Object::transparent() const
+{
+    return d->transparent;
+}
+
+Object& Object::updateTransparency()
+{
+    d->transparent = d->model.albedoCube()->transparent();
+    HCLOG(Info) << d->meta.name << " transparent: " << d->transparent;
+    return *this;
 }
 
 Model Object::model() const
@@ -217,7 +232,6 @@ Object& Object::updateDensity()
                                   ((height + d->meta.origin.y) * width);
             }
 
-    //image(map).write("c:/temp/vis_" + d->name + ".png");
     d->density = map;
     return *this;
 }
@@ -270,7 +284,6 @@ Object& Object::updateEmission()
                                        d->meta.scale);
     }
     d->emission = map;
-    //image(map).write("c:/temp/emis_" + d->name + ".png");
     return *this;
 }
 

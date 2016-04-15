@@ -77,7 +77,7 @@ struct Data
         colorGrade(renderSize),
         antiAlias(renderSize),
 
-        textureStore({256, 256}),
+        textureStore({512, 512}),
         objectStore(fs::path("objects"), &textureStore),
 
         objectSelector(display, &objectStore, &textureStore),
@@ -123,7 +123,8 @@ struct Data
         Time<GpuClock> clock;
         geometry(&textureStore.albedo.texture,
                  &textureStore.light.texture,
-                 scene.geometryInstances(), view, proj);
+                 scene.geometryInstances(Scene::GeometryType::Opaque),
+                 view, proj);
 
         ssao(&geometry.texDepth, &geometry.texNormalDenoise, proj, camera.fov);
 

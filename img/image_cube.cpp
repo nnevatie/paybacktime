@@ -94,6 +94,15 @@ int ImageCube::depth() const
     return std::min(d0, d1);
 }
 
+bool ImageCube::transparent() const
+{
+    for (const Image& side : sides)
+        if (side.transparent())
+            return true;
+
+    return false;
+}
+
 ImageCube ImageCube::scaled(const ImageCube& refCube) const
 {
     ImageCube imageCube(*this);

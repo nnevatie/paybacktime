@@ -21,6 +21,13 @@ namespace pt
 
 struct Scene
 {
+    enum class GeometryType
+    {
+        Any,
+        Opaque,
+        Transparent
+    };
+
     struct Item
     {
         Object         obj;
@@ -45,7 +52,8 @@ struct Scene
 
     Intersection intersect(const Ray& ray) const;
 
-    gfx::Geometry::Instances geometryInstances() const;
+    gfx::Geometry::Instances geometryInstances(
+        GeometryType type = GeometryType::Any) const;
 
     gl::Texture* lightmap() const;
     gl::Texture* incidence() const;
