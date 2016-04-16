@@ -53,11 +53,13 @@ T getVec(const bpt::ptree& tree, const std::string& key)
     return {};
 }
 
-void accumulateEmission(Grid<glm::vec3>* map, const Projection& p,
-                                              const Image& depth,
-                                              const Image& albedo,
-                                              const Image& light,
-                                              const float objScale)
+void accumulateEmission(Grid<glm::vec3>* map,
+                        Grid<float>* density,
+                        const Projection& p,
+                        const Image& depth,
+                        const Image& albedo,
+                        const Image& light,
+                        const float objScale)
 {
     auto const exp        = 0.15f;
     auto const rgbScale   = 1.f / 255;
@@ -65,6 +67,7 @@ void accumulateEmission(Grid<glm::vec3>* map, const Projection& p,
     auto const sizeLight  = light.size();
     auto const scaleLight = (sizeLight.as<glm::vec2>() /
                              sizeDepth.as<glm::vec2>()).x;
+    auto const areaLight  = 32.f * 8.f;
 
     for (int y = 0; y < sizeLight.h; ++y)
     {
@@ -81,18 +84,21 @@ void accumulateEmission(Grid<glm::vec3>* map, const Projection& p,
 
         for (int x = 0; x < sizeLight.w; ++x)
         {
-            auto xd    = int(x / float(sizeLight.w) * sizeDepth.w);
-            auto d     = int(rowDepth[xd]);
-            auto out   = p({x / float(sizeLight.w - 1) + 0.5f,
-                            y / float(sizeLight.h - 1) + 0.5f,
-                            d / 255.f + 0.5f}) * objScale;
+            auto xd     = int(x / float(sizeLight.w) * sizeDepth.w);
+            auto d      = int(rowDepth[xd]);
+            auto out    = p({x / float(sizeLight.w - 1) + 0.5f,
+                             y / float(sizeLight.h - 1) + 0.5f,
+                             d / 255.f + 0.5f}) * objScale;
 
-            auto argb0 = map->at(out.x, out.y, out.z);
-            auto argb1 = glm::vec3(argbTuple(rowAlbedo[x]).rgb()) * rgbScale;
-            auto light = argbTuple(rowLight[x]).b * rgbScale / scaleLight;
-            auto emis  = exp * light;
-            auto argb2 = argb0 + emis * argb1;
+            auto albedo = argbTuple(rowAlbedo[x]);
+            auto argb0  = map->at(out.x, out.y, out.z);
+            auto argb1  = glm::vec3(albedo.rgb()) * rgbScale;
+            auto light  = argbTuple(rowLight[x]).b * rgbScale / scaleLight;
+            auto emis   = exp * light;
+            auto argb2  = argb0 + emis * argb1;
             map->at(out.x, out.y, out.z) = argb2;
+            density->at(out.x, out.y, out.z) *= glm::pow(albedo.a / 255.f,
+                                                         1.f / areaLight);
         }
     }
 }
@@ -278,10 +284,11 @@ Object& Object::updateEmission()
             [&pmax](const glm::vec3& v)
             {return glm::vec3(pmax.x * v.x, pmax.y * v.y, pmax.z * v.z);}
         };
-        accumulateEmission(&map, p[i], cubeDepth->side(side),
-                                       cubeAlbedo->side(side),
-                                       cubeLight->side(side),
-                                       d->meta.scale);
+        accumulateEmission(&map, &d->density,
+                           p[i], cubeDepth->side(side),
+                           cubeAlbedo->side(side),
+                           cubeLight->side(side),
+                           d->meta.scale);
     }
     d->emission = map;
     return *this;
