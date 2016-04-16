@@ -42,29 +42,29 @@ struct Data
     platform::Display* display;
     Size<int> renderSize;
 
-    gfx::Geometry geometry;
-    gfx::Ssao ssao;
-    gfx::Lighting lighting;
-    gfx::Bloom bloom;
-    gfx::Outline outline;
-    gfx::Backdrop backdrop;
-    gfx::ColorGrade colorGrade;
-    gfx::AntiAlias antiAlias;
-    gfx::Output output;
-    gfx::Fader fader;
+    gfx::Geometry            geometry;
+    gfx::Ssao                ssao;
+    gfx::Lighting            lighting;
+    gfx::Bloom               bloom;
+    gfx::Outline             outline;
+    gfx::Backdrop            backdrop;
+    gfx::ColorGrade          colorGrade;
+    gfx::AntiAlias           antiAlias;
+    gfx::Output              output;
+    gfx::Fader               fader;
 
-    TextureStore textureStore;
-    ObjectStore objectStore;
+    TextureStore             textureStore;
+    ObjectStore              objectStore;
 
-    ui::ObjectSelector objectSelector;
-    ui::RenderStats stats;
+    ui::ObjectSelector       objectSelector;
+    ui::RenderStats          stats;
 
-    Scene scene;
-    Camera camera;
-    CameraControl cameraControl;
-    SceneControl sceneControl;
+    Scene                    scene;
+    Camera                   camera;
+    CameraControl            cameraControl;
+    SceneControl             sceneControl;
 
-    platform::Mouse mouse;
+    platform::Mouse          mouse;
 
     Data(platform::Display* display) :
         display(display),
@@ -137,6 +137,13 @@ struct Data
                  scene.incidence(),
                  scene.bounds(),
                  view, proj);
+
+        geometry(
+            &lighting.fbo,
+            &textureStore.albedo.texture,
+            &textureStore.light.texture,
+            scene.geometryInstances(Scene::GeometryType::Transparent),
+            view, proj);
 
         bloom(lighting.output());
         backdrop(&lighting.fbo, camera);

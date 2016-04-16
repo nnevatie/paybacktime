@@ -49,6 +49,13 @@ struct Geometry
                          const Instances& instances,
                          const glm::mat4& v,
                          const glm::mat4& p);
+
+    Geometry& operator()(gl::Fbo* fbo,
+                         gl::Texture* texAlbedo,
+                         gl::Texture* texLightmap,
+                         const Instances& instances,
+                         const glm::mat4& v,
+                         const glm::mat4& p);
 };
 
 } // namespace gfx
