@@ -138,15 +138,19 @@ struct Data
                  scene.bounds(),
                  view, proj);
 
+        backdrop(&lighting.fbo, camera);
+
         geometry(
             &lighting.fbo,
             &textureStore.albedo.texture,
             &textureStore.light.texture,
+            scene.lightmap(),
+            scene.incidence(),
+            scene.bounds(),
             scene.geometryInstances(Scene::GeometryType::Transparent),
-            view, proj);
+            camera);
 
         bloom(lighting.output());
-        backdrop(&lighting.fbo, camera);
 
         sceneControl(&lighting.fbo, lighting.output());
 
