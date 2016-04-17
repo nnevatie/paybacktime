@@ -139,6 +139,20 @@ ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders,
         glBindAttribLocation(d->id, attrib.first, attrib.second.c_str());
 
     glLinkProgram(d->id);
+
+    GLint success = 0;
+    glGetProgramiv(d->id, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        GLint logSize = 0;
+        glGetProgramiv(d->id, GL_INFO_LOG_LENGTH, &logSize);
+
+        std::string infoLog(logSize, 0);
+        glGetProgramInfoLog(d->id, logSize, &logSize, &infoLog[0]);
+
+        HCLOG(Error) << infoLog;
+        throw std::runtime_error("Program compilation error");
+    }
 }
 
 GLuint ShaderProgram::id() const
