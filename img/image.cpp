@@ -127,10 +127,13 @@ uint8_t* Image::bits(int x, int y)
 SDL_Surface* Image::surface() const
 {
     if (!d->surface)
+    {
         d->surface = SDL_CreateRGBSurfaceFrom(
                          d->bits, d->size.w, d->size.h, d->depth * 8, d->stride,
                          0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 
+        SDL_SetSurfaceBlendMode(d->surface, SDL_BLENDMODE_NONE);
+    }
     return d->surface;
 }
 
