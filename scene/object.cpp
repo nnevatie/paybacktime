@@ -213,8 +213,8 @@ Object& Object::updateDensity()
     const Cubefield cfield(*d->model.depthCube());
 
     for (int z = 0; z < size.z; ++z)
-        for (int y = 0; y < size.x; ++y)
-            for (int x = 0; x < size.y; ++x)
+        for (int y = 0; y < size.y; ++y)
+            for (int x = 0; x < size.x; ++x)
             {
                 int fx0   = x * cfield.width / size.x;
                 int fy0   = y * cfield.depth / size.y;

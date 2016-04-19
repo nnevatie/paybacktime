@@ -50,10 +50,10 @@ void accumulateDensity(
     for (int z = 0; z < size.z; ++z)
     {
         const auto z1 = pos.z + z;
-        for (int y = 0; y < size.x; ++y)
+        for (int y = 0; y < size.y; ++y)
         {
             const auto y1 = pos.y + y;
-            for (int x = 0; x < size.y; ++x)
+            for (int x = 0; x < size.x; ++x)
             {
                 const auto x1 = pos.x + x;
                 map->at(x1, y1, z1) = glm::min(1.f, map->at(x1, y1, z1) +
