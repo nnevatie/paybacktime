@@ -90,6 +90,29 @@ struct Data
         cameraControl(&camera, display, &mouse),
         sceneControl(&scene, &camera, display, &mouse, geometry.texDepth)
     {
+
+        auto floor = objectStore.object("floor");
+        auto light = objectStore.object("floor3");
+        auto head  = objectStore.object("head");
+        auto torso = objectStore.object("torso");
+
+        for (int y = -2; y <= 2; ++y)
+            for (int x = -2; x <= 2; ++x)
+            {
+                auto tr = TransformTrRot({16 * x, 0, 16 * y});
+                if (x || y)
+                    scene.add({floor, tr});
+                else
+                    scene.add({light, tr});
+
+                if (y == -2 && !x)
+                {
+                    auto trHead  = TransformTrRot(head.origin()  + tr.tr);
+                    auto trTorso = TransformTrRot(torso.origin() + tr.tr);
+                    scene.add({head, trHead});
+                    scene.add({torso, trTorso});
+                }
+            }
     }
 
     bool simulate(TimePoint /*time*/, Duration step)
