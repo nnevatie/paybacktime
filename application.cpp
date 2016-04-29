@@ -84,7 +84,7 @@ struct Data
         stats(display->nanoVg()),
 
         camera({0.f, 0.f, 0.f}, 350.f,
-               glm::half_pi<float>(), -glm::quarter_pi<float>(),
+               glm::half_pi<float>(), -glm::quarter_pi<float>() + 0,
                glm::radians(45.f), renderSize.aspect<float>(), 100.f, 550.f),
 
         cameraControl(&camera, display, &mouse),
@@ -95,6 +95,10 @@ struct Data
         auto light = objectStore.object("floor3");
         auto head  = objectStore.object("head");
         auto torso = objectStore.object("torso");
+        auto waist = objectStore.object("waist");
+        auto thigh = objectStore.object("thigh");
+        auto leg   = objectStore.object("leg");
+        auto foot  = objectStore.object("foot");
 
         for (int y = -2; y <= 2; ++y)
             for (int x = -2; x <= 2; ++x)
@@ -109,8 +113,17 @@ struct Data
                 {
                     auto trHead  = TransformTrRot(head.origin()  + tr.tr);
                     auto trTorso = TransformTrRot(torso.origin() + tr.tr);
-                    scene.add({head, trHead});
+                    auto trWaist = TransformTrRot(waist.origin() + tr.tr);
+                    auto trThigh = TransformTrRot(thigh.origin() + tr.tr);
+                    auto trLeg   = TransformTrRot(leg.origin()   + tr.tr);
+                    auto trFoot  = TransformTrRot(foot.origin()  + tr.tr);
+
+                    scene.add({head,  trHead});
                     scene.add({torso, trTorso});
+                    scene.add({waist, trWaist});
+                    scene.add({thigh, trThigh});
+                    scene.add({leg,   trLeg});
+                    scene.add({foot,  trFoot});
                 }
             }
     }
