@@ -15,6 +15,7 @@
 #include "gl/texture.h"
 
 #include "object.h"
+#include "character.h"
 
 namespace pt
 {

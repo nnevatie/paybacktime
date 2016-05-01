@@ -93,12 +93,14 @@ struct Data
 
         auto floor = objectStore.object("floor");
         auto light = objectStore.object("floor3");
+        /*
         auto head  = objectStore.object("head");
         auto torso = objectStore.object("torso");
         auto waist = objectStore.object("waist");
         auto thigh = objectStore.object("thigh");
         auto leg   = objectStore.object("leg");
         auto foot  = objectStore.object("foot");
+        */
 
         for (int y = -2; y <= 2; ++y)
             for (int x = -2; x <= 2; ++x)
@@ -109,6 +111,7 @@ struct Data
                 else
                     scene.add({light, tr});
 
+                /*
                 if (y == -2 && !x)
                 {
                     auto trHead  = TransformTrRot(head.origin()  + tr.tr);
@@ -125,6 +128,7 @@ struct Data
                     scene.add({leg,   trLeg});
                     scene.add({foot,  trFoot});
                 }
+                */
             }
     }
 
