@@ -159,7 +159,7 @@ struct Data
         Time<GpuClock> clock;
         geometry(&textureStore.albedo.texture,
                  &textureStore.light.texture,
-                 scene.geometryInstances(Scene::GeometryType::Opaque),
+                 scene.objectGeometry(Scene::GeometryType::Opaque),
                  view, proj);
 
         ssao(&geometry.texDepth, &geometry.texNormalDenoise, proj, camera.fov);
@@ -183,7 +183,7 @@ struct Data
             scene.lightmap(),
             scene.incidence(),
             scene.bounds(),
-            scene.geometryInstances(Scene::GeometryType::Transparent),
+            scene.objectGeometry(Scene::GeometryType::Transparent),
             camera);
 
         bloom(lighting.output());

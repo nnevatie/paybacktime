@@ -19,6 +19,18 @@
 namespace pt
 {
 
+struct ObjectItem
+{
+    Object         obj;
+    TransformTrRot trRot;
+
+    Box bounds() const;
+    bool operator==(const ObjectItem& other) const;
+    bool operator!=(const ObjectItem& other) const;
+};
+typedef std::vector<ObjectItem>           ObjectItems;
+typedef std::pair<glm::vec3, ObjectItems> Intersection;
+
 struct Scene
 {
     enum class GeometryType
@@ -28,31 +40,18 @@ struct Scene
         Transparent
     };
 
-    struct Item
-    {
-        Object         obj;
-        TransformTrRot trRot;
-
-        Box bounds() const;
-        bool operator==(const Item& other) const;
-        bool operator!=(const Item& other) const;
-    };
-
-    typedef std::vector<Item>           Items;
-    typedef std::pair<glm::vec3, Items> Intersection;
-
     Scene();
 
     Box bounds() const;
 
-    bool contains(const Item& item) const;
+    bool contains(const ObjectItem& item) const;
 
-    Scene& add(const Item& item);
-    bool remove(const Item& item);
+    Scene& add(const ObjectItem& item);
+    bool remove(const ObjectItem& item);
 
     Intersection intersect(const Ray& ray) const;
 
-    gfx::Geometry::Instances geometryInstances(
+    gfx::Geometry::Instances objectGeometry(
         GeometryType type = GeometryType::Any) const;
 
     gl::Texture* lightmap() const;
@@ -65,7 +64,7 @@ private:
     std::shared_ptr<Data> d;
 };
 
-bool containsItem(const Scene::Items& items, const Scene::Item& item);
-bool containsObject(const Scene::Items& items, const Object& object);
+bool containsItem(const ObjectItems& items, const ObjectItem& item);
+bool containsObject(const ObjectItems& items, const Object& object);
 
 } // namespace pt

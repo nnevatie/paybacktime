@@ -26,7 +26,7 @@ inline float pack(const glm::vec3& v)
 
 float vis(const Grid<float>& map, glm::ivec3 p0, glm::ivec3 p1)
 {
-    // TODO: find out whether useful
+    // Make results symmetrical between endpoints
     if (p0.y > p1.y) std::swap(p0, p1);
 
     const auto d = p1 - p0;
@@ -136,17 +136,17 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
 
 }
 
-Box Scene::Item::bounds() const
+Box ObjectItem::bounds() const
 {
     return {trRot.tr, obj.model().dimensions() / obj.scale()};
 }
 
-bool Scene::Item::operator==(const Scene::Item& other) const
+bool ObjectItem::operator==(const ObjectItem& other) const
 {
     return obj == other.obj && trRot == other.trRot;
 }
 
-bool Scene::Item::operator!=(const Scene::Item& other) const
+bool ObjectItem::operator!=(const ObjectItem& other) const
 {
     return !operator==(other);
 }
@@ -157,15 +157,15 @@ struct Scene::Data
              incidenceTex(gl::Texture::Type::Texture3d)
     {}
 
-    std::vector<Item> items;
+    ObjectItems     items;
 
-    Grid<float>       density;
-    Grid<glm::vec3>   emissive;
-    Grid<glm::vec3>   lightmap;
-    Grid<glm::vec3>   incidence;
+    Grid<float>     density;
+    Grid<glm::vec3> emissive;
+    Grid<glm::vec3> lightmap;
+    Grid<glm::vec3> incidence;
 
-    gl::Texture       lightTex;
-    gl::Texture       incidenceTex;
+    gl::Texture     lightTex;
+    gl::Texture     incidenceTex;
 };
 
 Scene::Scene() :
@@ -182,19 +182,19 @@ Box Scene::bounds() const
     return box;
 }
 
-bool Scene::contains(const Scene::Item& item) const
+bool Scene::contains(const ObjectItem& item) const
 {
     return containsItem(d->items, item);
 }
 
-Scene& Scene::add(const Item& item)
+Scene& Scene::add(const ObjectItem& item)
 {
     d->items.emplace_back(item);
     updateLightmap();
     return *this;
 }
 
-bool Scene::remove(const Item& item)
+bool Scene::remove(const ObjectItem& item)
 {
     for (int i = 0; i < int(d->items.size()); ++i)
         if (d->items.at(i).trRot.tr == item.trRot.tr)
@@ -207,13 +207,13 @@ bool Scene::remove(const Item& item)
     return false;
 }
 
-Scene::Intersection Scene::intersect(const Ray& ray) const
+Intersection Scene::intersect(const Ray& ray) const
 {
     float di = 0;
     glm::intersectRayPlane(ray.pos, ray.dir, glm::vec3(), glm::vec3(0, 1, 0), di);
     const auto pos = ray.pos + di * ray.dir;
 
-    Items items;
+    ObjectItems items;
     for (const auto& item : d->items)
         if (item.bounds().intersect(ray))
             items.emplace_back(item);
@@ -221,7 +221,7 @@ Scene::Intersection Scene::intersect(const Ray& ray) const
     return {pos, items};
 }
 
-gfx::Geometry::Instances Scene::geometryInstances(GeometryType type) const
+gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 {
     gfx::Geometry::Instances instances;
     instances.reserve(d->items.size());
@@ -236,7 +236,6 @@ gfx::Geometry::Instances Scene::geometryInstances(GeometryType type) const
             instances.push_back({item.obj.model().primitive(), m});
         }
     }
-    //HCLOG(Info) << instances.size();
     return instances;
 }
 
@@ -300,7 +299,7 @@ Scene& Scene::updateLightmap()
     return *this;
 }
 
-bool containsItem(const Scene::Items& items, const Scene::Item& item)
+bool containsItem(const ObjectItems& items, const ObjectItem& item)
 {
     for (const auto& i : items)
         if (i.obj == item.obj && i.trRot.tr == item.trRot.tr)
@@ -309,7 +308,7 @@ bool containsItem(const Scene::Items& items, const Scene::Item& item)
     return false;
 }
 
-bool containsObject(const Scene::Items& items, const Object& object)
+bool containsObject(const ObjectItems& items, const Object& object)
 {
     for (const auto& item : items)
         if (item.obj == object)
