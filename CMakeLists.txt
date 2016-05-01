@@ -118,44 +118,26 @@ target_link_libraries(${PROJECT_NAME}
 ################################################################################
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
 
+function(install_files path dst)
+    file(GLOB entries ${path})
+    foreach(entry ${entries})
+       IF(IS_DIRECTORY "${entry}" )
+          LIST(APPEND install_dirs "${entry}")
+       ELSE()
+          LIST(APPEND install_files "${entry}")
+       ENDIF()
+    endforeach()
+    install(DIRECTORY ${install_dirs}  DESTINATION ${dst})
+    install(FILES     ${install_files} DESTINATION ${dst})
+endfunction()
+
 # Binaries
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION .)
 
-# Shaders
-file(GLOB shader_files
-    "shaders/*")
-
-install(FILES ${shader_files}
-        DESTINATION shaders)
-
-# Runtime
-file(GLOB runtime_files
-    "runtime/*.dll")
-
-install(FILES ${runtime_files}
-        DESTINATION .)
-
-# Objects
-file(GLOB data_files
-    "data/*")
-
-install(FILES ${data_files}
-        DESTINATION data)
-
-# Objects
-file(GLOB object_entries
-    "objects/*")
-
-foreach(entry ${object_entries})
-   IF(IS_DIRECTORY "${entry}" )
-      LIST(APPEND object_dirs "${entry}")
-   ELSE()
-      LIST(APPEND object_files "${entry}")
-   ENDIF()
-endforeach()
-
-install(DIRECTORY ${object_dirs}
-        DESTINATION objects)
-install(FILES ${object_files}
-        DESTINATION objects)
+# Runtime and data
+install_files("runtime/*.dll" .)
+install_files("data/*"        data)
+install_files("shaders/*"     shaders)
+install_files("objects/*"     objects)
+install_files("characters/*"  characters)
