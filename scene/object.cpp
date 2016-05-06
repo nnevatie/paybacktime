@@ -181,6 +181,11 @@ glm::mat4x4 Object::transform() const
     return glm::translate(d->meta.origin);
 }
 
+glm::vec3 Object::dimensions() const
+{
+    return d->model.dimensions() / scale();
+}
+
 bool Object::transparent() const
 {
     return d->transparent;
