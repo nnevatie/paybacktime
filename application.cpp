@@ -55,6 +55,7 @@ struct Data
 
     TextureStore             textureStore;
     ObjectStore              objectStore;
+    Character                character;
 
     ui::ObjectSelector       objectSelector;
     ui::RenderStats          stats;
@@ -79,6 +80,7 @@ struct Data
 
         textureStore({512, 512}),
         objectStore(fs::path("objects"), &textureStore),
+        character(fs::path("characters") / "male1", &textureStore),
 
         objectSelector(display, &objectStore, &textureStore),
         stats(display->nanoVg()),
