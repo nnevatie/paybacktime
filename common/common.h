@@ -37,15 +37,20 @@ struct Binder
     T& obj;
 };
 
+template<typename T, std::size_t N>
+constexpr std::size_t countof(T const (&)[N]) noexcept
+{
+    return N;
+}
+
 template <class D, class S>
 inline D bitCast(const S& src)
 {
-  static_assert(sizeof(D) == sizeof(S),
-                "Src and dst are required to have same size");
-
-  D dst;
-  memcpy(&dst, &src, sizeof(dst));
-  return dst;
+    static_assert(sizeof(D) == sizeof(S),
+                  "Src and dst are required to have same size");
+    D dst;
+    memcpy(&dst, &src, sizeof(dst));
+    return dst;
 }
 
 inline int umod(int x, int y)
