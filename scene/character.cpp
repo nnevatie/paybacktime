@@ -45,7 +45,7 @@ struct Character::Data
                 parts[i] = parts[fallbacks[i]];
     }
 
-    Object parts[partCount];
+    std::array<Object, partCount> parts;
 };
 
 Character::Character()
@@ -54,5 +54,10 @@ Character::Character()
 Character::Character(const fs::path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {}
+
+const std::array<Object, 15>* Character::parts() const
+{
+    return &d->parts;
+}
 
 } // namespace pt

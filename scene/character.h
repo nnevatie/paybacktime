@@ -6,6 +6,8 @@
 
 #include "texture_store.h"
 
+#include "object.h"
+
 namespace pt
 {
 
@@ -32,6 +34,8 @@ struct Character
 
     Character();
     Character(const fs::path& path, TextureStore* textureStore);
+
+    const std::array<Object, 15>* parts() const;
 
 private:
     struct Data;
