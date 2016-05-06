@@ -42,7 +42,7 @@ struct Character::Data
         };
         for (int i = 0; i < partCount; ++i)
             if (!parts[i])
-                parts[i] = parts[fallbacks[i]];
+                parts[i] = parts[fallbacks[i]].flipped();
     }
 
     std::array<Object, partCount> parts;

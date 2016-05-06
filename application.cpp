@@ -92,7 +92,6 @@ struct Data
         cameraControl(&camera, display, &mouse),
         sceneControl(&scene, &camera, display, &mouse, geometry.texDepth)
     {
-
         auto floor = objectStore.object("floor");
         auto light = objectStore.object("floor3");
         for (int y = -2; y <= 2; ++y)

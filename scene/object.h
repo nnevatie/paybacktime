@@ -44,6 +44,8 @@ struct Object
     Grid<glm::vec3> emission() const;
     Object& updateEmission();
 
+    Object flipped() const;
+
 private:
     struct Data;
     std::shared_ptr<Data> d;

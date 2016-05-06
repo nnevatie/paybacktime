@@ -299,4 +299,9 @@ Object& Object::updateEmission()
     return *this;
 }
 
+Object Object::flipped() const
+{
+    return *this;
+}
+
 } // namespace pt
