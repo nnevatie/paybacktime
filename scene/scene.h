@@ -20,16 +20,32 @@
 namespace pt
 {
 
-struct ObjectItem
+template <typename T>
+struct SceneItem
 {
-    Object         obj;
+    T              obj;
     TransformTrRot trRot;
 
-    Box bounds() const;
-    bool operator==(const ObjectItem& other) const;
-    bool operator!=(const ObjectItem& other) const;
+    SceneItem(const T& obj, const TransformTrRot& trRot) : obj(obj), trRot(trRot)
+    {}
+
+    Box bounds() const
+    {
+        return {trRot.tr, obj.dimensions()};
+    }
+    bool operator==(const SceneItem& other) const
+    {
+        return obj == other.obj && trRot == other.trRot;
+    }
+    bool operator!=(const SceneItem& other) const
+    {
+        return !operator==(other);
+    }
 };
+typedef SceneItem<Object>                 ObjectItem;
+typedef SceneItem<Character>              CharacterItem;
 typedef std::vector<ObjectItem>           ObjectItems;
+typedef std::vector<CharacterItem>        CharacterItems;
 typedef std::pair<glm::vec3, ObjectItems> Intersection;
 
 struct Scene
@@ -50,10 +66,14 @@ struct Scene
     Scene& add(const ObjectItem& item);
     bool remove(const ObjectItem& item);
 
+    Scene& add(const CharacterItem& item);
+
     Intersection intersect(const Ray& ray) const;
 
     gfx::Geometry::Instances objectGeometry(
         GeometryType type = GeometryType::Any) const;
+
+    gfx::Geometry::Instances characterGeometry() const;
 
     gl::Texture* lightmap() const;
     gl::Texture* incidence() const;

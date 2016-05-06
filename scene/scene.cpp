@@ -136,28 +136,14 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
 
 }
 
-Box ObjectItem::bounds() const
-{
-    return {trRot.tr, obj.model().dimensions() / obj.scale()};
-}
-
-bool ObjectItem::operator==(const ObjectItem& other) const
-{
-    return obj == other.obj && trRot == other.trRot;
-}
-
-bool ObjectItem::operator!=(const ObjectItem& other) const
-{
-    return !operator==(other);
-}
-
 struct Scene::Data
 {
     Data() : lightTex(gl::Texture::Type::Texture3d),
              incidenceTex(gl::Texture::Type::Texture3d)
     {}
 
-    ObjectItems     items;
+    ObjectItems     objectItems;
+    CharacterItems  charItems;
 
     Grid<float>     density;
     Grid<glm::vec3> emissive;
@@ -177,34 +163,40 @@ Scene::Scene() :
 Box Scene::bounds() const
 {
     Box box;
-    for (const auto& item : d->items)
+    for (const auto& item : d->objectItems)
         box |= item.bounds();
     return box;
 }
 
 bool Scene::contains(const ObjectItem& item) const
 {
-    return containsItem(d->items, item);
+    return containsItem(d->objectItems, item);
 }
 
 Scene& Scene::add(const ObjectItem& item)
 {
-    d->items.emplace_back(item);
+    d->objectItems.emplace_back(item);
     updateLightmap();
     return *this;
 }
 
 bool Scene::remove(const ObjectItem& item)
 {
-    for (int i = 0; i < int(d->items.size()); ++i)
-        if (d->items.at(i).trRot.tr == item.trRot.tr)
+    for (int i = 0; i < int(d->objectItems.size()); ++i)
+        if (d->objectItems.at(i).trRot.tr == item.trRot.tr)
         {
-            d->items.erase(d->items.begin() + i);
+            d->objectItems.erase(d->objectItems.begin() + i);
             updateLightmap();
             return true;
         }
 
     return false;
+}
+
+Scene& Scene::add(const CharacterItem& item)
+{
+    d->charItems.emplace_back(item);
+    return *this;
 }
 
 Intersection Scene::intersect(const Ray& ray) const
@@ -214,7 +206,7 @@ Intersection Scene::intersect(const Ray& ray) const
     const auto pos = ray.pos + di * ray.dir;
 
     ObjectItems items;
-    for (const auto& item : d->items)
+    for (const auto& item : d->objectItems)
         if (item.bounds().intersect(ray))
             items.emplace_back(item);
 
@@ -224,8 +216,8 @@ Intersection Scene::intersect(const Ray& ray) const
 gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 {
     gfx::Geometry::Instances instances;
-    instances.reserve(d->items.size());
-    for (const auto& item : d->items)
+    instances.reserve(d->objectItems.size());
+    for (const auto& item : d->objectItems)
     {
         auto gt = item.obj.transparent() ? GeometryType::Transparent :
                                            GeometryType::Opaque;
@@ -235,6 +227,20 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
             auto m = static_cast<glm::mat4x4>(item.trRot);
             instances.push_back({item.obj.model().primitive(), m});
         }
+    }
+    return instances;
+}
+
+gfx::Geometry::Instances Scene::characterGeometry() const
+{
+    gfx::Geometry::Instances instances;
+    instances.reserve(d->charItems.size() * 15);
+    for (const auto& item : d->charItems)
+    {
+        auto m = static_cast<glm::mat4x4>(item.trRot);
+        for (const auto& obj : *item.obj.parts())
+            if (obj) instances.push_back({obj.model().primitive(),
+                                          m * glm::translate(obj.origin())});
     }
     return instances;
 }
@@ -264,7 +270,7 @@ Scene& Scene::updateLightmap()
     d->emissive = Grid<glm::vec3>(size);
     {
         HCTIME("precalc dens+emis maps");
-        for (const auto& item : d->items)
+        for (const auto& item : d->objectItems)
         {
             const auto density  = item.obj.density();
             const auto emission = item.obj.emission();

@@ -95,43 +95,14 @@ struct Data
 
         auto floor = objectStore.object("floor");
         auto light = objectStore.object("floor3");
-        /*
-        auto head  = objectStore.object("head");
-        auto torso = objectStore.object("torso");
-        auto waist = objectStore.object("waist");
-        auto thigh = objectStore.object("thigh");
-        auto leg   = objectStore.object("leg");
-        auto foot  = objectStore.object("foot");
-        */
-
         for (int y = -2; y <= 2; ++y)
             for (int x = -2; x <= 2; ++x)
             {
                 auto tr = TransformTrRot({16 * x, 0, 16 * y});
-                if (x || y)
-                    scene.add({floor, tr});
-                else
-                    scene.add({light, tr});
-
-                /*
-                if (y == -2 && !x)
-                {
-                    auto trHead  = TransformTrRot(head.origin()  + tr.tr);
-                    auto trTorso = TransformTrRot(torso.origin() + tr.tr);
-                    auto trWaist = TransformTrRot(waist.origin() + tr.tr);
-                    auto trThigh = TransformTrRot(thigh.origin() + tr.tr);
-                    auto trLeg   = TransformTrRot(leg.origin()   + tr.tr);
-                    auto trFoot  = TransformTrRot(foot.origin()  + tr.tr);
-
-                    scene.add({head,  trHead});
-                    scene.add({torso, trTorso});
-                    scene.add({waist, trWaist});
-                    scene.add({thigh, trThigh});
-                    scene.add({leg,   trLeg});
-                    scene.add({foot,  trFoot});
-                }
-                */
+                scene.add({x || y ? floor : light, tr});
             }
+
+        scene.add({character, TransformTrRot({0, 0, 16 * -2})});
     }
 
     bool simulate(TimePoint /*time*/, Duration step)
@@ -163,10 +134,17 @@ struct Data
         const glm::mat4 view = camera.matrixView();
 
         Time<GpuClock> clock;
+
+        const gfx::Geometry::Instances chars =
+            scene.characterGeometry();
+
+        gfx::Geometry::Instances geom =
+            scene.objectGeometry(Scene::GeometryType::Opaque);
+        geom.insert(geom.end(), chars.begin(), chars.end());
+
         geometry(&textureStore.albedo.texture,
                  &textureStore.light.texture,
-                 scene.objectGeometry(Scene::GeometryType::Opaque),
-                 view, proj);
+                 geom, view, proj);
 
         ssao(&geometry.texDepth, &geometry.texNormalDenoise, proj, camera.fov);
 
