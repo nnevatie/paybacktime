@@ -66,7 +66,7 @@ struct ObjectSelector::Data
                     camera.matrix() * glm::scale({}, glm::vec3(s, s, s)) *
                     glm::translate({}, glm::vec3(-dims.x, 4 - (1 - s) * 60.f, 0)));
 
-            const Image image = preview.output()->image().flipped();
+            const Image image = preview.output()->image().flipped(Image::Axis::X);
             images.push_back(image);
 
             auto nvgImage = image.nvgImage(display->nanoVg());

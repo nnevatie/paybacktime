@@ -44,7 +44,7 @@ struct Object
     Grid<glm::vec3> emission() const;
     Object& updateEmission();
 
-    Object flipped() const;
+    Object flipped(TextureStore* textureStore) const;
 
 private:
     struct Data;

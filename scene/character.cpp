@@ -42,7 +42,7 @@ struct Character::Data
         };
         for (int i = 0; i < partCount; ++i)
             if (!parts[i])
-                parts[i] = parts[fallbacks[i]].flipped();
+                parts[i] = parts[fallbacks[i]].flipped(textureStore);
     }
 
     std::array<Object, partCount> parts;

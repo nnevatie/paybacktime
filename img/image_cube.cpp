@@ -36,7 +36,8 @@ ImageCube::ImageCube(const fs::path& path, int depth)
             path.string(), "*", sideImage.name);
 
         sideImage.image = side != Side::Top && side != Side::Bottom ?
-                          Image(fn, depth).flipped() : Image(fn, depth);
+                          Image(fn, depth).flipped(Image::Axis::X) :
+                          Image(fn, depth);
     }
 
     // Mirror missing images with priority ordered fallbacks
@@ -70,27 +71,27 @@ ImageCube::ImageCube(const fs::path& path, int depth)
 
 const Image& ImageCube::side(ImageCube::Side s) const
 {
-    return sides[s];
+    return sides[int(s)];
 }
 
 int ImageCube::width() const
 {
-    int w0 = std::min(side(Front).size().w, side(Back).size().w);
-    int w1 = std::min(side(Top).size().w, side(Bottom).size().w);
+    int w0 = std::min(side(Side::Front).size().w, side(Side::Back).size().w);
+    int w1 = std::min(side(Side::Top).size().w, side(Side::Bottom).size().w);
     return std::min(w0, w1);
 }
 
 int ImageCube::height() const
 {
-    int h0 = std::min(side(Front).size().h, side(Back).size().h);
-    int h1 = std::min(side(Left).size().h, side(Right).size().h);
+    int h0 = std::min(side(Side::Front).size().h, side(Side::Back).size().h);
+    int h1 = std::min(side(Side::Left).size().h, side(Side::Right).size().h);
     return std::min(h0, h1);
 }
 
 int ImageCube::depth() const
 {
-    int d0 = std::min(side(Left).size().w, side(Right).size().w);
-    int d1 = std::min(side(Top).size().h, side(Bottom).size().h);
+    int d0 = std::min(side(Side::Left).size().w, side(Side::Right).size().w);
+    int d1 = std::min(side(Side::Top).size().h, side(Side::Bottom).size().h);
     return std::min(d0, d1);
 }
 
@@ -119,6 +120,22 @@ ImageCube ImageCube::scaled(const ImageCube& refCube) const
         }
     }
     return imageCube;
+}
+
+ImageCube ImageCube::flipped() const
+{
+    ImageCube cube(*this);
+    std::swap(cube.sides[int(Side::Left)], cube.sides[int(Side::Right)]);
+
+    cube.sides[int(Side::Front)]  = cube.sides[int(Side::Front)].
+                                    flipped(Image::Axis::Y);
+    cube.sides[int(Side::Back)]   = cube.sides[int(Side::Back)].
+                                    flipped(Image::Axis::Y);
+    cube.sides[int(Side::Top)]    = cube.sides[int(Side::Top)].
+                                    flipped(Image::Axis::Y);
+    cube.sides[int(Side::Bottom)] = cube.sides[int(Side::Bottom)].
+                                    flipped(Image::Axis::Y);
+    return cube;
 }
 
 } // namespace

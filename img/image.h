@@ -15,10 +15,16 @@ namespace pt
 
 struct Image
 {
+    enum class Axis
+    {
+        X,
+        Y
+    };
+
     Image();
     Image(const Size<int>& size, int depth);
     Image(const Size<int>& size, int depth, int stride);
-    Image(const fs::path& path, int depth = 0);
+    Image(const fs::path& path,  int depth = 0);
 
     operator bool() const;
 
@@ -50,7 +56,7 @@ struct Image
     int nvgImage(NVGcontext* nanoVg) const;
 
     Image scaled(const Size<int>& size) const;
-    Image flipped() const;
+    Image flipped(Axis axis) const;
     Image clone() const;
     Image& fill(uint32_t value);
 

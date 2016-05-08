@@ -33,6 +33,9 @@ struct Model::Data
     }
 };
 
+Model::Model()
+{}
+
 Model::Model(const fs::path& path, TextureStore* textureStore, float scale) :
     d(std::make_shared<Data>(path))
 {
@@ -40,6 +43,11 @@ Model::Model(const fs::path& path, TextureStore* textureStore, float scale) :
     d->entryLight  = textureStore->light.insert(d->cubeLight);
     auto mesh      = ImageMesher::mesh(d->cubeDepth, d->entryAlbedo.second, scale);
     d->primitive   = gl::Primitive(mesh);
+}
+
+pt::Model::operator bool() const
+{
+    return d.operator bool();
 }
 
 glm::vec3 Model::dimensions() const
@@ -65,6 +73,26 @@ const ImageCube* Model::albedoCube() const
 const ImageCube* Model::lightCube() const
 {
     return &d->cubeLight;
+}
+
+Model Model::flipped(TextureStore* textureStore, float scale) const
+{
+    if (d)
+    {
+        auto data         = std::make_shared<Data>(*d);
+        auto model        = Model();
+        model.d           = data;
+        data->cubeDepth   = d->cubeDepth.flipped();
+        data->cubeAlbedo  = d->cubeAlbedo.flipped();
+        data->cubeLight   = d->cubeLight.flipped();
+        data->entryAlbedo = textureStore->albedo.insert(data->cubeAlbedo);
+        data->entryLight  = textureStore->light.insert(data->cubeLight);
+        auto mesh         = ImageMesher::mesh(data->cubeDepth,
+                                             data->entryAlbedo.second, scale);
+        data->primitive   = gl::Primitive(mesh);
+        return model;
+    }
+    return Model();
 }
 
 } // namespace pt

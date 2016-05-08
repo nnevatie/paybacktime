@@ -243,7 +243,7 @@ Image Display::capture() const
 
     Image image(size, 4, stride);
     glReadPixels(0, 0, size.w, size.h, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
-    return image.flipped();
+    return image.flipped(Image::Axis::X);
 }
 
 } // namespace ui

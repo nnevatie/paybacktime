@@ -12,7 +12,7 @@ namespace pt
 
 struct ImageCube
 {
-    enum Side
+    enum class Side
     {
         Front, Back, Left, Right, Top, Bottom
     };
@@ -28,6 +28,8 @@ struct ImageCube
     bool transparent() const;
 
     ImageCube scaled(const ImageCube& refCube) const;
+
+    ImageCube flipped() const;
 
     std::vector<Image> sides;
 };

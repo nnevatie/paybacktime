@@ -156,24 +156,40 @@ Image Image::scaled(const Size<int>& size) const
     return image;
 }
 
-Image Image::flipped() const
+Image Image::flipped(Axis axis) const
 {
-    Image image(clone());
+    if (!*this) return Image();
 
-    // Flip vertically
+    Image image(d->size, d->depth);
+    const int w      = image.d->size.w;
     const int h      = image.d->size.h;
     const int stride = image.d->stride;
 
-    std::vector<uint8_t> t(static_cast<std::size_t>(stride));
-    uint8_t* b = image.bits();
-
-    for (int y = 0; y < h / 2; ++y)
+    if (axis == Axis::X)
     {
-        uint8_t* r0 = b + y * stride;
-        uint8_t* r1 = b + (h - y - 1) * stride;
-        std::copy(r0, r0 + stride, t.data());
-        std::copy(r1, r1 + stride, r0);
-        std::copy(t.data(), t.data() + stride, r1);
+        // Flip vertically
+        for (int y = 0; y < h; ++y)
+            std::copy(d->bits + y * stride,
+                      d->bits + y * stride + stride,
+                      image.d->bits + (h - y - 1) * stride);
+    }
+    else
+    {
+        // Flip horizontally
+        if (d->depth == 1)
+            for (int y = 0; y < h; ++y)
+                for (int x = 0; x < w; ++x)
+                    *image.bits<uint8_t>(x, y) =
+                        *bits<const uint8_t>(w - x - 1, y);
+        else
+        if (d->depth == 4)
+            for (int y = 0; y < h; ++y)
+                for (int x = 0; x < w; ++x)
+                    *image.bits<uint32_t>(x, y) =
+                        *bits<const uint32_t>(w - x - 1, y);
+        else
+            throw std::runtime_error("Not implemented for depth: " +
+                                     std::to_string(d->depth));
     }
     return image;
 }

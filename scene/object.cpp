@@ -146,6 +146,11 @@ Object::Object(const fs::path& path, TextureStore* textureStore) :
     updateEmission();
 }
 
+Object::operator bool() const
+{
+    return d.operator bool();
+}
+
 Object::operator==(const Object& other) const
 {
     return d == other.d;
@@ -154,11 +159,6 @@ Object::operator==(const Object& other) const
 Object::operator!=(const Object& other) const
 {
     return !operator==(other);
-}
-
-Object::operator bool() const
-{
-    return d.operator bool();
 }
 
 std::string Object::name() const
@@ -299,9 +299,18 @@ Object& Object::updateEmission()
     return *this;
 }
 
-Object Object::flipped() const
+Object Object::flipped(TextureStore* textureStore) const
 {
-    return *this;
+    if (d)
+    {
+        auto data   = std::make_shared<Data>(*d);
+        data->model = data->model.flipped(textureStore, d->meta.scale);
+        data->meta.origin.x += 8.f; // TODO
+        auto object = Object();
+        object.d    = data;
+        return object;
+    }
+    return Object();
 }
 
 } // namespace pt
