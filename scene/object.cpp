@@ -8,6 +8,7 @@
 #include "geom/volume.h"
 #include "img/color.h"
 
+#include "common/json.h"
 #include "common/log.h"
 
 namespace bpt = boost::property_tree;
