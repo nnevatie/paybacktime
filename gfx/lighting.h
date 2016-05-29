@@ -10,6 +10,8 @@
 #include "gl/texture.h"
 #include "gl/fbo.h"
 
+#include "scene/camera.h"
+
 namespace pt
 {
 namespace gfx
@@ -39,6 +41,7 @@ struct Lighting
         gl::Texture* texSsao,
         gl::Texture* texLightmap,
         gl::Texture* texIncidence,
+        const Camera& camera,
         const Box& bounds,
         const glm::mat4& v,
         const glm::mat4& p);

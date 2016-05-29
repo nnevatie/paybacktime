@@ -20,6 +20,7 @@ Lighting::Lighting(const Size<int>& renderSize, const gl::Texture& texDepth) :
     // Texture and FBO
     auto fboSize = {renderSize.w, renderSize.h};
     tex.bind().alloc(fboSize, GL_RGB32F,  GL_RGB, GL_FLOAT);
+
     fbo.bind()
        .attach(texDepth, gl::Fbo::Attachment::Depth)
        .attach(tex, gl::Fbo::Attachment::Color)
@@ -34,6 +35,7 @@ Lighting& Lighting::operator()(
     gl::Texture* texSsao,
     gl::Texture* texLightmap,
     gl::Texture* texIncidence,
+    const Camera& camera,
     const Box& bounds,
     const glm::mat4& v,
     const glm::mat4& p)
@@ -46,6 +48,9 @@ Lighting& Lighting::operator()(
                .setUniform("texAo",      4)
                .setUniform("texGi",      5)
                .setUniform("texIncid",   6)
+               .setUniform("z",           0.f)
+               .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
+               .setUniform("aspectRatio", camera.ar)
                .setUniform("boundsMin",  glm::floor(bounds.pos))
                .setUniform("boundsSize", glm::ceil(bounds.size))
                .setUniform("v",          v)
