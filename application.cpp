@@ -17,6 +17,7 @@
 
 #include "gfx/geometry.h"
 #include "gfx/ssao.h"
+#include "gfx/ssr.h"
 #include "gfx/lighting.h"
 #include "gfx/bloom.h"
 #include "gfx/outline.h"
@@ -44,6 +45,7 @@ struct Data
 
     gfx::Geometry            geometry;
     gfx::Ssao                ssao;
+    gfx::Ssr                 ssr;
     gfx::Lighting            lighting;
     gfx::Bloom               bloom;
     gfx::Outline             outline;
@@ -72,6 +74,7 @@ struct Data
         renderSize(display->size()),
         geometry(renderSize),
         ssao(32, renderSize, {4, 4}, geometry.texDepth),
+        ssr(renderSize),
         lighting(renderSize, geometry.texDepth),
         bloom(renderSize),
         outline(renderSize, geometry.texDepth),
@@ -154,6 +157,7 @@ struct Data
                  &ssao.texAoBlur,
                  scene.lightmap(),
                  scene.incidence(),
+                 camera,
                  scene.bounds(),
                  view, proj);
 
@@ -169,12 +173,17 @@ struct Data
             scene.objectGeometry(Scene::GeometryType::Transparent),
             camera);
 
-        bloom(lighting.output());
+        ssr(&geometry.texDepth, &geometry.texDepthBack,
+            &geometry.texNormalDenoise, lighting.output(),
+            &geometry.texLight, camera);
 
-        sceneControl(&lighting.fbo, lighting.output());
+        bloom(ssr.output());
 
-        colorGrade(lighting.output(), bloom.output());
+        sceneControl(&ssr.fbo, ssr.output());
+
+        colorGrade(ssr.output(), bloom.output());
         antiAlias(colorGrade.output());
+
         output(antiAlias.output());
 
         display->renderWidgets();
