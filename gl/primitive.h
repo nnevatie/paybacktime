@@ -48,10 +48,10 @@ struct Primitive
         }
     }
 
-    void render(GLenum mode = GL_TRIANGLES) const
+    void render(GLenum mode = GL_TRIANGLES, GLenum cull = GL_BACK) const
     {
         glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glCullFace(cull);
 
         // Draw elements with VAO
         Binder<gl::Vao> binder(vao);
