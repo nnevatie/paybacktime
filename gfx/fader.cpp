@@ -22,6 +22,7 @@ Fader& Fader::operator()(float alpha)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     prog.bind().setUniform("albedo", glm::vec4(0, 0, 0, alpha));
     rect.render();
+    glDisable(GL_BLEND);
     return* this;
 }
 
