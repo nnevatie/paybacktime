@@ -119,6 +119,7 @@ Ssao& Ssao::operator()(gl::Texture* texDepth,
 
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_DEPTH_TEST);
+        glViewport(0, 0, renderSize.w, renderSize.h);
 
         texDepth->bindAs(GL_TEXTURE0);
         texNormal->bindAs(GL_TEXTURE1);
