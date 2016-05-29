@@ -28,10 +28,21 @@ Geometry::Geometry(const Size<int>& renderSize) :
     progDenoise({vsQuad, fsDenoise},
         {{0, "position"}, {1, "uv"}})
 {
-    auto fboSize = {renderSize.w, renderSize.h};
+    auto fboSize     = {renderSize.w, renderSize.h};
+    auto fboSizeBack = {renderSize.w / backDownscale,
+                        renderSize.h / backDownscale};
 
-    texDepth.bind().alloc(fboSize,         GL_DEPTH_COMPONENT32F,
-                                           GL_DEPTH_COMPONENT, GL_FLOAT);
+    texDepth.bind().alloc(fboSize, GL_DEPTH_COMPONENT32F,
+                                   GL_DEPTH_COMPONENT, GL_FLOAT)
+                   .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                   .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    texDepthBack.bind().alloc(fboSizeBack,
+                              GL_DEPTH_COMPONENT32F,
+                              GL_DEPTH_COMPONENT, GL_FLOAT)
+                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     texNormal.bind().alloc(fboSize,        GL_RGB16F,  GL_RGB, GL_FLOAT);
     texNormalDenoise.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
     texColor.bind().alloc(fboSize,         GL_RGB8,    GL_RGB, GL_UNSIGNED_BYTE);
@@ -43,6 +54,10 @@ Geometry::Geometry(const Size<int>& renderSize) :
        .attach(texColor,         gl::Fbo::Attachment::Color, 1)
        .attach(texLight,         gl::Fbo::Attachment::Color, 2)
        .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 3)
+       .unbind();
+
+    fboBack.bind()
+       .attach(texDepthBack, gl::Fbo::Attachment::Depth)
        .unbind();
 
     // OIT
@@ -62,44 +77,74 @@ Geometry& Geometry::operator()(
     const glm::mat4& v,
     const glm::mat4& p)
 {
-    Binder<gl::Fbo> binder(fbo);
-    progGeometry.bind()
-                .setUniform("texAlbedo", 0)
-                .setUniform("texLight",  1)
-                .setUniform("v",         v)
-                .setUniform("p",         p)
-                .setUniform("size",      renderSize.as<glm::vec2>());
-
-    const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
-                                  GL_COLOR_ATTACHMENT1,
-                                  GL_COLOR_ATTACHMENT2};
-    glDrawBuffers(3, drawBuffers);
-    glDisable(GL_POLYGON_OFFSET_FILL);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glDisable(GL_BLEND);
-    glDepthMask(true);
-
-    glViewport(0, 0, renderSize.w, renderSize.h);
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    texAlbedo->bindAs(GL_TEXTURE0);
-    texLightmap->bindAs(GL_TEXTURE1);
-
-    // Render primitives
-    for (const auto& instance : instances)
     {
-        progGeometry.setUniform("m", instance.second);
-        instance.first.render();
-    }
+        // Front faces
+        Binder<gl::Fbo> binder(fbo);
+        progGeometry.bind()
+                    .setUniform("texAlbedo", 0)
+                    .setUniform("texLight",  1)
+                    .setUniform("v",         v)
+                    .setUniform("p",         p)
+                    .setUniform("size",      renderSize.as<glm::vec2>());
 
-    // Denoise normals
-    progDenoise.bind().setUniform("tex", 0);
-    glDrawBuffer(GL_COLOR_ATTACHMENT3);
-    glDisable(GL_DEPTH_TEST);
-    texNormal.bindAs(GL_TEXTURE0);
-    rect.render();
+        const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
+                                      GL_COLOR_ATTACHMENT1,
+                                      GL_COLOR_ATTACHMENT2};
+        glDrawBuffers(3, drawBuffers);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glDisable(GL_BLEND);
+        glDepthMask(true);
+
+        glViewport(0, 0, renderSize.w, renderSize.h);
+        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        texAlbedo->bindAs(GL_TEXTURE0);
+        texLightmap->bindAs(GL_TEXTURE1);
+
+        // Render primitives
+        for (const auto& instance : instances)
+        {
+            progGeometry.setUniform("m", instance.second);
+            instance.first.render();
+        }
+
+        // Denoise normals
+        progDenoise.bind().setUniform("tex", 0);
+        glDrawBuffer(GL_COLOR_ATTACHMENT3);
+        glDisable(GL_DEPTH_TEST);
+        texNormal.bindAs(GL_TEXTURE0);
+        rect.render();
+    }
+    {
+        // Back faces
+        Binder<gl::Fbo> binder(fboBack);
+        progGeometry.bind()
+                    .setUniform("v",    v)
+                    .setUniform("p",    p)
+                    .setUniform("size", renderSize.as<glm::vec2>());
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glDisable(GL_BLEND);
+        glDepthMask(true);
+        glColorMask(false, false, false, false);
+
+        glViewport(0, 0, renderSize.w / backDownscale,
+                         renderSize.h / backDownscale);
+        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        // Render primitives
+        for (const auto& instance : instances)
+        {
+            progGeometry.setUniform("m", instance.second);
+            instance.first.render(GL_TRIANGLES, GL_FRONT);
+        }
+        glColorMask(true, true, true, true);
+    }
     return *this;
 }
 
