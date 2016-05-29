@@ -1,5 +1,10 @@
 #version 150
 
+float linearDepth(float depth, float zNear, float zFar)
+{
+    return (2 * zNear) / (zFar + zNear - depth * (zFar - zNear));
+}
+
 float linearDepth(float depth, mat4 proj)
 {
   const float drmin = 0.0;
