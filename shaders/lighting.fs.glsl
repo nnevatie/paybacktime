@@ -69,6 +69,7 @@ void main(void)
     vec3 incidVec   = texture(texIncid, uvwGi).xzy;
     vec3 incident   = normalize(incidVec);
     vec3 lightDir   = normalize(normalMat * incident);
+    vec3 halfwayDir = normalize(lightDir + -viewDir);
     float incid     = smoothstep(0, 8, length(incidVec));
 
     // Ambient
@@ -78,17 +79,20 @@ void main(void)
     vec3 diffuse    = 8.f * incid * albedo * max(dot(normal, lightDir), 0.0);
 
     // Specular
-    vec3 reflectDir = reflect(lightDir, normal);
-    float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0), 4.f);
-    vec3 specular   = 16.f * albedo * light.r * spec;
+    float shininess = 4.0;
+    // Phong
+    //vec3 reflectDir = reflect(lightDir, normal);
+    //float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0), 4.f);
+    // Blinn-Phong
+    float spec      = incid * pow(max(dot(normal, halfwayDir), 0.0), shininess);
+    float fresnel   = max(0, min(1, 0.f + 1.f *
+                                (1.0 + dot(viewDir, normal)) * 1.f));
 
-    // Reflective
-    vec3 ref        = 8.f * light.g *
-                      texture(texGi, uvwGi + normal.xzy / sizeTexGi * 10.f).rgb;
+    vec3 specular   = 16.f * albedo * (light.r + fresnel) * spec;
 
     // Emissive
     vec3 emis       = 32.f * light.b * albedo;
 
-    vec3 lighting   = ao * ambient + ao * diffuse + ao * specular + ao * ref + emis;
+    vec3 lighting   = (ao * ambient + ao * diffuse) + (ao * specular) + emis;
     color           = vec4(lighting, 1.0);
 }
