@@ -50,11 +50,11 @@ struct Texture
 
     Texture& alloc(const std::vector<int>& dim,
                    GLint internalFormat, GLenum format,
-                   GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = 0);
+                   GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = nullptr);
 
     Texture& alloc(int level, const std::vector<int>& dim,
                    GLint internalFormat, GLenum format,
-                   GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = 0);
+                   GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = nullptr);
 
     Texture& alloc(const Image& image);
     Texture& alloc(const Grid<glm::vec3>& grid);
