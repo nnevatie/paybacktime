@@ -2,6 +2,7 @@
 
 #include <glm/gtx/transform.hpp>
 
+#include "platform/clock.h"
 #include "common/log.h"
 
 namespace pt
@@ -14,28 +15,55 @@ Ssr::Ssr(const Size<int>& renderSize) :
     rect(squareMesh()),
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
+    fsTexture(gl::Shader::path("texture.fs.glsl")),
+    fsGaussian(gl::Shader::path("gaussian.fs.glsl")),
     fsSsr(gl::Shader::path("ssr.fs.glsl")),
-    prog({vsQuad, fsSsr, fsCommon},
-        {{0, "position"}, {1, "uv"}})
+    fsSsrComposite(gl::Shader::path("ssr_composite.fs.glsl")),
+    progScale({vsQuad, fsTexture},
+              {{0, "position"}, {1, "uv"}}),
+    progBlur({vsQuad, fsGaussian},
+            {{0, "position"}, {1, "uv"}}),
+    progSsr({vsQuad, fsSsr, fsCommon},
+           {{0, "position"}, {1, "uv"}}),
+    progSsrComposite({vsQuad, fsSsrComposite},
+                    {{0, "position"}, {1, "uv"}})
 {
     // Texture and FBO
     auto fboSize = {renderSize.w, renderSize.h};
     {
-        Binder<gl::Texture> binder(texColor);
         std::vector<int> size = fboSize;
         for (int i = 0; i < mipmapCount; ++i)
         {
-            texColor.alloc(i, size, GL_RGB32F,  GL_RGB, GL_FLOAT);
+            texScale[i].bind().alloc(size, GL_RGBA32F, GL_RGBA, GL_FLOAT)
+                              .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                              .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            fboScale[i].bind()
+                       .attach(texScale[i], gl::Fbo::Attachment::Color)
+                       .unbind();
+
+            texBlur[i].bind().alloc(size, GL_RGBA32F, GL_RGBA, GL_FLOAT)
+                             .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                             .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            fboBlur[i].bind()
+                      .attach(texBlur[i], gl::Fbo::Attachment::Color)
+                      .unbind();
+
+            texColor.bind().alloc(i, size, GL_RGBA32F, GL_RGBA, GL_FLOAT);
             size = {size[0] / 2, size[1] / 2};
         }
-        texColor.set(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+        texColor.bind()
+                .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
                 .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
                 .set(GL_TEXTURE_MAX_LEVEL, mipmapCount - 1);
     }
+    fboColor.bind()
+            .attach(texColor, gl::Fbo::Attachment::Color)
+            .unbind();
+
     texSsr.bind().alloc(fboSize, GL_RGB32F, GL_RGB, GL_FLOAT);
-    fbo.bind()
-       .attach(texSsr, gl::Fbo::Attachment::Color)
-       .unbind();
+    fboSsr.bind()
+          .attach(texSsr, gl::Fbo::Attachment::Color)
+          .unbind();
 }
 
 Ssr& Ssr::operator()(gl::Texture* texDepth,
@@ -45,36 +73,118 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                      gl::Texture* texLight,
                      const Camera& camera)
 {
-    // View-to-screen transformation
-    auto sc0 = glm::scale({}, glm::vec3(renderSize.w, renderSize.h, 1));
-    auto sc1 = glm::scale({}, glm::vec3(0.5f, 0.5f, 1));
-    auto tr  = glm::translate({}, glm::vec3(0.5f, 0.5f, 0));
-    auto pc  = (sc0 * (tr * sc1)) * camera.matrixProj();
+    const auto dur    = std::chrono::high_resolution_clock::now().
+                        time_since_epoch();
+    const auto time   = std::chrono::duration_cast
+                       <std::chrono::milliseconds>(dur).count();
+    const float ftime = (time % 100000) / 1000.f;
 
-    Binder<gl::Fbo> binder(fbo);
-    prog.bind().setUniform("texDepth",    0)
-               .setUniform("texDepthBack",1)
-               .setUniform("texNormal",   2)
-               .setUniform("texColor",    3)
-               .setUniform("texLight",    4)
-               .setUniform("z",           0.f)
-               .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
-               .setUniform("aspectRatio", camera.ar)
-               .setUniform("viewPos",     camera.position())
-               .setUniform("v",           camera.matrixView())
-               .setUniform("p",           camera.matrixProj())
-               .setUniform("pc",          pc)
-               .setUniform("zNear",       camera.zNear)
-               .setUniform("zFar",        camera.zFar);
+    {
+        Binder<gl::Fbo> binder(fboColor);
+        fboColor.attach(this->texColor, gl::Fbo::Attachment::Color);
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glDisable(GL_DEPTH_TEST);
-    texDepth->bindAs(GL_TEXTURE0);
-    texDepthBack->bindAs(GL_TEXTURE1);
-    texNormal->bindAs(GL_TEXTURE2);
-    texColor->bindAs(GL_TEXTURE3);
-    texLight->bindAs(GL_TEXTURE4);
-    rect.render();
+        // View-to-screen transformation
+        auto sc0 = glm::scale({}, glm::vec3(renderSize.w, renderSize.h, 1));
+        auto sc1 = glm::scale({}, glm::vec3(0.5f, 0.5f, 1));
+        auto tr  = glm::translate({}, glm::vec3(0.5f, 0.5f, 0));
+        auto pc  = (sc0 * (tr * sc1)) * camera.matrixProj();
+
+        progSsr.bind().setUniform("texDepth",    0)
+                      .setUniform("texDepthBack",1)
+                      .setUniform("texNormal",   2)
+                      .setUniform("texColor",    3)
+                      .setUniform("texLight",    4)
+                      .setUniform("z",           0.f)
+                      .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
+                      .setUniform("aspectRatio", camera.ar)
+                      .setUniform("viewPos",     camera.position())
+                      .setUniform("v",           camera.matrixView())
+                      .setUniform("p",           camera.matrixProj())
+                      .setUniform("pc",          pc)
+                      .setUniform("zNear",       camera.zNear)
+                      .setUniform("zFar",        camera.zFar)
+                      .setUniform("time",        ftime);
+
+        glViewport(0, 0, renderSize.w, renderSize.h);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
+        texDepth->bindAs(GL_TEXTURE0);
+        texDepthBack->bindAs(GL_TEXTURE1);
+        texNormal->bindAs(GL_TEXTURE2);
+        texColor->bindAs(GL_TEXTURE3);
+        texLight->bindAs(GL_TEXTURE4);
+        rect.render();
+    }
+    {
+        // Mipmap levels
+        for (int i = 1; i < mipmapCount; ++i)
+        {
+            const auto size = texScale[i].size();
+            {
+                // Downscale
+                Binder<gl::Fbo> binder(fboScale[i]);
+                progScale.bind().setUniform("texColor", 0);
+
+                glViewport(0, 0, size.w, size.h);
+                glDrawBuffer(GL_COLOR_ATTACHMENT0);
+                glDisable(GL_DEPTH_TEST);
+                glDepthMask(false);
+                gl::Texture scaleSrc = i > 1 ? texScale[i - 1] : this->texColor;
+                this->texColor.bind().set(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                scaleSrc.bindAs(GL_TEXTURE0);
+                rect.render();
+            }
+            {
+                // Blur
+                progBlur.bind().setUniform("texColor", 0);
+                {
+                    // Horizontal
+                    progBlur.setUniform("horizontal", true);
+                    Binder<gl::Fbo> binder(fboBlur[i]);
+                    glViewport(0, 0, size.w, size.h);
+                    texScale[i].bindAs(GL_TEXTURE0);
+                    rect.render();
+                }
+                {
+                    // Vertical
+                    progBlur.setUniform("horizontal", false);
+                    Binder<gl::Fbo> binder(fboScale[i]);
+                    glViewport(0, 0, size.w, size.h);
+                    texBlur[i].bindAs(GL_TEXTURE0);
+                    rect.render();
+                }
+            }
+            {
+                // Copy to mipmap
+                Binder<gl::Fbo> binder(fboColor);
+                progScale.bind().setUniform("texColor", 0);
+                fboColor.attach(this->texColor, gl::Fbo::Attachment::Color, 0, i);
+                glViewport(0, 0, size.w, size.h);
+                glDrawBuffer(GL_COLOR_ATTACHMENT0);
+                texScale[i].bindAs(GL_TEXTURE0);
+                rect.render();
+            }
+        }
+    }
+    {
+        // Composite
+        Binder<gl::Fbo> binder(fboSsr);
+        progSsrComposite.bind().setUniform("texColor",    0)
+                               .setUniform("texSsr",      1)
+                               .setUniform("texLight",    2)
+                               .setUniform("z",           0.f)
+                               .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
+                               .setUniform("aspectRatio", camera.ar);
+
+        glViewport(0, 0, renderSize.w, renderSize.h);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        this->texColor.bind().set(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        texColor->bindAs(GL_TEXTURE0);
+        this->texColor.bindAs(GL_TEXTURE1);
+        texLight->bindAs(GL_TEXTURE2);
+        rect.render();
+    }
     return *this;
 }
 

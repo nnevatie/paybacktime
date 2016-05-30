@@ -23,7 +23,7 @@ Bloom::Bloom(const Size<int>& renderSize) :
     progAdd({vsQuadUv, fsAdd},
             {{0, "position"}, {1, "uv"}}),
     progBlur({vsQuadUv, fsGaussian},
-              {{0, "position"}, {1, "uv"}})
+            {{0, "position"}, {1, "uv"}})
 {
     HCLOG(Info) << "size " << renderSize.w << "x" << renderSize.h;
     auto fboSize = {renderSize.w, renderSize.h};

@@ -95,6 +95,7 @@ struct Data
         cameraControl(&camera, display, &mouse),
         sceneControl(&scene, &camera, display, &mouse, geometry.texDepth)
     {
+        #if 0
         auto floor = objectStore.object("floor");
         auto light = objectStore.object("floor3");
         for (int y = -2; y <= 2; ++y)
@@ -105,6 +106,7 @@ struct Data
             }
 
         scene.add({character, TransformTrRot({0, 0, 16 * -2})});
+        #endif
     }
 
     bool simulate(TimePoint /*time*/, Duration step)
@@ -179,7 +181,7 @@ struct Data
 
         bloom(ssr.output());
 
-        sceneControl(&ssr.fbo, ssr.output());
+        sceneControl(&ssr.fboSsr, ssr.output());
 
         colorGrade(ssr.output(), bloom.output());
         antiAlias(colorGrade.output());

@@ -12,10 +12,11 @@ uniform mat4      pc;
 uniform vec3      viewPos;
 uniform float     zNear;
 uniform float     zFar;
+uniform float     time;
 
 // Const
 vec2 sizeTex = textureSize(texDepth, 0);
-
+vec4 up      = v * vec4(0, 1, 0, 0);
 
 #define float4 vec4
 #define float3 vec3
@@ -201,14 +202,13 @@ bool raytrace(float3 rayOrigin,
 
 float alpha(bool intersect,
             float iterationCount,
-            float specularStrength,
             float2 hitPixel,
             float3 hitPoint,
             float3 vsRayOrigin,
             float3 vsRayDirection,
             float3 normal)
 {
-    float alpha = min( 1.0, specularStrength * 1.0);
+    float alpha = 1.0;
 
     // Fade ray hits that approach the maximum iterations
     alpha *= 1.0 - (iterationCount / _Iterations);
@@ -232,6 +232,10 @@ float alpha(bool intersect,
     alpha *= 1.0 - clamp(distance(vsRayOrigin, hitPoint) / _MaxRayDistance,
                          0.0, 1.0);
 
+    // Fade ray hits based on facing up
+    alpha *= 1.0 - abs(dot(normalize(up.xyz),
+                           normalize(texture(texNormal, hitPixel).xyz)));
+
     alpha *= intersect ? 1.0 : 0.0;
     return clamp(alpha, 0, 1);
 }
@@ -252,15 +256,13 @@ vec4 ssr()
     float iters;
 
     bool hit = raytrace(origin, ray, jitter, hitPixel, hitPoint, iters);
+    float a  = alpha(hit, iters, hitPixel, hitPoint, origin, ray, normal);
 
-    float a  = alpha(hit, iters, 1.0, hitPixel, hitPoint, origin, ray, normal);
-    vec4 col = mix(texture(texColor, ib.uv), texture(texColor, hitPixel), a);
-
-    return mix(texture(texColor, ib.uv), col, a);
+    return vec4(a > 0 ? texture(texColor, hitPixel).rgb :
+                        texture(texColor, ib.uv).rgb, a);
 }
 
 void main(void)
 {
-    //color = ssr();
-    color = textureLod(texColor, ib.uv, 1);
+    color = ssr();
 }

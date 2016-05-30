@@ -61,20 +61,21 @@ Fbo& Fbo::attach(const Rbo& rbo, Fbo::Attachment attachment, int index)
     return *this;
 }
 
-Fbo& Fbo::attach(const Texture& texture, Attachment attachment, int index)
+Fbo& Fbo::attach(const Texture& texture, Attachment attachment,
+                 int index, int level)
 {
     const GLenum target = GL_FRAMEBUFFER;
     const GLenum type   = GLenum(attachmentType(attachment) + uint32_t(index));
     const GLuint tid    = texture.id();
 
     if (texture.type() == Texture::Type::Texture1d)
-        glFramebufferTexture1D(target, type, GL_TEXTURE_1D, tid, 0);
+        glFramebufferTexture1D(target, type, GL_TEXTURE_1D, tid, level);
     else
     if (texture.type() == Texture::Type::Texture2d)
-        glFramebufferTexture2D(target, type, GL_TEXTURE_2D, tid, 0);
+        glFramebufferTexture2D(target, type, GL_TEXTURE_2D, tid, level);
     else
     if (texture.type() == Texture::Type::Texture3d)
-        glFramebufferTexture3D(target, type, GL_TEXTURE_3D, tid, 0, 0); // TODO
+        glFramebufferTexture3D(target, type, GL_TEXTURE_3D, tid, level, 0); // TODO
 
     return *this;
 }

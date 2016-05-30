@@ -21,13 +21,25 @@ struct Ssr
 
     gl::Shader        vsQuad,
                       fsCommon,
-                      fsSsr;
+                      fsTexture,
+                      fsGaussian,
+                      fsSsr,
+                      fsSsrComposite;
 
-    gl::ShaderProgram prog;
+    gl::ShaderProgram progScale,
+                      progBlur,
+                      progSsr,
+                      progSsrComposite;
 
-    gl::Texture       texColor;
-    gl::Texture       texSsr;
-    gl::Fbo           fbo;
+    gl::Texture       texScale[mipmapCount],
+                      texBlur[mipmapCount],
+                      texColor,
+                      texSsr;
+
+    gl::Fbo           fboScale[mipmapCount],
+                      fboBlur[mipmapCount],
+                      fboColor,
+                      fboSsr;
 
     Ssr(const Size<int>& renderSize);
 
