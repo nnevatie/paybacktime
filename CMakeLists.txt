@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(paybacktime)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
-    -std=c++11 -Wall -Wextra -Wno-unused-function -fopenmp")
+    -Wall -Wextra -Wno-unused-function -fopenmp")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
     -Wl,--stack,16777216")
@@ -89,6 +89,7 @@ include_directories(
 # Build definitions
 add_definitions(-DEIGEN_NO_DEBUG
                 -DEIGEN_DONT_PARALLELIZE
+                -DGL_GLEXT_PROTOTYPES
                 -DNANOVG_GL3_IMPLEMENTATION
                 -DBOOST_THREAD_VERSION=4
                 -DGLM_SWIZZLE)
