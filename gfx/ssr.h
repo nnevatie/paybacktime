@@ -44,7 +44,6 @@ struct Ssr
     Ssr(const Size<int>& renderSize);
 
     Ssr& operator()(gl::Texture* texDepth,
-                    gl::Texture* texDepthBack,
                     gl::Texture* texNormal,
                     gl::Texture* texColor,
                     gl::Texture* texLight,

@@ -95,17 +95,18 @@ struct Data
         cameraControl(&camera, display, &mouse),
         sceneControl(&scene, &camera, display, &mouse, geometry.texDepth)
     {
-        #if 0
+        #if 1
         auto floor = objectStore.object("floor");
         auto light = objectStore.object("floor3");
-        for (int y = -2; y <= 2; ++y)
-            for (int x = -2; x <= 2; ++x)
+        for (int y = -5; y <= 5; ++y)
+            for (int x = -5; x <= 5; ++x)
             {
-                auto tr = TransformTrRot({16 * x, 0, 16 * y});
+                auto tr = TransformTrRot({16 * x, -2, 16 * y});
                 scene.add({x || y ? floor : light, tr});
             }
 
-        scene.add({character, TransformTrRot({0, 0, 16 * -2})});
+        scene.add({objectStore.object("chair"), TransformTrRot({-32, 0, 16 * -2})});
+        scene.add({objectStore.object("table"), TransformTrRot({32, 0, 16 * -2})});
         #endif
     }
 
@@ -175,8 +176,7 @@ struct Data
             scene.objectGeometry(Scene::GeometryType::Transparent),
             camera);
 
-        ssr(&geometry.texDepth, &geometry.texDepthBack,
-            &geometry.texNormalDenoise, lighting.output(),
+        ssr(&geometry.texDepth, &geometry.texNormalDenoise, lighting.output(),
             &geometry.texLight, camera);
 
         bloom(ssr.output());

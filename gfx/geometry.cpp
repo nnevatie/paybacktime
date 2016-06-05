@@ -37,12 +37,6 @@ Geometry::Geometry(const Size<int>& renderSize) :
                    .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    texDepthBack.bind().alloc(fboSizeBack,
-                              GL_DEPTH_COMPONENT32F,
-                              GL_DEPTH_COMPONENT, GL_FLOAT)
-                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
     texNormal.bind().alloc(fboSize,        GL_RGB16F,  GL_RGB, GL_FLOAT);
     texNormalDenoise.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
     texColor.bind().alloc(fboSize,         GL_RGB8,    GL_RGB, GL_UNSIGNED_BYTE);
@@ -54,10 +48,6 @@ Geometry::Geometry(const Size<int>& renderSize) :
        .attach(texColor,         gl::Fbo::Attachment::Color, 1)
        .attach(texLight,         gl::Fbo::Attachment::Color, 2)
        .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 3)
-       .unbind();
-
-    fboBack.bind()
-       .attach(texDepthBack, gl::Fbo::Attachment::Depth)
        .unbind();
 
     // OIT
@@ -117,33 +107,6 @@ Geometry& Geometry::operator()(
         glDisable(GL_DEPTH_TEST);
         texNormal.bindAs(GL_TEXTURE0);
         rect.render();
-    }
-    {
-        // Back faces
-        Binder<gl::Fbo> binder(fboBack);
-        progGeometry.bind()
-                    .setUniform("v",    v)
-                    .setUniform("p",    p)
-                    .setUniform("size", renderSize.as<glm::vec2>());
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glDisable(GL_BLEND);
-        glDepthMask(true);
-        glColorMask(false, false, false, false);
-
-        glViewport(0, 0, renderSize.w / backDownscale,
-                         renderSize.h / backDownscale);
-        glClearColor(0.f, 0.f, 0.f, 1.f);
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-        // Render primitives
-        for (const auto& instance : instances)
-        {
-            progGeometry.setUniform("m", instance.second);
-            instance.first.render(GL_TRIANGLES, GL_FRONT);
-        }
-        glColorMask(true, true, true, true);
     }
     return *this;
 }

@@ -43,7 +43,6 @@ struct Geometry
                       progDenoise;
 
     gl::Texture       texDepth,
-                      texDepthBack,
                       texNormal,
                       texNormalDenoise,
                       texColor,
@@ -52,7 +51,6 @@ struct Geometry
                       texOit1;
 
     gl::Fbo           fbo,
-                      fboBack,
                       fboOit;
 
     typedef std::pair<gl::Primitive, glm::mat4> Instance;

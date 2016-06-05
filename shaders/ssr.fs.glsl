@@ -2,7 +2,6 @@
 
 // Uniforms
 uniform sampler2D texDepth;
-uniform sampler2D texDepthBack;
 uniform sampler2D texNormal;
 uniform sampler2D texColor;
 uniform sampler2D texLight;
@@ -12,7 +11,6 @@ uniform mat4      pc;
 uniform vec3      viewPos;
 uniform float     zNear;
 uniform float     zFar;
-uniform float     time;
 
 // Const
 vec2 sizeTex = textureSize(texDepth, 0);
@@ -22,12 +20,11 @@ vec4 up      = v * vec4(0, 1, 0, 0);
 #define float3 vec3
 #define float2 vec2
 
-int   _Iterations = 10;
-int   _BinarySearchIterations = 5;
+int   _Iterations = 20;
 float _MaxRayDistance = 50.0;
-float _PixelStride = 40.0;
-float _PixelStrideZCuttoff = 400.0;
-float _PixelThickness = 1.0;
+float _PixelStride = 20.0;
+float _PixelStrideZCuttoff = 500.0;
+float _PixelThickness = 5.0;
 vec3  _ProjectionParams = vec3(0, zNear, zFar);
 float _ScreenEdgeFadeStart = 0.75;
 float _EyeFadeStart = 0.0;
@@ -71,8 +68,7 @@ float distanceSquared(vec2 a, vec2 b)
 bool intersectDepth(vec2 uv, float zMin, float zMax)
 {
     float cameraZ = linearDepth(texture(texDepth, uv).r);
-    float backZ   = linearDepth(texture(texDepthBack, uv).r);
-    return -zMax >= cameraZ && -zMin <= backZ + _PixelThickness;
+    return -zMax >= cameraZ && -zMax <= cameraZ + _PixelThickness;
 }
 
 bool raytrace(float3 rayOrigin,
@@ -161,37 +157,6 @@ bool raytrace(float3 rayOrigin,
         intersect = intersectDepth(hitPixel, zA, zB);
     }
 
-    // Binary search refinement
-    if(pixelStride > 1.0 && intersect)
-    {
-        pqk -= dPQK;
-        dPQK /= pixelStride;
-
-        float originalStride = pixelStride * 0.5;
-        float stride = originalStride;
-
-        zA = pqk.z / pqk.w;
-        zB = zA;
-
-        for( float j=0; j<_BinarySearchIterations; j++)
-        {
-            pqk += dPQK * stride;
-
-            zA = zB;
-            zB = (dPQK.z * -0.5 + pqk.z) / (dPQK.w * -0.5 + pqk.w);
-            if (zB > zA)
-                swap(zB, zA);
-
-            hitPixel = permute ? pqk.yx : pqk.xy;
-            hitPixel *= 1.0 / sizeTex;
-
-            originalStride *= 0.5;
-            stride = intersectDepth(hitPixel, zA, zB) ?
-                    -originalStride : originalStride;
-        }
-    }
-
-
     Q0.xy += dQ.xy * i;
     Q0.z = pqk.z;
     hitPoint = Q0 / pqk.w;
@@ -231,10 +196,6 @@ float alpha(bool intersect,
     // Fade ray hits based on distance from ray origin
     alpha *= 1.0 - clamp(distance(vsRayOrigin, hitPoint) / _MaxRayDistance,
                          0.0, 1.0);
-
-    // Fade ray hits based on facing up
-    alpha *= 1.0 - abs(dot(normalize(up.xyz),
-                           normalize(texture(texNormal, hitPixel).xyz)));
 
     alpha *= intersect ? 1.0 : 0.0;
     return clamp(alpha, 0, 1);

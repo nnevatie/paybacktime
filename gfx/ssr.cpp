@@ -67,18 +67,11 @@ Ssr::Ssr(const Size<int>& renderSize) :
 }
 
 Ssr& Ssr::operator()(gl::Texture* texDepth,
-                     gl::Texture* texDepthBack,
                      gl::Texture* texNormal,
                      gl::Texture* texColor,
                      gl::Texture* texLight,
                      const Camera& camera)
 {
-    const auto dur    = std::chrono::high_resolution_clock::now().
-                        time_since_epoch();
-    const auto time   = std::chrono::duration_cast
-                       <std::chrono::milliseconds>(dur).count();
-    const float ftime = (time % 100000) / 1000.f;
-
     {
         Binder<gl::Fbo> binder(fboColor);
         fboColor.attach(this->texColor, gl::Fbo::Attachment::Color);
@@ -90,10 +83,9 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
         auto pc  = (sc0 * (tr * sc1)) * camera.matrixProj();
 
         progSsr.bind().setUniform("texDepth",    0)
-                      .setUniform("texDepthBack",1)
-                      .setUniform("texNormal",   2)
-                      .setUniform("texColor",    3)
-                      .setUniform("texLight",    4)
+                      .setUniform("texNormal",   1)
+                      .setUniform("texColor",    2)
+                      .setUniform("texLight",    3)
                       .setUniform("z",           0.f)
                       .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
                       .setUniform("aspectRatio", camera.ar)
@@ -102,18 +94,16 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                       .setUniform("p",           camera.matrixProj())
                       .setUniform("pc",          pc)
                       .setUniform("zNear",       camera.zNear)
-                      .setUniform("zFar",        camera.zFar)
-                      .setUniform("time",        ftime);
+                      .setUniform("zFar",        camera.zFar);
 
         glViewport(0, 0, renderSize.w, renderSize.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
         texDepth->bindAs(GL_TEXTURE0);
-        texDepthBack->bindAs(GL_TEXTURE1);
-        texNormal->bindAs(GL_TEXTURE2);
-        texColor->bindAs(GL_TEXTURE3);
-        texLight->bindAs(GL_TEXTURE4);
+        texNormal->bindAs(GL_TEXTURE1);
+        texColor->bindAs(GL_TEXTURE2);
+        texLight->bindAs(GL_TEXTURE3);
         rect.render();
     }
     {
