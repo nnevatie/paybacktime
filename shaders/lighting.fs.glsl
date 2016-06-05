@@ -81,10 +81,10 @@ void main(void)
     // Specular
     float shininess = 4.0;
     // Phong
-    //vec3 reflectDir = reflect(lightDir, normal);
-    //float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0), 4.f);
+    vec3 reflectDir = reflect(lightDir, normal);
+    float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0), 4.f);
     // Blinn-Phong
-    float spec      = incid * pow(max(dot(normal, halfwayDir), 0.0), shininess);
+    //float spec      = incid * pow(max(dot(normal, halfwayDir), 0.0), shininess);
     float fresnel   = max(0, min(1, 0.f + 1.f *
                                 (1.0 + dot(viewDir, normal)) * 1.f));
 
