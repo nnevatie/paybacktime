@@ -19,7 +19,20 @@ namespace ImageMesher
 namespace
 {
 
-void emitBoxFace(Mesh_P_N_UV* g, float scale, int axis, int cc[8][3],
+glm::vec3 tangent(const std::array<glm::vec3, 3>& pos,
+                  const std::array<glm::vec2, 3>& uv,
+                  const glm::vec3& n)
+{
+    auto e0   = pos[1] - pos[0];
+    auto e1   = pos[2] - pos[0];
+    auto duv0 = uv[1]  - uv[0];
+    auto duv1 = uv[2]  - uv[0];
+    auto f    = 1.0f / (duv0.x * duv1.y - duv0.y * duv1.x);
+    glm::vec3 t(f * (e0 * duv1.y - e1 * duv0.y));
+    return glm::normalize(-t - n * glm::dot(n, t));
+}
+
+void emitBoxFace(Mesh_P_N_T_UV* g, float scale, int axis, int cc[8][3],
                  const glm::vec3& p, const glm::vec3& s, const glm::vec3& d,
                  const RectCube<float>& uvCube)
 {
@@ -32,7 +45,7 @@ void emitBoxFace(Mesh_P_N_UV* g, float scale, int axis, int cc[8][3],
         {7, 6, 5, 4},
         {0, 1, 2, 3}
     };
-    const Mesh_P_N_UV::Index ib = g->vertices.size();
+    const Mesh_P_N_T_UV::Index ib = g->vertices.size();
 
     typedef glm::vec3 v;
 
@@ -86,23 +99,33 @@ void emitBoxFace(Mesh_P_N_UV* g, float scale, int axis, int cc[8][3],
     {
         const v n0 = glm::normalize(glm::cross(vb - va, vc - va));
         const v n1 = glm::normalize(glm::cross(vd - vc, va - vc));
-        g->vertices.insert(g->vertices.end(), {{va, n0, uvs[axis][0]},
-                                               {vb, n0, uvs[axis][1]},
-                                               {vc, n0, uvs[axis][2]},
-                                               {vc, n1, uvs[axis][2]},
-                                               {vd, n1, uvs[axis][3]},
-                                               {va, n1, uvs[axis][0]}});
+        const v t0 = tangent({va, vb, vc},
+                             {uvs[axis][0], uvs[axis][1], uvs[axis][2]}, n0);
+        const v t1 = tangent({vc, vd, va},
+                             {uvs[axis][2], uvs[axis][3], uvs[axis][0]}, n1);
+
+        g->vertices.insert(g->vertices.end(), {{va, n0, t0, uvs[axis][0]},
+                                               {vb, n0, t0, uvs[axis][1]},
+                                               {vc, n0, t0, uvs[axis][2]},
+                                               {vc, n1, t1, uvs[axis][2]},
+                                               {vd, n1, t1, uvs[axis][3]},
+                                               {va, n1, t1, uvs[axis][0]}});
     }
     else
     {
         const v n0 = glm::normalize(glm::cross(vc - vb, vd - vb));
         const v n1 = glm::normalize(glm::cross(va - vd, vb - vd));
-        g->vertices.insert(g->vertices.end(), {{vb, n0, uvs[axis][1]},
-                                               {vc, n0, uvs[axis][2]},
-                                               {vd, n0, uvs[axis][3]},
-                                               {vd, n1, uvs[axis][3]},
-                                               {va, n1, uvs[axis][0]},
-                                               {vb, n1, uvs[axis][1]}});
+        const v t0 = tangent({vb, vc, vd},
+                             {uvs[axis][1], uvs[axis][2], uvs[axis][3]}, n0);
+        const v t1 = tangent({vd, va, vb},
+                             {uvs[axis][3], uvs[axis][0], uvs[axis][1]}, n1);
+
+        g->vertices.insert(g->vertices.end(), {{vb, n0, t0, uvs[axis][1]},
+                                               {vc, n0, t0, uvs[axis][2]},
+                                               {vd, n0, t0, uvs[axis][3]},
+                                               {vd, n1, t1, uvs[axis][3]},
+                                               {va, n1, t1, uvs[axis][0]},
+                                               {vb, n1, t1, uvs[axis][1]}});
     }
     g->indices.insert(g->indices.end(), {ib + 0, ib + 1, ib + 2,
                                          ib + 3, ib + 4, ib + 5});
@@ -142,8 +165,8 @@ bool visible(const V& vol, int x, int y, int z)
 }
 
 template <typename V>
-Mesh_P_N_UV meshGreedy(const V& vol,
-                       const RectCube<float>& uvCube, float scale = 1.f)
+Mesh_P_N_T_UV meshGreedy(const V& vol,
+                         const RectCube<float>& uvCube, float scale = 1.f)
 {
     struct Cell
     {
@@ -182,7 +205,7 @@ Mesh_P_N_UV meshGreedy(const V& vol,
                 cells[x][y][z].g = v ? vol.g(x, y, z) : 0;
             }
 
-    Mesh_P_N_UV mesh;
+    Mesh_P_N_T_UV mesh;
     const int reserveSize = (dims[0] / 4) * (dims[1] / 4) * (dims[2] / 4);
     mesh.vertices.reserve(reserveSize);
     mesh.indices.reserve(reserveSize);
@@ -282,16 +305,16 @@ Mesh_P_N_UV meshGreedy(const V& vol,
 
 } // namespace
 
-Mesh_P_N_UV mesh(const Image& image, float scale)
+Mesh_P_N_T_UV mesh(const Image& image, float scale)
 {
     HCTIME("image");
     const Heightfield hfield(image, std::min(image.size().w, image.size().h));
     return meshGreedy(hfield, RectCube<float>(), scale);
 }
 
-Mesh_P_N_UV mesh(const ImageCube& imageCube,
-            const RectCube<float>& uvCube,
-            float scale)
+Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
+                   const RectCube<float>& uvCube,
+                   float scale)
 {
     HCTIME("cube");
     const Cubefield cfield(imageCube);

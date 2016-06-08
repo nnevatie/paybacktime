@@ -13,6 +13,7 @@ struct TextureStore
 
     gl::TextureAtlas albedo;
     gl::TextureAtlas light;
+    gl::TextureAtlas normal;
 };
 
 } // namespace pt

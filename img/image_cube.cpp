@@ -8,6 +8,9 @@
 namespace pt
 {
 
+ImageCube::ImageCube()
+{}
+
 ImageCube::ImageCube(const fs::path& path, int depth)
 {
     HCLOG(Info) << path.string() << ", " << depth;
@@ -35,9 +38,10 @@ ImageCube::ImageCube(const fs::path& path, int depth)
         const auto fn = boost::replace_all_copy(
             path.string(), "*", sideImage.name);
 
-        sideImage.image = side != Side::Top && side != Side::Bottom ?
-                          Image(fn, depth).flipped(Image::Axis::X) :
-                          Image(fn, depth);
+        if (fs::exists(fn))
+            sideImage.image = side != Side::Top && side != Side::Bottom ?
+                              Image(fn, depth).flipped(Image::Axis::X) :
+                              Image(fn, depth);
     }
 
     // Mirror missing images with priority ordered fallbacks
@@ -52,8 +56,10 @@ ImageCube::ImageCube(const fs::path& path, int depth)
 
     // Find fallbacks
     // TODO: Clone images
+    const Image imageDefault(Image(Size<int>(2, 2), depth).fill(0x00));
     for (int i = 0; i < 6; ++i)
         if (!sideImages[i].image)
+        {
             for (int f = 0; f < 5; ++f)
             {
                 const SideImage& fallback = sideImages[fallbacks[i][f]];
@@ -63,10 +69,19 @@ ImageCube::ImageCube(const fs::path& path, int depth)
                     break;
                 }
             }
+            // Finally, use the default image if all fallbacks failed
+            if (!sideImages[i].image)
+                sideImages[i].image = imageDefault;
+        }
 
     // Copy images
     for (const SideImage& sideImage : sideImages)
         sides.push_back(sideImage.image);
+}
+
+ImageCube::operator bool() const
+{
+    return sides.size() == 6;
 }
 
 const Image& ImageCube::side(ImageCube::Side s) const
@@ -136,6 +151,15 @@ ImageCube ImageCube::flipped() const
     cube.sides[int(Side::Bottom)] = cube.sides[int(Side::Bottom)].
                                     flipped(Image::Axis::Y);
     return cube;
+}
+
+ImageCube ImageCube::normals() const
+{
+    ImageCube imageCube;
+    for (const auto& side : sides)
+        imageCube.sides.push_back(side.normals());
+
+    return imageCube;
 }
 
 } // namespace

@@ -56,7 +56,7 @@ struct Texture
                    GLint internalFormat, GLenum format,
                    GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = nullptr);
 
-    Texture& alloc(const Image& image);
+    Texture& alloc(const Image& image, bool srgb = true);
     Texture& alloc(const Grid<glm::vec3>& grid);
     Texture& alloc(const Grid<glm::vec4>& grid);
 

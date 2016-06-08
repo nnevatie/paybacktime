@@ -8,8 +8,8 @@ namespace pt
 namespace gl
 {
 
-TextureAtlas::TextureAtlas(const Size<int>& size, int margin) :
-    atlas(size), margin(margin)
+TextureAtlas::TextureAtlas(const Size<int>& size, bool srgb, int margin) :
+    atlas(size), srgb(srgb), margin(margin)
 {
     // Update initial texture
     update();
@@ -17,7 +17,7 @@ TextureAtlas::TextureAtlas(const Size<int>& size, int margin) :
 
 void TextureAtlas::update()
 {
-    texture.bind().alloc(atlas.image())
+    texture.bind().alloc(atlas.image(), srgb)
                   .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                   .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
                   .set(GL_TEXTURE_MAX_ANISOTROPY_EXT, Texture::anisotropyMax());

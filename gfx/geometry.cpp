@@ -19,18 +19,16 @@ Geometry::Geometry(const Size<int>& renderSize) :
     fsOitComposite(gl::Shader::path("oit_composite.fs.glsl")),
     fsDenoise(gl::Shader::path("denoise.fs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
-    progGeometry({vsGeometry, gsWireframe, fsGeometry, fsCommon},
-                {{0, "position"}, {1, "normal"}, {2, "uv"}}),
+    progGeometry({vsGeometry, /*gsWireframe,*/ fsGeometry, fsCommon},
+                {{0, "position"}, {1, "normal"}, {2, "tangent"}, {3, "uv"}}),
     progGeometryTransparent({vsGeometryTransparent, fsGeometryTransparent, fsCommon},
-                            {{0, "position"}, {1, "normal"}, {2, "uv"}}),
+                {{0, "position"}, {1, "normal"}, {2, "tangent"}, {3, "uv"}}),
     progOitComposite({vsQuad, fsOitComposite},
                     {{0, "position"}, {1, "uv"}}),
     progDenoise({vsQuad, fsDenoise},
         {{0, "position"}, {1, "uv"}})
 {
-    auto fboSize     = {renderSize.w, renderSize.h};
-    auto fboSizeBack = {renderSize.w / backDownscale,
-                        renderSize.h / backDownscale};
+    auto fboSize = {renderSize.w, renderSize.h};
 
     texDepth.bind().alloc(fboSize, GL_DEPTH_COMPONENT32F,
                                    GL_DEPTH_COMPONENT, GL_FLOAT)
@@ -62,6 +60,7 @@ Geometry::Geometry(const Size<int>& renderSize) :
 
 Geometry& Geometry::operator()(
     gl::Texture* texAlbedo,
+    gl::Texture* texNormalMap,
     gl::Texture* texLightmap,
     const Instances& instances,
     const glm::mat4& v,
@@ -72,7 +71,8 @@ Geometry& Geometry::operator()(
         Binder<gl::Fbo> binder(fbo);
         progGeometry.bind()
                     .setUniform("texAlbedo", 0)
-                    .setUniform("texLight",  1)
+                    .setUniform("texNormal", 1)
+                    .setUniform("texLight",  2)
                     .setUniform("v",         v)
                     .setUniform("p",         p)
                     .setUniform("size",      renderSize.as<glm::vec2>());
@@ -92,7 +92,8 @@ Geometry& Geometry::operator()(
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         texAlbedo->bindAs(GL_TEXTURE0);
-        texLightmap->bindAs(GL_TEXTURE1);
+        texNormalMap->bindAs(GL_TEXTURE1);
+        texLightmap->bindAs(GL_TEXTURE2);
 
         // Render primitives
         for (const auto& instance : instances)

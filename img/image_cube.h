@@ -17,7 +17,10 @@ struct ImageCube
         Front, Back, Left, Right, Top, Bottom
     };
 
-    ImageCube(const fs::path& path, int depth = 0);
+    ImageCube();
+    ImageCube(const fs::path& path, int depth);
+
+    operator bool() const;
 
     const Image& side(Side s) const;
 
@@ -30,6 +33,8 @@ struct ImageCube
     ImageCube scaled(const ImageCube& refCube) const;
 
     ImageCube flipped() const;
+
+    ImageCube normals() const;
 
     std::vector<Image> sides;
 };

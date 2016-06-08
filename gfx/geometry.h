@@ -60,6 +60,7 @@ struct Geometry
 
     // Opaque
     Geometry& operator()(gl::Texture* texAlbedo,
+                         gl::Texture* texNormalMap,
                          gl::Texture* texLightmap,
                          const Instances& instances,
                          const glm::mat4& v,

@@ -62,6 +62,23 @@ struct Vertex_P_N_UV
     }
 };
 
+struct Vertex_P_N_T_UV
+{
+    glm::vec3 p;
+    glm::vec3 n;
+    glm::vec3 t;
+    glm::vec2 uv;
+
+    static VertexSpec spec()
+    {
+        return {sizeof(Vertex_P_N_T_UV),
+               {std::make_tuple(3, GL_FLOAT, sizeof(p)),
+                std::make_tuple(3, GL_FLOAT, sizeof(n)),
+                std::make_tuple(3, GL_FLOAT, sizeof(t)),
+                std::make_tuple(2, GL_FLOAT, sizeof(uv))}};
+    }
+};
+
 struct IndexSpec
 {
     size_t size;
@@ -91,9 +108,10 @@ struct Mesh
     }
 };
 
-typedef Mesh<Vertex_P,      uint32_t> Mesh_P;
-typedef Mesh<Vertex_P_UV,   uint32_t> Mesh_P_UV;
-typedef Mesh<Vertex_P_N_UV, uint32_t> Mesh_P_N_UV;
+typedef Mesh<Vertex_P,        uint32_t> Mesh_P;
+typedef Mesh<Vertex_P_UV,     uint32_t> Mesh_P_UV;
+typedef Mesh<Vertex_P_N_UV,   uint32_t> Mesh_P_N_UV;
+typedef Mesh<Vertex_P_N_T_UV, uint32_t> Mesh_P_N_T_UV;
 
 inline Mesh_P_UV rectMesh(float halfWidth = 1.f, float halfHeight = 1.f)
 {

@@ -171,7 +171,7 @@ Texture& Texture::alloc(int level, const std::vector<int>& dim,
     return *this;
 }
 
-Texture& Texture::alloc(const Image& image)
+Texture& Texture::alloc(const Image& image, bool srgb)
 {
     struct Format
     {
@@ -180,10 +180,10 @@ Texture& Texture::alloc(const Image& image)
     }
     formats[] =
     {
-        {GL_R8,           GL_RED},
-        {GL_RG8,          GL_RG},
-        {GL_SRGB8,        GL_RGB},
-        {GL_SRGB8_ALPHA8, GL_RGBA}
+        {GL_R8,                             GL_RED},
+        {GL_RG8,                            GL_RG},
+        {srgb ? GL_SRGB8        : GL_RGB8,  GL_RGB},
+        {srgb ? GL_SRGB8_ALPHA8 : GL_RGBA8, GL_RGBA}
     };
     if (image.depth() > 0 && image.depth() <= 4)
     {

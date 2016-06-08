@@ -41,6 +41,8 @@ struct Image
     const uint8_t* bits(int x, int y) const;
     uint8_t*       bits(int x, int y);
 
+    const uint8_t* bitsClamped(int x, int y) const;
+
     template <typename T>
     T* bits(int x, int y) const
     {
@@ -59,6 +61,8 @@ struct Image
     Image flipped(Axis axis) const;
     Image clone() const;
     Image& fill(uint32_t value);
+
+    Image normals(float strenght = 1.f) const;
 
     bool write(const fs::path& path) const;
 

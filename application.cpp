@@ -148,6 +148,7 @@ struct Data
         geom.insert(geom.end(), chars.begin(), chars.end());
 
         geometry(&textureStore.albedo.texture,
+                 &textureStore.normal.texture,
                  &textureStore.light.texture,
                  geom, view, proj);
 

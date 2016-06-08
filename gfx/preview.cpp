@@ -15,7 +15,7 @@ Preview::Preview(const Size<int>& renderSize) :
     fsModel(gl::Shader::path("model.fs.glsl")),
     fsDenoise(gl::Shader::path("denoise.fs.glsl")),
     progModel({vsModel, fsModel},
-             {{0, "position"}, {1, "normal"}, {2, "uv"}}),
+             {{0, "position"}, {1, "normal"}, {2, "tangent"}, {3, "uv"}}),
     progDenoise({vsQuad, fsDenoise},
                {{0, "position"}, {1, "uv"}}),
     antiAlias(renderSize)

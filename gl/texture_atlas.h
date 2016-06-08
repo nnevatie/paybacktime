@@ -17,7 +17,7 @@ struct TextureAtlas
     // Image and texture rect cubes
     typedef std::pair<RectCube<int>, RectCube<float>> EntryCube;
 
-    TextureAtlas(const Size<int>& size, int margin = 0);
+    TextureAtlas(const Size<int>& size, bool srgb, int margin = 0);
 
     void update();
 
@@ -25,6 +25,7 @@ struct TextureAtlas
 
     ImageAtlas  atlas;
     gl::Texture texture;
+    bool        srgb;
     int         margin;
 };
 

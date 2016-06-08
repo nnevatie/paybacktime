@@ -2,15 +2,16 @@
 
 // Uniforms
 uniform sampler2D texAlbedo;
+uniform sampler2D texNormal;
 uniform sampler2D texLight;
 
 // Input
 in Block
 {
     vec3 viewPos;
-    vec3 normal;
     vec2 uv;
     vec3 bc;
+    mat3 tbn;
 }
 ib;
 
@@ -29,7 +30,8 @@ float edge(vec3 bc)
 void main()
 {
     vec4 alb = texture(texAlbedo, ib.uv);
-    normal   = normalize(ib.normal);    
+    vec3 n   = texture(texNormal, ib.uv).rgb;
+    normal   = normalize(ib.tbn * normalize(n * 2.0 - 1.0));
     color    = alb;
     //color    = vec4(mix(alb + 0.25, alb, edge(ib.bc)).rgb, 1.0);
     light    = texture(texLight, ib.uv).rgb;

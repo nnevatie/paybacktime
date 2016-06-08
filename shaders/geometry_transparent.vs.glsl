@@ -8,6 +8,7 @@ uniform mat4 p;
 // Input
 in vec3 position;
 in vec3 normal;
+in vec3 tangent;
 in vec2 uv;
 
 // Output
