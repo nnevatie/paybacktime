@@ -3,6 +3,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
 #include "geom/volume.h"
@@ -10,6 +11,8 @@
 
 #include "common/json.h"
 #include "common/log.h"
+
+#include "common/metadata.h"
 
 namespace bpt = boost::property_tree;
 
@@ -20,39 +23,6 @@ namespace
 {
 
 typedef std::function<glm::vec3(const glm::vec3&)> Projection;
-
-bpt::ptree readJson(const fs::path& path)
-{
-    try
-    {
-        bpt::ptree tree;
-        bpt::read_json(path.string(), tree);
-        return tree;
-    }
-    catch (const std::exception& e)
-    {
-        HCLOG(Warn) << e.what();
-    }
-    return bpt::ptree();
-}
-
-template <typename T>
-T getVec(const bpt::ptree& tree, const std::string& key)
-{
-    try
-    {
-        T vec;
-        auto children = tree.get_child(key);
-        for (auto it = children.begin(); it != children.end(); ++it)
-            vec[std::distance(children.begin(), it)] =
-                it->second.get_value<float>();
-
-        return vec;
-    }
-    catch (const std::exception& e)
-    {}
-    return {};
-}
 
 void accumulateEmission(Grid<glm::vec3>* map,
                         Grid<float>* density,
@@ -108,12 +78,19 @@ void accumulateEmission(Grid<glm::vec3>* map,
 
 struct Meta
 {
-    Meta(const fs::path& path)
+    Meta(const fs::path& path) :
+        name(path.filename().string()),
+        scale(1.f)
     {
-        bpt::ptree tree(readJson(path / "object.json"));
-        name   = path.filename().string();
-        scale  = tree.get("scale", 1.f);
-        origin = getVec<glm::vec3>(tree, "origin");
+        const auto meta = readJson(path / "object.json");
+        if (!meta.is_null())
+        {
+            scale  = meta.value("scale", 1.f);
+            origin = glm::make_vec3(meta.value("origin",
+                                    std::vector<float>(3)).data());
+        }
+        HCLOG(Info) << "meta: " << scale << "; " << origin.x << ", "
+                                                 << origin.y << ", " << origin.z;
     }
 
     std::string name;
