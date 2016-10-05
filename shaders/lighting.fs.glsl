@@ -49,6 +49,38 @@ vec3 giUvw(vec3 worldPos)
     return uvw;
 }
 
+float g1v(float dotNV, float k)
+{
+    return 1.0f / (dotNV * (1.0f - k) + k);
+}
+
+float ggx(vec3 N, vec3 V, vec3 L, float roughness, float F0)
+{
+    float alpha = roughness * roughness;
+    vec3      H = normalize(V + L);
+    float dotNL = clamp(dot(N, L), 0.0, 1.0);
+    float dotNV = clamp(dot(N, V), 0.0, 1.0);
+    float dotNH = clamp(dot(N, H), 0.0, 1.0);
+    float dotLH = clamp(dot(L, H), 0.0, 1.0);
+
+    // D
+    float alphaSqr = alpha*alpha;
+    float pi       = 3.14159f;
+    float denom    = dotNH * dotNH * (alphaSqr - 1.0) + 1.0f;
+    float D        = alphaSqr / (pi * denom * denom);
+
+    // F
+    float dotLH5   = pow(1.0 - dotLH, 5);
+    float F        = F0 + (1.0 - F0) * (dotLH5);
+
+    // V
+    float k        = alpha / 2.0f;
+    float vis      = g1v(dotNL, k) * g1v(dotNV, k);
+
+    float specular = dotNL * D * F * vis;
+    return specular;
+}
+
 void main(void)
 {
     vec3 fragPos    = linearDepth(texture(texDepth, ib.uv).r, p) * ib.viewRay;
@@ -79,17 +111,9 @@ void main(void)
     vec3 diffuse    = 8.f * incid * albedo * max(dot(normal, lightDir), 0.0);
 
     // Specular
-    float shininess = 4.0;
-    // Phong
-    vec3 reflectDir = reflect(lightDir, normal);
-    float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0),
-                                  1.f + 8.f * light.g);
-    // Blinn-Phong
-    //float spec      = incid * pow(max(dot(normal, halfwayDir), 0.0), shininess);
-    float fresnel   = max(0, min(1, 0.f + 1.f *
-                                (1.0 + dot(viewDir, normal)) * 1.f));
-
-    vec3 specular   = 16.f * albedo * (light.r + fresnel) * spec;
+    float shininess = clamp(light.g, 0.0, 0.9);
+    vec3 specular   = 16.f * incid * light.r * albedo *
+                      ggx(normal, -viewDir, lightDir, 1.0 - shininess, 0.1);
 
     // Emissive
     vec3 emis       = 32.f * light.b * albedo;
