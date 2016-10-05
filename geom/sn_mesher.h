@@ -77,7 +77,7 @@ inline int dominantAxis(const glm::vec3& v)
 }
 
 template <typename V>
-Mesh_P_N_UV mesh(const V& vol, const RectCube<float>& uvCube, float scale = 1.f)
+Mesh_P_N_T_UV mesh(const V& vol, const RectCube<float>& uvCube, float scale = 1.f)
 {
     const std::array<int, 3>& dims = {vol.width + 2, vol.height + 2, vol.depth + 2};
 
@@ -90,7 +90,7 @@ Mesh_P_N_UV mesh(const V& vol, const RectCube<float>& uvCube, float scale = 1.f)
     std::vector<glm::vec3> vertices;
     vertices.reserve(buffer.size());
 
-    Mesh_P_N_UV mesh;
+    Mesh_P_N_T_UV mesh;
     mesh.vertices.reserve(buffer.size() * 16);
     mesh.indices.reserve(buffer.size()  * 4);
 

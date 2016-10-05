@@ -10,7 +10,6 @@ uniform vec2 size;
 in Block
 {
     vec3 viewPos;
-    vec3 normal;
     vec2 uv;
     vec3 bc;
     mat3 tbn;
@@ -21,7 +20,6 @@ ib[];
 out Block
 {
     vec3 viewPos;
-    vec3 normal;
     vec2 uv;
     vec3 bc;
     mat3 tbn;
@@ -41,7 +39,6 @@ void main(void)
     float area = abs(v1.x * v2.y - v1.y * v2.x);
 
     ob.viewPos  = ib[0].viewPos;
-    ob.normal   = ib[0].normal;
     ob.uv       = ib[0].uv;
     ob.tbn      = ib[0].tbn;
     ob.bc       = vec3(area / length(v0), 0, 0);
@@ -49,7 +46,6 @@ void main(void)
     EmitVertex();
 
     ob.viewPos  = ib[1].viewPos;
-    ob.normal   = ib[1].normal;
     ob.uv       = ib[1].uv;
     ob.tbn      = ib[1].tbn;
     ob.bc       = vec3(0, area / length(v1), 0);
@@ -57,7 +53,6 @@ void main(void)
     EmitVertex();
 
     ob.viewPos  = ib[2].viewPos;
-    ob.normal   = ib[2].normal;
     ob.uv       = ib[2].uv;
     ob.tbn      = ib[2].tbn;
     ob.bc       = vec3(0, 0, area / length(v2));
