@@ -10,7 +10,9 @@ json readJson(const fs::path& path)
 {
     try
     {
-        return json::parse(readFile(path, false));
+        return fs::exists(path) ?
+               json::parse(readFile(path, false)) :
+               json();
     }
     catch (const std::exception& e)
     {
