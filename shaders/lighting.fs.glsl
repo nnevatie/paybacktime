@@ -12,6 +12,7 @@ uniform vec3      boundsMin;
 uniform vec3      boundsSize;
 uniform mat4      v;
 uniform mat4      p;
+uniform vec3      camPos;
 
 // Const
 vec3 sizeTexGi = textureSize(texGi, 0);
@@ -118,6 +119,21 @@ void main(void)
     // Emissive
     vec3 emis       = 32.f * light.b * albedo;
 
-    vec3 lighting   = (ao * ambient + ao * diffuse) + (ao * specular) + emis;
+    // Scattering
+    vec3 scatter;
+    const int steps   = 16;
+    vec3 scatterRay   = normalize(camPos - worldPos);
+    vec3 scatterStep  = scatterRay * 8.0;
+    vec3 scatterPos   = worldPos;
+    for (int i = 0; i < steps; ++i)
+    {
+        vec3 gi      = texture(texGi, giUvw(scatterPos)).rgb *
+                       vec3(1 / (i * 0.2 + 1), 1 / (i * 0.3 + 1), 1);
+        scatter     += gi / (steps + i * 8);
+        scatterPos  += scatterStep;
+    }
+
+    vec3 lighting   = (ao * ambient   + ao   * diffuse) +
+                      (ao * specular) + emis + scatter;
     color           = vec4(lighting, 1.0);
 }

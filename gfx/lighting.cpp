@@ -41,20 +41,21 @@ Lighting& Lighting::operator()(
     const glm::mat4& p)
 {
     Binder<gl::Fbo> binder(fbo);
-    prog.bind().setUniform("texDepth",   0)
-               .setUniform("texNormal",  1)
-               .setUniform("texColor",   2)
-               .setUniform("texLight",   3)
-               .setUniform("texAo",      4)
-               .setUniform("texGi",      5)
-               .setUniform("texIncid",   6)
+    prog.bind().setUniform("texDepth",    0)
+               .setUniform("texNormal",   1)
+               .setUniform("texColor",    2)
+               .setUniform("texLight",    3)
+               .setUniform("texAo",       4)
+               .setUniform("texGi",       5)
+               .setUniform("texIncid",    6)
                .setUniform("z",           0.f)
                .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
                .setUniform("aspectRatio", camera.ar)
-               .setUniform("boundsMin",  glm::floor(bounds.pos))
-               .setUniform("boundsSize", glm::ceil(bounds.size))
-               .setUniform("v",          v)
-               .setUniform("p",          p);
+               .setUniform("boundsMin",   glm::floor(bounds.pos))
+               .setUniform("boundsSize",  glm::ceil(bounds.size))
+               .setUniform("v",           v)
+               .setUniform("p",           p)
+               .setUniform("camPos",      camera.position());
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);
