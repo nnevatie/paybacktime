@@ -57,9 +57,9 @@ void accumulateEmission(Grid<glm::vec3>* map,
         {
             auto xd     = int(x / float(sizeLight.w) * sizeDepth.w);
             auto d      = int(rowDepth[xd]);
-            auto out    = p({x / float(sizeLight.w - 1) + 0.5f,
-                             y / float(sizeLight.h - 1) + 0.5f,
-                             d / 255.f + 0.5f}) * objScale;
+            auto out    = (p({x / float(sizeLight.w - 1),
+                              y / float(sizeLight.h - 1),
+                              d / 255}) + 0.5f) * objScale;
 
             auto albedo = argbTuple(rowAlbedo[x]);
             auto argb0  = map->at(out.x, out.y, out.z);
