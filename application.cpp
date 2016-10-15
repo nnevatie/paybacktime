@@ -133,7 +133,7 @@ struct Data
     bool render(TimePoint time, float /*a*/)
     {
         const float timeSec =
-            std::chrono::duration<float>(time - TimePoint()).count();
+            boost::chrono::duration<float>(time - TimePoint()).count();
 
         const glm::mat4 proj = camera.matrixProj();
         const glm::mat4 view = camera.matrixView();
@@ -202,7 +202,7 @@ struct Data
     bool run()
     {
         namespace arg = std::placeholders;
-        Scheduler scheduler(std::chrono::milliseconds(10),
+        Scheduler scheduler(boost::chrono::milliseconds(10),
                             std::bind(&Data::simulate, this, arg::_1, arg::_2),
                             std::bind(&Data::render,   this, arg::_1, arg::_2));
         return scheduler.start();

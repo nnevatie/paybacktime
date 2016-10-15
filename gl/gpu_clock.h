@@ -25,7 +25,7 @@ struct GpuClock
                                &available);
         uint64_t time = 0;
         glGetQueryObjectui64v(id, GL_QUERY_RESULT, &time);
-        return TimePoint(std::chrono::nanoseconds(time));
+        return TimePoint(boost::chrono::nanoseconds(time));
     }
 private:
     GLuint id;

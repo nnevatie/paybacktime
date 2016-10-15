@@ -1,6 +1,6 @@
 #pragma once
 
-#include <chrono>
+#include <boost/chrono.hpp>
 #include <boost/thread/thread.hpp>
 
 #include <SDL2/SDL.h>
@@ -10,8 +10,8 @@
 
 namespace pt
 {
-using ChronoClock = std::chrono::high_resolution_clock;
-using TimePoint   = std::chrono::time_point<ChronoClock>;
+using ChronoClock = boost::chrono::high_resolution_clock;
+using TimePoint   = boost::chrono::time_point<ChronoClock>;
 using Duration    = ChronoClock::duration;
 
 template <typename T>
@@ -29,11 +29,7 @@ struct Time
     }
     Time& sleep(const Duration& duration)
     {
-        boost::chrono::nanoseconds durationBoost(
-            std::chrono::duration_cast
-                <std::chrono::nanoseconds>(duration).count());
-
-        boost::this_thread::sleep_for(durationBoost);
+        boost::this_thread::sleep_for(duration);
         return *this;
     }
 private:
@@ -53,8 +49,8 @@ struct ScopedClock
 
     ~ScopedClock()
     {
-        const float us = std::chrono::duration
-                         <float, std::micro>(clock_.elapsed()).count();
+        const float us = boost::chrono::duration
+                         <float, boost::micro>(clock_.elapsed()).count();
 
         Logger(Logger::Info, source_)
             << (message_.length() > 0 ? (message_ + " ") : "")

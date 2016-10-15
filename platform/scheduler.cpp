@@ -46,7 +46,7 @@ bool Scheduler::start()
         renderer(timeSim, float(durAcc.count()) / timeStep.count());
 
         if (options & OptionPreserveCpu)
-            clock.sleep(std::chrono::milliseconds(1));
+            clock.sleep(boost::chrono::milliseconds(1));
     }
     state = StateStopped;
     return true;
