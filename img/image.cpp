@@ -104,7 +104,7 @@ bool Image::transparent() const
 {
     for (int y = 0; y < d->size.h; ++y)
     {
-        const uint32_t* __restrict__ row = bits<const uint32_t>(y, 0);
+        const uint32_t* __restrict__ row = bits<const uint32_t>(0, y);
         for (int x = 0; x < d->size.w; ++x)
             if (((row[x] & 0xff000000) >> 24) < 0xff)
                 return true;
