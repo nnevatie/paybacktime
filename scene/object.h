@@ -42,7 +42,8 @@ struct Object
     Object& updateDensity();
 
     Grid<glm::vec3> emission() const;
-    Object& updateEmission();
+    Grid<glm::vec4> bleed() const;
+    Object& updateMaterial();
 
     Object flipped(TextureStore* textureStore) const;
 
