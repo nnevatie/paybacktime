@@ -37,7 +37,7 @@ float vis(const Grid<float>& map, glm::ivec3 p0, glm::ivec3 p1)
     float v = 1.f;
     auto p  = glm::vec3(p0) + s + 0.5f;
 
-    for (int i = 0; i < n - 1 && v > 0; ++i, p += s)
+    for (int i = 0; i < n - 1 && v > 0.f; ++i, p += s)
         v -= map.at(int(p.x), int(p.y), int(p.z));
 
     return glm::max(0.f, v);
