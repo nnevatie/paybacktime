@@ -8,6 +8,7 @@
 #include "geom/ray.h"
 #include "geom/transform.h"
 
+#include "gfx/arrow.h"
 #include "gfx/outline.h"
 
 namespace pt
@@ -41,6 +42,7 @@ struct SceneControl::Data
     platform::Display* display;
     platform::Mouse*   mouse;
 
+    gfx::Arrow         arrow;
     gfx::Outline       outline;
 
     State              state;
@@ -118,14 +120,19 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
 
 SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
 {
-    if (const Object object = d->object)
+    if (const auto& object = d->object)
     {
-        auto m = static_cast<glm::mat4x4>(d->objectTransform);
-        auto v = d->camera->matrixView();
-        auto p = d->camera->matrixProj();
+        const auto m = static_cast<glm::mat4x4>(d->objectTransform);
+        const auto v = d->camera->matrixView();
+        const auto p = d->camera->matrixProj();
 
         if (d->state != Data::State::Idle)
-            d->outline(fboOut, texColor, object.model().primitive(), p * v * m);
+        {
+            const auto mvp = p * v * m;
+            const auto t   = glm::vec3(0.f, d->object.dimensions().y, 0.f);
+            d->outline(fboOut, texColor, object.model().primitive(), mvp);
+            d->arrow(fboOut, mvp * glm::translate(t));
+        }
     }
     return *this;
 }
