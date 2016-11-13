@@ -127,6 +127,19 @@ inline Mesh_P_UV rectMesh(float halfWidth = 1.f, float halfHeight = 1.f)
     };
 }
 
+inline Mesh_P triMesh(float halfWidth = 1.f)
+{
+    return
+    {
+        {
+            {glm::vec3( halfWidth, 0,          0)},
+            {glm::vec3( 0,         0, -halfWidth)},
+            {glm::vec3(-halfWidth, 0,          0)},
+        },
+        {0, 1, 2}
+    };
+}
+
 inline Mesh_P_UV squareMesh(float halfWidth = 1.f)
 {
     return rectMesh(halfWidth, halfWidth);
