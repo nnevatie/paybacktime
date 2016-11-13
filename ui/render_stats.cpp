@@ -14,13 +14,13 @@ namespace pt
 namespace ui
 {
 
-const float UPDATE_INTERVAL_US = 1000.f * 200;
+const float UPDATE_INTERVAL_US = 1000.f * 100;
 
 struct RenderStats::Data
 {
     explicit Data(NVGcontext* vg) :
         vg(vg), accumTime(0), meanTimeMs(0),
-        frameTimes(100), vertexCount(0), triangleCount(0)
+        frameTimes(10), vertexCount(0), triangleCount(0)
     {
         nvgCreateFont(vg, "conradi", "data/conradi_square.ttf");
     }
