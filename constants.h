@@ -9,6 +9,7 @@ namespace c
 
 namespace cell
 {
+// X/Z form the ground plane, Y points World-up
 const auto SIZE = glm::vec3(8.f, 32.f, 8.f);
 }
 
