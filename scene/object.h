@@ -8,7 +8,6 @@
 
 #include "common/file_system.h"
 #include "geom/grid.h"
-#include "img/image.h"
 
 #include "texture_store.h"
 #include "model.h"

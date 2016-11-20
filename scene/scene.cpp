@@ -7,6 +7,8 @@
 #include <glm/gtx/random.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "constants.h"
+
 #include "platform/clock.h"
 #include "common/log.h"
 #include "img/color.h"
@@ -16,13 +18,6 @@ namespace pt
 
 namespace
 {
-
-inline float pack(const glm::vec3& v)
-{
-    glm::ivec3 iv = glm::ivec3(255.f * ((v + 1.f) * 0.5f));
-    uint32_t i    = (iv.x << 16) | (iv.y << 8) | iv.z;
-    return float(i) / float(1 << 24);
-}
 
 float vis(const Grid<float>& map, glm::ivec3 p0, glm::ivec3 p1)
 {
@@ -96,7 +91,7 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
     auto const k0      = 1.f;
     auto const k1      = 0.5f;
     auto const k2      = 0.05f;
-    auto const st      = glm::vec3(8.f, 8.f, 32.f);
+    auto const st      = c::cell::SIZE.xzy();
 
     auto const size = lightmap->size;
     //#pragma omp parallel for
@@ -257,9 +252,8 @@ gl::Texture* Scene::incidence() const
 
 Scene& Scene::updateLightmap()
 {
-    auto box = bounds();
-    glm::ivec3 size(glm::ceil(box.size.xz() / 8.f),
-                    glm::ceil(box.size.y    / 32.f));
+    const auto box = bounds();
+    const glm::ivec3 size(glm::ceil(box.size.xzy() / c::cell::SIZE.xzy()));
 
     HCTIME("generate lighting " + std::to_string(size.x) + "x"
                                 + std::to_string(size.y) + "x"
@@ -274,9 +268,8 @@ Scene& Scene::updateLightmap()
         {
             const auto density  = item.obj.density();
             const auto emission = item.obj.emission();
-            const auto pos      = glm::ivec3(
-                                     ((item.trRot.tr - box.pos) / 8.f).xz(),
-                                     ((item.trRot.tr - box.pos) / 32.f).y);
+            const auto pos      = glm::ivec3((item.trRot.tr - box.pos).xzy() /
+                                              c::cell::SIZE.xzy());
 
             accumulateDensity(&d->density, pos, density);
             accumulateEmission(&d->emissive, pos, emission);

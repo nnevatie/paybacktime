@@ -6,6 +6,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "constants.h"
+
 #include "geom/volume.h"
 #include "img/color.h"
 
@@ -18,7 +20,6 @@ namespace bpt = boost::property_tree;
 
 namespace pt
 {
-
 namespace
 {
 
@@ -33,12 +34,12 @@ void accumulateMaterial(Grid<glm::vec3>* map,
                         const float objScale,
                         const float area)
 {
-    auto const exp        = 0.15f;
-    auto const rgbScale   = 1.f / 255;
-    auto const sizeDepth  = depth.size();
-    auto const sizeLight  = light.size();
-    auto const scaleLight = (sizeLight.as<glm::vec2>() /
-                             sizeDepth.as<glm::vec2>()).x;
+    constexpr auto exp      = c::object::EXPOSURE;
+    constexpr auto rgbScale = 1.f / 255;
+    auto const sizeDepth    = depth.size();
+    auto const sizeLight    = light.size();
+    auto const scaleLight   = (sizeLight.as<glm::vec2>() /
+                               sizeDepth.as<glm::vec2>()).x;
 
     for (int y = 0; y < sizeLight.h; ++y)
     {
@@ -78,17 +79,18 @@ struct Meta
 {
     Meta(const fs::path& path) :
         name(path.filename().string()),
-        scale(1.f)
+        scale(c::object::SCALE)
     {
         const auto meta = readJson(path / "object.json");
         if (!meta.is_null())
         {
-            scale  = meta.value("scale", 1.f);
+            scale  = meta.value("scale", c::object::SCALE);
             origin = glm::make_vec3(meta.value("origin",
                                     std::vector<float>(3)).data());
         }
         HCLOG(Info) << "meta: " << scale << "; " << origin.x << ", "
-                                                 << origin.y << ", " << origin.z;
+                                                 << origin.y << ", "
+                                                 << origin.z;
     }
 
     std::string name;
@@ -171,7 +173,6 @@ bool Object::transparent() const
 Object& Object::updateTransparency()
 {
     d->transparent = d->model.albedoCube()->transparent();
-    HCLOG(Info) << d->meta.name << " transparent: " << d->transparent;
     return *this;
 }
 
@@ -187,9 +188,7 @@ Grid<float> Object::density() const
 
 Object& Object::updateDensity()
 {
-    const int height = 32;
-    const auto size  = glm::vec3(d->model.dimensions().xz() / 8.f,
-                                 d->model.dimensions().y    / 32.f);
+    const auto size = d->model.dimensions().xzy() / c::cell::SIZE.xzy();
 
     Grid<float> map(glm::ceil(size));
     const Cubefield cfield(*d->model.depthCube());
@@ -203,8 +202,8 @@ Object& Object::updateDensity()
                 int fx1   = (x + 1) * cfield.width / size.x - 1;
                 int fy1   = (y + 1) * cfield.depth / size.y - 1;
                 int width = fx1 - fx0 + 1;
-                int y0    = -d->meta.origin.y + z * height;
-                int y1    = (z + 1) * height;
+                int y0    = -d->meta.origin.y + z * c::cell::SIZE.y;
+                int y1    = (z + 1) * c::cell::SIZE.y;
 
                 int sum = 0;
                 for (int fy = y0; fy < y1; ++fy)
@@ -217,7 +216,7 @@ Object& Object::updateDensity()
                             }
 
                 map.at(x, y, z) = float(sum) /
-                                  ((height + d->meta.origin.y) * width);
+                                  ((c::cell::SIZE.y + d->meta.origin.y) * width);
             }
 
     d->density = map;
@@ -236,11 +235,8 @@ Grid<glm::vec4> Object::bleed() const
 
 Object& Object::updateMaterial()
 {
-    const auto sizeXZ = 8.f;
-    const auto sizeY  = 32.f;
+    const auto size = d->model.dimensions().xzy() / c::cell::SIZE.xzy();
 
-    const auto size = glm::vec3(d->model.dimensions().xz() / sizeXZ,
-                                d->model.dimensions().y    / sizeY);
     const auto pmax = glm::max(glm::vec3(0.f), size - 1.f);
     auto cubeDepth  = d->model.depthCube();
     auto cubeAlbedo = d->model.albedoCube();
@@ -271,12 +267,12 @@ Object& Object::updateMaterial()
         [&pmax](const glm::vec3& v)
         {return glm::vec3(pmax.x * v.x, pmax.y * v.y, pmax.z * v.z);}
     };
-    const float areas[] = {sizeXZ * sizeY,
-                           sizeXZ * sizeY,
-                           sizeXZ * sizeY,
-                           sizeXZ * sizeY,
-                           sizeY  * sizeY,
-                           sizeY  * sizeY};
+    const float areas[] = {size.x * size.y,
+                           size.x * size.y,
+                           size.x * size.y,
+                           size.x * size.y,
+                           size.y * size.y,
+                           size.y * size.y};
 
     for (int i = 0; i < 6; ++i)
     {
@@ -297,7 +293,7 @@ Object Object::flipped(TextureStore* textureStore) const
     {
         auto data   = std::make_shared<Data>(*d);
         data->model = data->model.flipped(textureStore, d->meta.scale);
-        data->meta.origin.x += 8.f; // TODO
+        data->meta.origin.x += c::cell::SIZE.x; // TODO
         auto object = Object();
         object.d    = data;
         return object;
