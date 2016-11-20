@@ -96,8 +96,8 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             t      += object.origin();
 
             // Rotation
-            const auto dim = object.dimensions();
             const auto rot = umod(d->objectTransform.rot + mouseWheel, 4);
+            const auto dim = object.dimensions();
             t += glm::vec3(rot > 1            ? dim.x - c::cell::GRID.x : 0.f, 0.f,
                            rot > 0 && rot < 3 ? dim.z - c::cell::GRID.z : 0.f);
 
