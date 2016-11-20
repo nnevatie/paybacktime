@@ -188,7 +188,7 @@ Grid<float> Object::density() const
 
 Object& Object::updateDensity()
 {
-    const auto size = dimensions().xzy() / c::cell::SIZE;
+    const auto size = dimensions().xzy() / c::cell::SIZE.xzy();
 
     Grid<float> map(glm::ceil(size));
     const Cubefield cfield(*d->model.depthCube());
@@ -202,8 +202,8 @@ Object& Object::updateDensity()
                 int fx1   = (x + 1) * cfield.width / size.x - 1;
                 int fy1   = (y + 1) * cfield.depth / size.y - 1;
                 int width = fx1 - fx0 + 1;
-                int y0    = -d->meta.origin.y + z * c::cell::SIZE.z;
-                int y1    = (z + 1) * c::cell::SIZE.z;
+                int y0    = -d->meta.origin.y + z * c::cell::SIZE.y;
+                int y1    = (z + 1) * c::cell::SIZE.y;
 
                 int sum = 0;
                 for (int fy = y0; fy < y1; ++fy)
@@ -216,7 +216,7 @@ Object& Object::updateDensity()
                             }
 
                 map.at(x, y, z) = float(sum) /
-                                  ((c::cell::SIZE.z + d->meta.origin.y) * width);
+                                  ((c::cell::SIZE.y + d->meta.origin.y) * width);
             }
 
     d->density = map;
@@ -235,7 +235,7 @@ Grid<glm::vec4> Object::bleed() const
 
 Object& Object::updateMaterial()
 {
-    const auto size = dimensions().xzy() / c::cell::SIZE;
+    const auto size = dimensions().xzy() / c::cell::SIZE.xzy();
 
     const auto pmax = glm::max(glm::vec3(0.f), size - 1.f);
     auto cubeDepth  = d->model.depthCube();

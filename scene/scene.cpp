@@ -91,7 +91,7 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
     auto const k0      = 1.f;
     auto const k1      = 0.5f;
     auto const k2      = 0.05f;
-    auto const st      = c::cell::SIZE;
+    auto const st      = c::cell::SIZE.xzy();
 
     auto const size = lightmap->size;
     //#pragma omp parallel for
@@ -253,7 +253,7 @@ gl::Texture* Scene::incidence() const
 Scene& Scene::updateLightmap()
 {
     const auto box = bounds();
-    const glm::ivec3 size(glm::ceil(box.size.xzy() / c::cell::SIZE));
+    const glm::ivec3 size(glm::ceil(box.size.xzy() / c::cell::SIZE.xzy()));
 
     HCTIME("generate lighting " + std::to_string(size.x) + "x"
                                 + std::to_string(size.y) + "x"
@@ -269,7 +269,7 @@ Scene& Scene::updateLightmap()
             const auto density  = item.obj.density();
             const auto emission = item.obj.emission();
             const auto pos      = glm::ivec3((item.trRot.tr - box.pos).xzy() /
-                                              c::cell::SIZE);
+                                              c::cell::SIZE.xzy());
 
             accumulateDensity(&d->density, pos, density);
             accumulateEmission(&d->emissive, pos, emission);
