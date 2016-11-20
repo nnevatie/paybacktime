@@ -2,6 +2,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "constants.h"
+
 #include "common/log.h"
 
 #include "geom/box.h"
@@ -82,21 +84,27 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
 
         if (d->state != Data::State::Idle)
         {
+            // World intersection
             const auto clipRay  = d->display->clip(d->mouse->position());
             const auto rayWorld = d->camera->world(d->camera->eye(clipRay));
             auto intersection   = d->scene->intersect(rayWorld);
 
+            // Translation
             auto& t = intersection.first;
-            auto mx = std::fmod(t.x, 16.f);
-            auto mz = std::fmod(t.z, 16.f);
-            t.x    -= mx > 0 ? mx : (16.f + mx);
-            t.y     = 0;
-            t.z    -= mz > 0 ? mz : (16.f + mz);
+            t      -= glm::mod(t, c::cell::GRID);
+            t.y     = 0.f;
             t      += object.origin();
+
+            // Rotation
+            const auto dim = object.dimensions();
+            const auto rot = umod(d->objectTransform.rot + mouseWheel, 4);
+            t += glm::vec3(rot > 1            ? dim.x - c::cell::GRID.x : 0.f, 0.f,
+                           rot > 0 && rot < 3 ? dim.z - c::cell::GRID.z : 0.f);
 
             if (d->state == Data::State::Adding &&
                !d->scene->contains({object, intersection.first}))
             {
+                // Add item
                 d->scene->add({object, {intersection.first,
                                         d->objectTransform.rot}});
             }
@@ -104,11 +112,13 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             if (d->state == Data::State::Removing &&
                 !intersection.second.empty())
             {
+                // Remove items
                 for (const auto& item : intersection.second)
                     d->scene->remove({item.obj, intersection.first});
             }
+            // Store current state
             d->objectTransform.tr  = intersection.first;
-            d->objectTransform.rot = umod(d->objectTransform.rot + mouseWheel, 4);
+            d->objectTransform.rot = rot;
         }
     }
     else
