@@ -9,7 +9,7 @@ namespace c
 
 namespace cell
 {
-const auto SIZE = glm::vec3(8.f, 32.f, 8.f);
+const auto SIZE = glm::vec3(8.f, 8.f, 32.f);
 }
 
 namespace object
