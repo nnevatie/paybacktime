@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <glm/vec3.hpp>
+
 #include "platform/clock.h"
 #include "common/statistics.h"
 
@@ -19,7 +21,7 @@ struct RenderStats
     void accumulate(const Duration& frameTime,
                     int vertexCount, int triangleCount);
 
-    RenderStats& operator()();
+    RenderStats& operator()(const glm::ivec3& sceneSize);
 
 private:
     struct Data;

@@ -60,7 +60,7 @@ void RenderStats::accumulate(const pt::Duration& frameTime,
     }
 }
 
-RenderStats& RenderStats::operator()()
+RenderStats& RenderStats::operator()(const glm::ivec3& sceneSize)
 {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -78,6 +78,12 @@ RenderStats& RenderStats::operator()()
     nvgText(d->vg, 140, 20, str(std::stringstream()
                                << std::fixed << std::setprecision(1)
                                << "FPS: " << (1000.f / timeMs)).c_str(), 0);
+    nvgText(d->vg, 250, 20, str(std::stringstream()
+                               << "Scene: "
+                               << sceneSize.x << "x"
+                               << sceneSize.y << "x"
+                               << sceneSize.z).c_str(), 0);
+
 #if 0
     nvgText(vg, 10, 40, str(std::stringstream()
                             << "Vertices: " << vertexCount).c_str(), 0);
