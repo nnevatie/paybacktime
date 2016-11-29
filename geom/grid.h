@@ -85,13 +85,13 @@ inline Image image(const Grid<float>& grid, float sat = 1.f)
     return img;
 }
 
-inline Image image(const Grid<glm::vec3>& grid, float sat = 1.f)
+inline Image image(const Grid<glm::vec3>& grid, int z = 0, float sat = 1.f)
 {
     Image img(grid.size.xy(), 4);
     for (int y = 0; y < grid.size.y; ++y)
         for (int x = 0; x < grid.size.x; ++x)
             *img.bits<uint32_t>(x, y) =
-                argb(255.f * glm::min(glm::vec3(1.f), grid.at(x, y) / sat));
+                argb(255.f * glm::min(glm::vec3(1.f), grid.at(x, y, z) / sat));
     return img;
 }
 
