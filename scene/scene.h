@@ -60,6 +60,7 @@ struct Scene
     Scene();
 
     Box bounds() const;
+    glm::ivec3 cellResolution() const;
 
     bool contains(const ObjectItem& item) const;
 

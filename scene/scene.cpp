@@ -163,6 +163,11 @@ Box Scene::bounds() const
     return box;
 }
 
+glm::ivec3 Scene::cellResolution() const
+{
+    return {glm::ceil(bounds().size.xzy() / c::cell::SIZE.xzy())};
+}
+
 bool Scene::contains(const ObjectItem& item) const
 {
     return containsItem(d->objectItems, item);
@@ -252,13 +257,12 @@ gl::Texture* Scene::incidence() const
 
 Scene& Scene::updateLightmap()
 {
-    const auto box = bounds();
-    const glm::ivec3 size(glm::ceil(box.size.xzy() / c::cell::SIZE.xzy()));
+    const auto box  = bounds();
+    const auto size = cellResolution();
 
     HCTIME("generate lighting " + std::to_string(size.x) + "x"
                                 + std::to_string(size.y) + "x"
                                 + std::to_string(size.z));
-
     // Density and emissive
     d->density  = Grid<float>(size);
     d->emissive = Grid<glm::vec3>(size);
