@@ -191,7 +191,7 @@ struct Data
 
         display->renderWidgets();
         stats.accumulate(clock.elapsed(), 0, 0);
-        stats();
+        stats(scene.cellResolution());
 
         fader(1.f - timeSec);
 
