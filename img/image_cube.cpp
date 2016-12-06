@@ -13,7 +13,7 @@ ImageCube::ImageCube()
 
 ImageCube::ImageCube(const fs::path& path, int depth)
 {
-    HCLOG(Info) << path.string() << ", " << depth;
+    PTLOG(Info) << path.string() << ", " << depth;
 
     struct SideImage
     {

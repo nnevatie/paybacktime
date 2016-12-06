@@ -21,7 +21,7 @@ void debugCallback(
     if ((severity == GL_DEBUG_SEVERITY_MEDIUM_ARB ||
          severity == GL_DEBUG_SEVERITY_HIGH_ARB)  &&
         !strstr(message, "recompiled"))
-        HCLOG(Debug) << message;
+        PTLOG(Debug) << message;
 }
 
 } // namespace
@@ -89,14 +89,14 @@ nanogui::Screen*Display::nanoGui() const
 
 bool Display::open()
 {
-    HCTIME("");
+    PTTIME("");
     if (!d->window)
     {
         // Log available video drivers
-        HCLOG(Debug) << "Video drivers:";
+        PTLOG(Debug) << "Video drivers:";
         const int driverCount = SDL_GetNumVideoDrivers();
         for (int i = 0; i < driverCount; ++i)
-            HCLOG(Debug) << "#" << (i + 1) << ": "
+            PTLOG(Debug) << "#" << (i + 1) << ": "
                          << SDL_GetVideoDriver(i);
 
         // Set GL context attributes
@@ -149,7 +149,7 @@ bool Display::open()
         SDL_GL_SwapWindow(d->window);
 
         // Log renderer info
-        HCLOG(Debug) << "OpenGL vendor: '" << glGetString(GL_VENDOR)
+        PTLOG(Debug) << "OpenGL vendor: '" << glGetString(GL_VENDOR)
                      << "', renderer: '"   << glGetString(GL_RENDERER)
                      << "', version: '"    << glGetString(GL_VERSION) << "'";
 
@@ -158,7 +158,7 @@ bool Display::open()
         glGetIntegerv(0x9047, &gpuRamDedicated);
         glGetIntegerv(0x9048, &gpuRamTotal);
         glGetIntegerv(0x9049, &gpuRamAvail);
-        HCLOG(Debug) << "GPU RAM (dedicated, total, available): "
+        PTLOG(Debug) << "GPU RAM (dedicated, total, available): "
                      << gpuRamDedicated << ", "
                      << gpuRamTotal << ", "
                      << gpuRamAvail;
@@ -171,7 +171,7 @@ bool Display::open()
         return gladStatus;
     }
     else
-        HCLOG(Warn) << "Window already open.";
+        PTLOG(Warn) << "Window already open.";
 
     return false;
 }
@@ -192,7 +192,7 @@ bool Display::close()
         return true;
     }
     else
-        HCLOG(Warn) << "Window not open.";
+        PTLOG(Warn) << "Window not open.";
 
     return false;
 }

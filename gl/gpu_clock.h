@@ -31,7 +31,7 @@ private:
     GLuint id;
 };
 
-#define HCTIME_GPU(description) \
+#define PTTIME_GPU(description) \
     pt::ScopedClock<GpuClock> scopedClock_(PTSRC(), description)
 
 }  // namespace

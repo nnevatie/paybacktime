@@ -14,7 +14,7 @@ struct Context::Data
 {
     Data()
     {
-        HCTIME("Construct");
+        PTTIME("Construct");
 
         if (SDL_Init(SDL_INIT_VIDEO))
             throw std::runtime_error("SDL init failed.");
@@ -26,7 +26,7 @@ struct Context::Data
 
     virtual ~Data()
     {
-        HCTIME("Clean up");
+        PTTIME("Clean up");
         IMG_Quit();
         SDL_Quit();
     }

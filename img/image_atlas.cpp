@@ -143,7 +143,7 @@ Rect<int> ImageAtlas::insert(const Image& image, int margin)
 
 RectCube<int> ImageAtlas::insert(const ImageCube& imageCube, int margin)
 {
-    HCTIME("cube");
+    PTTIME("cube");
 
     RectCube<int> cubeRect;
     for (std::size_t i = 0; i < imageCube.sides.size(); ++i)

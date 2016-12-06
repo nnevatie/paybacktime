@@ -25,7 +25,7 @@ Bloom::Bloom(const Size<int>& renderSize) :
     progBlur({vsQuadUv, fsGaussian},
             {{0, "position"}, {1, "uv"}})
 {
-    HCLOG(Info) << "size " << renderSize.w << "x" << renderSize.h;
+    PTLOG(Info) << "size " << renderSize.w << "x" << renderSize.h;
     auto fboSize = {renderSize.w, renderSize.h};
 
     const GLint iformat = GL_RGB16F;
@@ -64,7 +64,7 @@ Bloom::Bloom(const Size<int>& renderSize) :
                   .attach(texBlur[i], gl::Fbo::Attachment::Color)
                   .unbind();
 
-        HCLOG(Info) << i << " " << size.w << "x" << size.h;
+        PTLOG(Info) << i << " " << size.w << "x" << size.h;
     }
 }
 

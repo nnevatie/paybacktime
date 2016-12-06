@@ -88,7 +88,7 @@ struct Meta
             origin = glm::make_vec3(meta.value("origin",
                                     std::vector<float>(3)).data());
         }
-        HCLOG(Info) << "meta: " << scale << "; " << origin.x << ", "
+        PTLOG(Info) << "meta: " << scale << "; " << origin.x << ", "
                                                  << origin.y << ", "
                                                  << origin.z;
     }
@@ -243,7 +243,7 @@ Object& Object::updateMaterial()
     auto cubeLight  = d->model.lightCube();
 
     Grid<glm::vec3> map(glm::ceil(size));
-    HCLOG(Info) << name() << " size: " << map.size.x << "x"
+    PTLOG(Info) << name() << " size: " << map.size.x << "x"
                                        << map.size.y << "x"
                                        << map.size.z;
     const Projection projections[] =

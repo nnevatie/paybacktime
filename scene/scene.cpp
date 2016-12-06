@@ -260,14 +260,14 @@ Scene& Scene::updateLightmap()
     const auto box  = bounds();
     const auto size = cellResolution();
 
-    HCTIME("generate lighting " + std::to_string(size.x) + "x"
+    PTTIME("generate lighting " + std::to_string(size.x) + "x"
                                 + std::to_string(size.y) + "x"
                                 + std::to_string(size.z));
     // Density and emissive
     d->density  = Grid<float>(size);
     d->emissive = Grid<glm::vec3>(size);
     {
-        HCTIME("precalc dens+emis maps");
+        PTTIME("precalc dens+emis maps");
         for (const auto& item : d->objectItems)
         {
             const auto density  = item.obj.density();
@@ -281,7 +281,7 @@ Scene& Scene::updateLightmap()
     }
     // Lightmap
     {
-        HCTIME("acc lightmap");
+        PTTIME("acc lightmap");
         d->lightmap  = Grid<glm::vec3>(size);
         d->incidence = Grid<glm::vec3>(size);
         accumulateLightmap(&d->lightmap, &d->incidence,

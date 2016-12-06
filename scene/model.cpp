@@ -29,7 +29,7 @@ struct Model::Data
         cubeAlbedo((path / "albedo.*.png").string(), 4),
         cubeLight((path  / "light.*.png").string(), 4)
     {
-        HCLOG(Info) << path.string();
+        PTLOG(Info) << path.string();
         cubeNormal = cubeNormal.normals().scaled(cubeAlbedo);
         cubeLight  = cubeLight.scaled(cubeAlbedo);
     }

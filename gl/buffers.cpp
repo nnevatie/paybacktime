@@ -95,7 +95,7 @@ Buffer& Buffer::alloc(const void* data, int size)
     if(allocated == size)
         d->size = size;
     else
-        HCLOG(Warn) << "Could not alloc " << size << " bytes.";
+        PTLOG(Warn) << "Could not alloc " << size << " bytes.";
 
     return *this;
 }

@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     }
     catch (const std::exception& e)
     {
-        HCLOG(Fatal) << "An exception occurred: " << e.what();
+        PTLOG(Fatal) << "An exception occurred: " << e.what();
         return 1;
     }
     return 0;

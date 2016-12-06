@@ -74,7 +74,7 @@ struct Shader::Data
             std::string infoLog(logSize, 0);
             glGetShaderInfoLog(id, logSize, &logSize, &infoLog[0]);
 
-            HCLOG(Error) << (name.empty() ? infoLog : (name + ": " + infoLog));
+            PTLOG(Error) << (name.empty() ? infoLog : (name + ": " + infoLog));
             throw std::runtime_error("Shader compilation error");
         }
     }
@@ -150,7 +150,7 @@ ShaderProgram::ShaderProgram(const std::vector<Shader>& shaders,
         std::string infoLog(logSize, 0);
         glGetProgramInfoLog(d->id, logSize, &logSize, &infoLog[0]);
 
-        HCLOG(Error) << infoLog;
+        PTLOG(Error) << infoLog;
         throw std::runtime_error("Program compilation error");
     }
 }

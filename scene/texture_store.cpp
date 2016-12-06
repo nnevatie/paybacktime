@@ -10,7 +10,7 @@ TextureStore::TextureStore(const Size<int>& size) :
     light(size,  true,  2),
     normal(size, false, 2)
 {
-    HCLOG(Info) << "size: " << size.w << "x" << size.h;
+    PTLOG(Info) << "size: " << size.w << "x" << size.h;
 }
 
 } // namespace pt

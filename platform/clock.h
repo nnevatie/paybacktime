@@ -37,7 +37,7 @@ private:
     TimePoint tp0;
 };
 
-#define HCTIME(description) \
+#define PTTIME(description) \
     pt::ScopedClock<ChronoClock> scopedClock_(PTSRC(), description)
 
 template <typename T>
