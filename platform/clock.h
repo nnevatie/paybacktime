@@ -40,7 +40,17 @@ private:
 #define PTTIME(description) \
     pt::ScopedClock<ChronoClock> scopedClock_(PTSRC(), description)
 
+#define PTTIMEU(description, unit) \
+    pt::ScopedClock<ChronoClock, unit> scopedClock_(PTSRC(), description)
+
 template <typename T>
+inline std::string durationSuffix() {return {};}
+template <>
+inline std::string durationSuffix<boost::milli>() {return "ms";}
+template <>
+inline std::string durationSuffix<boost::micro>() {return "us";}
+
+template <typename T, typename U = boost::micro>
 struct ScopedClock
 {
     ScopedClock(const SourceLocation& source, const std::string& message) :
@@ -50,12 +60,13 @@ struct ScopedClock
     ~ScopedClock()
     {
         const float us = boost::chrono::duration
-                         <float, boost::micro>(clock_.elapsed()).count();
+                         <float, U>(clock_.elapsed()).count();
 
         Logger(Logger::Info, source_)
             << (message_.length() > 0 ? (message_ + " ") : "")
-            << us << " " << "us";
+            << us << " " << durationSuffix<U>();
     }
+
 private:
     Time<T>        clock_;
     SourceLocation source_;

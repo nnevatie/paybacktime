@@ -260,9 +260,9 @@ Scene& Scene::updateLightmap()
     const auto box  = bounds();
     const auto size = cellResolution();
 
-    PTTIME("generate lighting " + std::to_string(size.x) + "x"
-                                + std::to_string(size.y) + "x"
-                                + std::to_string(size.z));
+    PTTIMEU("generate lighting " + std::to_string(size.x) + "x"
+                                 + std::to_string(size.y) + "x"
+                                 + std::to_string(size.z), boost::milli);
     // Density and emissive
     d->density  = Grid<float>(size);
     d->emissive = Grid<glm::vec3>(size);
