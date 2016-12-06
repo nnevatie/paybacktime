@@ -281,17 +281,19 @@ Scene& Scene::updateLightmap()
     }
     // Lightmap
     {
-        PTTIME("acc lightmap");
+        PTTIMEU("accumulate lightmap", boost::milli);
         d->lightmap  = Grid<glm::vec3>(size);
         d->incidence = Grid<glm::vec3>(size);
         accumulateLightmap(&d->lightmap, &d->incidence,
                            d->density, d->emissive);
     }
 
+    #if 0
     image(d->density).write("c:/temp/density.png");
     image(d->emissive).write("c:/temp/emissive.png");
     image(d->lightmap).write("c:/temp/lightmap.png");
     image(d->incidence).write("c:/temp/incidence.png");
+    #endif
 
     d->lightTex.bind().alloc(d->lightmap)
                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
