@@ -92,8 +92,8 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
     auto const k1      = 0.5f;
     auto const k2      = 0.05f;
     auto const st      = c::cell::SIZE.xzy();
+    auto const size    = lightmap->size;
 
-    auto const size = lightmap->size;
     //#pragma omp parallel for
     for (int z = 0; z < size.z; ++z)
         for (int y = 0; y < size.y; ++y)
