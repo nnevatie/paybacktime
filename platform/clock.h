@@ -38,7 +38,7 @@ private:
 };
 
 #define HCTIME(description) \
-    pt::ScopedClock<ChronoClock> scopedClock_(HCSOURCE(), description)
+    pt::ScopedClock<ChronoClock> scopedClock_(PTSRC(), description)
 
 template <typename T>
 struct ScopedClock

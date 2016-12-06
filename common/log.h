@@ -5,7 +5,7 @@
 #include "common.h"
 
 #define HCLOG(priority)    \
-    pt::Logger(pt::Logger::priority, HCSOURCE())
+    pt::Logger(pt::Logger::priority, PTSRC())
 
 namespace pt
 {

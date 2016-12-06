@@ -32,6 +32,6 @@ private:
 };
 
 #define HCTIME_GPU(description) \
-    pt::ScopedClock<GpuClock> scopedClock_(HCSOURCE(), description)
+    pt::ScopedClock<GpuClock> scopedClock_(PTSRC(), description)
 
 }  // namespace
