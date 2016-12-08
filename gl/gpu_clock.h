@@ -34,4 +34,7 @@ private:
 #define PTTIME_GPU(description) \
     pt::ScopedClock<GpuClock> scopedClock_(PTSRC(), description)
 
+#define PTTIMEU_GPU(description, unit) \
+    pt::ScopedClock<GpuClock, unit> scopedClock_(PTSRC(), description)
+
 }  // namespace
