@@ -72,6 +72,11 @@ struct Grid
         return *this;
     }
 
+    operator bool() const
+    {
+        return !data.empty();
+    }
+
     glm::ivec3      size;
     std::vector<T>  data;
 };
