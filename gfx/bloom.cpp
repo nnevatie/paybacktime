@@ -31,7 +31,7 @@ Bloom::Bloom(const Size<int>& renderSize) :
     const GLint iformat = GL_RGB16F;
     const GLenum type   = GL_FLOAT;
 
-    // Color + emissive texture and FBO
+    // Color + emission texture and FBO
     texBloom.bind().alloc(fboSize, iformat, GL_RGB, type)
                    .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);

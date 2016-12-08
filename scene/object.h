@@ -7,8 +7,8 @@
 #include <glm/mat4x4.hpp>
 
 #include "common/file_system.h"
-#include "geom/grid.h"
 
+#include "material_types.h"
 #include "texture_store.h"
 #include "model.h"
 
@@ -37,11 +37,11 @@ struct Object
     bool transparent() const;
     Object& updateTransparency();
 
-    Grid<float> density() const;
+    mat::Density density() const;
     Object& updateDensity();
 
-    Grid<glm::vec3> emission() const;
-    Grid<glm::vec4> bleed() const;
+    mat::Emission emission() const;
+    mat::Bleed bleed() const;
     Object& updateMaterial();
 
     Object flipped(TextureStore* textureStore) const;

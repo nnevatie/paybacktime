@@ -25,8 +25,8 @@ namespace
 
 typedef std::function<glm::vec3(const glm::vec3&)> Projection;
 
-void accumulateMaterial(Grid<glm::vec3>* map,
-                        Grid<float>* density,
+void accumulateMaterial(mat::Emission& map,
+                        mat::Density& density,
                         const Projection& p,
                         const Image& depth,
                         const Image& albedo,
@@ -66,9 +66,9 @@ void accumulateMaterial(Grid<glm::vec3>* map,
             auto rgb    = glm::vec3(albedo.rgb());
             auto rgbN   = glm::length(rgb) > 0.f ? glm::normalize(rgb) : rgb;
             auto emis   = exp * argbTuple(rowLight[x]).b * rgbScale / scaleLight;
-            map->at(out.x, out.y, out.z) += emis * rgbN;
-            density->at(out.x, out.y, out.z) *= glm::pow(albedo.a / 255.f,
-                                                         1.f / area);
+            map.at(out.x, out.y, out.z) += emis * rgbN;
+            density.at(out.x, out.y, out.z) *= glm::pow(albedo.a / 255.f,
+                                                        1.f / area);
         }
     }
 }
@@ -109,9 +109,9 @@ struct Object::Data
     Meta            meta;
     Model           model;
     bool            transparent;
-    Grid<float>     density;
-    Grid<glm::vec3> emission;
-    Grid<glm::vec4> bleed;
+    mat::Density    density;
+    mat::Emission   emission;
+    mat::Bleed      bleed;
 };
 
 Object::Object()
@@ -181,7 +181,7 @@ Model Object::model() const
     return d->model;
 }
 
-Grid<float> Object::density() const
+mat::Density Object::density() const
 {
     return d->density;
 }
@@ -190,7 +190,7 @@ Object& Object::updateDensity()
 {
     const auto size = dimensions().xzy() / c::cell::SIZE.xzy();
 
-    Grid<float> map(glm::ceil(size));
+    mat::Density map(glm::ceil(size));
     const Cubefield cfield(*d->model.depthCube());
 
     for (int z = 0; z < size.z; ++z)
@@ -223,12 +223,12 @@ Object& Object::updateDensity()
     return *this;
 }
 
-Grid<glm::vec3> Object::emission() const
+mat::Emission Object::emission() const
 {
     return d->emission;
 }
 
-Grid<glm::vec4> Object::bleed() const
+mat::Bleed Object::bleed() const
 {
     return d->bleed;
 }
@@ -242,10 +242,10 @@ Object& Object::updateMaterial()
     auto cubeAlbedo = d->model.albedoCube();
     auto cubeLight  = d->model.lightCube();
 
-    Grid<glm::vec3> map(glm::ceil(size));
-    PTLOG(Info) << name() << " size: " << map.size.x << "x"
-                                       << map.size.y << "x"
-                                       << map.size.z;
+    mat::Emission emission(glm::ceil(size));
+    PTLOG(Info) << name() << " size: " << emission.size.x << "x"
+                                       << emission.size.y << "x"
+                                       << emission.size.z;
     const Projection projections[] =
     {
         // Front
@@ -277,13 +277,13 @@ Object& Object::updateMaterial()
     for (int i = 0; i < 6; ++i)
     {
         const auto side = ImageCube::Side(i);
-        accumulateMaterial(&map, &d->density,
+        accumulateMaterial(emission, d->density,
                            projections[i], cubeDepth->side(side),
                            cubeAlbedo->side(side),
                            cubeLight->side(side),
                            d->meta.scale, areas[i]);
     }
-    d->emission = map;
+    d->emission = emission;
     return *this;
 }
 

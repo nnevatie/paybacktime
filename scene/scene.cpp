@@ -12,6 +12,9 @@
 #include "platform/clock.h"
 #include "common/log.h"
 #include "img/color.h"
+#include "gfx/lightmapper.h"
+
+#include "material_types.h"
 
 namespace pt
 {
@@ -19,7 +22,7 @@ namespace pt
 namespace
 {
 
-float vis(const Grid<float>& map, glm::ivec3 p0, glm::ivec3 p1)
+float vis(const mat::Density& map, glm::ivec3 p0, glm::ivec3 p1)
 {
     // Make results symmetrical between endpoints
     if (p0.y > p1.y) std::swap(p0, p1);
@@ -39,7 +42,7 @@ float vis(const Grid<float>& map, glm::ivec3 p0, glm::ivec3 p1)
 }
 
 void accumulateDensity(
-    Grid<float>* map, const glm::ivec3& pos, const Grid<float>& density)
+    mat::Density& map, const glm::ivec3& pos, const mat::Density& density)
 {
     auto const size = density.size;
     for (int z = 0; z < size.z; ++z)
@@ -51,15 +54,15 @@ void accumulateDensity(
             for (int x = 0; x < size.x; ++x)
             {
                 const auto x1 = pos.x + x;
-                map->at(x1, y1, z1) = glm::min(1.f, map->at(x1, y1, z1) +
-                                                    density.at(x, y, z));
+                map.at(x1, y1, z1) = glm::min(1.f, map.at(x1, y1, z1) +
+                                                   density.at(x, y, z));
             }
         }
     }
 }
 
 void accumulateEmission(
-    Grid<glm::vec3>* map, const glm::ivec3& pos, const Grid<glm::vec3>& emission)
+    mat::Emission& map, const glm::ivec3& pos, const mat::Emission& emission)
 {
     auto const size = emission.size;
     for (int z = 0; z < size.z; ++z)
@@ -70,20 +73,20 @@ void accumulateEmission(
             const int y1 = pos.y + y;
             for (int x = 0; x < size.x; ++x)
             {
-                const int x1        = pos.x + x;
-                auto argb0          = map->at(x1, y1, z1);
-                auto argb1          = emission.at(x, y);
-                auto argb2          = argb0 + argb1;
-                map->at(x1, y1, z1) = argb2;
+                const int x1       = pos.x + x;
+                auto argb0         = map.at(x1, y1, z1);
+                auto argb1         = emission.at(x, y);
+                auto argb2         = argb0 + argb1;
+                map.at(x1, y1, z1) = argb2;
             }
         }
     }
 }
 
-void accumulateLightmap(Grid<glm::vec3>* lightmap,
-                        Grid<glm::vec3>* incidence,
-                        const Grid<float>& density,
-                        const Grid<glm::vec3>& emissive)
+void accumulateLightmap(mat::Light& lightmap,
+                        mat::Indidence& incidence,
+                        const mat::Density& density,
+                        const mat::Emission& emission)
 {
     auto const exp     = 1.f;
     auto const ambient = 0.f;
@@ -92,8 +95,9 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
     auto const k1      = 0.5f;
     auto const k2      = 0.05f;
     auto const st      = c::cell::SIZE.xzy();
-    auto const size    = lightmap->size;
+    auto const size    = lightmap.size;
 
+    #if 0
     //#pragma omp parallel for
     for (int z = 0; z < size.z; ++z)
         for (int y = 0; y < size.y; ++y)
@@ -105,7 +109,7 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
                     for (int ey = 0; ey < size.y; ++ey)
                         for (int ex = 0; ex < size.x; ++ex)
                         {
-                            auto argb = emissive.at(ex, ey, ez);
+                            auto argb = emission.at(ex, ey, ez);
                             if (argb != glm::zero<glm::vec3>())
                             {
                                 auto e   = argb;
@@ -124,9 +128,12 @@ void accumulateLightmap(Grid<glm::vec3>* lightmap,
                             }
                         }
 
-                lightmap->at(x, y, z)  = ambient + light;
-                incidence->at(x, y, z) = incid;
+                lightmap.at(x, y, z)  = ambient + light;
+                incidence.at(x, y, z) = incid;
             }
+    #else
+    gfx::Lightmapper()(lightmap, density, emission);
+    #endif
 }
 
 }
@@ -137,16 +144,16 @@ struct Scene::Data
              incidenceTex(gl::Texture::Type::Texture3d)
     {}
 
-    ObjectItems     objectItems;
-    CharacterItems  charItems;
+    ObjectItems    objectItems;
+    CharacterItems charItems;
 
-    Grid<float>     density;
-    Grid<glm::vec3> emissive;
-    Grid<glm::vec3> lightmap;
-    Grid<glm::vec3> incidence;
+    mat::Density   density;
+    mat::Emission  emission;
+    mat::Light     lightmap;
+    mat::Indidence incidence;
 
-    gl::Texture     lightTex;
-    gl::Texture     incidenceTex;
+    gl::Texture    lightTex;
+    gl::Texture    incidenceTex;
 };
 
 Scene::Scene() :
@@ -263,9 +270,9 @@ Scene& Scene::updateLightmap()
     PTTIMEU("generate lighting " + std::to_string(size.x) + "x"
                                  + std::to_string(size.y) + "x"
                                  + std::to_string(size.z), boost::milli);
-    // Density and emissive
-    d->density  = Grid<float>(size);
-    d->emissive = Grid<glm::vec3>(size);
+    // Density and emission
+    d->density  = mat::Density(size);
+    d->emission = mat::Emission(size);
     {
         PTTIME("precalc dens+emis maps");
         for (const auto& item : d->objectItems)
@@ -275,22 +282,22 @@ Scene& Scene::updateLightmap()
             const auto pos      = glm::ivec3((item.trRot.tr - box.pos).xzy() /
                                               c::cell::SIZE.xzy());
 
-            accumulateDensity(&d->density, pos, density);
-            accumulateEmission(&d->emissive, pos, emission);
+            accumulateDensity(d->density, pos, density);
+            accumulateEmission(d->emission, pos, emission);
         }
     }
     // Lightmap
     {
         PTTIMEU("accumulate lightmap", boost::milli);
-        d->lightmap  = Grid<glm::vec3>(size);
-        d->incidence = Grid<glm::vec3>(size);
-        accumulateLightmap(&d->lightmap, &d->incidence,
-                           d->density, d->emissive);
+        d->lightmap  = mat::Light(size);
+        d->incidence = mat::Indidence(size);
+        accumulateLightmap(d->lightmap, d->incidence,
+                           d->density,  d->emission);
     }
 
     #if 0
     image(d->density).write("c:/temp/density.png");
-    image(d->emissive).write("c:/temp/emissive.png");
+    image(d->emission).write("c:/temp/emission.png");
     image(d->lightmap).write("c:/temp/lightmap.png");
     image(d->incidence).write("c:/temp/incidence.png");
     #endif
