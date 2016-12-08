@@ -40,8 +40,12 @@ struct Object
     mat::Density density() const;
     Object& updateDensity();
 
+    bool emissive() const;
+    Object& updateEmissivity();
+
     mat::Emission emission() const;
     mat::Bleed bleed() const;
+
     Object& updateMaterial();
 
     Object flipped(TextureStore* textureStore) const;

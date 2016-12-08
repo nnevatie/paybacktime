@@ -103,12 +103,14 @@ struct Object::Data
     Data(const fs::path& path, TextureStore* textureStore) :
         meta(path),
         model(path, textureStore, meta.scale),
-        transparent(false)
+        transparent(false),
+        emissive(false)
     {}
 
     Meta            meta;
     Model           model;
     bool            transparent;
+    bool            emissive;
     mat::Density    density;
     mat::Emission   emission;
     mat::Bleed      bleed;
@@ -121,6 +123,7 @@ Object::Object(const fs::path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {
     updateTransparency();
+    updateEmissivity();
     updateDensity();
     updateMaterial();
 }
@@ -220,6 +223,17 @@ Object& Object::updateDensity()
             }
 
     d->density = map;
+    return *this;
+}
+
+bool Object::emissive() const
+{
+    return d->emissive;
+}
+
+Object& Object::updateEmissivity()
+{
+    d->emissive = d->model.lightCube()->emissive();
     return *this;
 }
 
