@@ -30,6 +30,8 @@ struct ImageCube
 
     bool transparent() const;
 
+    bool emissive() const;
+
     ImageCube scaled(const ImageCube& refCube) const;
 
     ImageCube flipped() const;

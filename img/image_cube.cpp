@@ -112,8 +112,17 @@ int ImageCube::depth() const
 
 bool ImageCube::transparent() const
 {
-    for (const Image& side : sides)
-        if (side.transparent())
+    for (const auto& side : sides)
+        if (side.channelPopulated(3, 0xff))
+            return true;
+
+    return false;
+}
+
+bool ImageCube::emissive() const
+{
+    for (const auto& side : sides)
+        if (side.channelPopulated(2))
             return true;
 
     return false;
