@@ -116,7 +116,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                 Binder<gl::Fbo> binder(fboScale[i]);
                 progScale.bind().setUniform("texColor", 0);
 
-                glViewport(0, 0, size.w, size.h);
+                glViewport(0, 0, size.x, size.y);
                 glDrawBuffer(GL_COLOR_ATTACHMENT0);
                 glDisable(GL_DEPTH_TEST);
                 glDepthMask(false);
@@ -132,7 +132,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                     // Horizontal
                     progBlur.setUniform("horizontal", true);
                     Binder<gl::Fbo> binder(fboBlur[i]);
-                    glViewport(0, 0, size.w, size.h);
+                    glViewport(0, 0, size.x, size.y);
                     texScale[i].bindAs(GL_TEXTURE0);
                     rect.render();
                 }
@@ -140,7 +140,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                     // Vertical
                     progBlur.setUniform("horizontal", false);
                     Binder<gl::Fbo> binder(fboScale[i]);
-                    glViewport(0, 0, size.w, size.h);
+                    glViewport(0, 0, size.x, size.y);
                     texBlur[i].bindAs(GL_TEXTURE0);
                     rect.render();
                 }
@@ -150,7 +150,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                 Binder<gl::Fbo> binder(fboColor);
                 progScale.bind().setUniform("texColor", 0);
                 fboColor.attach(this->texColor, gl::Fbo::Attachment::Color, 0, i);
-                glViewport(0, 0, size.w, size.h);
+                glViewport(0, 0, size.x, size.y);
                 glDrawBuffer(GL_COLOR_ATTACHMENT0);
                 texScale[i].bindAs(GL_TEXTURE0);
                 rect.render();

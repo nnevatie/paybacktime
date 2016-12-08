@@ -84,10 +84,10 @@ Bloom& Bloom::operator()(gl::Texture* texColor)
     // Downscale
     for (int i = 0; i < scaleCount; ++i)
     {
-        const Size<int> size = texScale[i].size();
+        const auto size = texScale[i].size();
         progScale.bind().setUniform("texColor", 0);
         Binder<gl::Fbo> binder(fboScale[i]);
-        glViewport(0, 0, size.w, size.h);
+        glViewport(0, 0, size.x, size.y);
         gl::Texture scaleSrc = i > 0 ? texScale[i - 1] : texBloom;
         scaleSrc.bindAs(GL_TEXTURE0);
         rect.render();
@@ -96,7 +96,7 @@ Bloom& Bloom::operator()(gl::Texture* texColor)
     // Blur and combine to next scale level up
     for (int i = scaleCount - 1; i >= 0; --i)
     {
-        const Size<int> size = texScale[i].size();
+        const auto size = texScale[i].size();
 
         // Blur source will be either the downscaled texture or it
         // combined with the previous level's blurred version.
@@ -106,7 +106,7 @@ Bloom& Bloom::operator()(gl::Texture* texColor)
             // Add previous level
             progAdd.bind().setUniform("tex0", 0).setUniform("tex1", 1);
             Binder<gl::Fbo> binder(fboAdd[i]);
-            glViewport(0, 0, size.w, size.h);
+            glViewport(0, 0, size.x, size.y);
             texBloom.bindAs(GL_TEXTURE0);
             texScale[i + 1].bindAs(GL_TEXTURE1);
             rect.render();
@@ -119,7 +119,7 @@ Bloom& Bloom::operator()(gl::Texture* texColor)
             // Blur horizontal
             progBlur.setUniform("horizontal", true);
             Binder<gl::Fbo> binder(fboBlur[i]);
-            glViewport(0, 0, size.w, size.h);
+            glViewport(0, 0, size.x, size.y);
             blurSrc.bindAs(GL_TEXTURE0);
             rect.render();
         }
@@ -127,7 +127,7 @@ Bloom& Bloom::operator()(gl::Texture* texColor)
             // Blur vertical
             progBlur.setUniform("horizontal", false);
             Binder<gl::Fbo> binder(fboScale[i]);
-            glViewport(0, 0, size.w, size.h);
+            glViewport(0, 0, size.x, size.y);
             texBlur[i].bindAs(GL_TEXTURE0);
             rect.render();
         }

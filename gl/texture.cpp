@@ -65,12 +65,13 @@ Texture::Type Texture::type() const
     return d->type;
 }
 
-Size<int> Texture::size()
+glm::ivec3 Texture::size()
 {
     Binder<gl::Texture> binder(this);
-    Size<int> size;
-    glGetTexLevelParameteriv(d->target, 0, GL_TEXTURE_WIDTH,  &size.w);
-    glGetTexLevelParameteriv(d->target, 0, GL_TEXTURE_HEIGHT, &size.h);
+    glm::ivec3 size;
+    glGetTexLevelParameteriv(d->target, 0, GL_TEXTURE_WIDTH,  &size.x);
+    glGetTexLevelParameteriv(d->target, 0, GL_TEXTURE_HEIGHT, &size.y);
+    glGetTexLevelParameteriv(d->target, 0, GL_TEXTURE_DEPTH,  &size.z);
     return size;
 }
 
@@ -88,7 +89,8 @@ int Texture::dimensions() const
 
 Image Texture::image()
 {
-    Image image(size(), 4);
+    const auto s = size();
+    Image image(Size<int>(s.x, s.y), 4);
     Binder<gl::Texture> binder(this);
     glGetTexImage(d->target, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
     return image;
@@ -196,16 +198,12 @@ Texture& Texture::alloc(const Image& image, bool srgb)
 
 Texture& Texture::alloc(const Grid<glm::vec3>& grid)
 {
-    std::vector<int> dv;
-    dv.insert(dv.begin(), &grid.size[0], &grid.size[dimensions() - 1] + 1);
-    return alloc(dv, GL_RGB32F, GL_RGB, GL_FLOAT, grid.ptr());
+    return alloc(grid.dims(), GL_RGB32F, GL_RGB, GL_FLOAT, grid.ptr());
 }
 
 Texture& Texture::alloc(const Grid<glm::vec4>& grid)
 {
-    std::vector<int> dv;
-    dv.insert(dv.begin(), &grid.size[0], &grid.size[dimensions() - 1] + 1);
-    return alloc(dv, GL_RGBA32F, GL_RGBA, GL_FLOAT, grid.ptr());
+    return alloc(grid.dims(), GL_RGBA32F, GL_RGBA, GL_FLOAT, grid.ptr());
 }
 
 float Texture::anisotropyMax()

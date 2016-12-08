@@ -22,7 +22,7 @@ Lightmapper& Lightmapper::operator()(mat::Light& lightmap,
 {
     if (lightmap)
     {
-        tex.bind().alloc(lightmap);
+        texLight.bind().alloc(lightmap);
 
         gl::Fbo fbo;
         Binder<gl::Fbo> fboBinder(&fbo);
@@ -34,7 +34,7 @@ Lightmapper& Lightmapper::operator()(mat::Light& lightmap,
 
         for (int z = 0; z < lightmap.size.z; ++z)
         {
-            fbo.attach(tex, gl::Fbo::Attachment::Color, 0, 0, z);
+            fbo.attach(texLight, gl::Fbo::Attachment::Color, 0, 0, z);
             prog.setUniform("z", 0.f);
             rect.render();
 

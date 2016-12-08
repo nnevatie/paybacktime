@@ -26,6 +26,14 @@ struct Grid
         size(size), data(size.x * size.y * size.z)
     {}
 
+    std::vector<int> dims() const
+    {
+        std::vector<int> d;
+        if (const int dimc = (size.x > 0) + (size.y > 0) + (size.z > 0))
+            d.insert(d.begin(), &size[0], &size[dimc - 1] + 1);
+        return d;
+    }
+
     const T& at(int x, int y) const
     {
         return data.at(y * size.x + x);

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <glad/glad.h>
+#include <glm/vec3.hpp>
 
 #include "geom/size.h"
 #include "geom/grid.h"
@@ -32,7 +33,7 @@ struct Texture
     GLuint id() const;
     Type type() const;
 
-    Size<int> size();
+    glm::ivec3 size();
     int dimensions() const;
 
     Image image();
