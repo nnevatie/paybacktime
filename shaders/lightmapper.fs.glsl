@@ -64,7 +64,7 @@ void main(void)
             {
                 ivec3 p1 = ivec3(ex, ey, ez);
                 vec3 e   = texelFetch(emission, p1, 0).rgb;
-                if (length(e) > 0.0)
+                if (dot(e, e) > 0.0)
                 {
                     vec3  w0  = cs * vec3(p0);
                     vec3  w1  = cs * vec3(p1);
