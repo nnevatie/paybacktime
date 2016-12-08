@@ -83,11 +83,13 @@ void accumulateEmission(
     }
 }
 
-void accumulateLightmap(mat::Light& lightmap,
+void accumulateLightmap(gfx::Lightmapper& lightmapper,
+                        mat::Light& lightmap,
                         mat::Indidence& incidence,
                         const mat::Density& density,
                         const mat::Emission& emission)
 {
+    #if 0
     auto const exp     = 1.f;
     auto const ambient = 0.f;
     auto const attMin  = 0.005f;
@@ -97,7 +99,6 @@ void accumulateLightmap(mat::Light& lightmap,
     auto const st      = c::cell::SIZE.xzy();
     auto const size    = lightmap.size;
 
-    #if 0
     //#pragma omp parallel for
     for (int z = 0; z < size.z; ++z)
         for (int y = 0; y < size.y; ++y)
@@ -132,7 +133,7 @@ void accumulateLightmap(mat::Light& lightmap,
                 incidence.at(x, y, z) = incid;
             }
     #else
-    gfx::Lightmapper()(lightmap, density, emission);
+    lightmapper(lightmap, density, emission);
     #endif
 }
 
@@ -140,20 +141,19 @@ void accumulateLightmap(mat::Light& lightmap,
 
 struct Scene::Data
 {
-    Data() : lightTex(gl::Texture::Type::Texture3d),
-             incidenceTex(gl::Texture::Type::Texture3d)
+    Data() : incidenceTex(gl::Texture::Type::Texture3d)
     {}
 
-    ObjectItems    objectItems;
-    CharacterItems charItems;
+    ObjectItems      objectItems;
+    CharacterItems   charItems;
 
-    mat::Density   density;
-    mat::Emission  emission;
-    mat::Light     lightmap;
-    mat::Indidence incidence;
+    mat::Density     density;
+    mat::Emission    emission;
+    mat::Light       lightmap;
+    mat::Indidence   incidence;
 
-    gl::Texture    lightTex;
-    gl::Texture    incidenceTex;
+    gfx::Lightmapper lightmapper;
+    gl::Texture      incidenceTex;
 };
 
 Scene::Scene() :
@@ -254,7 +254,7 @@ gfx::Geometry::Instances Scene::characterGeometry() const
 
 gl::Texture* Scene::lightmap() const
 {
-    return &d->lightTex;
+    return &d->lightmapper.texLight;
 }
 
 gl::Texture* Scene::incidence() const
@@ -288,10 +288,10 @@ Scene& Scene::updateLightmap()
     }
     // Lightmap
     {
-        PTTIMEU("accumulate lightmap", boost::milli);
         d->lightmap  = mat::Light(size);
         d->incidence = mat::Indidence(size);
-        accumulateLightmap(d->lightmap, d->incidence,
+        accumulateLightmap(d->lightmapper,
+                           d->lightmap, d->incidence,
                            d->density,  d->emission);
     }
 
@@ -302,9 +302,6 @@ Scene& Scene::updateLightmap()
     image(d->incidence).write("c:/temp/incidence.png");
     #endif
 
-    d->lightTex.bind().alloc(d->lightmap)
-                      .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                      .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     d->incidenceTex.bind().alloc(d->incidence)
                           .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                           .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);

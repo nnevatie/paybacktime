@@ -20,7 +20,9 @@ struct Lightmapper
 
     gl::ShaderProgram prog;
 
-    gl::Texture       texLight;
+    gl::Texture       texLight,
+                      texDensity,
+                      texEmission;
 
     Lightmapper();
 
