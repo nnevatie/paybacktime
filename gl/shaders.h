@@ -44,6 +44,7 @@ struct ShaderProgram
 
     GLuint id() const;
     ShaderProgram& bind();
+    ShaderProgram& unbind();
 
     template<typename T>
     ShaderProgram& setUniform(const char* name, const T& v);

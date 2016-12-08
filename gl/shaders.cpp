@@ -166,5 +166,11 @@ ShaderProgram& ShaderProgram::bind()
     return *this;
 }
 
+ShaderProgram& ShaderProgram::unbind()
+{
+    glUseProgram(0);
+    return *this;
+}
+
 } // namespace gl
 } // namespace pt
