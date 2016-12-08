@@ -180,7 +180,7 @@ Texture& Texture::alloc(const Image& image, bool srgb)
         GLint internalFormat;
         GLenum format;
     }
-    formats[] =
+    const formats[] =
     {
         {GL_R8,                             GL_RED},
         {GL_RG8,                            GL_RG},
@@ -194,6 +194,11 @@ Texture& Texture::alloc(const Image& image, bool srgb)
                       f.internalFormat, f.format, GL_UNSIGNED_BYTE, image.bits());
     }
     return *this;
+}
+
+Texture& Texture::alloc(const Grid<float>& grid)
+{
+    return alloc(grid.dims(), GL_R32F, GL_RED, GL_FLOAT, grid.ptr());
 }
 
 Texture& Texture::alloc(const Grid<glm::vec3>& grid)
