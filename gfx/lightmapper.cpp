@@ -18,6 +18,7 @@ Lightmapper::Lightmapper() :
     prog({vsQuadUv, fsLightmapper},
          {{0, "position"}, {1, "uv"}}),
     texLight(gl::Texture::Type::Texture3d),
+    texIncidence(gl::Texture::Type::Texture3d),
     texDensity(gl::Texture::Type::Texture3d),
     texEmission(gl::Texture::Type::Texture3d)
 {
@@ -32,9 +33,15 @@ Lightmapper& Lightmapper::operator()(mat::Light& lightmap,
     {
         if (glm::any(glm::notEqual(texLight.size(), lightmap.size)))
         {
-            texLight.bind().alloc(lightmap.dims(), GL_RGB32F, GL_RGB, GL_FLOAT)
+            const auto dims = lightmap.dims();
+
+            texLight.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
                            .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                            .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            texIncidence.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
+                               .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                               .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             PTLOG(Info) << " alloc "
                         << lightmap.size.x << ", "
@@ -57,7 +64,8 @@ Lightmapper& Lightmapper::operator()(mat::Light& lightmap,
             .setUniform("k2",       0.05f)
             .setUniform("cs",       c::cell::SIZE.xzy());
 
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        const GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+        glDrawBuffers(2, buffers);
         glDisable(GL_DEPTH_TEST);
 
         texDensity.bindAs(GL_TEXTURE0);
@@ -65,8 +73,9 @@ Lightmapper& Lightmapper::operator()(mat::Light& lightmap,
 
         for (int z = 0; z < lightmap.size.z; ++z)
         {
-            fbo.attach(texLight, gl::Fbo::Attachment::Color, 0, 0, z);
-            prog.setUniform("z", 0.f);
+            fbo.attach(texLight,     gl::Fbo::Attachment::Color, 0, 0, z);
+            fbo.attach(texIncidence, gl::Fbo::Attachment::Color, 1, 0, z);
+            prog.setUniform("wz", z);
             rect.render();
 
             #if 0

@@ -141,7 +141,7 @@ void accumulateLightmap(gfx::Lightmapper& lightmapper,
 
 struct Scene::Data
 {
-    Data() : incidenceTex(gl::Texture::Type::Texture3d)
+    Data()
     {}
 
     ObjectItems      objectItems;
@@ -153,7 +153,6 @@ struct Scene::Data
     mat::Indidence   incidence;
 
     gfx::Lightmapper lightmapper;
-    gl::Texture      incidenceTex;
 };
 
 Scene::Scene() :
@@ -259,7 +258,7 @@ gl::Texture* Scene::lightmap() const
 
 gl::Texture* Scene::incidence() const
 {
-    return &d->incidenceTex;
+    return &d->lightmapper.texIncidence;
 }
 
 Scene& Scene::updateLightmap()
@@ -301,10 +300,6 @@ Scene& Scene::updateLightmap()
     image(d->lightmap).write("c:/temp/lightmap.png");
     image(d->incidence).write("c:/temp/incidence.png");
     #endif
-
-    d->incidenceTex.bind().alloc(d->incidence)
-                          .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                          .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     return *this;
 }
 
