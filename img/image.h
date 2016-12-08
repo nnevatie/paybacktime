@@ -33,7 +33,7 @@ struct Image
     int depth() const;
     int stride() const;
 
-    bool transparent() const;
+    bool channelPopulated(int index, uint8_t ref = 0x00) const;
 
     const uint8_t* bits() const;
     uint8_t*       bits();

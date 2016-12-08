@@ -100,13 +100,15 @@ int Image::stride() const
     return d->stride;
 }
 
-bool Image::transparent() const
+bool Image::channelPopulated(int index, uint8_t ref) const
 {
+    const uint32_t shift = index << 3;
+    const uint32_t mask  = 0xff  << shift;
     for (int y = 0; y < d->size.h; ++y)
     {
         const uint32_t* __restrict__ row = bits<const uint32_t>(0, y);
         for (int x = 0; x < d->size.w; ++x)
-            if (((row[x] & 0xff000000) >> 24) < 0xff)
+            if (((row[x] & mask) >> shift) != ref)
                 return true;
     }
     return false;
