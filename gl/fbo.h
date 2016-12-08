@@ -27,7 +27,7 @@ struct Fbo
     Fbo& attach(const Rbo& rbo, Attachment attachment,
                 int index = 0);
     Fbo& attach(const Texture& texture, Attachment attachment,
-                int index = 0, int level = 0);
+                int index = 0, int level = 0, int layer = 0);
 
     static bool unbind();
 

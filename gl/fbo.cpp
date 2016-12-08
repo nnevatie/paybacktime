@@ -62,7 +62,7 @@ Fbo& Fbo::attach(const Rbo& rbo, Fbo::Attachment attachment, int index)
 }
 
 Fbo& Fbo::attach(const Texture& texture, Attachment attachment,
-                 int index, int level)
+                 int index, int level, int layer)
 {
     const GLenum target = GL_FRAMEBUFFER;
     const GLenum type   = GLenum(attachmentType(attachment) + uint32_t(index));
@@ -75,7 +75,7 @@ Fbo& Fbo::attach(const Texture& texture, Attachment attachment,
         glFramebufferTexture2D(target, type, GL_TEXTURE_2D, tid, level);
     else
     if (texture.type() == Texture::Type::Texture3d)
-        glFramebufferTexture3D(target, type, GL_TEXTURE_3D, tid, level, 0); // TODO
+        glFramebufferTexture3D(target, type, GL_TEXTURE_3D, tid, level, layer);
 
     return *this;
 }
