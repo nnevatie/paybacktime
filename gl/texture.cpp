@@ -1,6 +1,7 @@
 #include "texture.h"
 
 #include <glad/glad.h>
+#include <glm/gtc/constants.hpp>
 
 #include "common/log.h"
 
@@ -53,6 +54,11 @@ struct Texture::Data
 Texture::Texture(Type type) :
     d(std::make_shared<Data>(type))
 {
+}
+
+pt::gl::Texture::operator bool()
+{
+    return size() != glm::zero<glm::ivec3>();
 }
 
 GLuint Texture::id() const

@@ -30,6 +30,8 @@ struct Texture
 
     Texture(Type type = Type::Texture2d);
 
+    operator bool();
+
     GLuint id() const;
     Type type() const;
 
