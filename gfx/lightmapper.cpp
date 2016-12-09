@@ -194,7 +194,9 @@ Lightmapper& Lightmapper::operator()()
 
         glViewport(0, 0, size.x, size.y);
 
+        #if 0
         mat::Light lightmap(size);
+        #endif
 
         for (int z = 0; z < size.z; ++z)
         {
@@ -210,16 +212,16 @@ Lightmapper& Lightmapper::operator()()
             #endif
         }
 
+        #if 1
         const auto elapsed = boost::chrono::duration<float, boost::milli>
                             (clock.elapsed()).count();
         const auto vol     = size.x * size.y * size.z;
 
-        #if 1
         PTLOG(Info) << "elapsed " << elapsed << " ms, "
                     << (vol / elapsed) << " cells/ms";
         #endif
 
-        #if 1
+        #if 0
         for (int z = 0; z < size.z; ++z)
         {
             const auto zs = std::to_string(z);
