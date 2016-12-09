@@ -103,7 +103,7 @@ void main(void)
     vec3 incident   = normalize(incidVec);
     vec3 lightDir   = normalize(normalMat * incident);
     vec3 halfwayDir = normalize(lightDir + -viewDir);
-    float incid     = smoothstep(0, 2, length(incidVec));
+    float incid     = smoothstep(0, 1.25, length(incidVec));
 
     // Ambient
     vec3 ambient    = 0.5f * albedo;
