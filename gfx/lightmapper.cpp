@@ -55,12 +55,11 @@ void accumulate(
                 const auto x1 = pos.x + x;
                 d0.at(x1, y1, z1) = glm::min(1.f, d0.at(x1, y1, z1) +
                                                   d1.at(x,  y,  z));
-                const auto em1 = e1.at(x, y);
+                const auto em1 = e1.at(x, y, z);
                 if (em1 != glm::zero<glm::vec3>())
                 {
                     auto em0 = e0.at(x1, y1, z1);
-                    auto em2 = em0 + em1;
-                    e0.at(x1, y1, z1) = em2;
+                    e0.at(x1, y1, z1) = em0 + em1;
                     lightSources.insert({x1, y1, z1});
                 }
 
@@ -132,8 +131,6 @@ Lightmapper& Lightmapper::reset(const glm::ivec3& size)
         d->texIncidence.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
                               .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                               .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        PTLOG(Info) << "alloc " << size.x << ", " << size.y << ", " << size.z;
     }
     d->density      = mat::Density(size);
     d->emission     = mat::Emission(size);
@@ -199,6 +196,8 @@ Lightmapper& Lightmapper::operator()()
 
         glViewport(0, 0, size.x, size.y);
 
+        mat::Light lightmap(size);
+
         for (int z = 0; z < size.z; ++z)
         {
             fbo.attach(d->texLight,     gl::Fbo::Attachment::Color, 0, 0, z);
@@ -206,7 +205,7 @@ Lightmapper& Lightmapper::operator()()
             d->prog.setUniform("wz", z);
             d->rect.render();
 
-            #if 0
+            #if 1
             glReadPixels(0, 0, lightmap.size.x, lightmap.size.y,
                          GL_RGB, GL_FLOAT, static_cast<GLvoid*>(
                                                &lightmap.at(0, 0, z)));
@@ -217,8 +216,20 @@ Lightmapper& Lightmapper::operator()()
                             (clock.elapsed()).count();
         const auto vol     = size.x * size.y * size.z;
 
+        #if 0
         PTLOG(Info) << "elapsed " << elapsed << " ms, "
                     << (vol / elapsed) << " cells/ms";
+        #endif
+
+        #if 0
+        for (int z = 0; z < size.z; ++z)
+        {
+            const auto zs = std::to_string(z);
+            image(lightmap, z).write("c:/temp/" + zs + "_light.png");
+            image(d->density, z).write("c:/temp/" + zs + "_density.png");
+            image(d->emission, z).write("c:/temp/" + zs + "_emission.png");
+        }
+        #endif
     }
     return *this;
 }
