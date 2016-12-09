@@ -1,16 +1,18 @@
 #version 150
 
 // Uniforms
-uniform sampler3D density;
-uniform sampler3D emission;
-uniform int       wz;
-uniform float     exp;
-uniform float     ambient;
-uniform float     attMin;
-uniform float     k0;
-uniform float     k1;
-uniform float     k2;
-uniform vec3      cs;
+uniform sampler3D      density;
+uniform sampler3D      emission;
+uniform isamplerBuffer lightSrc;
+uniform int            wz;
+uniform int            lsc;
+uniform float          exp;
+uniform float          ambient;
+uniform float          attMin;
+uniform float          k0;
+uniform float          k1;
+uniform float          k2;
+uniform vec3           cs;
 
 // Const
 ivec3 size = ivec3(textureSize(density, 0));
@@ -52,36 +54,42 @@ float vis(ivec3 p0, ivec3 p1)
     return max(0.0, v);
 }
 
+float distance2(vec3 v0, vec3 v1)
+{
+    vec3 d = v0 - v1;
+    return d.x * d.x + d.y * d.y + d.z * d.z;
+}
+
 void main(void)
 {
     ivec3 p0 = ivec3(gl_FragCoord.xy, wz);
     vec3 l   = vec3(0);
     vec3 i   = vec3(0);
 
-    for (int ez = 0; ez < size.z; ++ez)
-        for (int ey = 0; ey < size.y; ++ey)
-            for (int ex = 0; ex < size.x; ++ex)
+    for (int li = 0; li < lsc; ++li)
+    {
+        ivec4 ls = texelFetch(lightSrc, li);
+        ivec3 p1 = ivec3(ls.x, ls.y, ls.z);
+        vec3  w0 = cs * vec3(p0);
+        vec3  w1 = cs * vec3(p1);
+        float d2 = distance2(w0, w1);
+        float r  = 1.0 / (k2 * attMin);
+        if (d2 <= r)
+        {
+            float d   = sqrt(d2);
+            float att = 1.0 / (k0 + k1 * d + k2 * d * d);
+            if (att > attMin)
             {
-                ivec3 p1 = ivec3(ex, ey, ez);
-                vec3 e   = texelFetch(emission, p1, 0).rgb;
-                if (dot(e, e) > 0.0)
+                float v = vis(p1, p0);
+                if (v > 0)
                 {
-                    vec3  w0  = cs * vec3(p0);
-                    vec3  w1  = cs * vec3(p1);
-                    float d   = distance(w0, w1);
-                    float r   = inversesqrt(k2 * attMin);
-                    if (d <= r)
-                    {
-                        float att = 1.0 / (k0 + k1 * d + k2 * d * d);
-                        if (att > attMin)
-                        {
-                            float v = vis(p1, p0);
-                            l      += v * v * exp * e * att;
-                            i      += att * (w1 - w0);
-                        }
-                    }
+                    vec3  e = texelFetch(emission, p1, 0).rgb;
+                    l      += v * v * exp * e * att;
+                    i      += att * (w1 - w0);
                 }
             }
+        }
+    }
 
     light     = l;
     incidence = i;

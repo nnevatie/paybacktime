@@ -96,14 +96,29 @@ struct Data
         sceneControl(&scene, &camera, display, &mouse, geometry.texDepth)
     {
         #if 1
-        auto floor = objectStore.object("floor");
-        auto light = objectStore.object("floor3");
+        auto floor  = objectStore.object("floor");
+        auto light  = objectStore.object("floor3");
+
+        #if 0
+        auto pillar = objectStore.object("pillar");
+        scene.add({pillar, TransformTrRot({0, 0, 0})});
+        #endif
+
         for (int y = -5; y <= 5; ++y)
             for (int x = -5; x <= 5; ++x)
             {
                 auto tr = TransformTrRot({16 * x, -2, 16 * y});
                 scene.add({x || y ? floor : light, tr});
             }
+
+        #if 0
+        for (int y = -20; y <= 20; ++y)
+            for (int x = -20; x <= 20; ++x)
+            {
+                auto tr = TransformTrRot({16 * x, -2, 16 * y});
+                scene.add({light, tr});
+            }
+        #endif
 
         scene.add({objectStore.object("chair"), TransformTrRot({-32, 0, 16 * -2})});
         scene.add({objectStore.object("table"), TransformTrRot({32, 0, 16 * -2})});

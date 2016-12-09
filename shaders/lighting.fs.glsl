@@ -127,7 +127,7 @@ void main(void)
     vec3 scatterPos   = worldPos;
     for (int i = 0; i < steps; ++i)
     {
-        vec3 gi      = texture(texGi, giUvw(scatterPos)).rgb * 0.25;
+        vec3 gi      = texture(texGi, giUvw(scatterPos)).rgb * 0.5;
         scatter     += gi / (steps + i * 32);
         scatterPos  += scatterStep;
     }

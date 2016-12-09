@@ -1,6 +1,7 @@
 #include "lightmapper.h"
 
 #include <set>
+#include <vector>
 
 #include <glm/gtc/constants.hpp>
 #include <glm/vec3.hpp>
@@ -10,6 +11,7 @@
 #include "gl/primitive.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"
+#include "gl/buffers.h"
 #include "gl/fbo.h"
 #include "gl/gpu_clock.h"
 
@@ -22,6 +24,10 @@ namespace gfx
 namespace
 {
 
+struct LightSource
+{
+    int16_t x, y, z, w;
+};
 struct LightSourceCmp : std::binary_function<glm::ivec3, glm::ivec3, bool>
 {
     bool operator()(const glm::ivec3& lhs, const glm::ivec3 rhs) const
@@ -33,14 +39,8 @@ struct LightSourceCmp : std::binary_function<glm::ivec3, glm::ivec3, bool>
 };
 using LightSources = std::set<glm::ivec3, LightSourceCmp>;
 
-/*
-    std::set<glm::ivec3, Compare> lightSources;
-
-    lightSources.insert({x1, y1, z1});
-*/
-
 void accumulate(
-    mat::Density& d0, mat::Emission& e0,
+    mat::Density& d0, mat::Emission& e0, LightSources& lightSources,
     const glm::ivec3& pos, const mat::Density& d1, const mat::Emission& e1)
 {
     auto const size = d1.size;
@@ -61,6 +61,7 @@ void accumulate(
                     auto em0 = e0.at(x1, y1, z1);
                     auto em2 = em0 + em1;
                     e0.at(x1, y1, z1) = em2;
+                    lightSources.insert({x1, y1, z1});
                 }
 
             }
@@ -81,7 +82,8 @@ struct Lightmapper::Data
         texLight(gl::Texture::Type::Texture3d),
         texIncidence(gl::Texture::Type::Texture3d),
         texDensity(gl::Texture::Type::Texture3d),
-        texEmission(gl::Texture::Type::Texture3d)
+        texEmission(gl::Texture::Type::Texture3d),
+        texLightSources(gl::Texture::Type::Buffer)
     {}
 
     gl::Primitive     rect;
@@ -93,11 +95,13 @@ struct Lightmapper::Data
 
     mat::Density      density;
     mat::Emission     emission;
+    LightSources      lightSources;
 
     gl::Texture       texLight,
                       texIncidence,
                       texDensity,
-                      texEmission;
+                      texEmission,
+                      texLightSources;
 };
 
 Lightmapper::Lightmapper() :
@@ -131,8 +135,9 @@ Lightmapper& Lightmapper::reset(const glm::ivec3& size)
 
         PTLOG(Info) << "alloc " << size.x << ", " << size.y << ", " << size.z;
     }
-    d->density  = mat::Density(size);
-    d->emission = mat::Emission(size);
+    d->density      = mat::Density(size);
+    d->emission     = mat::Emission(size);
+    d->lightSources = {};
     return *this;
 }
 
@@ -140,24 +145,41 @@ Lightmapper& Lightmapper::add(const glm::ivec3& pos,
                               const mat::Density& density,
                               const mat::Emission& emission)
 {
-    accumulate(d->density, d->emission, pos, density, emission);
+    accumulate(d->density, d->emission, d->lightSources, pos, density, emission);
     return *this;
 }
 
 Lightmapper& Lightmapper::operator()()
 {
-    PTTIMEU_GPU("generate lightmap", boost::milli);
     if (d->texLight)
     {
+        const Time<GpuClock> clock;
         const auto size = d->texLight.size();
+
+        // Populate lightsources buffer
+        const int lightSourceCount = d->lightSources.size();
+        std::vector<LightSource> lightSources;
+        lightSources.reserve(lightSourceCount);
+        for (const auto& ls : d->lightSources)
+            lightSources.push_back({int16_t(ls.x),
+                                    int16_t(ls.y),
+                                    int16_t(ls.z), 0});
+
+        gl::Buffer lightSourcesBuf(gl::Buffer::Type::Texture);
+        lightSourcesBuf.alloc(lightSources.data(),
+                              sizeof(LightSource) * lightSourceCount);
+
         d->texDensity.bind().alloc(d->density);
         d->texEmission.bind().alloc(d->emission);
+        d->texLightSources.bind().alloc(GL_RGBA16I, lightSourcesBuf);
 
         gl::Fbo fbo;
         Binder<gl::Fbo> fboBinder(&fbo);
         Binder<gl::ShaderProgram> progBinder(&d->prog);
         d->prog.setUniform("density",  0)
                .setUniform("emission", 1)
+               .setUniform("lightSrc", 2)
+               .setUniform("lsc",      lightSourceCount)
                .setUniform("exp",      1.f)
                .setUniform("ambient",  0.f)
                .setUniform("attMin",   0.005f)
@@ -173,6 +195,7 @@ Lightmapper& Lightmapper::operator()()
 
         d->texDensity.bindAs(GL_TEXTURE0);
         d->texEmission.bindAs(GL_TEXTURE1);
+        d->texLightSources.bindAs(GL_TEXTURE2);
 
         glViewport(0, 0, size.x, size.y);
 
@@ -189,6 +212,13 @@ Lightmapper& Lightmapper::operator()()
                                                &lightmap.at(0, 0, z)));
             #endif
         }
+
+        const auto elapsed = boost::chrono::duration<float, boost::milli>
+                            (clock.elapsed()).count();
+        const auto vol     = size.x * size.y * size.z;
+
+        PTLOG(Info) << "elapsed " << elapsed << " ms, "
+                    << (vol / elapsed) << " cells/ms";
     }
     return *this;
 }
