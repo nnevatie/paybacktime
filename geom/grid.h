@@ -89,12 +89,12 @@ struct Grid
     std::vector<T>  data;
 };
 
-inline Image image(const Grid<float>& grid, float sat = 1.f)
+inline Image image(const Grid<float>& grid, int z = 0, float sat = 1.f)
 {
     Image img(grid.size.xy(), 1);
     for (int y = 0; y < grid.size.y; ++y)
         for (int x = 0; x < grid.size.x; ++x)
-            *img.bits<uint8_t>(x, y) = 255.f * grid.at(x, y) / sat;
+            *img.bits<uint8_t>(x, y) = 255.f * grid.at(x, y, z) / sat;
     return img;
 }
 
