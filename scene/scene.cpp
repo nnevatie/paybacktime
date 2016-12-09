@@ -1,6 +1,5 @@
 #include "scene.h"
 
-#include <set>
 #include <vector>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -13,7 +12,6 @@
 #include "platform/clock.h"
 #include "gfx/lightmapper.h"
 #include "common/log.h"
-#include "img/color.h"
 
 namespace pt
 {
@@ -127,12 +125,12 @@ gfx::Geometry::Instances Scene::characterGeometry() const
 
 gl::Texture* Scene::lightmap() const
 {
-    return &d->lightmapper.texLight;
+    return d->lightmapper.lightTexture();
 }
 
 gl::Texture* Scene::incidence() const
 {
-    return &d->lightmapper.texIncidence;
+    return d->lightmapper.incidenceTexture();
 }
 
 Scene& Scene::updateLightmap()

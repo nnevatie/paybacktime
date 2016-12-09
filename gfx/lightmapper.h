@@ -1,9 +1,9 @@
 #pragma once
 
+#include <memory>
+
 #include <glm/vec3.hpp>
 
-#include "gl/primitive.h"
-#include "gl/shaders.h"
 #include "gl/texture.h"
 
 #include "scene/material_types.h"
@@ -15,21 +15,10 @@ namespace gfx
 
 struct Lightmapper
 {
-    gl::Primitive     rect;
-
-    gl::Shader        vsQuadUv,
-                      fsLightmapper;
-
-    gl::ShaderProgram prog;
-
-    mat::Density      density;
-    mat::Emission     emission;
-
-    gl::Texture       texLight,
-                      texIncidence,
-                      texDensity,
-                      texEmission;
     Lightmapper();
+
+    gl::Texture* lightTexture() const;
+    gl::Texture* incidenceTexture() const;
 
     Lightmapper& reset(const glm::ivec3& size = {});
 
@@ -38,6 +27,10 @@ struct Lightmapper
                      const mat::Emission& emission);
 
     Lightmapper& operator()();
+
+private:
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace gfx

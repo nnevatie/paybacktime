@@ -1,9 +1,15 @@
 #include "lightmapper.h"
 
+#include <set>
+
 #include <glm/gtc/constants.hpp>
 #include <glm/vec3.hpp>
 
 #include "common/log.h"
+
+#include "gl/primitive.h"
+#include "gl/shaders.h"
+#include "gl/texture.h"
 #include "gl/fbo.h"
 #include "gl/gpu_clock.h"
 
@@ -16,14 +22,18 @@ namespace gfx
 namespace
 {
 
-/*
-    struct Compare : std::binary_function<glm::ivec3, glm::ivec3, bool>
+struct LightSourceCmp : std::binary_function<glm::ivec3, glm::ivec3, bool>
+{
+    bool operator()(const glm::ivec3& lhs, const glm::ivec3 rhs) const
     {
-        bool operator()(const glm::ivec3& lhs, const glm::ivec3 rhs) const
-        {
-            return (lhs.y < rhs.y) || ((lhs.y == rhs.y) && (lhs.x < rhs.x));
-        }
-    };
+        return (lhs.x  < rhs.x)                  ||
+               (lhs.x == rhs.x && lhs.y < rhs.y) ||
+               (lhs.x == rhs.x && lhs.y == rhs.y && lhs.z < rhs.z);
+    }
+};
+using LightSources = std::set<glm::ivec3, LightSourceCmp>;
+
+/*
     std::set<glm::ivec3, Compare> lightSources;
 
     lightSources.insert({x1, y1, z1});
@@ -60,37 +70,69 @@ void accumulate(
 
 } // namespace
 
-Lightmapper::Lightmapper() :
-    rect(squareMesh()),
-    vsQuadUv(gl::Shader::path("quad_uv.vs.glsl")),
-    fsLightmapper(gl::Shader::path("lightmapper.fs.glsl")),
-    prog({vsQuadUv, fsLightmapper},
-         {{0, "position"}, {1, "uv"}}),
-    texLight(gl::Texture::Type::Texture3d),
-    texIncidence(gl::Texture::Type::Texture3d),
-    texDensity(gl::Texture::Type::Texture3d),
-    texEmission(gl::Texture::Type::Texture3d)
+struct Lightmapper::Data
 {
+    Data() :
+        rect(squareMesh()),
+        vsQuadUv(gl::Shader::path("quad_uv.vs.glsl")),
+        fsLightmapper(gl::Shader::path("lightmapper.fs.glsl")),
+        prog({vsQuadUv, fsLightmapper},
+             {{0, "position"}, {1, "uv"}}),
+        texLight(gl::Texture::Type::Texture3d),
+        texIncidence(gl::Texture::Type::Texture3d),
+        texDensity(gl::Texture::Type::Texture3d),
+        texEmission(gl::Texture::Type::Texture3d)
+    {}
+
+    gl::Primitive     rect;
+
+    gl::Shader        vsQuadUv,
+                      fsLightmapper;
+
+    gl::ShaderProgram prog;
+
+    mat::Density      density;
+    mat::Emission     emission;
+
+    gl::Texture       texLight,
+                      texIncidence,
+                      texDensity,
+                      texEmission;
+};
+
+Lightmapper::Lightmapper() :
+    d(std::make_shared<Data>())
+{
+}
+
+gl::Texture* Lightmapper::lightTexture() const
+{
+    return &d->texLight;
+}
+
+gl::Texture* Lightmapper::incidenceTexture() const
+{
+    return &d->texIncidence;
 }
 
 Lightmapper& Lightmapper::reset(const glm::ivec3& size)
 {
-    if (glm::any(glm::notEqual(texLight.size(), size)))
+    if (glm::any(glm::notEqual(d->texLight.size(), size)))
     {
         const std::vector<int> dims = {size.x, size.y, size.z};
 
-        texLight.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
-                       .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                       .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        d->texLight.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
+                          .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                          .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        texIncidence.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
-                           .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                           .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        d->texIncidence.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
+                              .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                              .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         PTLOG(Info) << "alloc " << size.x << ", " << size.y << ", " << size.z;
     }
-    density  = mat::Density(size);
-    emission = mat::Emission(size);
+    d->density  = mat::Density(size);
+    d->emission = mat::Emission(size);
     return *this;
 }
 
@@ -98,48 +140,48 @@ Lightmapper& Lightmapper::add(const glm::ivec3& pos,
                               const mat::Density& density,
                               const mat::Emission& emission)
 {
-    accumulate(this->density, this->emission, pos, density, emission);
+    accumulate(d->density, d->emission, pos, density, emission);
     return *this;
 }
 
 Lightmapper& Lightmapper::operator()()
 {
     PTTIMEU_GPU("generate lightmap", boost::milli);
-    if (texLight)
+    if (d->texLight)
     {
-        const auto size = texLight.size();
-        texDensity.bind().alloc(density);
-        texEmission.bind().alloc(emission);
+        const auto size = d->texLight.size();
+        d->texDensity.bind().alloc(d->density);
+        d->texEmission.bind().alloc(d->emission);
 
         gl::Fbo fbo;
         Binder<gl::Fbo> fboBinder(&fbo);
-        Binder<gl::ShaderProgram> progBinder(&prog);
-        prog.setUniform("density",  0)
-            .setUniform("emission", 1)
-            .setUniform("exp",      1.f)
-            .setUniform("ambient",  0.f)
-            .setUniform("attMin",   0.005f)
-            .setUniform("k0",       1.f)
-            .setUniform("k1",       0.5f)
-            .setUniform("k2",       0.05f)
-            .setUniform("cs",       c::cell::SIZE.xzy());
+        Binder<gl::ShaderProgram> progBinder(&d->prog);
+        d->prog.setUniform("density",  0)
+               .setUniform("emission", 1)
+               .setUniform("exp",      1.f)
+               .setUniform("ambient",  0.f)
+               .setUniform("attMin",   0.005f)
+               .setUniform("k0",       1.f)
+               .setUniform("k1",       0.5f)
+               .setUniform("k2",       0.05f)
+               .setUniform("cs",       c::cell::SIZE.xzy());
 
         const GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
         glDrawBuffers(2, buffers);
         glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
 
-        texDensity.bindAs(GL_TEXTURE0);
-        texEmission.bindAs(GL_TEXTURE1);
+        d->texDensity.bindAs(GL_TEXTURE0);
+        d->texEmission.bindAs(GL_TEXTURE1);
 
         glViewport(0, 0, size.x, size.y);
 
         for (int z = 0; z < size.z; ++z)
         {
-            fbo.attach(texLight,     gl::Fbo::Attachment::Color, 0, 0, z);
-            fbo.attach(texIncidence, gl::Fbo::Attachment::Color, 1, 0, z);
-            prog.setUniform("wz", z);
-            rect.render();
+            fbo.attach(d->texLight,     gl::Fbo::Attachment::Color, 0, 0, z);
+            fbo.attach(d->texIncidence, gl::Fbo::Attachment::Color, 1, 0, z);
+            d->prog.setUniform("wz", z);
+            d->rect.render();
 
             #if 0
             glReadPixels(0, 0, lightmap.size.x, lightmap.size.y,
