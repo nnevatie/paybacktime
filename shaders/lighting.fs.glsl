@@ -103,7 +103,7 @@ void main(void)
     vec3 incident   = normalize(incidVec);
     vec3 lightDir   = normalize(normalMat * incident);
     vec3 halfwayDir = normalize(lightDir + -viewDir);
-    float incid     = smoothstep(0, 8, length(incidVec));
+    float incid     = smoothstep(0, 2, length(incidVec));
 
     // Ambient
     vec3 ambient    = 0.5f * albedo;
@@ -128,7 +128,7 @@ void main(void)
     for (int i = 0; i < steps; ++i)
     {
         vec3 gi      = texture(texGi, giUvw(scatterPos)).rgb * 0.5;
-        scatter     += gi / (steps + i * 32);
+        scatter     += gi / (steps + i * 8);
         scatterPos  += scatterStep;
     }
 
