@@ -177,12 +177,10 @@ Lightmapper& Lightmapper::operator()()
                .setUniform("emission", 1)
                .setUniform("lightSrc", 2)
                .setUniform("lsc",      lightSourceCount)
-               .setUniform("exp",      1.f)
-               .setUniform("ambient",  0.f)
-               .setUniform("attMin",   0.005f)
+               .setUniform("attMin",   0.001f)
                .setUniform("k0",       1.f)
-               .setUniform("k1",       0.5f)
-               .setUniform("k2",       0.05f)
+               .setUniform("k1",       0.22f)
+               .setUniform("k2",       0.2f)
                .setUniform("cs",       c::cell::SIZE.xzy());
 
         const GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
@@ -205,7 +203,7 @@ Lightmapper& Lightmapper::operator()()
             d->prog.setUniform("wz", z);
             d->rect.render();
 
-            #if 1
+            #if 0
             glReadPixels(0, 0, lightmap.size.x, lightmap.size.y,
                          GL_RGB, GL_FLOAT, static_cast<GLvoid*>(
                                                &lightmap.at(0, 0, z)));
@@ -216,12 +214,12 @@ Lightmapper& Lightmapper::operator()()
                             (clock.elapsed()).count();
         const auto vol     = size.x * size.y * size.z;
 
-        #if 0
+        #if 1
         PTLOG(Info) << "elapsed " << elapsed << " ms, "
                     << (vol / elapsed) << " cells/ms";
         #endif
 
-        #if 0
+        #if 1
         for (int z = 0; z < size.z; ++z)
         {
             const auto zs = std::to_string(z);

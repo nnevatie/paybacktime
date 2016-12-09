@@ -6,8 +6,6 @@ uniform sampler3D      emission;
 uniform isamplerBuffer lightSrc;
 uniform int            wz;
 uniform int            lsc;
-uniform float          exp;
-uniform float          ambient;
 uniform float          attMin;
 uniform float          k0;
 uniform float          k1;
@@ -81,11 +79,12 @@ void main(void)
             if (att > attMin)
             {
                 float v = vis(p1, p0);
-                if (v > 0)
+                if (v > 0.0)
                 {
                     vec3  e = texelFetch(emission, p1, 0).rgb;
-                    l      += v * v * exp * e * att;
-                    i      += att * (w1 - w0);
+                    float a = v * v * att;
+                    l      += a * e;
+                    i      += a * (w1 - w0);
                 }
             }
         }
