@@ -44,10 +44,7 @@ vec3 world(sampler2D depth, vec2 uv, mat4 v, mat4 p)
 
 vec3 giUvw(vec3 worldPos)
 {
-    vec3 uvw = ((worldPos - boundsMin) / boundsSize).xzy;
-    float zs = 1.0 / sizeTexGi.z;
-    uvw.z    = 0.5 * zs + uvw.z * zs * (sizeTexGi.z - 1);
-    return uvw;
+    return ((worldPos - boundsMin) / boundsSize).xzy;
 }
 
 float g1v(float dotNV, float k)
@@ -102,7 +99,7 @@ void main(void)
     vec3 incident   = normalize(incidVec);
     vec3 lightDir   = normalize(normalMat * incident);
     vec3 halfwayDir = normalize(lightDir + -viewDir);
-    float incid     = smoothstep(0.0, 1.25, length(incidVec));
+    float incid     = smoothstep(0.0, 2.0, length(incidVec));
 
     // Ambient
     vec3 ambient    = 0.25 * albedo;
