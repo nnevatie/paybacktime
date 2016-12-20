@@ -82,3 +82,38 @@ vec4 textureBicubicBell(sampler2D sampler, vec2 uv0)
 
     return sum / den;
 }
+
+vec4 textureTricubic(sampler3D tex, vec3 uvw, vec3 texSize)
+{
+    vec3 uvwg = uvw * texSize - 0.5;
+    vec3 i    = floor(uvwg);
+    vec3 f0   = uvwg - i;
+    vec3 f1   = 1.0 - f0;
+
+    vec3 w0 = 1.0 / 6.0 * f1 * f1 *f1;
+    vec3 w1 = 2.0 / 3.0 - 0.5 * f0 * f0 * (2.0 - f0);
+    vec3 w2 = 2.0 / 3.0 - 0.5 * f1 * f1 * (2.0 - f1);
+    vec3 w3 = 1.0 / 6.0 * f0 * f0 *f0;
+
+    vec3 g0 = w0 + w1;
+    vec3 g1 = w2 + w3;
+    vec3 m  = 1.0 / texSize;
+    vec3 h0 = m * ((w1 / g0) - 0.5 + i);
+    vec3 h1 = m * ((w3 / g1) + 1.5 + i);
+
+    vec4 tex000 = texture(tex, h0);
+    vec4 tex100 = texture(tex, vec3(h1.x, h0.y, h0.z));
+    tex000 = mix(tex100, tex000, g0.x);
+    vec4 tex010 = texture(tex, vec3(h0.x, h1.y, h0.z));
+    vec4 tex110 = texture(tex, vec3(h1.x, h1.y, h0.z));
+    tex010 = mix(tex110, tex010, g0.x);
+    tex000 = mix(tex010, tex000, g0.y);
+    vec4 tex001 = texture(tex, vec3(h0.x, h0.y, h1.z));
+    vec4 tex101 = texture(tex, vec3(h1.x, h0.y, h1.z));
+    tex001 = mix(tex101, tex001, g0.x);
+    vec4 tex011 = texture(tex, vec3(h0.x, h1.y, h1.z));
+    vec4 tex111 = texture(tex, h1);
+    tex011 = mix(tex111, tex011, g0.x);
+    tex001 = mix(tex011, tex001, g0.y);
+    return mix(tex001, tex000, g0.z);
+}
