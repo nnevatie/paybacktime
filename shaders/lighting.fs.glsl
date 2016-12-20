@@ -13,9 +13,11 @@ uniform vec3      boundsSize;
 uniform mat4      v;
 uniform mat4      p;
 uniform vec3      camPos;
+uniform mat4      wm;
 
 // Const
 vec3 sizeTexGi = textureSize(texGi, 0);
+mat3 normalMat = transpose(inverse(mat3(v)));
 
 // Input
 in Block
@@ -31,14 +33,12 @@ out vec4 color;
 // Externals
 float linearDepth(float depth, mat4 proj);
 vec4 textureBicubic(sampler3D, vec3);
+vec4 textureTricubic(sampler3D, vec3, vec3);
 
-vec3 world(sampler2D depthSampler, vec2 uv, mat4 v, mat4 p)
+vec3 world(sampler2D depth, vec2 uv, mat4 v, mat4 p)
 {
-  vec4 clip;
-  clip.xy    = uv * 2.0 - 1.0;
-  clip.z     = texture(depthSampler, uv).r * 2.0 - 1.0;
-  clip.w     = 1.0;
-  vec4 world = inverse(p * v) * clip;
+  vec4 clip  = vec4(uv * 2.0 - 1.0, texture(depth, uv).r * 2.0 - 1.0, 1.0);
+  vec4 world = wm * clip;
   return world.xyz / world.w;
 }
 
@@ -65,9 +65,9 @@ float ggx(vec3 N, vec3 V, vec3 L, float roughness, float F0)
     float dotLH = clamp(dot(L, H), 0.0, 1.0);
 
     // D
-    float alphaSqr = alpha*alpha;
-    float pi       = 3.14159f;
-    float denom    = dotNH * dotNH * (alphaSqr - 1.0) + 1.0f;
+    float alphaSqr = alpha * alpha;
+    float pi       = 3.14159;
+    float denom    = dotNH * dotNH * (alphaSqr - 1.0) + 1.0;
     float D        = alphaSqr / (pi * denom * denom);
 
     // F
@@ -75,7 +75,7 @@ float ggx(vec3 N, vec3 V, vec3 L, float roughness, float F0)
     float F        = F0 + (1.0 - F0) * (dotLH5);
 
     // V
-    float k        = alpha / 2.0f;
+    float k        = alpha / 2.0;
     float vis      = g1v(dotNL, k) * g1v(dotNV, k);
 
     float specular = dotNL * D * F * vis;
@@ -87,8 +87,8 @@ void main(void)
     vec3 fragPos    = linearDepth(texture(texDepth, ib.uv).r, p) * ib.viewRay;
     vec3 worldPos   = world(texDepth, ib.uv, v, p);
     vec3 uvwGi      = giUvw(worldPos);
-    vec3 uvwGiBic   = uvwGi - vec3(0.5 / sizeTexGi.xy, 0);
-    vec3 gi         = textureBicubic(texGi, uvwGiBic).rgb;
+    vec3 gi         = textureTricubic(texGi, uvwGi, sizeTexGi).rgb;
+
     vec3 ao         = texture(texAo, ib.uv).r * gi.rgb;
     vec3 normal     = texture(texNormal, ib.uv).rgb;
     vec3 albedo     = texture(texColor,  ib.uv).rgb;
@@ -98,15 +98,14 @@ void main(void)
     vec3 viewDir    = normalize(ib.viewRay);
 
     // Light dir & incident
-    mat3 normalMat  = transpose(inverse(mat3(v)));
     vec3 incidVec   = texture(texIncid, uvwGi).xzy;
     vec3 incident   = normalize(incidVec);
     vec3 lightDir   = normalize(normalMat * incident);
     vec3 halfwayDir = normalize(lightDir + -viewDir);
-    float incid     = smoothstep(0, 1.25, length(incidVec));
+    float incid     = smoothstep(0.0, 1.25, length(incidVec));
 
     // Ambient
-    vec3 ambient    = 0.5f * albedo;
+    vec3 ambient    = 0.25 * albedo;
 
     // Diffuse
     vec3 diffuse    = 8.f * incid * albedo * max(dot(normal, lightDir), 0.0);
