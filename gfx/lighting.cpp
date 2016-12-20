@@ -1,5 +1,7 @@
 #include "lighting.h"
 
+#include <glm/matrix.hpp>
+
 #include "common/common.h"
 #include "common/log.h"
 
@@ -55,7 +57,8 @@ Lighting& Lighting::operator()(
                .setUniform("boundsSize",  glm::ceil(bounds.size))
                .setUniform("v",           v)
                .setUniform("p",           p)
-               .setUniform("camPos",      camera.position());
+               .setUniform("camPos",      camera.position())
+               .setUniform("wm",          glm::inverse(p * v));
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);
