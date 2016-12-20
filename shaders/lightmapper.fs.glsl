@@ -37,7 +37,7 @@ void swap(inout ivec3 v0, inout ivec3 v1)
 float vis(ivec3 p0, ivec3 p1)
 {
     // Make results symmetrical between endpoints
-    if (p0.y > p1.y) swap(p0, p1);
+    if (p0.y > p1.y || p0.z > p1.z) swap(p0, p1);
 
     ivec3 d = p1 - p0;
     int   n = abs(d.x) > abs(d.y) ? abs(d.x) : abs(d.y);
