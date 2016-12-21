@@ -27,13 +27,6 @@ ib;
 out vec3 light;
 out vec3 incidence;
 
-void swap(inout ivec3 v0, inout ivec3 v1)
-{
-    ivec3 t = v0;
-    v0 = v1;
-    v1 = t;
-}
-
 float vis(ivec3 p0, ivec3 p1)
 {
     // Grid deltas and step
