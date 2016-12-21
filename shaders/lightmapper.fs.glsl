@@ -27,41 +27,52 @@ ib;
 out vec3 light;
 out vec3 incidence;
 
-float vis(ivec3 p0, ivec3 p1)
+float vis(vec3 p0, vec3 p1)
 {
+    p0 += 0.5; p1 += 0.5;
+
     // Grid deltas and step
-    ivec3 d  = p1 - p0;
-    ivec3 da = abs(d);
-    ivec3 sg = sign(d);
+    vec3 d  = p1 - p0;
+    vec3 da = abs(d);
+    vec3 sg = sign(d);
 
     // t-step, iteration count
     vec3 st = 1.0 / da;
-    int   n = da.x + da.y + da.z;
+    int   n = int(da.x + da.y + da.z);
 
     // Loop
-    vec3  m = st;
-    ivec3 p = p0;
+    vec3  m = 0.5 * st;
+    vec3  p = p0;
     float v = 1.0;
+
     for (int i = 0; i < n && v > 0.0; ++i)
     {
-        if (i > 0)
-            v -= texelFetch(density, p, 0).r;
-
-        if (m.x < m.y && m.x < m.z)
+        v -= float(i > 0) * texelFetch(density, ivec3(p), 0).r;
+        if (m.x < m.y)
         {
-            p.x += sg.x;
-            m.x += st.x;
+            if (m.x < m.z)
+            {
+                p.x += sg.x;
+                m.x += st.x;
+            }
+            else
+            {
+                p.z += sg.z;
+                m.z += st.z;
+            }
         }
         else
-        if (m.y < m.z)
         {
-            p.y += sg.y;
-            m.y += st.y;
-        }
-        else
-        {
-            p.z += sg.z;
-            m.z += st.z;
+            if (m.y < m.z)
+            {
+                p.y += sg.y;
+                m.y += st.y;
+            }
+            else
+            {
+                p.z += sg.z;
+                m.z += st.z;
+            }
         }
     }
     return v;
