@@ -34,7 +34,7 @@ float vis(ivec3 p0, ivec3 p1)
     ivec3 da = abs(d);
     ivec3 sg = sign(d);
 
-    // t-step, t-max
+    // t-step, iteration count
     vec3 st = 1.0 / da;
     int   n = da.x + da.y + da.z;
 

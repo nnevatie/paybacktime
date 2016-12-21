@@ -61,6 +61,15 @@ ShaderProgram& ShaderProgram::setUniform<glm::vec4>(
 }
 
 template<>
+ShaderProgram& ShaderProgram::setUniform<glm::mat3>(
+    const char* name, const glm::mat3& v)
+{
+    glUniformMatrix3fv(glGetUniformLocation(id(), name),
+                       1, GL_FALSE, glm::value_ptr(v));
+    return *this;
+}
+
+template<>
 ShaderProgram& ShaderProgram::setUniform<glm::mat4>(
     const char* name, const glm::mat4& v)
 {

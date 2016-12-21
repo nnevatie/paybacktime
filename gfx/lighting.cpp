@@ -58,6 +58,7 @@ Lighting& Lighting::operator()(
                .setUniform("v",           v)
                .setUniform("p",           p)
                .setUniform("camPos",      camera.position())
+               .setUniform("nm",          glm::transpose(glm::inverse(glm::mat3(v))))
                .setUniform("wm",          glm::inverse(p * v));
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);

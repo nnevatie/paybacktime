@@ -13,11 +13,11 @@ uniform vec3      boundsSize;
 uniform mat4      v;
 uniform mat4      p;
 uniform vec3      camPos;
+uniform mat3      nm;
 uniform mat4      wm;
 
 // Const
 vec3 sizeTexGi = textureSize(texGi, 0);
-mat3 normalMat = transpose(inverse(mat3(v)));
 
 // Input
 in Block
@@ -97,7 +97,7 @@ void main(void)
     // Light dir & incident
     vec3 incidVec   = texture(texIncid, uvwGi).xzy;
     vec3 incident   = normalize(incidVec);
-    vec3 lightDir   = normalize(normalMat * incident);
+    vec3 lightDir   = normalize(nm * incident);
     vec3 halfwayDir = normalize(lightDir + -viewDir);
     float incid     = smoothstep(0.0, 2.0, length(incidVec));
 
