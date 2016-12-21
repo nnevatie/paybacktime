@@ -36,20 +36,42 @@ void swap(inout ivec3 v0, inout ivec3 v1)
 
 float vis(ivec3 p0, ivec3 p1)
 {
-    // Make results symmetrical between endpoints
-    if (p0.y > p1.y || p0.z > p1.z) swap(p0, p1);
+    // Grid deltas and step
+    ivec3 d  = p1 - p0;
+    ivec3 da = abs(d);
+    ivec3 sg = sign(d);
 
-    ivec3 d = p1 - p0;
-    int   n = abs(d.x) > abs(d.y) ? abs(d.x) : abs(d.y);
-    vec3  s = vec3(d) / n;
+    // t-step, t-max
+    vec3 st = 1.0 / da;
+    int   n = da.x + da.y + da.z;
 
+    // Loop
+    vec3  m = st;
+    ivec3 p = p0;
     float v = 1.0;
-    vec3 p  = vec3(p0) + s + 0.5;
+    for (int i = 0; i < n && v > 0.0; ++i)
+    {
+        if (i > 0)
+            v -= texelFetch(density, p, 0).r;
 
-    for (int i = 0; i < n - 1 && v > 0.0; ++i, p += s)
-        v -= texelFetch(density, ivec3(p), 0).r;
-
-    return max(0.0, v);
+        if (m.x < m.y && m.x < m.z)
+        {
+            p.x += sg.x;
+            m.x += st.x;
+        }
+        else
+        if (m.y < m.z)
+        {
+            p.y += sg.y;
+            m.y += st.y;
+        }
+        else
+        {
+            p.z += sg.z;
+            m.z += st.z;
+        }
+    }
+    return v;
 }
 
 float distance2(vec3 v0, vec3 v1)
