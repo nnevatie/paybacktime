@@ -41,6 +41,8 @@ void accumulateMaterial(mat::Emission& map,
     auto const scaleLight   = (sizeLight.as<glm::vec2>() /
                                sizeDepth.as<glm::vec2>()).x;
 
+    auto const cellArea     = c::cell::SIZE.x * c::cell::SIZE.z;
+
     for (int y = 0; y < sizeLight.h; ++y)
     {
         auto yd = int(y / float(sizeLight.h) * sizeDepth.h);
@@ -68,7 +70,7 @@ void accumulateMaterial(mat::Emission& map,
             auto emis   = exp * argbTuple(rowLight[x]).b * rgbScale / scaleLight;
             map.at(out.x, out.y, out.z) += emis * rgbN;
             density.at(out.x, out.y, out.z) *= glm::pow(albedo.a / 255.f,
-                                                        1.f / area);
+                                                        0.5f * cellArea / area);
         }
     }
 }
@@ -249,14 +251,15 @@ mat::Bleed Object::bleed() const
 
 Object& Object::updateMaterial()
 {
-    const auto size = dimensions().xzy() / c::cell::SIZE.xzy();
+    const auto size     = dimensions().xzy();
+    const auto cellSize = size / c::cell::SIZE.xzy();
 
-    const auto pmax = glm::max(glm::vec3(0.f), size - 1.f);
+    const auto pmax = glm::max(glm::vec3(0.f), cellSize - 1.f);
     auto cubeDepth  = d->model.depthCube();
     auto cubeAlbedo = d->model.albedoCube();
     auto cubeLight  = d->model.lightCube();
 
-    mat::Emission emission(glm::ceil(size));
+    mat::Emission emission(glm::ceil(cellSize));
     PTLOG(Info) << name() << " size: " << emission.size.x << "x"
                                        << emission.size.y << "x"
                                        << emission.size.z;
@@ -281,15 +284,16 @@ Object& Object::updateMaterial()
         [&pmax](const glm::vec3& v)
         {return glm::vec3(pmax.x * v.x, pmax.y * v.y, pmax.z * v.z);}
     };
-    const float areas[] = {size.x * size.y,
+    const float areas[] = {size.x * size.z,
+                           size.x * size.z,
+                           size.y * size.z,
+                           size.y * size.z,
                            size.x * size.y,
-                           size.x * size.y,
-                           size.x * size.y,
-                           size.y * size.y,
-                           size.y * size.y};
+                           size.x * size.y};
 
     for (int i = 0; i < 6; ++i)
     {
+        PTLOG(Info) << i << " area: " << areas[i];
         const auto side = ImageCube::Side(i);
         accumulateMaterial(emission, d->density,
                            projections[i], cubeDepth->side(side),
