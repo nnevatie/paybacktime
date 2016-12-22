@@ -48,31 +48,24 @@ float vis(vec3 p0, vec3 p1)
     for (int i = 0; i < n && v > 0.0; ++i)
     {
         v -= float(i > 0) * texelFetch(density, ivec3(p), 0).r;
-        if (m.x < m.y)
+
+        bvec3 lt  = lessThan(m.xxy, m.yzz);
+        bvec3 lti = not(lt);
+
+        if (lt.x && lt.y)
         {
-            if (m.x < m.z)
-            {
-                p.x += sg.x;
-                m.x += st.x;
-            }
-            else
-            {
-                p.z += sg.z;
-                m.z += st.z;
-            }
+            p.x += sg.x;
+            m.x += st.x;
         }
-        else
+        if (lti.x && lt.z)
         {
-            if (m.y < m.z)
-            {
-                p.y += sg.y;
-                m.y += st.y;
-            }
-            else
-            {
-                p.z += sg.z;
-                m.z += st.z;
-            }
+            p.y += sg.y;
+            m.y += st.y;
+        }
+        if ((lt.x && lti.y) || (lti.x && lti.z))
+        {
+            p.z += sg.z;
+            m.z += st.z;
         }
     }
     return v;
