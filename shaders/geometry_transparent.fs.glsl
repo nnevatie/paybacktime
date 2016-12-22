@@ -25,12 +25,13 @@ ib;
 out vec4 accum;
 out vec4 reveal;
 
+// Externals
+vec4 textureTricubic(sampler3D, vec3, vec3);
+float ggx(vec3 N, vec3 V, vec3 L, float roughness, float F0);
+
 vec3 giUvw(vec3 worldPos)
 {
-    vec3 uvw = ((worldPos - boundsMin) / boundsSize).xzy;
-    float zs = 1.0 / sizeTexGi.z;
-    uvw.z    = 0.5 * zs + uvw.z * zs * (sizeTexGi.z - 1);
-    return uvw;
+    return ((worldPos - boundsMin) / boundsSize).xzy;
 }
 
 void main()
@@ -40,25 +41,25 @@ void main()
     vec3 light    = texture(texLight,  ib.uv).rgb;
 
     // GI
-    vec3 uvwGi    = giUvw(ib.worldPos);
-    vec3 gi       = texture(texGi, uvwGi).rgb;
+    vec3 uvwGi      = giUvw(ib.worldPos);
+    vec3 gi         = textureTricubic(texGi, uvwGi, sizeTexGi).rgb;
 
     // View & light dir
     vec3 viewDir  = normalize(ib.worldPos - viewPos);
     vec3 incidVec = texture(texIncid, uvwGi).xzy;
     vec3 lightDir = normalize(incidVec);
-    float incid   = smoothstep(0, 8, length(incidVec));
+    float incid     = smoothstep(0.0, 2.0, length(incidVec));
 
     // Ambient
-    vec3 ambient  = 0.5f * albedo.rgb;
+    vec3 ambient  = 0.25f * albedo.rgb;
 
     // Diffuse
     vec3 diffuse  = 8.f * incid * albedo.rgb * max(dot(ib.normal, lightDir), 0.0);
 
     // Specular
-    vec3 reflectDir = reflect(lightDir, ib.normal);
-    float spec      = incid * pow(max(dot(viewDir, reflectDir), 0.0), 4.f);
-    vec3 specular   = 16.f * albedo.rgb * light.r * spec;
+    float shininess = clamp(light.g, 0.0, 0.9);
+    vec3 specular   = 16.f * incid * light.r * albedo.rgb *
+                      ggx(ib.normal, -viewDir, lightDir, 1.0 - shininess, 0.1);
 
     vec3 lighting = gi * ambient + gi * diffuse + gi * specular;
     vec4 color    = vec4(lighting, albedo.a);

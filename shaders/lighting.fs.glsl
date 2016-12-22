@@ -32,8 +32,8 @@ out vec4 color;
 
 // Externals
 float linearDepth(float depth, mat4 proj);
-vec4 textureBicubic(sampler3D, vec3);
 vec4 textureTricubic(sampler3D, vec3, vec3);
+float ggx(vec3 N, vec3 V, vec3 L, float roughness, float F0);
 
 vec3 world(sampler2D depth, vec2 uv, mat4 v, mat4 p)
 {
@@ -45,38 +45,6 @@ vec3 world(sampler2D depth, vec2 uv, mat4 v, mat4 p)
 vec3 giUvw(vec3 worldPos)
 {
     return ((worldPos - boundsMin) / boundsSize).xzy;
-}
-
-float g1v(float dotNV, float k)
-{
-    return 1.0f / (dotNV * (1.0f - k) + k);
-}
-
-float ggx(vec3 N, vec3 V, vec3 L, float roughness, float F0)
-{
-    float alpha = roughness * roughness;
-    vec3      H = normalize(V + L);
-    float dotNL = clamp(dot(N, L), 0.0, 1.0);
-    float dotNV = clamp(dot(N, V), 0.0, 1.0);
-    float dotNH = clamp(dot(N, H), 0.0, 1.0);
-    float dotLH = clamp(dot(L, H), 0.0, 1.0);
-
-    // D
-    float alphaSqr = alpha * alpha;
-    float pi       = 3.14159;
-    float denom    = dotNH * dotNH * (alphaSqr - 1.0) + 1.0;
-    float D        = alphaSqr / (pi * denom * denom);
-
-    // F
-    float dotLH5   = pow(1.0 - dotLH, 5);
-    float F        = F0 + (1.0 - F0) * (dotLH5);
-
-    // V
-    float k        = alpha / 2.0;
-    float vis      = g1v(dotNL, k) * g1v(dotNV, k);
-
-    float specular = dotNL * D * F * vis;
-    return specular;
 }
 
 void main(void)
@@ -98,7 +66,6 @@ void main(void)
     vec3 incidVec   = texture(texIncid, uvwGi).xzy;
     vec3 incident   = normalize(incidVec);
     vec3 lightDir   = normalize(nm * incident);
-    vec3 halfwayDir = normalize(lightDir + -viewDir);
     float incid     = smoothstep(0.0, 2.0, length(incidVec));
 
     // Ambient
