@@ -40,10 +40,14 @@ struct LightSourceCmp : std::binary_function<glm::ivec3, glm::ivec3, bool>
 using LightSources = std::set<glm::ivec3, LightSourceCmp>;
 
 void accumulate(
-    mat::Density& d0, mat::Emission& e0, LightSources& lightSources,
-    const glm::ivec3& pos, const mat::Density& d1, const mat::Emission& e1)
+    mat::Density& density0,
+    mat::Emission& emission0,
+    LightSources& lightSources,
+    const glm::ivec3& pos,
+    const mat::Density& density1,
+    const mat::Emission& emission1)
 {
-    auto const size = d1.size;
+    auto const size = density1.size;
     for (int z = 0; z < size.z; ++z)
     {
         const auto z1 = pos.z + z;
@@ -52,14 +56,21 @@ void accumulate(
             const auto y1 = pos.y + y;
             for (int x = 0; x < size.x; ++x)
             {
-                const auto x1 = pos.x + x;
-                d0.at(x1, y1, z1) = glm::min(1.f, d0.at(x1, y1, z1) +
-                                                  d1.at(x,  y,  z));
-                const auto em1 = e1.at(x, y, z);
+                const auto x1   = pos.x + x;
+                auto& d0        = density0.at(x1, y1, z1);
+                const auto& d1  = density1.at(x,  y,  z);
+
+                const auto aMin = std::min(d0.a, d1.a);
+                const auto a    = aMin < 0.f ? aMin : std::min(1.f, d0.a + d1.a);
+                const auto rgb  = 0.5f * (d0.rgb() + d1.rgb());
+
+                d0 = glm::vec4(rgb, a);
+
+                const auto em1 = emission1.at(x, y, z);
                 if (em1 != glm::zero<glm::vec3>())
                 {
-                    auto em0 = e0.at(x1, y1, z1);
-                    e0.at(x1, y1, z1) = em0 + em1;
+                    auto em0 = emission0.at(x1, y1, z1);
+                    emission0.at(x1, y1, z1) = em0 + em1;
                     lightSources.insert({x1, y1, z1});
                 }
 

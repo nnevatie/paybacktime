@@ -10,11 +10,10 @@ namespace pt
 namespace mat
 {
 
-using Density   = Grid<float>;
+using Density   = Grid<glm::vec4>;
 using Light     = Grid<glm::vec3>;
 using Indidence = Grid<glm::vec3>;
 using Emission  = Grid<glm::vec3>;
-using Bleed     = Grid<glm::vec4>;
 
 } // namespace mat
 } // namespace pt

@@ -25,7 +25,7 @@ namespace
 
 typedef std::function<glm::vec3(const glm::vec3&)> Projection;
 
-void accumulateMaterial(mat::Emission& map,
+void accumulateMaterial(mat::Emission& emission,
                         mat::Density& density,
                         const Projection& p,
                         const Image& depth,
@@ -34,14 +34,13 @@ void accumulateMaterial(mat::Emission& map,
                         const float objScale,
                         const float area)
 {
+    auto const cellArea     = c::cell::SIZE.x * c::cell::SIZE.z;
     constexpr auto exp      = c::object::EXPOSURE;
     constexpr auto rgbScale = 1.f / 255;
     auto const sizeDepth    = depth.size();
     auto const sizeLight    = light.size();
     auto const scaleLight   = (sizeLight.as<glm::vec2>() /
                                sizeDepth.as<glm::vec2>()).x;
-
-    auto const cellArea     = c::cell::SIZE.x * c::cell::SIZE.z;
 
     for (int y = 0; y < sizeLight.h; ++y)
     {
@@ -68,9 +67,16 @@ void accumulateMaterial(mat::Emission& map,
             auto rgb    = glm::vec3(albedo.rgb());
             auto rgbN   = glm::length(rgb) > 0.f ? glm::normalize(rgb) : rgb;
             auto emis   = exp * argbTuple(rowLight[x]).b * rgbScale / scaleLight;
-            map.at(out.x, out.y, out.z) += emis * rgbN;
-            density.at(out.x, out.y, out.z) *= glm::pow(albedo.a / 255.f,
-                                                        0.5f * cellArea / area);
+
+            emission.at(out.x, out.y, out.z) += emis * rgbN;
+
+            auto& d0  = density.at(out.x, out.y, out.z);
+            auto  a0  = d0.a;
+            auto  a1  = albedo.a / 255.f;
+            auto  as  = std::min(a0, a1) < 1.f ? -1.f : 1.f;
+            auto  a   = std::abs(a0) * glm::pow(a1, 0.75f * cellArea / area);
+            auto rgb1 = a0 < 0.f ? 0.5f * (d0.rgb() + rgbN) : rgbN;
+            d0 = glm::vec4(rgb1, as * a);
         }
     }
 }
@@ -115,7 +121,6 @@ struct Object::Data
     bool            emissive;
     mat::Density    density;
     mat::Emission   emission;
-    mat::Bleed      bleed;
 };
 
 Object::Object()
@@ -220,8 +225,10 @@ Object& Object::updateDensity()
                                 break;
                             }
 
-                map.at(x, y, z) = float(sum) /
-                                  ((c::cell::SIZE.y + d->meta.origin.y) * width);
+                float a = float(sum) / ((c::cell::SIZE.y + d->meta.origin.y) *
+                                         width);
+
+                map.at(x, y, z) = {1.f, 1.f, 1.f, a};
             }
 
     d->density = map;
@@ -233,20 +240,15 @@ bool Object::emissive() const
     return d->emissive;
 }
 
-Object& Object::updateEmissivity()
-{
-    d->emissive = d->model.lightCube()->emissive();
-    return *this;
-}
-
 mat::Emission Object::emission() const
 {
     return d->emission;
 }
 
-mat::Bleed Object::bleed() const
+Object& Object::updateEmissivity()
 {
-    return d->bleed;
+    d->emissive = d->model.lightCube()->emissive();
+    return *this;
 }
 
 Object& Object::updateMaterial()

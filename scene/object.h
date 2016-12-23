@@ -41,10 +41,8 @@ struct Object
     Object& updateDensity();
 
     bool emissive() const;
-    Object& updateEmissivity();
-
     mat::Emission emission() const;
-    mat::Bleed bleed() const;
+    Object& updateEmissivity();
 
     Object& updateMaterial();
 

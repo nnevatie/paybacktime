@@ -27,7 +27,7 @@ ib;
 out vec3 light;
 out vec3 incidence;
 
-float vis(vec3 p0, vec3 p1)
+float vis(vec3 p0, vec3 p1, inout vec3 e, float el)
 {
     p0 += 0.5; p1 += 0.5;
 
@@ -47,7 +47,13 @@ float vis(vec3 p0, vec3 p1)
 
     for (int i = 0; i < n && v > 0.0; ++i)
     {
-        v -= float(i > 0) * texelFetch(density, ivec3(p), 0).r;
+        if (i > 0)
+        {
+            vec4 d  = texelFetch(density, ivec3(p), 0);
+            float a = abs(d.a);
+            e = d.a < 0 ? mix(e, el * d.rgb, min(1.0, 1.0 - a)) : e;
+            v -= a;
+        }
 
         bvec3 lt  = lessThan(m.xxy, m.yzz);
         bvec3 lti = not(lt);
@@ -97,10 +103,10 @@ void main(void)
             float att = 1.0 / (k0 + k1 * d + k2 * d * d);
             if (att > attMin)
             {
-                float v = vis(p1, p0);
+                vec3  e = texelFetch(emission, p1, 0).rgb;
+                float v = vis(p1, p0, e, length(e));
                 if (v > 0.0)
                 {
-                    vec3  e = texelFetch(emission, p1, 0).rgb;
                     float a = v * v * att;
                     l      += a * e;
                     i      += a * (w1 - w0);
