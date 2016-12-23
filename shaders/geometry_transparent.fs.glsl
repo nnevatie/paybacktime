@@ -61,7 +61,7 @@ void main()
     vec3 specular   = 16.f * incid * light.r * albedo.rgb *
                       ggx(ib.normal, -viewDir, lightDir, 1.0 - shininess, 0.1);
 
-    vec3 lighting = gi * ambient + gi * diffuse + gi * specular;
+    vec3 lighting = min(vec3(1.0), gi * ambient + gi * diffuse + gi * specular);
     vec4 color    = vec4(lighting, albedo.a);
 
     // OIT
