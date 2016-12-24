@@ -1,5 +1,15 @@
 #version 150
 
+float cmin(vec3 v)
+{
+    return min(v.z, min(v.x, v.y));
+}
+
+float cmax(vec3 v)
+{
+    return max(v.z, max(v.x, v.y));
+}
+
 float linearDepth(float depth, float zNear, float zFar)
 {
     return (2 * zNear) / (zFar + zNear - depth * (zFar - zNear));

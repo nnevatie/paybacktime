@@ -120,8 +120,10 @@ struct Data
             }
         #endif
 
+        #if 0
         scene.add({objectStore.object("chair"), TransformTrRot({-32, 0, 16 * -2})});
         scene.add({objectStore.object("table"), TransformTrRot({32, 0, 16 * -2})});
+        #endif
         #endif
     }
 

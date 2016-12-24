@@ -87,7 +87,8 @@ struct Lightmapper::Data
         rect(squareMesh()),
         vsQuadUv(gl::Shader::path("quad_uv.vs.glsl")),
         fsLightmapper(gl::Shader::path("lightmapper.fs.glsl")),
-        prog({vsQuadUv, fsLightmapper},
+        fsCommon(gl::Shader::path("common.fs.glsl")),
+        prog({vsQuadUv, fsLightmapper, fsCommon},
              {{0, "position"}, {1, "uv"}}),
         texLight(gl::Texture::Type::Texture3d),
         texIncidence(gl::Texture::Type::Texture3d),
@@ -99,7 +100,8 @@ struct Lightmapper::Data
     gl::Primitive     rect;
 
     gl::Shader        vsQuadUv,
-                      fsLightmapper;
+                      fsLightmapper,
+                      fsCommon;
 
     gl::ShaderProgram prog;
 
@@ -137,11 +139,17 @@ Lightmapper& Lightmapper::reset(const glm::ivec3& size)
 
         d->texLight.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
                           .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                          .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                          .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+                          .set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
+                          .set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
+                          .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
 
         d->texIncidence.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
                               .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                              .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                              .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+                              .set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
+                              .set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
+                              .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
     }
     d->density      = mat::Density(size);
     d->emission     = mat::Emission(size);
@@ -186,7 +194,8 @@ Lightmapper& Lightmapper::operator()()
         Binder<gl::ShaderProgram> progBinder(&d->prog);
         d->prog.setUniform("density",  0)
                .setUniform("emission", 1)
-               .setUniform("lightSrc", 2)
+               .setUniform("horizon",  2)
+               .setUniform("lightSrc", 3)
                .setUniform("lsc",      lightSourceCount)
                .setUniform("attMin",   0.001f)
                .setUniform("k0",       1.f)
@@ -199,9 +208,16 @@ Lightmapper& Lightmapper::operator()()
         glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
 
+        gl::Texture texHorizon = gl::Texture()
+                                 .bind().alloc(Image("data/horizon.png"))
+                                 .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                                 .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
         d->texDensity.bindAs(GL_TEXTURE0);
         d->texEmission.bindAs(GL_TEXTURE1);
-        d->texLightSources.bindAs(GL_TEXTURE2);
+        texHorizon.bindAs(GL_TEXTURE2);
+        d->texLightSources.bindAs(GL_TEXTURE3);
 
         glViewport(0, 0, size.x, size.y);
 
