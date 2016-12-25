@@ -16,9 +16,9 @@ struct Display;
 namespace ui
 {
 
-struct ObjectSelector
+struct ObjectPane
 {
-    ObjectSelector(platform::Display* display,
+    ObjectPane(platform::Display* display,
                    ObjectStore* objectStore,
                    TextureStore* textureStore);
 

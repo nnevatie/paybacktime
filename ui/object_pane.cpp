@@ -1,4 +1,4 @@
-#include "object_selector.h"
+#include "object_pane.h"
 
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -29,7 +29,7 @@ namespace pt
 namespace ui
 {
 
-struct ObjectSelector::Data
+struct ObjectPane::Data
 {
     explicit Data(platform::Display* display,
                   ObjectStore* objectStore,
@@ -37,7 +37,7 @@ struct ObjectSelector::Data
         display(display),
         objectStore(objectStore)
     {
-        nanogui::Screen* screen = display->nanoGui();
+        auto screen = display->nanoGui();
 
         auto& window = screen->add<nanogui::Window>("objects");
         window.setFixedSize({220, screen->size().y() - 16});
@@ -99,14 +99,14 @@ struct ObjectSelector::Data
     std::vector<Image>   images;
 };
 
-ObjectSelector::ObjectSelector(platform::Display* display,
+ObjectPane::ObjectPane(platform::Display* display,
                                ObjectStore* objectStore,
                                TextureStore* textureStore) :
     d(std::make_shared<Data>(display, objectStore, textureStore))
 {
 }
 
-Object ObjectSelector::selectedObject() const
+Object ObjectPane::selectedObject() const
 {
     return d->objectStore->object(d->imagePanel->selection());
 }

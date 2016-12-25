@@ -27,7 +27,7 @@
 #include "gfx/output.h"
 #include "gfx/fader.h"
 
-#include "ui/object_selector.h"
+#include "ui/object_pane.h"
 #include "ui/render_stats.h"
 
 #include "scene/scene.h"
@@ -41,33 +41,33 @@ namespace pt
 struct Data
 {
     platform::Display* display;
-    Size<int> renderSize;
+    Size<int>          renderSize;
 
-    gfx::Geometry            geometry;
-    gfx::Ssao                ssao;
-    gfx::Ssr                 ssr;
-    gfx::Lighting            lighting;
-    gfx::Bloom               bloom;
-    gfx::Outline             outline;
-    gfx::Backdrop            backdrop;
-    gfx::ColorGrade          colorGrade;
-    gfx::AntiAlias           antiAlias;
-    gfx::Output              output;
-    gfx::Fader               fader;
+    gfx::Geometry      geometry;
+    gfx::Ssao          ssao;
+    gfx::Ssr           ssr;
+    gfx::Lighting      lighting;
+    gfx::Bloom         bloom;
+    gfx::Outline       outline;
+    gfx::Backdrop      backdrop;
+    gfx::ColorGrade    colorGrade;
+    gfx::AntiAlias     antiAlias;
+    gfx::Output        output;
+    gfx::Fader         fader;
 
-    TextureStore             textureStore;
-    ObjectStore              objectStore;
-    Character                character;
+    TextureStore       textureStore;
+    ObjectStore        objectStore;
+    Character          character;
 
-    ui::ObjectSelector       objectSelector;
-    ui::RenderStats          stats;
+    ui::ObjectPane     objectPane;
+    ui::RenderStats    stats;
 
-    Scene                    scene;
-    Camera                   camera;
-    CameraControl            cameraControl;
-    SceneControl             sceneControl;
+    Scene              scene;
+    Camera             camera;
+    CameraControl      cameraControl;
+    SceneControl       sceneControl;
 
-    platform::Mouse          mouse;
+    platform::Mouse    mouse;
 
     Data(platform::Display* display) :
         display(display),
@@ -85,7 +85,7 @@ struct Data
         objectStore(fs::path("objects"), &textureStore),
         character(fs::path("characters") / "male1", &textureStore),
 
-        objectSelector(display, &objectStore, &textureStore),
+        objectPane(display, &objectStore, &textureStore),
         stats(display->nanoVg()),
 
         camera({0.f, 0.f, 0.f}, 350.f,
@@ -142,7 +142,7 @@ struct Data
             return false;
 
         cameraControl(step);
-        sceneControl(step, objectSelector.selectedObject());
+        sceneControl(step, objectPane.selectedObject());
 
         return true;
     }
