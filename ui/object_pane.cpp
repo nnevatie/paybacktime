@@ -13,8 +13,8 @@
 #include <include/imagepanel.h>
 #include <include/vscrollpanel.h>
 
-#include "gl/texture_atlas.h"
 #include "platform/display.h"
+#include "gl/texture_atlas.h"
 #include "geom/image_mesher.h"
 #include "common/log.h"
 
