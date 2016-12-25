@@ -17,7 +17,8 @@ uniform mat3      nm;
 uniform mat4      wm;
 
 // Const
-vec3 sizeTexGi = textureSize(texGi, 0);
+vec3 sizeTexGi          = textureSize(texGi, 0);
+const int SCATTER_STEPS = 20;
 
 // Input
 in Block
@@ -45,6 +46,27 @@ vec3 world(sampler2D depth, vec2 uv, mat4 v, mat4 p)
 vec3 giUvw(vec3 worldPos)
 {
     return ((worldPos - boundsMin) / boundsSize).xzy;
+}
+
+vec3 scattering(vec3 start)
+{
+    vec3 ray  = normalize(camPos - start);
+    vec3 step = 5.0 * ray;
+    vec3 end  = start + SCATTER_STEPS * step;
+
+    vec3 uvw0 = giUvw(start);
+    vec3 uvw1 = giUvw(end);
+    vec3 uvws = (uvw1 - uvw0) / SCATTER_STEPS;
+
+    float weight = 0.01;
+    vec3 scatter = vec3(0.0);
+    for (int i = 0; i < SCATTER_STEPS && uvw0.z < 1.05; ++i)
+    {
+        vec3 gi  = texture(texGi, uvw0).rgb;
+        scatter += weight * gi;
+        uvw0    += uvws;
+    }
+    return scatter;
 }
 
 void main(void)
@@ -83,19 +105,11 @@ void main(void)
     vec3 emis       = 32.f * light.b * albedo;
 
     // Scattering
-    vec3 scatter;
-    const int steps   = 16;
-    vec3 scatterRay   = normalize(camPos - worldPos);
-    vec3 scatterStep  = scatterRay * 8.0;
-    vec3 scatterPos   = worldPos;
-    for (int i = 0; i < steps; ++i)
-    {
-        vec3 gi      = texture(texGi, giUvw(scatterPos)).rgb * 0.5;
-        scatter     += gi / (steps + i * 8);
-        scatterPos  += scatterStep;
-    }
+    vec3 scatter    = scattering(worldPos);
 
+    // Final lighting
     vec3 lighting   = (ao * ambient   + ao   * diffuse) +
                       (ao * specular) + emis + scatter;
-    color           = vec4(lighting, 1.0);
+
+    color = vec4(lighting, 1.0);
 }
