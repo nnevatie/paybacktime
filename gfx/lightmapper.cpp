@@ -140,15 +140,11 @@ Lightmapper& Lightmapper::reset(const glm::ivec3& size)
         d->texLight.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
                           .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                           .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                          .set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
-                          .set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
                           .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
 
         d->texIncidence.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
                               .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                               .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                              .set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
-                              .set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
                               .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
     }
     d->density      = mat::Density(size);
