@@ -11,6 +11,7 @@
 */
 
 #include <nanogui/vscrollpanel.h>
+#include <nanogui/window.h>
 #include <nanogui/theme.h>
 #include <nanogui/opengl.h>
 
@@ -70,6 +71,9 @@ bool VScrollPanel::mouseMotionEvent(const Vector2i &p, const Vector2i &rel, int 
     if (mChildren.empty())
         return false;
     int shift = (int) (mScroll*(mChildPreferredHeight - mSize.y()));
+    shift += dynamic_cast<const Window*>(parent()) ?
+             -theme()->mWindowHeaderHeight : 0;
+
     return mChildren[0]->mouseMotionEvent(p + Vector2i(0, shift), rel, button, modifiers);
 }
 

@@ -24,11 +24,10 @@ Widget::Widget(Widget *parent)
       mPos(Vector2i::Zero()), mSize(Vector2i::Zero()),
       mFixedSize(Vector2i::Zero()), mVisible(true), mEnabled(true),
       mFocused(false), mMouseFocus(false), mTooltip(""), mFontSize(-1.0f),
-      mCursor(Cursor::Arrow) {
-    if (parent) {
+      mCursor(Cursor::Arrow)
+{
+    if (parent)
         parent->addChild(this);
-        mTheme = parent->mTheme;
-    }
 }
 
 Widget::~Widget() {
@@ -92,18 +91,15 @@ bool Widget::mouseButtonEvent(const Vector2i &p, int button, bool down, int modi
 bool Widget::mouseMotionEvent(const Vector2i &p, const Vector2i &rel, int button, int modifiers) {
     for (auto it = mChildren.rbegin(); it != mChildren.rend(); ++it) {
         Widget *child = *it;
-        Vector2i shift = dynamic_cast<Window*>(child->parent()) ?
-                         Vector2i(0, -theme()->mWindowHeaderHeight) :
-                         Vector2i(0, 0);
-
         if (!child->visible())
             continue;
-        bool contained = child->contains(p - mPos + shift),
-                         prevContained = child->contains(p - mPos - rel + shift);
+
+        bool contained = child->contains(p - mPos),
+                         prevContained = child->contains(p - mPos - rel);
         if (contained != prevContained)
-            child->mouseEnterEvent(p + shift, contained);
+            child->mouseEnterEvent(p, contained);
         if ((contained || prevContained) &&
-            child->mouseMotionEvent(p - mPos + shift, rel, button, modifiers))
+            child->mouseMotionEvent(p - mPos, rel, button, modifiers))
             return true;
     }
     return false;
@@ -151,6 +147,10 @@ void Widget::addChild(int index, Widget * widget) {
     assert(index <= childCount());
     mChildren.insert(mChildren.begin() + index, widget);
     widget->incRef();
+
+    if (auto parent = widget->parent())
+        parent->removeChild(widget);
+
     widget->setParent(this);
     widget->setTheme(mTheme);
 }
@@ -158,7 +158,12 @@ void Widget::addChild(int index, Widget * widget) {
 void Widget::addChild(Widget *widget) {
     mChildren.push_back(widget);
     widget->incRef();
+
+    if (auto parent = widget->parent())
+        parent->removeChild(widget);
+
     widget->setParent(this);
+    widget->setTheme(mTheme);
 }
 
 void Widget::removeChild(const Widget *widget) {

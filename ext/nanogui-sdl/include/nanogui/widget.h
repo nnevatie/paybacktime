@@ -240,7 +240,7 @@ public:
       return *this;
     }
 
-protected:
+//protected:
     /// Free all resources used by the widget and any children
     virtual ~Widget();
 

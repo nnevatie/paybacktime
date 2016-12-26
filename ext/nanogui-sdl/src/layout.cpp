@@ -29,8 +29,9 @@ BoxLayout::BoxLayout(Orientation orientation, Alignment alignment,
 Vector2i BoxLayout::preferredSize(NVGcontext *ctx, const Widget *widget) const {
     Vector2i size = Vector2i::Constant(2*mMargin);
 
-    if (dynamic_cast<const Window *>(widget))
-        size[1] += widget->theme()->mWindowHeaderHeight - mMargin/2;
+    if (auto window = dynamic_cast<const Window *>(widget))
+        if (!window->title().empty())
+            size[1] += widget->theme()->mWindowHeaderHeight - mMargin / 2;
 
     bool first = true;
     int axis1 = (int) mOrientation, axis2 = ((int) mOrientation + 1)%2;
@@ -49,7 +50,7 @@ Vector2i BoxLayout::preferredSize(NVGcontext *ctx, const Widget *widget) const {
         );
 
         size[axis1] += targetSize[axis1];
-        size[axis2] = std::max(size[axis2], targetSize[axis2] + 2*mMargin);
+        size[axis2] = std::max(size[axis2], targetSize[axis2] + 2 * mMargin);
         first = false;
     }
     return size;
@@ -62,11 +63,12 @@ void BoxLayout::performLayout(NVGcontext *ctx, Widget *widget) const {
         fs_w[1] ? fs_w[1] : widget->height()
     );
 
-    int axis1 = (int) mOrientation, axis2 = ((int) mOrientation + 1)%2;
+    int axis1 = (int) mOrientation, axis2 = ((int) mOrientation + 1) % 2;
     int position = mMargin;
 
-    if (dynamic_cast<Window *>(widget))
-        position += widget->theme()->mWindowHeaderHeight - mMargin/2;
+    if (auto window = dynamic_cast<Window *>(widget))
+        if (!window->title().empty())
+            position += widget->theme()->mWindowHeaderHeight - mMargin / 2;
 
     bool first = true;
     for (auto w : widget->children()) {
@@ -97,7 +99,8 @@ void BoxLayout::performLayout(NVGcontext *ctx, Widget *widget) const {
                 break;
             case Alignment::Fill:
                 pos[axis2] = mMargin;
-                targetSize[axis2] = fs[axis2] ? fs[axis2] : containerSize[axis2];
+                targetSize[axis2] = fs[axis2] ? fs[axis2] :
+                                    containerSize[axis2] - mMargin * 2;
                 break;
         }
 

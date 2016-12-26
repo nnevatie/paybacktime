@@ -26,15 +26,18 @@ Vector2i Window::preferredSize(NVGcontext *ctx) const
 {
     if (mButtonPanel)
         mButtonPanel->setVisible(false);
+
     Vector2i result = Widget::preferredSize(ctx);
     if (mButtonPanel)
         mButtonPanel->setVisible(true);
 
-    nvgFontSize(ctx, 18.0f);
-    nvgFontFace(ctx, "sans-bold");
-    float bounds[4];
-    nvgTextBounds(ctx, 0, 0, mTitle.c_str(), nullptr, bounds);
-
+    float bounds[4] = {};
+    if (!mTitle.empty())
+    {
+        nvgFontSize(ctx, 18.0f);
+        nvgFontFace(ctx, "sans-bold");
+        nvgTextBounds(ctx, 0, 0, mTitle.c_str(), nullptr, bounds);
+    }
     return result.cwiseMax(Vector2i(
         bounds[2]-bounds[0] + 20, bounds[3]-bounds[1]
     ));
@@ -67,8 +70,8 @@ void Window::performLayout(NVGcontext *ctx)
 }
 
 void Window::draw(NVGcontext *ctx) {
-    int ds = mTheme->mWindowDropShadowSize, cr = mTheme->mWindowCornerRadius;
-    int hh = mTheme->mWindowHeaderHeight;
+    const int ds = mTheme->mWindowDropShadowSize,
+              cr = mTheme->mWindowCornerRadius;
 
     /* Draw window */
     nvgSave(ctx);
@@ -93,6 +96,7 @@ void Window::draw(NVGcontext *ctx) {
 
     if (!mTitle.empty()) {
         /* Draw header */
+        const int hh = mTheme->mWindowHeaderHeight;
         NVGpaint headerPaint = nvgLinearGradient(
             ctx, mPos.x(), mPos.y(), mPos.x(),
             mPos.y() + hh,
