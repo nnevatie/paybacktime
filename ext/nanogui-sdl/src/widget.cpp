@@ -75,12 +75,14 @@ Widget *Widget::findWidget(const Vector2i &p) {
 bool Widget::mouseButtonEvent(const Vector2i &p, int button, bool down, int modifiers) {
     for (auto it = mChildren.rbegin(); it != mChildren.rend(); ++it) {
         Widget *child = *it;
+        /*
         Vector2i shift = dynamic_cast<Window*>(child->parent()) ?
                          Vector2i(0, -theme()->mWindowHeaderHeight) :
                          Vector2i(0, 0);
+        */
 
         if (child->visible() && child->contains(p - mPos) &&
-            child->mouseButtonEvent(p - mPos + shift, button, down, modifiers))
+            child->mouseButtonEvent(p - mPos, button, down, modifiers))
             return true;
     }
     if (button == SDL_BUTTON_LEFT && down && !mFocused)
@@ -147,10 +149,6 @@ void Widget::addChild(int index, Widget * widget) {
     assert(index <= childCount());
     mChildren.insert(mChildren.begin() + index, widget);
     widget->incRef();
-
-    if (auto parent = widget->parent())
-        parent->removeChild(widget);
-
     widget->setParent(this);
     widget->setTheme(mTheme);
 }
@@ -158,10 +156,6 @@ void Widget::addChild(int index, Widget * widget) {
 void Widget::addChild(Widget *widget) {
     mChildren.push_back(widget);
     widget->incRef();
-
-    if (auto parent = widget->parent())
-        parent->removeChild(widget);
-
     widget->setParent(this);
     widget->setTheme(mTheme);
 }
