@@ -9,12 +9,12 @@
     BSD-style license that can be found in the LICENSE.txt file.
 */
 
-#include <include/widget.h>
-#include <include/layout.h>
-#include <include/theme.h>
-#include <include/window.h>
-#include <include/opengl.h>
-#include <include/screen.h>
+#include <nanogui/widget.h>
+#include <nanogui/layout.h>
+#include <nanogui/theme.h>
+#include <nanogui/window.h>
+#include <nanogui/opengl.h>
+#include <nanogui/screen.h>
 #include <SDL/SDL.h>
 
 NAMESPACE_BEGIN(nanogui)
@@ -147,6 +147,14 @@ bool Widget::keyboardCharacterEvent(unsigned int) {
     return false;
 }
 
+void Widget::addChild(int index, Widget * widget) {
+    assert(index <= childCount());
+    mChildren.insert(mChildren.begin() + index, widget);
+    widget->incRef();
+    widget->setParent(this);
+    widget->setTheme(mTheme);
+}
+
 void Widget::addChild(Widget *widget) {
     mChildren.push_back(widget);
     widget->incRef();
@@ -162,6 +170,13 @@ void Widget::removeChild(int index) {
     Widget *widget = mChildren[index];
     mChildren.erase(mChildren.begin() + index);
     widget->decRef();
+}
+
+int Widget::childIndex(Widget *widget) const {
+    auto it = std::find(mChildren.begin(), mChildren.end(), widget);
+    if (it == mChildren.end())
+        return -1;
+    return it - mChildren.begin();
 }
 
 Window *Widget::window() {

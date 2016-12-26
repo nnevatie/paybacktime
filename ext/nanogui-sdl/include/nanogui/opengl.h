@@ -14,7 +14,7 @@
 #define __NGSDL_OPENGL_INCLUDE_H__
 
 #include <SDL2/SDL_opengl.h>
-#include <include/common.h>
+#include <nanogui/common.h>
 #include <nanovg.h>
 
 NAMESPACE_BEGIN(nanogui)

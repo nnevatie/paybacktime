@@ -5,7 +5,7 @@
 #include <nanovg.h>
 #include <nanovg_gl.h>
 
-#include <include/screen.h>
+#include <nanogui/screen.h>
 
 #include "platform/clock.h"
 #include "common/log.h"

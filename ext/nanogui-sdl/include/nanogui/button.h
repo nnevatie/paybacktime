@@ -12,7 +12,7 @@
 #ifndef __NGSDL_BUTTON_H__
 #define __NGSDL_BUTTON_H__
 
-#include <include/widget.h>
+#include <nanogui/widget.h>
 
 NAMESPACE_BEGIN(nanogui)
 

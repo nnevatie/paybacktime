@@ -4,14 +4,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
 
-#include <include/screen.h>
-#include <include/window.h>
-#include <include/layout.h>
-#include <include/label.h>
-#include <include/button.h>
-#include <include/imageview.h>
-#include <include/imagepanel.h>
-#include <include/vscrollpanel.h>
+#include <nanogui/screen.h>
+#include <nanogui/window.h>
+#include <nanogui/layout.h>
+#include <nanogui/label.h>
+#include <nanogui/button.h>
+#include <nanogui/imageview.h>
+#include <nanogui/imagepanel.h>
+#include <nanogui/vscrollpanel.h>
 
 #include "platform/display.h"
 #include "gl/texture_atlas.h"

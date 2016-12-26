@@ -9,10 +9,10 @@
     BSD-style license that can be found in the LICENSE.txt file.
 */
 
-#include <include/button.h>
+#include <nanogui/button.h>
 #include <SDL2/SDL.h>
-#include <include/theme.h>
-#include <include/opengl.h>
+#include <nanogui/theme.h>
+#include <nanogui/opengl.h>
 
 NAMESPACE_BEGIN(nanogui)
 

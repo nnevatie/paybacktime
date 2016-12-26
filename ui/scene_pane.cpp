@@ -1,6 +1,6 @@
 #include "scene_pane.h"
 
-#include <include/screen.h>
+#include <nanogui/screen.h>
 
 #include "platform/display.h"
 

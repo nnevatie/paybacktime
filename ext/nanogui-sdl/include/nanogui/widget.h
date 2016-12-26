@@ -12,7 +12,7 @@
 #ifndef __NGSDL_WIDGET_H__
 #define __NGSDL_WIDGET_H__
 
-#include <include/object.h>
+#include <nanogui/object.h>
 #include <vector>
 
 NAMESPACE_BEGIN(nanogui)
@@ -138,6 +138,8 @@ public:
      * since the constructor of \ref Widget automatically
      * adds the current widget to its parent
      */
+    virtual void addChild(int index, Widget *widget);
+
     void addChild(Widget *widget);
 
     /// Remove a child widget by index
@@ -145,6 +147,9 @@ public:
 
     /// Remove a child widget by value
     void removeChild(const Widget *widget);
+
+    /// Returns the index of a specific child or -1 if not found
+    int childIndex(Widget* widget) const;
 
     // Walk up the hierarchy and return the parent window
     Window *window();
