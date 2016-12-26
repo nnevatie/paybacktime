@@ -2,6 +2,11 @@
 
 #include <memory>
 
+namespace nanogui
+{
+class Widget;
+}
+
 namespace pt
 {
 struct Object;
@@ -19,8 +24,10 @@ namespace ui
 struct ObjectPane
 {
     ObjectPane(platform::Display* display,
-                   ObjectStore* objectStore,
-                   TextureStore* textureStore);
+               ObjectStore* objectStore,
+               TextureStore* textureStore);
+
+    nanogui::Widget* widget() const;
 
     Object selectedObject() const;
 

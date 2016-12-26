@@ -2,19 +2,21 @@
 
 #include <memory>
 
-namespace pt
+namespace nanogui
 {
-namespace platform
-{
-struct Display;
+class Widget;
 }
 
+namespace pt
+{
 namespace ui
 {
 
 struct ScenePane
 {
-    ScenePane(platform::Display* display);
+    ScenePane();
+
+    nanogui::Widget* widget() const;
 
 private:
     struct Data;

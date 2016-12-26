@@ -27,9 +27,10 @@
 #include "gfx/output.h"
 #include "gfx/fader.h"
 
+#include "ui/render_stats.h"
+#include "ui/tools_window.h"
 #include "ui/scene_pane.h"
 #include "ui/object_pane.h"
-#include "ui/render_stats.h"
 
 #include "scene/scene.h"
 #include "scene/scene_control.h"
@@ -60,9 +61,10 @@ struct Data
     ObjectStore        objectStore;
     Character          character;
 
+    ui::RenderStats    stats;
     ui::ScenePane      scenePane;
     ui::ObjectPane     objectPane;
-    ui::RenderStats    stats;
+    ui::ToolsWindow    toolsWindow;
 
     Scene              scene;
     Camera             camera;
@@ -88,9 +90,11 @@ struct Data
         character(fs::path("characters") / "male1", &textureStore),
 
         // UI
-        scenePane(display),
-        objectPane(display, &objectStore, &textureStore),
         stats(display->nanoVg()),
+        scenePane(),
+        objectPane(display, &objectStore, &textureStore),
+        toolsWindow(display, {{"Scene",   scenePane.widget()},
+                              {"Objects", objectPane.widget()}}),
 
         // Camera
         camera({0.f, 0.f, 0.f}, 350.f,

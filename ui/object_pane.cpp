@@ -28,21 +28,19 @@ namespace pt
 {
 namespace ui
 {
+namespace ng = nanogui;
 
 struct ObjectPane::Data
 {
     explicit Data(platform::Display* display,
                   ObjectStore* objectStore,
                   TextureStore* textureStore) :
-        display(display),
-        objectStore(objectStore)
+        objectStore(objectStore),
+        widget(display->nanoGui())
     {
         auto screen = display->nanoGui();
-
-        auto& window = screen->add<nanogui::Window>("objects");
-        window.setFixedSize({220, screen->size().y() - 16});
-        window.setPosition({screen->size().x() - window.fixedWidth() - 8, 8});
-        window.setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+        widget.setFixedSize({220, screen->size().y() - 64});
+        widget.setLayout(new ng::BoxLayout(ng::Orientation::Vertical));
 
         const Size<int> previewSize(256, 256);
         const Camera camera({0.f, 0.f, 0.f}, 90.f,
@@ -52,7 +50,7 @@ struct ObjectPane::Data
 
         gfx::Preview preview(previewSize);
 
-        nanogui::ImagePanel::Images nvgImages;
+        ng::ImagePanel::Images nvgImages;
         for (const auto& object : objectStore->objects())
         {
             const glm::vec3 dims = object.model().dimensions();
@@ -73,13 +71,12 @@ struct ObjectPane::Data
             nvgImages.push_back({nvgImage, object.name()});
         }
 
-        auto& vscroll = window.add<nanogui::VScrollPanel>();
-        vscroll.setFixedSize({210, window.fixedHeight() - 36});
+        auto& vscroll = widget.add<ng::VScrollPanel>();
+        vscroll.setFixedSize({210, widget.fixedHeight() - 36});
 
-        auto& imagePanel = vscroll.add<nanogui::ImagePanel>(90, 5, 5);
+        auto& imagePanel = vscroll.add<ng::ImagePanel>(90, 5, 5);
 
-        imagePanel.setCallback(
-            [&imagePanel](int i)
+        imagePanel.setCallback([&imagePanel](int i)
         {
             imagePanel.setSelection(i);
         });
@@ -92,18 +89,22 @@ struct ObjectPane::Data
         screen->performLayout();
     }
 
-    platform::Display*   display;
-    ObjectStore*         objectStore;
-
-    nanogui::ImagePanel* imagePanel;
-    std::vector<Image>   images;
+    ObjectStore*       objectStore;
+    ng::Widget         widget;
+    ng::ImagePanel*    imagePanel;
+    std::vector<Image> images;
 };
 
 ObjectPane::ObjectPane(platform::Display* display,
-                               ObjectStore* objectStore,
-                               TextureStore* textureStore) :
+                       ObjectStore* objectStore,
+                       TextureStore* textureStore) :
     d(std::make_shared<Data>(display, objectStore, textureStore))
 {
+}
+
+nanogui::Widget* ObjectPane::widget() const
+{
+    return &d->widget;
 }
 
 Object ObjectPane::selectedObject() const
