@@ -199,6 +199,7 @@ bool Display::close()
 
 bool Display::update()
 {
+    nanoGui()->performLayout();
     return !SDL_UpdateWindowSurface(d->window);
 }
 

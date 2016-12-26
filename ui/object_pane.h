@@ -23,11 +23,10 @@ namespace ui
 
 struct ObjectPane
 {
-    ObjectPane(platform::Display* display,
+    ObjectPane(nanogui::Widget* parent,
+               platform::Display* display,
                ObjectStore* objectStore,
                TextureStore* textureStore);
-
-    nanogui::Widget* widget() const;
 
     Object selectedObject() const;
 

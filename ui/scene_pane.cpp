@@ -13,22 +13,17 @@ namespace ng = nanogui;
 
 struct ScenePane::Data
 {
-    explicit Data() :
-        widget(nullptr)
+    explicit Data(ng::Widget* parent) :
+        widget(new ng::Widget(parent))
     {
     }
 
-    ng::Widget widget;
+    ng::Widget* widget;
 };
 
-ScenePane::ScenePane() :
-    d(std::make_shared<Data>())
+ScenePane::ScenePane(ng::Widget* parent) :
+    d(std::make_shared<Data>(parent))
 {}
-
-nanogui::Widget* ScenePane::widget() const
-{
-    return &d->widget;
-}
 
 } // namespace ui
 } // namespace pt

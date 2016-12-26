@@ -14,9 +14,7 @@ namespace ui
 
 struct ScenePane
 {
-    ScenePane();
-
-    nanogui::Widget* widget() const;
+    ScenePane(nanogui::Widget* parent);
 
 private:
     struct Data;

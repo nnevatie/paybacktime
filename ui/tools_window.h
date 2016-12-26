@@ -24,7 +24,11 @@ struct ToolsWindow
     using Widget  = std::pair<std::string, nanogui::Widget*>;
     using Widgets = std::vector<Widget>;
 
-    ToolsWindow(platform::Display* display, const Widgets& widgets);
+    ToolsWindow(platform::Display* display);
+
+    ToolsWindow& select(int index);
+
+    nanogui::Widget* add(const std::string& label, bool selected = false);
 
 private:
     struct Data;

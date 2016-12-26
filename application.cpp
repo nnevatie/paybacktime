@@ -62,9 +62,9 @@ struct Data
     Character          character;
 
     ui::RenderStats    stats;
+    ui::ToolsWindow    toolsWindow;
     ui::ScenePane      scenePane;
     ui::ObjectPane     objectPane;
-    ui::ToolsWindow    toolsWindow;
 
     Scene              scene;
     Camera             camera;
@@ -91,10 +91,11 @@ struct Data
 
         // UI
         stats(display->nanoVg()),
-        scenePane(),
-        objectPane(display, &objectStore, &textureStore),
-        toolsWindow(display, {{"Scene",   scenePane.widget()},
-                              {"Objects", objectPane.widget()}}),
+
+        toolsWindow(display),
+        scenePane(toolsWindow.add("Scene")),
+        objectPane(toolsWindow.add("Objects", true),
+                   display, &objectStore, &textureStore),
 
         // Camera
         camera({0.f, 0.f, 0.f}, 350.f,
@@ -135,6 +136,9 @@ struct Data
         scene.add({objectStore.object("table"), TransformTrRot({32, 0, 16 * -2})});
         #endif
         #endif
+
+        toolsWindow.select(1);
+        display->update();
     }
 
     bool simulate(TimePoint /*time*/, Duration step)

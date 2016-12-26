@@ -32,15 +32,16 @@ namespace ng = nanogui;
 
 struct ObjectPane::Data
 {
-    explicit Data(platform::Display* display,
+    explicit Data(ng::Widget* parent,
+                  platform::Display* display,
                   ObjectStore* objectStore,
                   TextureStore* textureStore) :
         objectStore(objectStore),
-        widget(display->nanoGui())
+        widget(new ng::Widget(parent))
     {
         auto screen = display->nanoGui();
-        widget.setFixedSize({220, screen->size().y() - 64});
-        widget.setLayout(new ng::BoxLayout(ng::Orientation::Vertical));
+        widget->setFixedSize({220, screen->size().y() - 64});
+        widget->setLayout(new ng::BoxLayout(ng::Orientation::Vertical));
 
         const Size<int> previewSize(256, 256);
         const Camera camera({0.f, 0.f, 0.f}, 90.f,
@@ -71,8 +72,8 @@ struct ObjectPane::Data
             nvgImages.push_back({nvgImage, object.name()});
         }
 
-        auto& vscroll = widget.add<ng::VScrollPanel>();
-        vscroll.setFixedSize({210, widget.fixedHeight() - 36});
+        auto& vscroll = widget->add<ng::VScrollPanel>();
+        vscroll.setFixedSize({210, widget->fixedHeight() - 36});
 
         auto& imagePanel = vscroll.add<ng::ImagePanel>(90, 5, 5);
 
@@ -86,25 +87,20 @@ struct ObjectPane::Data
         imagePanel.setSelection(0);
 
         this->imagePanel = &imagePanel;
-        screen->performLayout();
     }
 
     ObjectStore*       objectStore;
-    ng::Widget         widget;
+    ng::Widget*        widget;
     ng::ImagePanel*    imagePanel;
     std::vector<Image> images;
 };
 
-ObjectPane::ObjectPane(platform::Display* display,
+ObjectPane::ObjectPane(ng::Widget* parent,
+                       platform::Display* display,
                        ObjectStore* objectStore,
                        TextureStore* textureStore) :
-    d(std::make_shared<Data>(display, objectStore, textureStore))
+    d(std::make_shared<Data>(parent, display, objectStore, textureStore))
 {
-}
-
-nanogui::Widget* ObjectPane::widget() const
-{
-    return &d->widget;
 }
 
 Object ObjectPane::selectedObject() const
