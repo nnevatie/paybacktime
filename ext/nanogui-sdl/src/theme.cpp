@@ -29,7 +29,7 @@ nanogui::Color color(int luma, int alpha)
 }
 
 Theme::Theme(NVGcontext *ctx) {
-    mStandardFontSize                 = 16;
+    mStandardFontSize                 = 20;
     mButtonFontSize                   = 20;
     mTextBoxFontSize                  = 20;
     mWindowCornerRadius               = 2;
