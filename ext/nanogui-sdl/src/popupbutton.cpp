@@ -61,8 +61,13 @@ void PopupButton::performLayout(NVGcontext *ctx) {
 
     const Window *parentWindow = window();
 
-    mPopup->setAnchorPos(Vector2i(parentWindow->width() + 15,
+    // Right
+    mPopup->setAnchorPos(Vector2i(-mSize.x() / 2,
         absolutePosition().y() - parentWindow->position().y() + mSize.y() /2));
+
+    // Left
+    //mPopup->setAnchorPos(Vector2i(parentWindow->width() + 15,
+    //    absolutePosition().y() - parentWindow->position().y() + mSize.y() /2));
 }
 
 NAMESPACE_END(nanogui)

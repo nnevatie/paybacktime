@@ -61,9 +61,17 @@ void Popup::draw(NVGcontext* ctx) {
     nvgBeginPath(ctx);
     nvgRoundedRect(ctx, mPos.x(), mPos.y(), mSize.x(), mSize.y(), cr);
 
+    // Right
+    nvgMoveTo(ctx, mPos.x() + mSize.x() + 15, mPos.y() + mAnchorHeight);
+    nvgLineTo(ctx, mPos.x() + mSize.x(), mPos.y() + mAnchorHeight - 15);
+    nvgLineTo(ctx, mPos.x() + mSize.x(), mPos.y() + mAnchorHeight + 15);
+
+    /*
+    // Left
     nvgMoveTo(ctx, mPos.x()-15,mPos.y()+mAnchorHeight);
     nvgLineTo(ctx, mPos.x()+1,mPos.y()+mAnchorHeight-15);
     nvgLineTo(ctx, mPos.x()+1,mPos.y()+mAnchorHeight+15);
+    */
 
     nvgFillColor(ctx, mTheme->mWindowPopup);
     nvgFill(ctx);

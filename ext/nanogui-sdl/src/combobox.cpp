@@ -61,6 +61,7 @@ void ComboBox::setItems(const std::vector<std::string> &items, const std::vector
         });
         index++;
     }
+    mPopup->setVisible(false);
     setSelectedIndex(mSelectedIndex);
 }
 
