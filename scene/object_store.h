@@ -13,12 +13,14 @@ namespace pt
 
 struct ObjectStore
 {
+    using Objects = std::vector<Object>;
+
     ObjectStore(const fs::path& path, TextureStore* textureStore);
+
+    Objects objects() const;
 
     Object object(int index) const;
     Object object(const std::string& name) const;
-
-    std::vector<Object> objects() const;
 
 private:
     struct Data;

@@ -10,7 +10,7 @@ namespace pt
 
 struct ObjectStore::Data
 {
-    std::vector<Object> objects;
+    Objects objects;
 
     Data()
     {}
@@ -21,13 +21,18 @@ ObjectStore::ObjectStore(const fs::path& path, TextureStore* textureStore) :
 {
     PTTIME("create objects");
     int objectCount;
-    for (const fs::directory_entry& e : fs::directory_iterator(path))
-        if (is_directory(e))
+    for (const auto& entry : fs::directory_iterator(path))
+        if (fs::is_directory(entry))
         {
-            d->objects.push_back(Object(e.path(), textureStore));
+            d->objects.push_back(Object(entry.path(), textureStore));
             ++objectCount;
         }
     PTLOG(Info) << std::to_string(objectCount) + " objects";
+}
+
+ObjectStore::Objects ObjectStore::objects() const
+{
+    return d->objects;
 }
 
 Object ObjectStore::object(int index) const
@@ -38,16 +43,11 @@ Object ObjectStore::object(int index) const
 
 Object ObjectStore::object(const std::string& name) const
 {
-    for (auto& obj : d->objects)
+    for (const auto& obj : d->objects)
         if (obj.name() == name)
             return obj;
 
     return Object();
-}
-
-std::vector<Object> ObjectStore::objects() const
-{
-    return d->objects;
 }
 
 } // namespace pt

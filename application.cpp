@@ -36,6 +36,7 @@
 #include "scene/scene_control.h"
 #include "scene/camera_control.h"
 #include "scene/object_store.h"
+#include "scene/horizon_store.h"
 
 namespace pt
 {
@@ -59,6 +60,7 @@ struct Data
 
     TextureStore       textureStore;
     ObjectStore        objectStore;
+    HorizonStore       horizonStore;
     Character          character;
 
     ui::RenderStats    stats;
@@ -87,6 +89,7 @@ struct Data
 
         textureStore({512, 512}),
         objectStore(fs::path("objects"), &textureStore),
+        horizonStore(fs::path("horizons")),
         character(fs::path("characters") / "male1", &textureStore),
 
         // UI
@@ -209,7 +212,7 @@ struct Data
             camera);
 
         ssr(&geometry.texDepth, &geometry.texNormalDenoise, lighting.output(),
-            &geometry.texLight, camera);
+           &geometry.texLight, camera);
 
         bloom(ssr.output());
 
