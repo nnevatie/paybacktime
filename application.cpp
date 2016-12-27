@@ -77,7 +77,7 @@ struct Data
         display(display),
         renderSize(display->size()),
         geometry(renderSize),
-        ssao(32, renderSize, {4, 4}, geometry.texDepth),
+        ssao(32, renderSize, {4, 4}),
         ssr(renderSize),
         lighting(renderSize, geometry.texDepth),
         bloom(renderSize),
@@ -249,8 +249,7 @@ bool Application::run(const boost::program_options::variables_map& args)
     platform::Context context;
 
     const auto fullscreen = args.count("fullscreen");
-    const Size<int> size(fullscreen ? 1920 : 1280,
-                         fullscreen ? 1080 : 720);
+    const Size<int> size(1920, 1080);
 
     platform::Display display("Payback Time", size, fullscreen);
     display.open();
