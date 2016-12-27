@@ -38,18 +38,14 @@ struct Ssao
                       progBlur;
 
     gl::Fbo           fboAo,
-                      fboAoBlur,
-                      fboOutput;
+                      fboAoBlur;
 
     gl::Texture       texAo,
                       texAoBlur,
-                      texLighting,
                       texNoise;
 
-    Ssao(int kernelSize,
-         const Size<int>& renderSize,
-         const Size<int>& noiseSize,
-         const gl::Texture& texDepth);
+    Ssao(int kernelSize, const Size<int>& renderSize,
+                         const Size<int>& noiseSize);
 
     glm::vec2 noiseScale() const;
 

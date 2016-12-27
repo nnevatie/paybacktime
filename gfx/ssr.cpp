@@ -34,21 +34,21 @@ Ssr::Ssr(const Size<int>& renderSize) :
         std::vector<int> size = fboSize;
         for (int i = 0; i < mipmapCount; ++i)
         {
-            texScale[i].bind().alloc(size, GL_RGBA32F, GL_RGBA, GL_FLOAT)
+            texScale[i].bind().alloc(size, GL_RGBA16F, GL_RGBA, GL_FLOAT)
                               .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                               .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             fboScale[i].bind()
                        .attach(texScale[i], gl::Fbo::Attachment::Color)
                        .unbind();
 
-            texBlur[i].bind().alloc(size, GL_RGBA32F, GL_RGBA, GL_FLOAT)
+            texBlur[i].bind().alloc(size, GL_RGBA16F, GL_RGBA, GL_FLOAT)
                              .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                              .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             fboBlur[i].bind()
                       .attach(texBlur[i], gl::Fbo::Attachment::Color)
                       .unbind();
 
-            texColor.bind().alloc(i, size, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+            texColor.bind().alloc(i, size, GL_RGBA16F, GL_RGBA, GL_FLOAT);
             size = {size[0] / 2, size[1] / 2};
         }
         texColor.bind()
@@ -60,7 +60,7 @@ Ssr::Ssr(const Size<int>& renderSize) :
             .attach(texColor, gl::Fbo::Attachment::Color)
             .unbind();
 
-    texSsr.bind().alloc(fboSize, GL_RGB32F, GL_RGB, GL_FLOAT);
+    texSsr.bind().alloc(fboSize, GL_RGB16F, GL_RGB, GL_FLOAT);
     fboSsr.bind()
           .attach(texSsr, gl::Fbo::Attachment::Color)
           .unbind();

@@ -49,8 +49,7 @@ std::vector<float> noiseData(int size)
 
 Ssao::Ssao(int kernelSize,
            const Size<int>& renderSize,
-           const Size<int>& noiseSize,
-           const gl::Texture& texDepth) :
+           const Size<int>& noiseSize) :
     kernelSize(kernelSize),
     renderSize(renderSize),
     noiseSize(noiseSize),
@@ -65,12 +64,11 @@ Ssao::Ssao(int kernelSize,
     progBlur({vsQuad, fsBlur},
             {{0, "position"}, {1, "uv"}})
 {
-    auto fboSize  = {renderSize.w, renderSize.h};
+    auto fboSize = {renderSize.w, renderSize.h};
 
     // Alloc textures
-    texAo.bind().alloc(fboSize,       GL_R16F,    GL_RGB, GL_FLOAT);
-    texAoBlur.bind().alloc(fboSize,   GL_R16F,    GL_RGB, GL_FLOAT);
-    texLighting.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT);
+    texAo.bind().alloc(fboSize,     GL_R8, GL_RED, GL_UNSIGNED_BYTE);
+    texAoBlur.bind().alloc(fboSize, GL_R8, GL_RED, GL_UNSIGNED_BYTE);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
@@ -87,11 +85,6 @@ Ssao::Ssao(int kernelSize,
     fboAoBlur.bind()
            .attach(texAoBlur, gl::Fbo::Attachment::Color)
            .unbind();
-
-    fboOutput.bind()
-             .attach(texDepth,    gl::Fbo::Attachment::Depth)
-             .attach(texLighting, gl::Fbo::Attachment::Color)
-             .unbind();
 }
 
 glm::vec2 Ssao::noiseScale() const
