@@ -156,12 +156,16 @@ void main(void)
                   ivec2(size.x - 1, c - edge2);
 
         ivec3 p1 = ivec3(p, uv.y * (size.z - 1) + 0.5);
-        vec3  e  = texture(horizon, uv).rgb;
-        float v  = vis(p1, p0, e, length(e));
-        if (v > 0.0)
+        vec4  h  = texture(horizon, uv);
+        if (h.a > 0.0)
         {
-            l += weight * v * e;
-            i += weight * v * v * normalize(vec3(p1) - vec3(p0));
+            vec3 e  = h.rgb;
+            float v = vis(p1, p0, e, length(e));
+            if (v > 0.0)
+            {
+                l += weight * v * e;
+                i += weight * v * v * normalize(vec3(p1) - vec3(p0));
+            }
         }
     }
 
