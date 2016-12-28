@@ -63,15 +63,15 @@ struct Data
     HorizonStore       horizonStore;
     Character          character;
 
-    ui::RenderStats    stats;
-    ui::ToolsWindow    toolsWindow;
-    ui::ScenePane      scenePane;
-    ui::ObjectPane     objectPane;
-
     Scene              scene;
     Camera             camera;
     CameraControl      cameraControl;
     SceneControl       sceneControl;
+
+    ui::RenderStats    stats;
+    ui::ToolsWindow    toolsWindow;
+    ui::ScenePane      scenePane;
+    ui::ObjectPane     objectPane;
 
     platform::Mouse    mouse;
 
@@ -92,14 +92,6 @@ struct Data
         horizonStore(fs::path("horizons")),
         character(fs::path("characters") / "male1", &textureStore),
 
-        // UI
-        stats(display->nanoVg()),
-
-        toolsWindow(display),
-        scenePane(toolsWindow.add("Scene")),
-        objectPane(toolsWindow.add("Objects", true),
-                   display, &objectStore, &textureStore),
-
         // Camera
         camera({0.f, 0.f, 0.f}, 350.f,
                glm::half_pi<float>(), -glm::quarter_pi<float>() + 0,
@@ -107,7 +99,14 @@ struct Data
 
         // Controls
         cameraControl(&camera, display, &mouse),
-        sceneControl(&scene, &camera, display, &mouse, geometry.texDepth)
+        sceneControl(&scene, &camera, display, &mouse, geometry.texDepth),
+
+        // UI
+        stats(display->nanoVg()),
+        toolsWindow(display),
+        scenePane(toolsWindow.add("Scene"), &scene, &horizonStore),
+        objectPane(toolsWindow.add("Objects", true),
+                   display, &objectStore, &textureStore)
     {
         #if 1
         auto floor  = objectStore.object("floor");
@@ -159,7 +158,7 @@ struct Data
             return false;
 
         cameraControl(step);
-        sceneControl(step, objectPane.selectedObject());
+        sceneControl(step, objectPane.selected());
 
         return true;
     }

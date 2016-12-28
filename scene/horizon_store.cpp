@@ -37,6 +37,12 @@ HorizonStore::Horizons HorizonStore::horizons() const
     return d->horizons;
 }
 
+Horizon HorizonStore::horizon(int index) const
+{
+    return index >= 0 && index < int(d->horizons.size()) ?
+           d->horizons.at(index) : Horizon();
+}
+
 Horizon HorizonStore::horizon(const std::string& name) const
 {
     for (const auto& horz : d->horizons)

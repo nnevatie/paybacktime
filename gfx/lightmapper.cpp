@@ -161,7 +161,7 @@ Lightmapper& Lightmapper::add(const glm::ivec3& pos,
     return *this;
 }
 
-Lightmapper& Lightmapper::operator()()
+Lightmapper& Lightmapper::operator()(const Horizon& horizon)
 {
     if (d->texLight)
     {
@@ -204,15 +204,9 @@ Lightmapper& Lightmapper::operator()()
         glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
 
-        gl::Texture texHorizon = gl::Texture()
-                                 .bind().alloc(Image("data/horizon.png"))
-                                 .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                                 .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
         d->texDensity.bindAs(GL_TEXTURE0);
         d->texEmission.bindAs(GL_TEXTURE1);
-        texHorizon.bindAs(GL_TEXTURE2);
+        if (horizon) horizon.texture().bindAs(GL_TEXTURE2);
         d->texLightSources.bindAs(GL_TEXTURE3);
 
         glViewport(0, 0, size.x, size.y);

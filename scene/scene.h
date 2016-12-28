@@ -14,6 +14,7 @@
 #include "gfx/geometry.h"
 #include "gl/texture.h"
 
+#include "horizon.h"
 #include "object.h"
 #include "character.h"
 
@@ -61,6 +62,8 @@ struct Scene
 
     Box bounds() const;
     glm::ivec3 cellResolution() const;
+
+    Scene& setHorizon(const Horizon& horizon);
 
     bool contains(const ObjectItem& item) const;
 

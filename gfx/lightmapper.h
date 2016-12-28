@@ -7,6 +7,7 @@
 #include "gl/texture.h"
 
 #include "scene/material_types.h"
+#include "scene/horizon.h"
 
 namespace pt
 {
@@ -26,7 +27,7 @@ struct Lightmapper
                      const mat::Density& density,
                      const mat::Emission& emission);
 
-    Lightmapper& operator()();
+    Lightmapper& operator()(const Horizon& horizon);
 
 private:
     struct Data;

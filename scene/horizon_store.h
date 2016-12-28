@@ -18,6 +18,7 @@ struct HorizonStore
 
     Horizons horizons() const;
 
+    Horizon horizon(int index) const;
     Horizon horizon(const std::string& name) const;
 
 private:

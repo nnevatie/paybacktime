@@ -18,9 +18,11 @@ namespace pt
 
 struct Scene::Data
 {
-    Data()
+    Data() :
+        horizon(Horizon::none())
     {}
 
+    Horizon          horizon;
     ObjectItems      objectItems;
     CharacterItems   charItems;
 
@@ -44,6 +46,13 @@ Box Scene::bounds() const
 glm::ivec3 Scene::cellResolution() const
 {
     return {glm::ceil(bounds().size.xzy() / c::cell::SIZE.xzy())};
+}
+
+Scene& Scene::setHorizon(const Horizon& horizon)
+{
+    d->horizon = horizon;
+    updateLightmap();
+    return *this;
 }
 
 bool Scene::contains(const ObjectItem& item) const
@@ -146,7 +155,7 @@ Scene& Scene::updateLightmap()
 
         d->lightmapper.add(pos, item.obj.density(), item.obj.emission());
     }
-    d->lightmapper();
+    d->lightmapper(d->horizon);
     return *this;
 }
 

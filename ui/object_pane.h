@@ -28,7 +28,7 @@ struct ObjectPane
                ObjectStore* objectStore,
                TextureStore* textureStore);
 
-    Object selectedObject() const;
+    Object selected() const;
 
 private:
     struct Data;

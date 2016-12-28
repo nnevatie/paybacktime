@@ -103,7 +103,7 @@ ObjectPane::ObjectPane(ng::Widget* parent,
 {
 }
 
-Object ObjectPane::selectedObject() const
+Object ObjectPane::selected() const
 {
     return d->objectStore->object(d->imagePanel->selection());
 }
