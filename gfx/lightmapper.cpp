@@ -206,7 +206,7 @@ Lightmapper& Lightmapper::operator()(const Horizon& horizon)
 
         d->texDensity.bindAs(GL_TEXTURE0);
         d->texEmission.bindAs(GL_TEXTURE1);
-        if (horizon) horizon.texture().bindAs(GL_TEXTURE2);
+        horizon.texture().bindAs(GL_TEXTURE2);
         d->texLightSources.bindAs(GL_TEXTURE3);
 
         glViewport(0, 0, size.x, size.y);
