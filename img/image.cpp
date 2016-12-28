@@ -4,6 +4,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
+#include <glm/gtx/component_wise.hpp>
 
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
@@ -259,6 +260,29 @@ Image Image::normals(float strenght) const
         return image;
     }
     return Image();
+}
+
+Image Image::maxToAlpha() const
+{
+    Image image(d->size, 4);
+    if (d->depth == 4)
+    {
+        const int w = image.d->size.w;
+        const int h = image.d->size.h;
+        for (int y = 0; y < h; ++y)
+            for (int x = 0; x < w; ++x)
+            {
+                auto argb0 = *bits<const uint32_t>(x, y);
+                auto  rgb0 = argbTuple(argb0).rgb();
+                auto    a1 = glm::compMax(rgb0);
+                auto argb1 = argb(glm::uvec4(rgb0, a1));
+                *image.bits<uint32_t>(x, y) = argb1;
+            }
+    }
+    else
+        throw std::runtime_error("Not implemented for depth: " +
+                                 std::to_string(d->depth));
+    return image;
 }
 
 bool Image::write(const fs::path& path) const

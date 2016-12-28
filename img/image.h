@@ -63,6 +63,7 @@ struct Image
     Image& fill(uint32_t value);
 
     Image normals(float strenght = 1.f) const;
+    Image maxToAlpha() const;
 
     bool write(const fs::path& path) const;
 
