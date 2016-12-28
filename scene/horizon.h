@@ -18,8 +18,8 @@ struct Horizon
 
     operator bool() const;
 
-    operator==(const Horizon& other) const;
-    operator!=(const Horizon& other) const;
+    bool operator==(const Horizon& other) const;
+    bool operator!=(const Horizon& other) const;
 
     std::string name() const;
     Image image() const;

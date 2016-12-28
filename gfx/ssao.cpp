@@ -3,7 +3,7 @@
 #include <boost/algorithm/clamp.hpp>
 
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/random.hpp>
+#include <glm/gtc/random.hpp>
 #include <glm/gtx/compatibility.hpp>
 
 #include "common/common.h"

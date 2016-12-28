@@ -52,12 +52,12 @@ Horizon::operator bool() const
     return d.operator bool();
 }
 
-Horizon::operator==(const Horizon& other) const
+bool Horizon::operator==(const Horizon& other) const
 {
     return d == other.d;
 }
 
-Horizon::operator!=(const Horizon& other) const
+bool Horizon::operator!=(const Horizon& other) const
 {
     return !operator==(other);
 }

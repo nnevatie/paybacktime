@@ -2,9 +2,9 @@
 
 #include <vector>
 
+#include <glm/gtc/random.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/intersect.hpp>
-#include <glm/gtx/random.hpp>
 #include <glm/gtx/transform.hpp>
 
 #include "constants.h"

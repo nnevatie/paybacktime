@@ -15,7 +15,7 @@
 #include <nanogui/window.h>
 #include <nanogui/opengl.h>
 #include <nanogui/screen.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 NAMESPACE_BEGIN(nanogui)
 
