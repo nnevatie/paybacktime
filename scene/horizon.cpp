@@ -2,25 +2,37 @@
 
 namespace pt
 {
+const Size<int> previewSize(200, 30);
 
 struct Horizon::Data
 {
     Data(const Image& image, const std::string& name) :
-        name(name)
+        name(name),
+        image(image),
+        preview(image.scaled(previewSize))
+    {
+        allocTexture();
+    }
+
+    Data(const fs::path& path) :
+        name(path.stem().string()),
+        image(Image(path, 4)),
+        preview(image.scaled(previewSize))
+    {
+        allocTexture();
+    }
+
+    Data& allocTexture()
     {
         texture.bind().alloc(image.maxToAlpha())
-                      .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                      .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
-    Data(const fs::path& path) :
-        name(path.stem().string())
-    {
-        texture.bind().alloc(Image(path, 4).maxToAlpha())
-                      .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                      .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+               .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+               .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        return *this;
     }
 
     std::string name;
+    Image       image,
+                preview;
     gl::Texture texture;
 };
 
@@ -53,6 +65,16 @@ Horizon::operator!=(const Horizon& other) const
 std::string Horizon::name() const
 {
     return d->name;
+}
+
+Image Horizon::image() const
+{
+    return d->image;
+}
+
+Image Horizon::preview() const
+{
+    return d->preview;
 }
 
 gl::Texture Horizon::texture() const

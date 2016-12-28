@@ -5,6 +5,9 @@
 #include <nanogui/label.h>
 #include <nanogui/button.h>
 #include <nanogui/combobox.h>
+#include <nanogui/imageview.h>
+
+#include "platform/display.h"
 
 #include "scene/scene.h"
 #include "scene/horizon_store.h"
@@ -17,10 +20,14 @@ namespace ng = nanogui;
 
 struct ScenePane::Data
 {
-    explicit Data(ng::Widget* parent, Scene* scene, HorizonStore* horizonStore) :
-        horizonStore(horizonStore),
+    explicit Data(ng::Widget* parent,
+                  platform::Display* display,
+                  Scene* scene,
+                  HorizonStore* horizonStore) :
         widget(new ng::Widget(parent))
     {
+        auto nanovg = display->nanoVg();
+
         widget->setLayout(new ng::BoxLayout(ng::Orientation::Vertical,
                                             ng::Alignment::Fill, 5, 5));
         // Horizons
@@ -31,22 +38,29 @@ struct ScenePane::Data
                        std::back_inserter(horizonNames),
                        [](Horizon h) {return h.name();});
 
-        horizonSelector = &widget->add<ng::ComboBox>(horizonNames);
-        horizonSelector->setCallback([scene, horizonStore](int index)
-        {
-            scene->setHorizon(horizonStore->horizon(index));
-        });
+        auto horizonView     = &widget->add<ng::ImageView>(
+                               horizons.front().preview().nvgImage(nanovg));
+        auto horizonSelector = &widget->add<ng::ComboBox>(horizonNames);
+
+        horizonSelector->setCallback(
+            [scene, horizonStore, horizonView, nanovg](int index)
+            {
+                const auto horizon = horizonStore->horizon(index);
+                scene->setHorizon(horizon);
+                horizonView->setImage(horizon.preview().nvgImage(nanovg));
+            });
+
         widget->setVisible(false);
     }
 
-    HorizonStore* horizonStore;
-    ng::Widget*   widget;
-    ng::ComboBox* horizonSelector;
+    ng::Widget* widget;
 };
 
 ScenePane::ScenePane(ng::Widget* parent,
-                     Scene* scene, HorizonStore* horizonStore) :
-    d(std::make_shared<Data>(parent, scene, horizonStore))
+                     platform::Display* display,
+                     Scene* scene,
+                     HorizonStore* horizonStore) :
+    d(std::make_shared<Data>(parent, display, scene, horizonStore))
 {}
 
 } // namespace ui

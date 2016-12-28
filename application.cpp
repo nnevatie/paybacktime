@@ -104,7 +104,7 @@ struct Data
         // UI
         stats(display->nanoVg()),
         toolsWindow(display),
-        scenePane(toolsWindow.add("Scene"), &scene, &horizonStore),
+        scenePane(toolsWindow.add("Scene"), display, &scene, &horizonStore),
         objectPane(toolsWindow.add("Objects", true),
                    display, &objectStore, &textureStore)
     {

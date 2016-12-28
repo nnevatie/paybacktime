@@ -22,6 +22,8 @@ struct Horizon
     operator!=(const Horizon& other) const;
 
     std::string name() const;
+    Image image() const;
+    Image preview() const;
     gl::Texture texture() const;
 
     static Horizon none();

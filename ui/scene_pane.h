@@ -9,6 +9,11 @@ class Widget;
 
 namespace pt
 {
+namespace platform
+{
+struct Display;
+}
+
 struct Scene;
 struct HorizonStore;
 
@@ -18,7 +23,9 @@ namespace ui
 struct ScenePane
 {
     ScenePane(nanogui::Widget* parent,
-              Scene* scene, HorizonStore* horizonStore);
+              platform::Display* display,
+              Scene* scene,
+              HorizonStore* horizonStore);
 
 private:
     struct Data;
