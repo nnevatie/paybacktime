@@ -20,12 +20,17 @@ using OutlineTr = std::pair<glm::mat4x4, glm::mat4x4>;
 namespace
 {
 
-OutlineTr outlineTransform(Camera* camera)
+OutlineTr outlineTransform(Camera* camera, const ObjectItem& object)
 {
-    return OutlineTr();
+    const auto m   = static_cast<glm::mat4x4>(object.trRot);
+    const auto v   = camera->matrixView();
+    const auto p   = camera->matrixProj();
+    const auto mvp = p * v * m;
+    const auto t   = glm::vec3(0.f, object.obj.dimensions().y, 0.f);
+    return OutlineTr(mvp, mvp * glm::translate(t));
 }
 
-}
+} // namespace
 
 struct SceneControl::Data
 {
@@ -148,31 +153,20 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
 
 SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
 {
-    /*
-    if (d->insersectedObject)
+    if (d->state != Data::State::Idle)
     {
-        const auto object = d->insersectedObject.obj;
-        const auto m = static_cast<glm::mat4x4>(d->insersectedObject.trRot);
-        const auto v = d->camera->matrixView();
-        const auto p = d->camera->matrixProj();
-
-        const auto mvp = p * v * m;
-        const auto t   = glm::vec3(0.f, d->object.dimensions().y, 0.f);
-        d->outline(fboOut, texColor, object.model().primitive(), mvp);
-        d->arrow(fboOut, mvp * glm::translate(t));
-    }*/
-    if (const auto& object = d->object)
-    {
-        const auto m = static_cast<glm::mat4x4>(d->object.trRot);
-        const auto v = d->camera->matrixView();
-        const auto p = d->camera->matrixProj();
-
-        if (d->state != Data::State::Idle)
+        if (const auto object = d->insersectedObject)
         {
-            const auto mvp = p * v * m;
-            const auto t   = glm::vec3(0.f, d->object.obj.dimensions().y, 0.f);
-            d->outline(fboOut, texColor, object.obj.model().primitive(), mvp);
-            d->arrow(fboOut, mvp * glm::translate(t));
+            const auto otr = outlineTransform(d->camera, object);
+            d->outline(fboOut, texColor,
+                       object.obj.model().primitive(), otr.first);
+        }
+        if (const auto& object = d->object)
+        {
+            const auto otr = outlineTransform(d->camera, d->object);
+            d->outline(fboOut, texColor,
+                       object.obj.model().primitive(), otr.first);
+            d->arrow(fboOut, otr.second);
         }
     }
     return *this;
