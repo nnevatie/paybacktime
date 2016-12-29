@@ -1,5 +1,7 @@
 #include "lighting.h"
 
+#include <glbinding/gl/bitfield.h>
+
 #include <glm/matrix.hpp>
 
 #include "common/common.h"

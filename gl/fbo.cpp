@@ -1,6 +1,6 @@
 #include "fbo.h"
 
-#include "platform/gl.h"
+#include <glbinding/gl/functions.h>
 
 namespace pt
 {

@@ -2,7 +2,9 @@
 
 #include <memory>
 
-#include "platform/gl.h"
+#include <glbinding/gl/types.h>
+using namespace gl;
+
 #include "geom/size.h"
 
 namespace pt

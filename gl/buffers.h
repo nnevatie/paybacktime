@@ -2,7 +2,8 @@
 
 #include <memory>
 
-#include "platform/gl.h"
+#include <glbinding/gl/types.h>
+using namespace gl;
 
 namespace pt
 {

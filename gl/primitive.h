@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glbinding/gl/functions.h>
+
 #include "common/common.h"
 #include "geom/mesh.h"
 #include "buffers.h"

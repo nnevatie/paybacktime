@@ -4,10 +4,12 @@
 #include <vector>
 #include <iostream>
 
+#include <glbinding/gl/types.h>
+#include <glbinding/gl/enum.h>
+using namespace gl;
+
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
-
-#include "platform/gl.h"
 
 #include "rect.h"
 

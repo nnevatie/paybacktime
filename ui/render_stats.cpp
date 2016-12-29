@@ -3,9 +3,10 @@
 #include <sstream>
 #include <iomanip>
 
+#include <glbinding/gl/functions.h>
+
 #include <nanovg.h>
 
-#include "platform/gl.h"
 #include "common/common.h"
 #include "geom/mesh.h"
 

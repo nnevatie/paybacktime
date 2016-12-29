@@ -1,5 +1,7 @@
 #include "geometry.h"
 
+#include <glbinding/gl/bitfield.h>
+
 #include "common/common.h"
 
 namespace pt

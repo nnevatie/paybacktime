@@ -3,9 +3,12 @@
 #include <memory>
 #include <vector>
 
+#include <glbinding/gl/types.h>
+#include <glbinding/gl/enum.h>
+using namespace gl;
+
 #include <glm/vec3.hpp>
 
-#include "platform/gl.h"
 #include "geom/size.h"
 #include "geom/grid.h"
 #include "img/image.h"

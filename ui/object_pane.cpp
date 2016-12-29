@@ -13,7 +13,6 @@
 #include <nanogui/vscrollpanel.h>
 
 #include "platform/display.h"
-#include "platform/gl.h"
 #include "gl/texture_atlas.h"
 #include "geom/image_mesher.h"
 #include "common/log.h"

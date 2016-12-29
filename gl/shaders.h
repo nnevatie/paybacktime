@@ -3,7 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "platform/gl.h"
+#include <glbinding/gl/types.h>
+using namespace gl;
+
 #include "common/file_system.h"
 
 namespace pt

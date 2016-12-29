@@ -1,8 +1,12 @@
 #include "display.h"
-#include "platform/gl.h"
 
+#include <glbinding/gl/types.h>
+#include <glbinding/gl/enum.h>
+#include <glbinding/gl/bitfield.h>
+#include <glbinding/gl/functions.h>
 #include <glbinding/Binding.h>
 #include <glbinding/CallbackMask.h>
+using namespace gl;
 
 #include <nanovg.h>
 #include <nanovg_gl.h>

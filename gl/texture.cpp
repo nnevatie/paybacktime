@@ -1,8 +1,9 @@
 #include "texture.h"
 
+#include <glbinding/gl/functions.h>
+
 #include <glm/gtc/constants.hpp>
 
-#include "platform/gl.h"
 #include "common/log.h"
 
 namespace pt

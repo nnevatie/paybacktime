@@ -1,6 +1,7 @@
 #pragma once
 
-#include "platform/gl.h"
+#include <glbinding/gl/functions.h>
+
 #include "platform/clock.h"
 
 namespace pt
