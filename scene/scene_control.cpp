@@ -153,8 +153,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
 
 SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
 {
-    if (d->state != Data::State::Idle)
-    {
+    if (d->state == Data::State::Removing)
         if (const auto object = d->insersectedObject)
         {
             const auto otr = outlineTransform(d->camera, object);
@@ -162,6 +161,8 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
                        object.obj.model().primitive(), otr.first,
                        glm::vec4(0.75f, 0.f, 0.f, 1.f));
         }
+
+    if (d->state == Data::State::Adding)
         if (const auto& object = d->object)
         {
             const auto otr = outlineTransform(d->camera, d->object);
@@ -170,7 +171,6 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
                        glm::vec4(0.f, 0.5f, 0.75f, 1.f));
             d->arrow(fboOut, otr.second);
         }
-    }
     return *this;
 }
 
