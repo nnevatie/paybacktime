@@ -109,8 +109,8 @@ struct Data
                    display, &objectStore, &textureStore)
     {
         #if 1
-        auto floor  = objectStore.object("floor");
-        auto light  = objectStore.object("floor3");
+        auto floor = objectStore.object("floor");
+        auto light = objectStore.object("floor3");
 
         #if 0
         auto pillar = objectStore.object("pillar");
