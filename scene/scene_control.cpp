@@ -92,19 +92,14 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
     if (mouseOnScene)
     {
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
-        if (keyState[SDL_SCANCODE_LSHIFT])
-        {
-            d->state = mouseButtons[0] ? Data::State::Adding   :
-                       mouseButtons[2] ? Data::State::Removing :
-                                         Data::State::Hovering;
 
-            d->mouse->setCursor(platform::Mouse::Cursor::Crosshair);
-        }
-        else
-            d->state = Data::State::Idle;
-
+        d->state = keyState[SDL_SCANCODE_LSHIFT] ? Data::State::Adding :
+                   keyState[SDL_SCANCODE_LCTRL]  ? Data::State::Removing :
+                                                   Data::State::Idle;
         if (d->state != Data::State::Idle)
         {
+            d->mouse->setCursor(platform::Mouse::Cursor::Crosshair);
+
             // World intersection
             const auto clipRay  = d->display->clip(d->mouse->position());
             const auto rayWorld = d->camera->world(d->camera->eye(clipRay));
