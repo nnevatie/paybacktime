@@ -1,6 +1,5 @@
 #include "object_pane.h"
 
-#include "platform/gl.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
 
@@ -14,6 +13,7 @@
 #include <nanogui/vscrollpanel.h>
 
 #include "platform/display.h"
+#include "platform/gl.h"
 #include "gl/texture_atlas.h"
 #include "geom/image_mesher.h"
 #include "common/log.h"

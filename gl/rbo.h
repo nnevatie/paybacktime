@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "platform/gl.h"
-
 #include "geom/size.h"
 
 namespace pt

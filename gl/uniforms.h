@@ -1,8 +1,9 @@
 #pragma once
 
-#include "platform/gl.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "platform/gl.h"
 
 namespace pt
 {

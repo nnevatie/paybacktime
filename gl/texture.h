@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "platform/gl.h"
 #include <glm/vec3.hpp>
 
+#include "platform/gl.h"
 #include "geom/size.h"
 #include "geom/grid.h"
 #include "img/image.h"

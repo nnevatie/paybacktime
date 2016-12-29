@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "platform/gl.h"
-
 #include "common/file_system.h"
 
 namespace pt

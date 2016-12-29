@@ -1,7 +1,8 @@
 #include "display.h"
-
 #include "platform/gl.h"
+
 #include <glbinding/Binding.h>
+#include <glbinding/CallbackMask.h>
 
 #include <nanovg.h>
 #include <nanovg_gl.h>
@@ -20,8 +21,7 @@ void debugCallback(
     const GLchar* message, const GLvoid* /*userParam*/)
 {
     if ((severity == GL_DEBUG_SEVERITY_MEDIUM_ARB ||
-         severity == GL_DEBUG_SEVERITY_HIGH_ARB)  &&
-        !strstr(message, "recompiled"))
+         severity == GL_DEBUG_SEVERITY_HIGH_ARB))
         PTLOG(Debug) << message;
 }
 
@@ -133,6 +133,16 @@ bool Display::open()
         // Init glbinding
         glbinding::Binding::initialize();
 
+        // Error logging
+        glbinding::setCallbackMaskExcept(glbinding::CallbackMask::After,
+                                        {"glGetError"});
+        glbinding::setAfterCallback([](const glbinding::FunctionCall &)
+        {
+            const auto error = glGetError();
+            if (error != GL_NO_ERROR)
+                PTLOG(Error) << "GL error: " << std::hex << error << std::endl;
+        });
+
         if (glDebugMessageCallbackARB != nullptr)
         {
             glDebugMessageCallbackARB(debugCallback, 0);
@@ -180,10 +190,10 @@ bool Display::close()
 {
     if (d->window)
     {
+        delete d->nanoGuiScreen;
+        nvgDeleteGL3(d->nvgContext);
         SDL_GL_DeleteContext(d->glContext);
         SDL_DestroyWindow(d->window);
-        nvgDeleteGL3(d->nvgContext);
-        delete d->nanoGuiScreen;
 
         d->glContext     = nullptr;
         d->window        = nullptr;

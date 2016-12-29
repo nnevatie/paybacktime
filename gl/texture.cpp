@@ -1,8 +1,8 @@
 #include "texture.h"
 
-#include "platform/gl.h"
 #include <glm/gtc/constants.hpp>
 
+#include "platform/gl.h"
 #include "common/log.h"
 
 namespace pt

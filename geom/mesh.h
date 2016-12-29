@@ -4,10 +4,10 @@
 #include <vector>
 #include <iostream>
 
-#include "platform/gl.h"
-
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+
+#include "platform/gl.h"
 
 #include "rect.h"
 

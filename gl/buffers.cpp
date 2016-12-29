@@ -1,7 +1,6 @@
-#include "platform/gl.h"
+#include "buffers.h"
 
 #include "common/log.h"
-#include "buffers.h"
 
 namespace pt
 {

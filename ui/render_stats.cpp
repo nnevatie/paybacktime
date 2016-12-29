@@ -3,9 +3,9 @@
 #include <sstream>
 #include <iomanip>
 
-#include "platform/gl.h"
 #include <nanovg.h>
 
+#include "platform/gl.h"
 #include "common/common.h"
 #include "geom/mesh.h"
 
