@@ -41,7 +41,8 @@ Outline::Outline(const Size<int>& renderSize, const gl::Texture& texDepth) :
 Outline& Outline::operator()(gl::Fbo* fboOut,
                              gl::Texture* texColor,
                              const gl::Primitive& primitive,
-                             const glm::mat4& mvp)
+                             const glm::mat4& mvp,
+                             const glm::vec4& color)
 {
     {
         Binder<gl::Fbo> binder(fboModel);
@@ -80,8 +81,7 @@ Outline& Outline::operator()(gl::Fbo* fboOut,
         texDenoise.bindAs(GL_TEXTURE1);
         progOutline.bind().setUniform("tex", 0)
                           .setUniform("outline", 1)
-                          .setUniform("fillColor",
-                                      glm::vec4(0.f, 0.5f, 0.75f, 1.f));
+                          .setUniform("fillColor", color);
         rect.render();
     }
     return* this;

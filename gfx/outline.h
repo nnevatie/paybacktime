@@ -39,7 +39,8 @@ struct Outline
     Outline& operator()(gl::Fbo* fboOut,
                         gl::Texture* texColor,
                         const gl::Primitive& primitive,
-                        const glm::mat4& mvp);
+                        const glm::mat4& mvp,
+                        const glm::vec4& color);
 };
 
 } // namespace gfx

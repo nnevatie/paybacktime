@@ -159,13 +159,15 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
         {
             const auto otr = outlineTransform(d->camera, object);
             d->outline(fboOut, texColor,
-                       object.obj.model().primitive(), otr.first);
+                       object.obj.model().primitive(), otr.first,
+                       glm::vec4(0.75f, 0.f, 0.f, 1.f));
         }
         if (const auto& object = d->object)
         {
             const auto otr = outlineTransform(d->camera, d->object);
             d->outline(fboOut, texColor,
-                       object.obj.model().primitive(), otr.first);
+                       object.obj.model().primitive(), otr.first,
+                       glm::vec4(0.f, 0.5f, 0.75f, 1.f));
             d->arrow(fboOut, otr.second);
         }
     }
