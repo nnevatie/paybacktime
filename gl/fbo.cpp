@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+#include "platform/gl.h"
 
 #include "fbo.h"
 

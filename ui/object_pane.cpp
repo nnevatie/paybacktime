@@ -1,6 +1,6 @@
 #include "object_pane.h"
 
-#include <glad/glad.h>
+#include "platform/gl.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
 

@@ -20,12 +20,12 @@ struct TransformTrRot
     TransformTrRot(const V& tr, int rot = 0) : tr(tr), rot(rot)
     {}
 
-    operator==(const TransformTrRot& other) const
+    bool operator==(const TransformTrRot& other) const
     {
         return tr == other.tr && rot == other.rot;
     }
 
-    operator!=(const TransformTrRot& other) const
+    bool operator!=(const TransformTrRot& other) const
     {
         return !operator==(other);
     }

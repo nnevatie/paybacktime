@@ -28,8 +28,8 @@ Bloom::Bloom(const Size<int>& renderSize) :
     PTLOG(Info) << "size " << renderSize.w << "x" << renderSize.h;
     auto fboSize = {renderSize.w, renderSize.h};
 
-    const GLint iformat = GL_RGB16F;
-    const GLenum type   = GL_FLOAT;
+    const GLenum iformat = GL_RGB16F;
+    const GLenum type    = GL_FLOAT;
 
     // Color + emission texture and FBO
     texBloom.bind().alloc(fboSize, iformat, GL_RGB, type)

@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <glad/glad.h>
+#include "platform/gl.h"
 
 namespace pt
 {

@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <glad/glad.h>
+#include "platform/gl.h"
 #include <glm/vec3.hpp>
 
 #include "geom/size.h"
@@ -46,17 +46,18 @@ struct Texture
 
     static void unbind(GLenum target, GLenum unit);
 
+    Texture& set(GLenum name, GLenum param);
     Texture& set(GLenum name, GLint param);
     Texture& set(GLenum name, GLfloat param);
 
-    Texture& alloc(GLint internalFormat, const Buffer& buffer);
+    Texture& alloc(GLenum internalFormat, const Buffer& buffer);
 
     Texture& alloc(const std::vector<int>& dim,
-                   GLint internalFormat, GLenum format,
+                   GLenum internalFormat, GLenum format,
                    GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = nullptr);
 
     Texture& alloc(int level, const std::vector<int>& dim,
-                   GLint internalFormat, GLenum format,
+                   GLenum internalFormat, GLenum format,
                    GLenum type = GL_UNSIGNED_BYTE, const GLvoid* data = nullptr);
 
     Texture& alloc(const Image& image, bool srgb = true);

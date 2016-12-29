@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <glad/glad.h>
+#include "platform/gl.h"
 
 #include "geom/size.h"
 
@@ -20,7 +20,7 @@ struct Rbo
     Rbo& bind();
     Rbo& unbind();
 
-    Rbo& alloc(const Size<int>& size, GLint internalFormat);
+    Rbo& alloc(const Size<int>& size, GLenum internalFormat);
 
 private:
     struct Data;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(paybacktime)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
-    -Wall -Wextra -Wno-unused-function -fopenmp -ffast-math")
+    -Wall -Wno-unused-function -fopenmp -ffast-math -march=core2")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
     -Wl,--stack,16777216")
@@ -35,7 +35,6 @@ file(GLOB EXT_HEADER_FILES
     )
 
 file(GLOB EXT_SOURCE_FILES
-    ext/glad/*.c
     ext/nanovg/src/*.c
     ext/nanogui-sdl/src/*.cpp
     )
@@ -71,6 +70,7 @@ set(SDL_LIBS
 
 # OpenGL dependencies
 set(OPENGL_LIBS
+    glbinding
     opengl32
     )
 
@@ -79,7 +79,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/ext
     ${CMAKE_SOURCE_DIR}/ext/stb
-    ${CMAKE_SOURCE_DIR}/ext/glad
     ${CMAKE_SOURCE_DIR}/ext/eigen
     ${CMAKE_SOURCE_DIR}/ext/nanovg/src
     ${CMAKE_SOURCE_DIR}/ext/nanogui-sdl/include
@@ -92,7 +91,7 @@ add_definitions(-DEIGEN_NO_DEBUG
                 -DGL_GLEXT_PROTOTYPES
                 -DNANOVG_GL3_IMPLEMENTATION
                 -DBOOST_THREAD_VERSION=4
-                -DGLM_SWIZZLE)
+                -DGLM_FORCE_SWIZZLE)
 
 # Use CCache if available
 #find_program(CCACHE_FOUND ccache)

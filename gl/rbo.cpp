@@ -42,7 +42,7 @@ Rbo& Rbo::unbind()
     return *this;
 }
 
-Rbo& Rbo::alloc(const Size<int>& size, GLint internalFormat)
+Rbo& Rbo::alloc(const Size<int>& size, GLenum internalFormat)
 {
     glRenderbufferStorage(GL_RENDERBUFFER, internalFormat, size.w, size.h);
     return *this;

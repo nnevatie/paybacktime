@@ -1,6 +1,6 @@
 #include "texture.h"
 
-#include <glad/glad.h>
+#include "platform/gl.h"
 #include <glm/gtc/constants.hpp>
 
 #include "common/log.h"
@@ -126,6 +126,12 @@ void Texture::unbind(GLenum target, GLenum unit)
     glBindTexture(target, 0);
 }
 
+Texture& Texture::set(GLenum name, GLenum param)
+{
+    glTexParameteri(d->target, name, param);
+    return *this;
+}
+
 Texture& Texture::set(GLenum name, GLint param)
 {
     glTexParameteri(d->target, name, param);
@@ -138,21 +144,21 @@ Texture& Texture::set(GLenum name, GLfloat param)
     return *this;
 }
 
-Texture& Texture::alloc(GLint internalFormat, const Buffer& buffer)
+Texture& Texture::alloc(GLenum internalFormat, const Buffer& buffer)
 {
     glTexBuffer(GL_TEXTURE_BUFFER, internalFormat, buffer.id());
     return *this;
 }
 
 Texture& Texture::alloc(const std::vector<int> &dim,
-                        GLint internalFormat, GLenum format,
+                        GLenum internalFormat, GLenum format,
                         GLenum type, const GLvoid* data)
 {
     return alloc(0, dim, internalFormat, format, type, data);
 }
 
 Texture& Texture::alloc(int level, const std::vector<int>& dim,
-                        GLint internalFormat, GLenum format,
+                        GLenum internalFormat, GLenum format,
                         GLenum type, const GLvoid* data)
 {
     if (d->target == GL_TEXTURE_1D && dim.size() > 0)
@@ -171,11 +177,11 @@ Texture& Texture::alloc(int level, const std::vector<int>& dim,
                      dim[0], dim[1], dim[2], 0, format, type, data);
 
     // Set default params
-    set(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    set(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    set(GL_TEXTURE_MIN_FILTER, GLint(GL_NEAREST));
+    set(GL_TEXTURE_MAG_FILTER, GLint(GL_NEAREST));
+    set(GL_TEXTURE_WRAP_S, GLint(GL_CLAMP_TO_EDGE));
+    set(GL_TEXTURE_WRAP_T, GLint(GL_CLAMP_TO_EDGE));
+    set(GL_TEXTURE_WRAP_R, GLint(GL_CLAMP_TO_EDGE));
     return *this;
 }
 
@@ -183,7 +189,7 @@ Texture& Texture::alloc(const Image& image, bool srgb)
 {
     struct Format
     {
-        GLint internalFormat;
+        GLenum internalFormat;
         GLenum format;
     }
     const formats[] =

@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+#include "platform/gl.h"
 
 #include "common/log.h"
 #include "buffers.h"
@@ -28,7 +28,7 @@ GLenum bufferUsage(Buffer::Usage usage)
         case Buffer::Usage::StreamDraw:
             return GL_STREAM_DRAW;
     }
-    return 0;
+    return GLenum(0);
 }
 
 } // namespace

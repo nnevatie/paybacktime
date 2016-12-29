@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/glad.h>
+#include "platform/gl.h"
 
 #include "platform/clock.h"
 

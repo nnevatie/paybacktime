@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <glad/glad.h>
+#include "platform/gl.h"
 
 #include "common/file_system.h"
 

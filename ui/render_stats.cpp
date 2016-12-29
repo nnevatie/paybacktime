@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include <glad/glad.h>
+#include "platform/gl.h"
 #include <nanovg.h>
 
 #include "common/common.h"

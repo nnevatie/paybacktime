@@ -1,6 +1,7 @@
 #include "display.h"
 
-#include <glad/glad.h>
+#include "platform/gl.h"
+#include <glbinding/Binding.h>
 
 #include <nanovg.h>
 #include <nanovg_gl.h>
@@ -129,9 +130,8 @@ bool Display::open()
         // Create OpenGL context
         d->glContext = SDL_GL_CreateContext(d->window);
 
-        // Init GLAD
-        const int gladStatus = gladLoadGLLoader((GLADloadproc)
-                                                SDL_GL_GetProcAddress);
+        // Init glbinding
+        glbinding::Binding::initialize();
 
         if (glDebugMessageCallbackARB != nullptr)
         {
@@ -154,10 +154,10 @@ bool Display::open()
                      << "', version: '"    << glGetString(GL_VERSION) << "'";
 
         // Log GPU RAM info
-        int gpuRamDedicated = 0, gpuRamTotal = 0, gpuRamAvail   = 0;
-        glGetIntegerv(0x9047, &gpuRamDedicated);
-        glGetIntegerv(0x9048, &gpuRamTotal);
-        glGetIntegerv(0x9049, &gpuRamAvail);
+        GLint gpuRamDedicated = 0, gpuRamTotal = 0, gpuRamAvail = 0;
+        glGetIntegerv(GLenum(0x9047), &gpuRamDedicated);
+        glGetIntegerv(GLenum(0x9048), &gpuRamTotal);
+        glGetIntegerv(GLenum(0x9049), &gpuRamAvail);
         PTLOG(Debug) << "GPU RAM (dedicated, total, available): "
                      << gpuRamDedicated << ", "
                      << gpuRamTotal << ", "
@@ -168,7 +168,7 @@ bool Display::open()
 
         // Init NanoGUI
         d->nanoGuiScreen = new nanogui::Screen(d->nvgContext, d->window);
-        return gladStatus;
+        return true;
     }
     else
         PTLOG(Warn) << "Window already open.";

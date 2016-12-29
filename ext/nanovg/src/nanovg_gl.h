@@ -410,14 +410,14 @@ static int glnvg__createShader(GLNVGshader* shader, const char* name, const char
 
 	glCompileShader(vert);
 	glGetShaderiv(vert, GL_COMPILE_STATUS, &status);
-	if (status != GL_TRUE) {
+    if (status != GLint(GL_TRUE)) {
 		glnvg__dumpShaderError(vert, name, "vert");
 		return 0;
 	}
 
 	glCompileShader(frag);
 	glGetShaderiv(frag, GL_COMPILE_STATUS, &status);
-	if (status != GL_TRUE) {
+    if (status != GLint(GL_TRUE)) {
 		glnvg__dumpShaderError(frag, name, "frag");
 		return 0;
 	}
@@ -430,7 +430,7 @@ static int glnvg__createShader(GLNVGshader* shader, const char* name, const char
 
 	glLinkProgram(prog);
 	glGetProgramiv(prog, GL_LINK_STATUS, &status);
-	if (status != GL_TRUE) {
+    if (status != GLint(GL_TRUE)) {
 		glnvg__dumpProgramError(prog, name);
 		return 0;
 	}
