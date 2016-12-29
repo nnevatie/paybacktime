@@ -97,6 +97,14 @@ Intersection Scene::intersect(const Ray& ray) const
         if (item.bounds().intersect(ray))
             items.emplace_back(item);
 
+    // Sort intersections by distance to ray origin
+    std::sort(items.begin(), items.end(),
+        [ray](const ObjectItem& a, const ObjectItem& b)
+        {
+            return glm::distance(ray.pos, a.bounds().center()) <
+                   glm::distance(ray.pos, b.bounds().center());
+        });
+
     return {pos, items};
 }
 

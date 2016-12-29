@@ -30,6 +30,11 @@ struct Box
         return pos + size;
     }
 
+    inline V center() const
+    {
+        return pos + 0.5f * size;
+    }
+
     inline operator bool() const
     {
         return pos != V() || size != V();
