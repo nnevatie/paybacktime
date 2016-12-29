@@ -27,12 +27,21 @@ struct SceneItem
     T              obj;
     TransformTrRot trRot;
 
-    SceneItem(const T& obj, const TransformTrRot& trRot) : obj(obj), trRot(trRot)
+    SceneItem()
+    {}
+
+    SceneItem(const T& obj, const TransformTrRot& trRot) :
+        obj(obj), trRot(trRot)
     {}
 
     Box bounds() const
     {
         return {trRot.tr, obj.dimensions()};
+    }
+
+    operator bool() const
+    {
+        return obj;
     }
     bool operator==(const SceneItem& other) const
     {

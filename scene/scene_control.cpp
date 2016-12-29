@@ -15,6 +15,17 @@
 
 namespace pt
 {
+using OutlineTr = std::pair<glm::mat4x4, glm::mat4x4>;
+
+namespace
+{
+
+OutlineTr outlineTransform(Camera* camera)
+{
+    return OutlineTr();
+}
+
+}
 
 struct SceneControl::Data
 {
@@ -49,8 +60,13 @@ struct SceneControl::Data
 
     State              state;
 
+    /*
     Object             object;
     TransformTrRot     objectTransform;
+    */
+
+    ObjectItem         object;
+    ObjectItem         insersectedObject;
 };
 
 SceneControl::SceneControl(Scene* scene,
@@ -89,6 +105,10 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             const auto rayWorld = d->camera->world(d->camera->eye(clipRay));
             auto intersection   = d->scene->intersect(rayWorld);
 
+            // Store intersection
+            d->insersectedObject = !intersection.second.empty() ?
+                                    intersection.second.front() :
+                                    ObjectItem();
             // Translation
             auto& t = intersection.first;
             t      -= glm::mod(t, c::cell::GRID);
@@ -96,7 +116,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             t      += object.origin();
 
             // Rotation
-            const auto rot = umod(d->objectTransform.rot + mouseWheel, 4);
+            const auto rot = umod(d->object.trRot.rot + mouseWheel, 4);
             const auto dim = object.dimensions();
             t += glm::vec3(rot > 1            ? dim.x - c::cell::GRID.x : 0.f, 0.f,
                            rot > 0 && rot < 3 ? dim.z - c::cell::GRID.z : 0.f);
@@ -105,8 +125,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
                !d->scene->contains({object, intersection.first}))
             {
                 // Add item
-                d->scene->add({object, {intersection.first,
-                                        d->objectTransform.rot}});
+                d->scene->add({object, {intersection.first, d->object.trRot.rot}});
             }
             else
             if (d->state == Data::State::Removing &&
@@ -117,30 +136,42 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
                     d->scene->remove({item.obj, intersection.first});
             }
             // Store current state
-            d->objectTransform.tr  = intersection.first;
-            d->objectTransform.rot = rot;
+            d->object.trRot = {intersection.first, rot};
         }
     }
     else
         d->state = Data::State::Idle;
 
-    d->object = object;
+    d->object.obj = object;
     return *this;
 }
 
 SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
 {
+    /*
+    if (d->insersectedObject)
+    {
+        const auto object = d->insersectedObject.obj;
+        const auto m = static_cast<glm::mat4x4>(d->insersectedObject.trRot);
+        const auto v = d->camera->matrixView();
+        const auto p = d->camera->matrixProj();
+
+        const auto mvp = p * v * m;
+        const auto t   = glm::vec3(0.f, d->object.dimensions().y, 0.f);
+        d->outline(fboOut, texColor, object.model().primitive(), mvp);
+        d->arrow(fboOut, mvp * glm::translate(t));
+    }*/
     if (const auto& object = d->object)
     {
-        const auto m = static_cast<glm::mat4x4>(d->objectTransform);
+        const auto m = static_cast<glm::mat4x4>(d->object.trRot);
         const auto v = d->camera->matrixView();
         const auto p = d->camera->matrixProj();
 
         if (d->state != Data::State::Idle)
         {
             const auto mvp = p * v * m;
-            const auto t   = glm::vec3(0.f, d->object.dimensions().y, 0.f);
-            d->outline(fboOut, texColor, object.model().primitive(), mvp);
+            const auto t   = glm::vec3(0.f, d->object.obj.dimensions().y, 0.f);
+            d->outline(fboOut, texColor, object.obj.model().primitive(), mvp);
             d->arrow(fboOut, mvp * glm::translate(t));
         }
     }
