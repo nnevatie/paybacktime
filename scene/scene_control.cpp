@@ -37,7 +37,6 @@ struct SceneControl::Data
     enum class State
     {
         Idle,
-        Resetting,
         Adding,
         Removing
     };
@@ -67,6 +66,7 @@ struct SceneControl::Data
 
     ObjectItem         object;
     Intersection       intersection;
+    Object             removedObject;
 };
 
 SceneControl::SceneControl(Scene* scene,
@@ -88,9 +88,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
     {
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
 
-        d->state = d->state == Data::State::Resetting &&
-                   mouseButtons[0] ? Data::State::Resetting :
-                   keyState[SDL_SCANCODE_LSHIFT] ? Data::State::Adding :
+        d->state = keyState[SDL_SCANCODE_LSHIFT] ? Data::State::Adding :
                    keyState[SDL_SCANCODE_LCTRL]  ? Data::State::Removing :
                                                    Data::State::Idle;
         if (d->state != Data::State::Idle)
@@ -129,16 +127,17 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             {
                 // Remove items
                 const auto firstObj = d->intersection.second.front();
-                d->scene->remove(firstObj);
-
-                // Go to resetting state if different objects are intersecting
-                for (const auto intObj : d->intersection.second)
-                    if (intObj.obj != firstObj.obj)
-                    {
-                        d->state = Data::State::Resetting;
-                        break;
-                    }
+                if (!d->removedObject || firstObj.obj == d->removedObject)
+                {
+                    d->removedObject = firstObj.obj;
+                    d->scene->remove(firstObj);
+                }
             }
+            else
+            if (!mouseButtons[0])
+                // Reset removed object type
+                d->removedObject = {};
+
             // Store current state
             d->object.trRot = {intersection.first, rot};
         }
@@ -155,11 +154,25 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
     if (d->state == Data::State::Removing)
         if (!d->intersection.second.empty())
         {
-            const auto object = d->intersection.second.front();
-            const auto otr    = outlineTransform(d->camera, object);
-            d->outline(fboOut, texColor,
-                       object.obj.model().primitive(), otr.first,
-                       glm::vec4(0.75f, 0.f, 0.f, 1.f));
+            // Prefer same-typed removed objects
+            ObjectItem firstObj;
+            if (!d->removedObject)
+                firstObj = d->intersection.second.front();
+            else
+                for (const auto intObj : d->intersection.second)
+                    if (intObj.obj == d->removedObject)
+                    {
+                        firstObj = intObj;
+                        break;
+                    }
+
+            if (firstObj.obj)
+            {
+                const auto otr = outlineTransform(d->camera, firstObj);
+                d->outline(fboOut, texColor,
+                           firstObj.obj.model().primitive(), otr.first,
+                           glm::vec4(0.75f, 0.f, 0.f, 1.f));
+            }
         }
 
     if (d->state == Data::State::Adding)
