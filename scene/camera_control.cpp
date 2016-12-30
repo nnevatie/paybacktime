@@ -81,10 +81,6 @@ CameraControl& CameraControl::operator()(Duration step)
     const glm::ivec2 mousePos = d->mouse->position();
     const bool mouseOnScene   = SDL_GetMouseFocus() &&
                                 mousePos.x < d->display->size().w - 225;
-
-    if (keyState[SDL_SCANCODE_LSHIFT] || keyState[SDL_SCANCODE_LCTRL])
-        return *this;
-
     if (keyState[SDL_SCANCODE_LEFT]  || keyState[SDL_SCANCODE_A])
         d->pos[1] += -right * accPos;
     if (keyState[SDL_SCANCODE_RIGHT] || keyState[SDL_SCANCODE_D])
@@ -110,6 +106,8 @@ CameraControl& CameraControl::operator()(Duration step)
         const glm::vec3 dragPos  = d->camera->position() + rayDrag;
         glm::vec3 md             = d->prevDragPos - dragPos;
         md.y                     = 0;
+        const bool editing       = keyState[SDL_SCANCODE_LSHIFT] ||
+                                   keyState[SDL_SCANCODE_LCTRL];
 
         const platform::Mouse::Buttons buttons = d->mouse->buttons();
         if (buttons[0] || buttons[2])
@@ -117,12 +115,13 @@ CameraControl& CameraControl::operator()(Duration step)
             d->mouse->setCursor(platform::Mouse::Cursor::Hand);
             if (!glm::isNull(d->prevMousePos, 0.f))
             {
-                if (buttons[0])
+                if (buttons[0] && !editing)
                 {
                     d->camera->target += md;
                     d->ang[1] = glm::vec3();
                 }
                 else
+                if (buttons[2])
                 {
                     glm::vec4 mouseDiff = 32.f * (rayMouse - d->prevMousePos);
                     d->ang[1].x = mouseDiff.x * -accAng * 2;
