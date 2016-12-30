@@ -37,7 +37,7 @@ struct SceneControl::Data
     enum class State
     {
         Idle,
-        Hovering,
+        Resetting,
         Adding,
         Removing
     };
@@ -65,13 +65,8 @@ struct SceneControl::Data
 
     State              state;
 
-    /*
-    Object             object;
-    TransformTrRot     objectTransform;
-    */
-
     ObjectItem         object;
-    ObjectItem         insersectedObject;
+    Intersection       intersection;
 };
 
 SceneControl::SceneControl(Scene* scene,
@@ -93,7 +88,9 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
     {
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
 
-        d->state = keyState[SDL_SCANCODE_LSHIFT] ? Data::State::Adding :
+        d->state = d->state == Data::State::Resetting &&
+                   mouseButtons[0] ? Data::State::Resetting :
+                   keyState[SDL_SCANCODE_LSHIFT] ? Data::State::Adding :
                    keyState[SDL_SCANCODE_LCTRL]  ? Data::State::Removing :
                                                    Data::State::Idle;
         if (d->state != Data::State::Idle)
@@ -106,9 +103,8 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             auto intersection   = d->scene->intersect(rayWorld);
 
             // Store intersection
-            d->insersectedObject = !intersection.second.empty() ?
-                                    intersection.second.front() :
-                                    ObjectItem();
+            d->intersection = intersection;
+
             // Translation
             auto& t = intersection.first;
             t      -= glm::mod(t, c::cell::GRID);
@@ -121,19 +117,27 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             t += glm::vec3(rot > 1            ? dim.x - c::cell::GRID.x : 0.f, 0.f,
                            rot > 0 && rot < 3 ? dim.z - c::cell::GRID.z : 0.f);
 
-            if (d->state == Data::State::Adding &&
-               !d->scene->contains({object, intersection.first}))
+            if (d->state == Data::State::Adding && mouseButtons[0] &&
+                !d->scene->contains({object, intersection.first}))
             {
                 // Add item
                 d->scene->add({object, {intersection.first, d->object.trRot.rot}});
             }
             else
-            if (d->state == Data::State::Removing &&
+            if (d->state == Data::State::Removing && mouseButtons[0] &&
                 !intersection.second.empty())
             {
                 // Remove items
-                for (const auto& item : intersection.second)
-                    d->scene->remove({item.obj, intersection.first});
+                const auto firstObj = d->intersection.second.front();
+                d->scene->remove(firstObj);
+
+                // Go to resetting state if different objects are intersecting
+                for (const auto intObj : d->intersection.second)
+                    if (intObj.obj != firstObj.obj)
+                    {
+                        d->state = Data::State::Resetting;
+                        break;
+                    }
             }
             // Store current state
             d->object.trRot = {intersection.first, rot};
@@ -149,9 +153,10 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
 SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
 {
     if (d->state == Data::State::Removing)
-        if (const auto object = d->insersectedObject)
+        if (!d->intersection.second.empty())
         {
-            const auto otr = outlineTransform(d->camera, object);
+            const auto object = d->intersection.second.front();
+            const auto otr    = outlineTransform(d->camera, object);
             d->outline(fboOut, texColor,
                        object.obj.model().primitive(), otr.first,
                        glm::vec4(0.75f, 0.f, 0.f, 1.f));
