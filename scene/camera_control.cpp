@@ -81,6 +81,9 @@ CameraControl& CameraControl::operator()(Duration step)
     const glm::ivec2 mousePos = d->mouse->position();
     const bool mouseOnScene   = SDL_GetMouseFocus() &&
                                 mousePos.x < d->display->size().w - 225;
+    const bool editing        = keyState[SDL_SCANCODE_LSHIFT] ||
+                                keyState[SDL_SCANCODE_LCTRL];
+
     if (keyState[SDL_SCANCODE_LEFT]  || keyState[SDL_SCANCODE_A])
         d->pos[1] += -right * accPos;
     if (keyState[SDL_SCANCODE_RIGHT] || keyState[SDL_SCANCODE_D])
@@ -94,9 +97,16 @@ CameraControl& CameraControl::operator()(Duration step)
         d->ang[1].x = +accAng;
     if (keyState[SDL_SCANCODE_END]    || keyState[SDL_SCANCODE_E])
         d->ang[1].x = -accAng;
-    if (keyState[SDL_SCANCODE_PAGEUP] || (mouseOnScene && d->mouse->wheel() < 0))
+
+    // Do not process the following events when editing
+    if (editing)
+        return *this;
+
+    if (keyState[SDL_SCANCODE_PAGEUP] ||
+       (mouseOnScene && d->mouse->wheel() < 0))
         d->ang[1].y = 0.75f * -accAng * (1 + 2 * std::abs(d->mouse->wheel()));
-    if (keyState[SDL_SCANCODE_PAGEDOWN] || (mouseOnScene && d->mouse->wheel() > 0))
+    if (keyState[SDL_SCANCODE_PAGEDOWN] ||
+       (mouseOnScene && d->mouse->wheel() > 0))
         d->ang[1].y = 0.75f * +accAng * (1 + 2 * std::abs(d->mouse->wheel()));
 
     if (mouseOnScene)
@@ -106,22 +116,18 @@ CameraControl& CameraControl::operator()(Duration step)
         const glm::vec3 dragPos  = d->camera->position() + rayDrag;
         glm::vec3 md             = d->prevDragPos - dragPos;
         md.y                     = 0;
-        const bool editing       = keyState[SDL_SCANCODE_LSHIFT] ||
-                                   keyState[SDL_SCANCODE_LCTRL];
+        const auto buttons       = d->mouse->buttons();
 
-        const platform::Mouse::Buttons buttons = d->mouse->buttons();
         if (buttons[0] || buttons[2])
         {
-            d->mouse->setCursor(platform::Mouse::Cursor::Hand);
             if (!glm::isNull(d->prevMousePos, 0.f))
             {
-                if (buttons[0] && !editing)
+                if (buttons[0])
                 {
                     d->camera->target += md;
                     d->ang[1] = glm::vec3();
                 }
                 else
-                if (buttons[2])
                 {
                     glm::vec4 mouseDiff = 32.f * (rayMouse - d->prevMousePos);
                     d->ang[1].x = mouseDiff.x * -accAng * 2;
@@ -130,11 +136,10 @@ CameraControl& CameraControl::operator()(Duration step)
             }
             d->prevMousePos = rayMouse;
             d->prevDragPos  = d->camera->position() + rayDrag;
+            d->mouse->setCursor(platform::Mouse::Cursor::Hand);
         }
         else
         {
-            d->mouse->setCursor(platform::Mouse::Cursor::Arrow);
-
             // Let position float after letting drag go
             if (!glm::isNull(d->prevMousePos, 0.f) &&
                  glm::isNull(d->ang[0], 0.f))
@@ -142,6 +147,7 @@ CameraControl& CameraControl::operator()(Duration step)
 
             d->prevMousePos = glm::vec4();
             d->prevDragPos  = glm::vec3();
+            d->mouse->setCursor(platform::Mouse::Cursor::Arrow);
         }
     }
     else
