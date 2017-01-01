@@ -55,6 +55,18 @@ struct Box
         return *this;
     }
 
+    inline Box rotated(int r)
+    {
+        switch (r & 0x03)
+        {
+            case 0: return *this;
+            case 1: return Box(pos - V(0, 0, size.x), V(size.z, size.y, size.x));
+            case 2: return Box(pos - V(size.x, 0, size.z), size);
+            case 3: return Box(pos - V(size.z, 0, 0), V(size.z, size.y, size.x));
+        }
+        return {};
+    }
+
     inline bool intersect(const Ray& ray) const
     {
         V t0         = (min() - ray.pos) * ray.dirInv;

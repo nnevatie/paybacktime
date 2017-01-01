@@ -34,24 +34,34 @@ struct Grid
         return d;
     }
 
-    const T& at(int x, int y) const
+    inline const T& at(int x, int y) const
     {
         return data.at(y * size.x + x);
     }
 
-    const T& at(int x, int y, int z) const
+    inline const T& at(int x, int y, int z) const
     {
         return data.at(z * size.x * size.y + y * size.x + x);
     }
 
-    T& at(int x, int y)
+    inline T& at(int x, int y)
     {
         return data.at(y * size.x + x);
     }
 
-    T& at(int x, int y, int z)
+    inline T& at(int x, int y, int z)
     {
         return data.at(z * size.x * size.y + y * size.x + x);
+    }
+
+    inline const T& at(const glm::ivec3& v) const
+    {
+        return at(v.x, v.y, v.z);
+    }
+
+    inline T& at(const glm::ivec3& v)
+    {
+        return at(v.x, v.y, v.z);
     }
 
     const T* ptr() const

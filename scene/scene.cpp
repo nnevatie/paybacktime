@@ -158,10 +158,14 @@ Scene& Scene::updateLightmap()
     d->lightmapper.reset(size);
     for (const auto& item : d->objectItems)
     {
-        const auto pos = glm::ivec3((item.trRot.tr - box.pos).xzy() /
-                                     c::cell::SIZE.xzy());
+        const auto& obj     = item.obj;
+        const auto density  = obj.density();
+        const auto emission = obj.emission();
+        const auto pos      = glm::ivec3((item.trRot.tr - box.pos).xzy() /
+                                          c::cell::SIZE.xzy());
+        const auto rot      = Rotation(density.size, item.trRot.rot);
 
-        d->lightmapper.add(pos, item.obj.density(), item.obj.emission());
+        d->lightmapper.add(pos, rot, density, emission);
     }
     d->lightmapper(d->horizon);
     return *this;
@@ -169,6 +173,7 @@ Scene& Scene::updateLightmap()
 
 bool containsItem(const ObjectItems& items, const ObjectItem& item)
 {
+    // TODO: Rewrite using bounds.
     for (const auto& i : items)
         if (i.obj == item.obj && i.trRot.tr == item.trRot.tr)
             return true;

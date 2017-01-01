@@ -3,7 +3,9 @@
 #include <memory>
 
 #include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 
+#include "geom/transform.h"
 #include "gl/texture.h"
 
 #include "scene/material_types.h"
@@ -24,6 +26,7 @@ struct Lightmapper
     Lightmapper& reset(const glm::ivec3& size = {});
 
     Lightmapper& add(const glm::ivec3& pos,
+                     const Rotation& rot,
                      const mat::Density& density,
                      const mat::Emission& emission);
 

@@ -104,16 +104,14 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             d->intersection = intersection;
 
             // Translation
+            const auto rot = umod(d->object.trRot.rot + mouseWheel, 4);
+            const auto dim = object.dimensions();
+
             auto& t = intersection.first;
+            t      += Rotation(dim, rot).translation();
             t      -= glm::mod(t, c::cell::GRID);
             t.y     = 0.f;
             t      += object.origin();
-
-            // Rotation
-            const auto rot = umod(d->object.trRot.rot + mouseWheel, 4);
-            const auto dim = object.dimensions();
-            t += glm::vec3(rot > 1            ? dim.x - c::cell::GRID.x : 0.f, 0.f,
-                           rot > 0 && rot < 3 ? dim.z - c::cell::GRID.z : 0.f);
 
             if (d->state == Data::State::Adding && mouseButtons[0] &&
                 !d->scene->contains({object, intersection.first}))

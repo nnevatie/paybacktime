@@ -36,7 +36,7 @@ struct SceneItem
 
     Box bounds() const
     {
-        return {trRot.tr, obj.dimensions()};
+        return Box(trRot.tr, obj.dimensions()).rotated(trRot.rot);
     }
 
     operator bool() const

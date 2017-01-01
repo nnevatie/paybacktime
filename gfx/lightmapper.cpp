@@ -44,21 +44,19 @@ void accumulate(
     mat::Emission& emission0,
     LightSources& lightSources,
     const glm::ivec3& pos,
+    const Rotation& rot,
     const mat::Density& density1,
     const mat::Emission& emission1)
 {
+    glm::ivec3 p0;
     auto const size = density1.size;
-    for (int z = 0; z < size.z; ++z)
-    {
-        const auto z1 = pos.z + z;
-        for (int y = 0; y < size.y; ++y)
-        {
-            const auto y1 = pos.y + y;
-            for (int x = 0; x < size.x; ++x)
+    for (p0.z = 0; p0.z < size.z; ++p0.z)
+        for (p0.y = 0; p0.y < size.y; ++p0.y)
+            for (p0.x = 0; p0.x < size.x; ++p0.x)
             {
-                const auto x1   = pos.x + x;
-                auto& d0        = density0.at(x1, y1, z1);
-                const auto& d1  = density1.at(x,  y,  z);
+                const auto p1   = pos + rot(p0);
+                auto& d0        = density0.at(p1);
+                const auto& d1  = density1.at(p0);
 
                 const auto aMin = std::min(d0.a, d1.a);
                 const auto a    = aMin < 0.f ? aMin : std::min(1.f, d0.a + d1.a);
@@ -66,17 +64,14 @@ void accumulate(
 
                 d0 = glm::vec4(rgb, a);
 
-                const auto em1 = emission1.at(x, y, z);
+                const auto em1 = emission1.at(p0);
                 if (em1 != glm::zero<glm::vec3>())
                 {
-                    auto em0 = emission0.at(x1, y1, z1);
-                    emission0.at(x1, y1, z1) = em0 + em1;
-                    lightSources.insert({x1, y1, z1});
+                    auto em0 = emission0.at(p1);
+                    emission0.at(p1) = em0 + em1;
+                    lightSources.insert(p1);
                 }
-
             }
-        }
-    }
 }
 
 } // namespace
@@ -154,10 +149,12 @@ Lightmapper& Lightmapper::reset(const glm::ivec3& size)
 }
 
 Lightmapper& Lightmapper::add(const glm::ivec3& pos,
+                              const Rotation& rot,
                               const mat::Density& density,
                               const mat::Emission& emission)
 {
-    accumulate(d->density, d->emission, d->lightSources, pos, density, emission);
+    accumulate(d->density, d->emission, d->lightSources,
+               pos, rot, density, emission);
     return *this;
 }
 
