@@ -93,9 +93,9 @@ struct Data
         character(fs::path("characters") / "male1", &textureStore),
 
         // Camera
-        camera({0.f, 0.f, 0.f}, 350.f,
+        camera({0.f, 0.f, 0.f}, 450.f,
                glm::half_pi<float>(), -glm::quarter_pi<float>() + 0,
-               glm::radians(45.f), renderSize.aspect<float>(), 100.f, 550.f),
+               glm::radians(45.f), renderSize.aspect<float>(), 100.f, 750.f),
 
         // Controls
         cameraControl(&camera, display, &mouse),
