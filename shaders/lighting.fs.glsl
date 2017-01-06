@@ -58,7 +58,7 @@ vec3 scattering(vec3 start)
     vec3 uvw1 = giUvw(end);
     vec3 uvws = (uvw1 - uvw0) / SCATTER_STEPS;
 
-    float weight = 0.01;
+    float weight = 0.005;
     vec3 scatter = vec3(0.0);
     for (int i = 0; i < SCATTER_STEPS && uvw0.z < 1.05; ++i)
     {
