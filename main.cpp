@@ -1,5 +1,3 @@
-#include <stdexcept>
-
 #include <boost/program_options.hpp>
 
 #include "common/log.h"
