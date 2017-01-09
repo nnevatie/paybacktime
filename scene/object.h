@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
@@ -17,8 +18,11 @@ namespace pt
 
 struct Object
 {
+    // Object path, store root
+    using Path = std::pair<fs::path, fs::path>;
+
     Object();
-    Object(const fs::path& path, TextureStore* textureStore);
+    Object(const Path& path, TextureStore* textureStore);
 
     operator bool() const;
 
@@ -47,6 +51,8 @@ struct Object
     Object& updateMaterial();
 
     Object flipped(TextureStore* textureStore) const;
+
+    static bool exists(const fs::path& path);
 
 private:
     struct Data;

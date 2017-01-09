@@ -34,7 +34,7 @@ struct Character::Data
         {
             const fs::path partPath(path / partDirs[i]);
             if (fs::exists(partPath))
-                parts[i] = Object(partPath, textureStore);
+                parts[i] = Object({partPath, path}, textureStore);
         }
         const int fallbacks[partCount] =
         {

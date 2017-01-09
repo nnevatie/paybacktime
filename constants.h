@@ -16,6 +16,8 @@ namespace cell
 
 namespace object
 {
+    constexpr auto METAFILE = "object.json";
+
     constexpr auto SCALE    = 1.f,
                    EXPOSURE = 0.25f;
 }

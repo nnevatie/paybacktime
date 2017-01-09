@@ -4,9 +4,24 @@
 
 #include "platform/clock.h"
 #include "common/log.h"
+#include "constants.h"
 
 namespace pt
 {
+
+int createObjects(ObjectStore::Objects& objects,
+                  const fs::path& path, TextureStore* textureStore)
+{
+    int objectCount = 0;
+    for (const auto& entry : fs::directory_iterator(path))
+        if (fs::is_directory(entry) && Object::exists(entry))
+        {
+            objects.push_back(Object({entry.path(), path}, textureStore));
+            ++objectCount;
+        }
+
+    return objectCount;
+}
 
 struct ObjectStore::Data
 {
@@ -20,13 +35,7 @@ ObjectStore::ObjectStore(const fs::path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>())
 {
     PTTIME("create objects");
-    int objectCount;
-    for (const auto& entry : fs::directory_iterator(path))
-        if (fs::is_directory(entry))
-        {
-            d->objects.push_back(Object(entry.path(), textureStore));
-            ++objectCount;
-        }
+    const auto objectCount = createObjects(d->objects, path, textureStore);
     PTLOG(Info) << std::to_string(objectCount) + " objects";
 }
 

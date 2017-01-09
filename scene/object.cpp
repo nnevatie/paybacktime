@@ -6,15 +6,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include "constants.h"
-
 #include "geom/volume.h"
 #include "img/color.h"
 
 #include "common/json.h"
 #include "common/log.h"
-
 #include "common/metadata.h"
+
+#include "constants.h"
 
 namespace bpt = boost::property_tree;
 
@@ -85,11 +84,11 @@ void accumulateMaterial(mat::Emission& emission,
 
 struct Meta
 {
-    Meta(const fs::path& path) :
-        name(path.filename().string()),
+    Meta(const Object::Path& path) :
+        name(path.first.filename().string()),
         scale(c::object::SCALE)
     {
-        const auto meta = readJson(path / "object.json");
+        const auto meta = readJson(path.first / c::object::METAFILE);
         if (!meta.is_null())
         {
             scale  = meta.value("scale", c::object::SCALE);
@@ -108,9 +107,9 @@ struct Meta
 
 struct Object::Data
 {
-    Data(const fs::path& path, TextureStore* textureStore) :
+    Data(const Path& path, TextureStore* textureStore) :
         meta(path),
-        model(path, textureStore, meta.scale),
+        model(path.first, textureStore, meta.scale),
         transparent(false),
         emissive(false)
     {}
@@ -126,7 +125,7 @@ struct Object::Data
 Object::Object()
 {}
 
-Object::Object(const fs::path& path, TextureStore* textureStore) :
+Object::Object(const Path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {
     updateTransparency();
@@ -319,6 +318,11 @@ Object Object::flipped(TextureStore* textureStore) const
         return object;
     }
     return Object();
+}
+
+bool Object::exists(const boost::filesystem::path& path)
+{
+    return fs::exists(path / c::object::METAFILE);
 }
 
 } // namespace pt

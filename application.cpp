@@ -108,7 +108,7 @@ struct Data
         objectPane(toolsWindow.add("Objects", true),
                    display, &objectStore, &textureStore)
     {
-        #if 1
+        #if 0
         auto floor = objectStore.object("floor");
         auto light = objectStore.object("floor3");
 

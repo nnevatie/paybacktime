@@ -75,7 +75,6 @@ struct ObjectPane::Data
         vscroll.setFixedSize({210, widget->fixedHeight() - 36});
 
         auto& imagePanel = vscroll.add<ng::ImagePanel>(90, 5, 5);
-
         imagePanel.setCallback([&imagePanel](int i)
         {
             imagePanel.setSelection(i);
