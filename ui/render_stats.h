@@ -21,8 +21,7 @@ struct RenderStats
 
     RenderStats(NVGcontext* vg);
 
-    void accumulate(const Time& frameTime,
-                    int vertexCount, int triangleCount);
+    void accumulate(const Time& frameTime);
 
     RenderStats& operator()(const glm::ivec3& sceneSize);
 

@@ -75,6 +75,7 @@ struct TimeTree
 {
     using Key     = std::string;
     using SubTime = Time<T>;
+    using Map     = std::unordered_map<Key, SubTime>;
 
     TimeTree() {}
 
@@ -90,9 +91,13 @@ struct TimeTree
     {
         return TimeScope<T>(operator[](key));
     }
+    const Map& map() const
+    {
+        return times;
+    }
 
 private:
-    std::unordered_map<Key, SubTime> times;
+    Map times;
 };
 
 #define PTTIME(description) \

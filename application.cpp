@@ -182,7 +182,7 @@ struct Data
         geom.insert(geom.end(), chars.begin(), chars.end());
 
         {
-            auto time = timeTree.scope("geom-opaque");
+            auto time = timeTree.scope("geom-opq");
             geometry(&textureStore.albedo.texture,
                      &textureStore.normal.texture,
                      &textureStore.light.texture,
@@ -211,7 +211,7 @@ struct Data
             backdrop(&lighting.fbo, camera);
         }
         {
-            auto time = timeTree.scope("geom-transparent");
+            auto time = timeTree.scope("geom-tr");
             geometry(
                 &lighting.fbo,
                 &textureStore.albedo.texture,
@@ -252,7 +252,7 @@ struct Data
         }
 
         timeTotal.end();
-        stats.accumulate(timeTree, 0, 0);
+        stats.accumulate(timeTree);
         stats(scene.cellResolution());
 
         fader(1.f - timeSec);

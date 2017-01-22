@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <unordered_map>
 
 #include <glbinding/gl/functions.h>
 
@@ -15,27 +16,19 @@ namespace pt
 namespace ui
 {
 
-const float UPDATE_INTERVAL_US = 1000.f * 100;
+constexpr int   MOVING_AVG_LEN     = 10;
+constexpr float UPDATE_INTERVAL_US = 1000.f * 100;
 
 struct RenderStats::Data
 {
     explicit Data(NVGcontext* vg) :
-        vg(vg), accumTime(0), meanTimeMs(0),
-        frameTimes(10), vertexCount(0), triangleCount(0)
+        vg(vg)
     {
         nvgCreateFont(vg, "conradi", "data/conradi_square.ttf");
     }
-    ~Data()
-    {
-        // TODO: Free font?
-    }
 
     NVGcontext* vg;
-
-    float accumTime, meanTimeMs;
-    MovingAvg<float> frameTimes;
-
-    int vertexCount, triangleCount;
+    std::unordered_map<std::string, MovingAvg<float>> times;
 };
 
 RenderStats::RenderStats(NVGcontext* vg) :
@@ -43,21 +36,16 @@ RenderStats::RenderStats(NVGcontext* vg) :
 {
 }
 
-void RenderStats::accumulate(const Time& frameTime,
-                             int vertexCount, int triangleCount)
+void RenderStats::accumulate(const Time& frameTime)
 {
-    const float timeUs = boost::chrono::duration<float, boost::micro>(
-                         frameTime.at("total").duration()).count();
-
-    d->frameTimes.push(timeUs);
-    d->vertexCount   = vertexCount;
-    d->triangleCount = triangleCount;
-
-    d->accumTime += timeUs;
-    if (d->accumTime >= UPDATE_INTERVAL_US || !d->meanTimeMs)
+    using Milli = boost::chrono::duration<float, boost::milli>;
+    for (const auto& t : frameTime.map())
     {
-        d->meanTimeMs = d->frameTimes.mean() * 0.001f;
-        d->accumTime  = std::fmod(d->accumTime, UPDATE_INTERVAL_US);
+        auto it = d->times.find(t.first);
+        if (it != d->times.end())
+            it->second.push(Milli(t.second.duration()).count());
+        else
+            d->times.insert({t.first, MovingAvg<float>(MOVING_AVG_LEN)});
     }
 }
 
@@ -71,32 +59,45 @@ RenderStats& RenderStats::operator()(const glm::ivec3& sceneSize)
     nvgFontFace(d->vg, "conradi");
     nvgFillColor(d->vg, nvgRGBA(255, 255, 255, 255));
 
-    const float timeMs = d->meanTimeMs;
+    const auto timeTotal = d->times.at("total").mean();
 
     nvgText(d->vg, 10, 20, str(std::stringstream()
                                << std::fixed << std::setprecision(1)
-                               << "Time: " << timeMs << " ms").c_str(), 0);
+                               << "FPS: " << (1000.f / timeTotal)).c_str(), 0);
     nvgText(d->vg, 140, 20, str(std::stringstream()
-                               << std::fixed << std::setprecision(1)
-                               << "FPS: " << (1000.f / timeMs)).c_str(), 0);
-    nvgText(d->vg, 250, 20, str(std::stringstream()
                                << "Scene: "
                                << sceneSize.x << "x"
                                << sceneSize.y << "x"
                                << sceneSize.z).c_str(), 0);
 
-#if 0
-    nvgText(vg, 10, 40, str(std::stringstream()
-                            << "Vertices: " << vertexCount).c_str(), 0);
-    nvgText(vg, 140, 40, str(std::stringstream()
-                            << "Triangles: " << triangleCount).c_str(), 0);
+    std::vector<std::pair<std::string, float>> times;
+    for (const auto& t : d->times)
+    {
+        const auto time = t.second.mean();
+        int index = 0;
+        for (; index < int(times.size()); ++index)
+            if (time > times.at(index).second)
+                break;
 
-    int geomKb = 0.001 * (vertexCount * sizeof(Mesh_P_N_UV::Vertex) +
-                          triangleCount * 3 * sizeof(Mesh_P_N_UV::Index));
+        times.insert(times.begin() + index, std::make_pair(t.first, time));
+    }
 
-    nvgText(vg, 10, 60, str(std::stringstream()
-                            << "Geometry: ~" << geomKb << " KB").c_str(), 0);
-#endif
+    int row = 0;
+    nvgFillColor(d->vg, nvgRGBA(150, 180, 200, 255));
+    for (const auto& t : times)
+    {
+        const auto time = t.second;
+        const auto f    = time / timeTotal;
+        nvgText(d->vg, 10, 40 + row * 20,
+                str(std::stringstream()
+                    << t.first << ":").c_str(), 0);
+        nvgText(d->vg, 140, 40 + row * 20,
+                str(std::stringstream()
+                    << std::fixed << std::setprecision(3)
+                    << time << " ms, " << (f * 100.f) << "%").c_str(), 0);
+        ++row;
+    }
+
     nvgEndFrame(d->vg);
     return *this;
 }
