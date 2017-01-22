@@ -43,11 +43,11 @@ RenderStats::RenderStats(NVGcontext* vg) :
 {
 }
 
-void RenderStats::accumulate(const pt::Duration& frameTime,
+void RenderStats::accumulate(const Time& frameTime,
                              int vertexCount, int triangleCount)
 {
-    const float timeUs = boost::chrono::duration
-                         <float, boost::micro>(frameTime).count();
+    const float timeUs = boost::chrono::duration<float, boost::micro>(
+                         frameTime.at("total").duration()).count();
 
     d->frameTimes.push(timeUs);
     d->vertexCount   = vertexCount;

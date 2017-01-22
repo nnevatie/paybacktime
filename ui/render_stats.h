@@ -6,6 +6,7 @@
 
 #include "platform/clock.h"
 #include "common/statistics.h"
+#include "gl/gpu_clock.h"
 
 struct NVGcontext;
 
@@ -16,9 +17,11 @@ namespace ui
 
 struct RenderStats
 {
+    using Time = TimeTree<GpuClock>;
+
     RenderStats(NVGcontext* vg);
 
-    void accumulate(const Duration& frameTime,
+    void accumulate(const Time& frameTime,
                     int vertexCount, int triangleCount);
 
     RenderStats& operator()(const glm::ivec3& sceneSize);

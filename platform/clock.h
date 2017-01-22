@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+
 #include <boost/chrono.hpp>
 #include <boost/thread/thread.hpp>
 
@@ -17,11 +19,20 @@ using Duration    = ChronoClock::duration;
 template <typename T>
 struct Time
 {
-    Time() : tp0(now())
+    Time() : tp0(now()), tp1(tp0)
     {}
     TimePoint now() const
     {
         return impl.now();
+    }
+    Time& mark()
+    {
+        tp1 = now();
+        return *this;
+    }
+    Duration duration() const
+    {
+        return tp1 - tp0;
     }
     Duration elapsed() const
     {
@@ -32,9 +43,56 @@ struct Time
         boost::this_thread::sleep_for(duration);
         return *this;
     }
+
 private:
     T impl;
-    TimePoint tp0;
+    TimePoint tp0, tp1;
+};
+
+template <typename T>
+struct TimeScope
+{
+    using TimeT = Time<T>;
+
+    TimeScope(TimeT& time) : time(time)
+    {}
+    ~TimeScope()
+    {
+        time.mark();
+    }
+    TimeScope& end()
+    {
+        time.mark();
+        return *this;
+    }
+
+private:
+    TimeT& time;
+};
+
+template <typename T>
+struct TimeTree
+{
+    using Key     = std::string;
+    using SubTime = Time<T>;
+
+    TimeTree() {}
+
+    const SubTime& at(const Key& key) const
+    {
+        return times.at(key);
+    }
+    SubTime& operator[](const Key& key)
+    {
+        return times[key];
+    }
+    TimeScope<T> scope(const Key& key)
+    {
+        return TimeScope<T>(operator[](key));
+    }
+
+private:
+    std::unordered_map<Key, SubTime> times;
 };
 
 #define PTTIME(description) \

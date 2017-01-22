@@ -1,6 +1,8 @@
 #pragma once
 
+#include <glbinding/gl/enum.h>
 #include <glbinding/gl/functions.h>
+using namespace gl;
 
 #include "platform/clock.h"
 

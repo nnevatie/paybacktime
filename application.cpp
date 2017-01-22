@@ -171,7 +171,8 @@ struct Data
         const glm::mat4 proj = camera.matrixProj();
         const glm::mat4 view = camera.matrixView();
 
-        Time<GpuClock> clock;
+        TimeTree<GpuClock> timeTree;
+        auto timeTotal = timeTree.scope("total");
 
         const gfx::Geometry::Instances chars =
             scene.characterGeometry();
@@ -223,7 +224,9 @@ struct Data
         output(antiAlias.output());
 
         display->renderWidgets();
-        stats.accumulate(clock.elapsed(), 0, 0);
+
+        timeTotal.end();
+        stats.accumulate(timeTree, 0, 0);
         stats(scene.cellResolution());
 
         fader(1.f - timeSec);
