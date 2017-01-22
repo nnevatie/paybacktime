@@ -95,9 +95,11 @@ struct Meta
             origin = glm::make_vec3(meta.value("origin",
                                     std::vector<float>(3)).data());
         }
-        PTLOG(Info) << "meta: " << scale << "; " << origin.x << ", "
-                                                 << origin.y << ", "
-                                                 << origin.z;
+        PTLOG(Info) << "meta: "
+                    << name  << ", "  << path.first << ", " << path.second
+                     << ", " << scale << "; " << origin.x << ", "
+                                      << origin.y << ", "
+                                      << origin.z;
     }
 
     std::string name;
@@ -261,9 +263,9 @@ Object& Object::updateMaterial()
     auto cubeLight  = d->model.lightCube();
 
     mat::Emission emission(glm::ceil(cellSize));
-    PTLOG(Info) << name() << " size: " << emission.size.x << "x"
-                                       << emission.size.y << "x"
-                                       << emission.size.z;
+    //PTLOG(Info) << name() << " size: " << emission.size.x << "x"
+    //                                   << emission.size.y << "x"
+    //                                   << emission.size.z;
     const Projection projections[] =
     {
         // Front
@@ -294,7 +296,6 @@ Object& Object::updateMaterial()
 
     for (int i = 0; i < 6; ++i)
     {
-        PTLOG(Info) << i << " area: " << areas[i];
         const auto side = ImageCube::Side(i);
         accumulateMaterial(emission, d->density,
                            projections[i], cubeDepth->side(side),

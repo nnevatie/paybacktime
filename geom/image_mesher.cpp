@@ -307,7 +307,6 @@ Mesh_P_N_T_UV meshGreedy(const V& vol,
 
 Mesh_P_N_T_UV mesh(const Image& image, float scale)
 {
-    PTTIME("image");
     const Heightfield hfield(image, std::min(image.size().w, image.size().h));
     return meshGreedy(hfield, RectCube<float>(), scale);
 }
@@ -316,7 +315,6 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
                    const RectCube<float>& uvCube,
                    float scale)
 {
-    PTTIME("cube");
     const Cubefield cfield(imageCube);
     return meshGreedy(cfield, uvCube, scale);
     //return SnMesher::mesh(cfield, uvCube, scale);

@@ -10,14 +10,24 @@ namespace pt
 {
 
 int createObjects(ObjectStore::Objects& objects,
-                  const fs::path& path, TextureStore* textureStore)
+                  const Object::Path& path, TextureStore* textureStore)
 {
     int objectCount = 0;
-    for (const auto& entry : fs::directory_iterator(path))
-        if (fs::is_directory(entry) && Object::exists(entry))
+    for (const auto& entry : fs::directory_iterator(path.first))
+        if (fs::is_directory(entry))
         {
-            objects.push_back(Object({entry.path(), path}, textureStore));
-            ++objectCount;
+            if (Object::exists(entry))
+            {
+                objects.push_back(Object({entry.path(), path.second},
+                                         textureStore));
+                ++objectCount;
+            }
+            else
+            {
+                // Recurse into subdir
+                objectCount += createObjects(objects, {entry, path.second},
+                                             textureStore);
+            }
         }
 
     return objectCount;
@@ -35,7 +45,7 @@ ObjectStore::ObjectStore(const fs::path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>())
 {
     PTTIME("create objects");
-    const auto objectCount = createObjects(d->objects, path, textureStore);
+    const auto objectCount = createObjects(d->objects, {path, path}, textureStore);
     PTLOG(Info) << std::to_string(objectCount) + " objects";
 }
 

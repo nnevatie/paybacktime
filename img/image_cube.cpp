@@ -13,8 +13,6 @@ ImageCube::ImageCube()
 
 ImageCube::ImageCube(const fs::path& path, int depth)
 {
-    PTLOG(Info) << path.string() << ", " << depth;
-
     struct SideImage
     {
         std::string name;
