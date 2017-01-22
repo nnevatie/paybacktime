@@ -181,49 +181,75 @@ struct Data
             scene.objectGeometry(Scene::GeometryType::Opaque);
         geom.insert(geom.end(), chars.begin(), chars.end());
 
-        geometry(&textureStore.albedo.texture,
-                 &textureStore.normal.texture,
-                 &textureStore.light.texture,
-                 geom, view, proj);
-
-        ssao(&geometry.texDepth, &geometry.texNormalDenoise, proj, camera.fov);
-
-        lighting(&geometry.texDepth,
-                 &geometry.texNormalDenoise,
-                 &geometry.texColor,
-                 &geometry.texLight,
-                 &ssao.texAoBlur,
-                 scene.lightmap(),
-                 scene.incidence(),
-                 camera,
-                 scene.bounds(),
-                 view, proj);
-
-        backdrop(&lighting.fbo, camera);
-
-        geometry(
-            &lighting.fbo,
-            &textureStore.albedo.texture,
-            &textureStore.light.texture,
-            scene.lightmap(),
-            scene.incidence(),
-            scene.bounds(),
-            scene.objectGeometry(Scene::GeometryType::Transparent),
-            camera);
-
-        ssr(&geometry.texDepth, &geometry.texNormalDenoise, lighting.output(),
-           &geometry.texLight, camera);
-
-        bloom(ssr.output());
+        {
+            auto time = timeTree.scope("geom-opaque");
+            geometry(&textureStore.albedo.texture,
+                     &textureStore.normal.texture,
+                     &textureStore.light.texture,
+                     geom, view, proj);
+        }
+        {
+            auto time = timeTree.scope("ssao");
+            ssao(&geometry.texDepth, &geometry.texNormalDenoise,
+                 proj, camera.fov);
+        }
+        {
+            auto time = timeTree.scope("lighting");
+            lighting(&geometry.texDepth,
+                     &geometry.texNormalDenoise,
+                     &geometry.texColor,
+                     &geometry.texLight,
+                     &ssao.texAoBlur,
+                     scene.lightmap(),
+                     scene.incidence(),
+                     camera,
+                     scene.bounds(),
+                     view, proj);
+        }
+        {
+            auto time = timeTree.scope("backdrop");
+            backdrop(&lighting.fbo, camera);
+        }
+        {
+            auto time = timeTree.scope("geom-transparent");
+            geometry(
+                &lighting.fbo,
+                &textureStore.albedo.texture,
+                &textureStore.light.texture,
+                scene.lightmap(),
+                scene.incidence(),
+                scene.bounds(),
+                scene.objectGeometry(Scene::GeometryType::Transparent),
+                camera);
+        }
+        {
+            auto time = timeTree.scope("ssr");
+            ssr(&geometry.texDepth, &geometry.texNormalDenoise, lighting.output(),
+               &geometry.texLight, camera);
+        }
+        {
+            auto time = timeTree.scope("bloom");
+            bloom(ssr.output());
+        }
 
         sceneControl(&ssr.fboSsr, ssr.output());
 
-        colorGrade(ssr.output(), bloom.output());
-        antiAlias(colorGrade.output());
-
-        output(antiAlias.output());
-
-        display->renderWidgets();
+        {
+            auto time = timeTree.scope("colorgrade");
+            colorGrade(ssr.output(), bloom.output());
+        }
+        {
+            auto time = timeTree.scope("anti-alias");
+            antiAlias(colorGrade.output());
+        }
+        {
+            auto time = timeTree.scope("output");
+            output(antiAlias.output());
+        }
+        {
+            auto time = timeTree.scope("ui");
+            display->renderWidgets();
+        }
 
         timeTotal.end();
         stats.accumulate(timeTree, 0, 0);
