@@ -22,12 +22,15 @@ struct TextureAtlas
     void update();
 
     EntryCube insert(const ImageCube& imageCube);
+    TextureAtlas& remove(const EntryCube& entry);
 
     ImageAtlas  atlas;
     gl::Texture texture;
     bool        srgb;
     int         margin;
 };
+
+bool valid(const TextureAtlas::EntryCube& entry);
 
 } // namespace gl
 } // namespace pt

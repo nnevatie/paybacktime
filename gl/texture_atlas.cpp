@@ -42,5 +42,18 @@ TextureAtlas::EntryCube TextureAtlas::insert(const ImageCube& imageCube)
     return entryCube;
 }
 
+TextureAtlas& TextureAtlas::remove(const TextureAtlas::EntryCube& entry)
+{
+    for (const auto& side : entry.first)
+        atlas.remove(side);
+
+    return *this;
+}
+
+bool valid(const TextureAtlas::EntryCube& entry)
+{
+    return entry.first[0].size;
+}
+
 } // namespace gl
 } // namespace pt
