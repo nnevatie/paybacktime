@@ -50,6 +50,11 @@ struct Primitive
         }
     }
 
+    operator bool() const
+    {
+        return vertices;
+    }
+
     void render(GLenum mode = GL_TRIANGLES, GLenum cull = GL_BACK) const
     {
         glEnable(GL_CULL_FACE);
