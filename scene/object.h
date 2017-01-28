@@ -50,6 +50,8 @@ struct Object
 
     Object& updateMaterial();
 
+    Object& update(TextureStore* textureStore);
+
     Object flipped(TextureStore* textureStore) const;
 
     static bool exists(const fs::path& path);

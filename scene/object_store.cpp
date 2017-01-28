@@ -69,4 +69,12 @@ Object ObjectStore::object(const std::string& name) const
     return Object();
 }
 
+ObjectStore& ObjectStore::update(TextureStore* textureStore)
+{
+    for (auto& object : d->objects)
+         object.update(textureStore);
+
+    return *this;
+}
+
 } // namespace pt

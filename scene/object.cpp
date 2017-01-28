@@ -307,6 +307,12 @@ Object& Object::updateMaterial()
     return *this;
 }
 
+Object& Object::update(TextureStore* textureStore)
+{
+    d->model.update(textureStore);
+    return *this;
+}
+
 Object Object::flipped(TextureStore* textureStore) const
 {
     if (d)

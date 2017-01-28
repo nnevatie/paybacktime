@@ -22,6 +22,8 @@ struct ObjectStore
     Object object(int index) const;
     Object object(const std::string& name) const;
 
+    ObjectStore& update(TextureStore* textureStore);
+
 private:
     struct Data;
     std::shared_ptr<Data> d;

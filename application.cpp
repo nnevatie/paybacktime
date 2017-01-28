@@ -75,6 +75,8 @@ struct Data
 
     platform::Mouse    mouse;
 
+    TimePoint          lastLiveUpdate;
+
     Data(platform::Display* display) :
         display(display),
         renderSize(display->size()),
@@ -143,8 +145,9 @@ struct Data
         display->update();
     }
 
-    bool simulate(TimePoint /*time*/, Duration step)
+    bool simulate(TimePoint time, Duration step)
     {
+        // Process events
         mouse.reset();
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -153,13 +156,24 @@ struct Data
             mouse.update(event);
         }
 
+        // Read key states
         const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
         if (keyState[SDL_SCANCODE_ESCAPE])
             return false;
 
+        // Camera control
         cameraControl(step);
+
+        // Scene control
         sceneControl(step, objectPane.selected());
 
+        // Update object store
+        if (boost::chrono::duration<float, boost::milli>
+           (time - lastLiveUpdate).count() > 1000.f)
+        {
+            objectStore.update(&textureStore);
+            lastLiveUpdate = time;
+        }
         return true;
     }
 

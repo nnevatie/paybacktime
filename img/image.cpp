@@ -83,7 +83,7 @@ Image::Image(const fs::path& path, int depth) :
 
 Image::operator bool() const
 {
-    return d && d->size;
+    return d && d->size && d->bits;
 }
 
 Size<int> Image::size() const

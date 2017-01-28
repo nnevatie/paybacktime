@@ -15,23 +15,55 @@ namespace pt
 
 struct Model::Data
 {
-    ImageCube cubeDepth,
-              cubeNormal,
-              cubeAlbedo,
-              cubeLight;
+    std::time_t lastUpdated;
+    fs::path    path;
+    float       scale;
+
+    ImageCube   cubeDepth,
+                cubeAlbedo,
+                cubeLight,
+                cubeNormal;
 
     gl::TextureAtlas::EntryCube atlasEntry;
-    gl::Primitive primitive;
+    gl::Primitive               primitive;
 
-    Data(const fs::path& path) :
-        cubeDepth((path  / "*.png").string(), 1),
-        cubeNormal((path  / "normal.*.png").string(), 1),
-        cubeAlbedo((path / "albedo.*.png").string(), 4),
-        cubeLight((path  / "light.*.png").string(), 4)
+    Data(const fs::path& path, TextureStore* textureStore, float scale) :
+        lastUpdated(0), path(path), scale(scale)
     {
         PTLOG(Info) << path.string();
-        cubeNormal = cubeNormal.normals().scaled(cubeAlbedo);
-        cubeLight  = cubeLight.scaled(cubeAlbedo);
+        update(textureStore);
+    }
+
+    Data& update(TextureStore* textureStore)
+    {
+        const auto modified = lastModified(path);
+        if (modified > lastUpdated)
+        {
+            // Cube updates
+            cubeDepth  = ImageCube((path / "*.png").string(),        1);
+            cubeAlbedo = ImageCube((path / "albedo.*.png").string(), 4);
+            cubeLight  = ImageCube((path / "light.*.png").string(),  4).
+                         scaled(cubeAlbedo);
+            cubeNormal = ImageCube((path / "normal.*.png").string(), 1).
+                         normals().scaled(cubeAlbedo);
+
+            // Atlas removal
+            if (gl::valid(atlasEntry))
+            {
+                textureStore->albedo.remove(atlasEntry);
+                textureStore->light.remove(atlasEntry);
+                textureStore->normal.remove(atlasEntry);
+            }
+            // Atlas insert
+            atlasEntry  = textureStore->albedo.insert(cubeAlbedo);
+                          textureStore->light.insert(cubeLight);
+                          textureStore->normal.insert(cubeNormal);
+            // Update mesh
+            auto mesh   = ImageMesher::mesh(cubeDepth, atlasEntry.second, scale);
+            primitive   = gl::Primitive(mesh);
+            lastUpdated = modified;
+        }
+        return *this;
     }
 };
 
@@ -39,14 +71,8 @@ Model::Model()
 {}
 
 Model::Model(const fs::path& path, TextureStore* textureStore, float scale) :
-    d(std::make_shared<Data>(path))
+    d(std::make_shared<Data>(path, textureStore, scale))
 {
-    d->atlasEntry = textureStore->albedo.insert(d->cubeAlbedo);
-    textureStore->light.insert(d->cubeLight);
-    textureStore->normal.insert(d->cubeNormal);
-
-    auto mesh    = ImageMesher::mesh(d->cubeDepth, d->atlasEntry.second, scale);
-    d->primitive = gl::Primitive(mesh);
 }
 
 pt::Model::operator bool() const
@@ -77,6 +103,12 @@ const ImageCube* Model::albedoCube() const
 const ImageCube* Model::lightCube() const
 {
     return &d->cubeLight;
+}
+
+Model& Model::update(TextureStore* textureStore)
+{
+    d->update(textureStore);
+    return *this;
 }
 
 Model Model::flipped(TextureStore* textureStore, float scale) const
