@@ -81,6 +81,25 @@ struct Node
         }
     }
 
+    bool release(const Rect<int>& rect)
+    {
+        if (isLeaf())
+        {
+            if (reserved && rect == this->rect)
+            {
+                reserved = false;
+                return true;
+            }
+        }
+        else
+        {
+            // Release from subnodes
+            bool released = nodes[0]->release(rect);
+            return released || nodes[1]->release(rect);
+        }
+        return false;
+    }
+
     void draw(Painter* painter, uint32_t color) const
     {
         painter->setColor(color);
@@ -128,16 +147,18 @@ Image ImageAtlas::image(bool drawNodes) const
 
 Rect<int> ImageAtlas::insert(const Image& image, int margin)
 {
-    if (Node* node = d->root.reserve(image.size() + 2 * margin))
-    {
-        // Blit the image into atlas
-        Painter painter(&d->atlas);
-        painter.drawImageClamped(image, node->rect.x, node->rect.y, margin);
+    if (image)
+        if (Node* node = d->root.reserve(image.size() + 2 * margin))
+        {
+            // Blit the image into atlas
+            Painter painter(&d->atlas);
+            painter.drawImageClamped(image, node->rect.x, node->rect.y, margin);
 
-        // Mark node reserved
-        node->reserved = true;
-        return node->rect;
-    }
+            // Mark node reserved
+            node->reserved = true;
+            return node->rect;
+        }
+
     return Rect<int>();
 }
 
@@ -150,6 +171,12 @@ RectCube<int> ImageAtlas::insert(const ImageCube& imageCube, int margin)
         cubeRect[i] = insert(imageCube.side(ImageCube::Side(i)), margin);
 
     return cubeRect;
+}
+
+ImageAtlas& ImageAtlas::remove(const Rect<int>& rect)
+{
+    d->root.release(rect);
+    return *this;
 }
 
 } // namespace pt
