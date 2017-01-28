@@ -71,6 +71,15 @@ struct Rect
         return CT(x, y, size.w, size.h);
     }
 
+    bool operator==(const Rect<T>& other) const
+    {
+        return x == other.x && y == other.y && size == other.size;
+    }
+    bool operator!=(const Rect<T>& other) const
+    {
+        return !operator==(other);
+    }
+
     T x {}, y {};
     Size<T> size {};
 };
