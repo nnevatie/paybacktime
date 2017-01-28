@@ -29,6 +29,8 @@ struct Buffer
     Buffer();
     Buffer(Type type);
 
+    operator bool() const;
+
     GLuint id() const;
     int size() const;
 

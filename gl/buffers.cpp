@@ -63,6 +63,11 @@ Buffer::Buffer(Buffer::Type type) :
 {
 }
 
+Buffer::operator bool() const
+{
+    return bool(d);
+}
+
 GLuint Buffer::id() const
 {
     return d->id;
