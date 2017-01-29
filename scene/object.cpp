@@ -130,10 +130,7 @@ Object::Object()
 Object::Object(const Path& path, TextureStore* textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {
-    updateTransparency();
-    updateEmissivity();
-    updateDensity();
-    updateMaterial();
+    updateApproximation();
 }
 
 Object::operator bool() const
@@ -307,10 +304,23 @@ Object& Object::updateMaterial()
     return *this;
 }
 
-Object& Object::update(TextureStore* textureStore)
+Object& Object::updateApproximation()
 {
-    d->model.update(textureStore);
+    updateTransparency();
+    updateEmissivity();
+    updateDensity();
+    updateMaterial();
     return *this;
+}
+
+bool Object::update(TextureStore* textureStore)
+{
+    if (d->model.update(textureStore))
+    {
+        updateApproximation();
+        return true;
+    }
+    return false;
 }
 
 Object Object::flipped(TextureStore* textureStore) const

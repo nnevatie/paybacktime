@@ -171,7 +171,9 @@ struct Data
         if (boost::chrono::duration<float, boost::milli>
            (time - lastLiveUpdate).count() > 1000.f)
         {
-            objectStore.update(&textureStore);
+            if (objectStore.update(&textureStore))
+                scene.updateLightmap();
+
             lastLiveUpdate = time;
         }
         return true;

@@ -28,7 +28,7 @@ struct Model
     const ImageCube* albedoCube() const;
     const ImageCube* lightCube()  const;
 
-    Model& update(TextureStore* textureStore);
+    bool update(TextureStore* textureStore);
 
     Model flipped(TextureStore* textureStore, float scale = 1.f) const;
 

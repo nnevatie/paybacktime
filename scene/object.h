@@ -50,7 +50,9 @@ struct Object
 
     Object& updateMaterial();
 
-    Object& update(TextureStore* textureStore);
+    Object& updateApproximation();
+
+    bool update(TextureStore* textureStore);
 
     Object flipped(TextureStore* textureStore) const;
 

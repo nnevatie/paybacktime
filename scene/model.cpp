@@ -34,7 +34,7 @@ struct Model::Data
         update(textureStore);
     }
 
-    Data& update(TextureStore* textureStore)
+    bool update(TextureStore* textureStore)
     {
         const auto modified = lastModified(path);
         if (modified > lastUpdated)
@@ -62,8 +62,9 @@ struct Model::Data
             auto mesh   = ImageMesher::mesh(cubeDepth, atlasEntry.second, scale);
             primitive   = gl::Primitive(mesh);
             lastUpdated = modified;
+            return true;
         }
-        return *this;
+        return false;
     }
 };
 
@@ -105,10 +106,9 @@ const ImageCube* Model::lightCube() const
     return &d->cubeLight;
 }
 
-Model& Model::update(TextureStore* textureStore)
+bool Model::update(TextureStore* textureStore)
 {
-    d->update(textureStore);
-    return *this;
+    return d->update(textureStore);
 }
 
 Model Model::flipped(TextureStore* textureStore, float scale) const

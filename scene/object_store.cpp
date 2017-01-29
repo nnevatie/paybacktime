@@ -69,12 +69,13 @@ Object ObjectStore::object(const std::string& name) const
     return Object();
 }
 
-ObjectStore& ObjectStore::update(TextureStore* textureStore)
+int ObjectStore::update(TextureStore* textureStore)
 {
+    int updateCount = 0;
     for (auto& object : d->objects)
-         object.update(textureStore);
+         updateCount += object.update(textureStore);
 
-    return *this;
+    return updateCount;
 }
 
 } // namespace pt
