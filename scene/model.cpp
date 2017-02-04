@@ -30,7 +30,6 @@ struct Model::Data
     Data(const fs::path& path, TextureStore* textureStore, float scale) :
         lastUpdated(0), path(path), scale(scale)
     {
-        PTLOG(Info) << path.generic_string();
         update(textureStore);
     }
 

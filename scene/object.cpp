@@ -89,7 +89,6 @@ struct Meta
         name(path.first.filename().string()),
         scale(c::object::SCALE)
     {
-        PTLOG(Info) << id;
         const auto meta = readJson(path.first / c::object::METAFILE);
         if (!meta.is_null())
         {
