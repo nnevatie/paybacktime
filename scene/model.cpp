@@ -30,7 +30,7 @@ struct Model::Data
     Data(const fs::path& path, TextureStore* textureStore, float scale) :
         lastUpdated(0), path(path), scale(scale)
     {
-        PTLOG(Info) << path.string();
+        PTLOG(Info) << path.generic_string();
         update(textureStore);
     }
 
@@ -40,11 +40,11 @@ struct Model::Data
         if (modified > lastUpdated)
         {
             // Cube updates
-            cubeDepth  = ImageCube((path / "*.png").string(),        1);
-            cubeAlbedo = ImageCube((path / "albedo.*.png").string(), 4);
-            cubeLight  = ImageCube((path / "light.*.png").string(),  4).
+            cubeDepth  = ImageCube((path / "*.png").generic_string(),        1);
+            cubeAlbedo = ImageCube((path / "albedo.*.png").generic_string(), 4);
+            cubeLight  = ImageCube((path / "light.*.png").generic_string(),  4).
                          scaled(cubeAlbedo);
-            cubeNormal = ImageCube((path / "normal.*.png").string(), 1).
+            cubeNormal = ImageCube((path / "normal.*.png").generic_string(), 1).
                          normals().scaled(cubeAlbedo);
 
             // Atlas removal

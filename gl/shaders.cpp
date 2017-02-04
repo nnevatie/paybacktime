@@ -45,7 +45,7 @@ Shader::Type typeFromExt(const fs::path& path)
             return type.second;
 
     throw std::runtime_error("Cannot determine shader "
-                             "type for path: " + path.string());
+                             "type for path: " + path.generic_string());
 }
 
 } // namespace
@@ -109,12 +109,13 @@ Shader::Shader(Type type, const std::string& s) :
 }
 
 Shader::Shader(Type type, const fs::path& path) :
-    d(std::make_shared<Data>(type, readFile(path), path.string()))
+    d(std::make_shared<Data>(type, readFile(path), path.generic_string()))
 {
 }
 
 Shader::Shader(const fs::path& path) :
-    d(std::make_shared<Data>(typeFromExt(path), readFile(path), path.string()))
+    d(std::make_shared<Data>(typeFromExt(path),
+                             readFile(path), path.generic_string()))
 {
 }
 

@@ -30,6 +30,8 @@ struct Object
     operator!=(const Object& other) const;
 
     Model       model()     const;
+
+    std::string id()        const;
     std::string name()      const;
 
     float       scale()     const;

@@ -73,7 +73,7 @@ Image::Image(const Size<int>& size, int depth, int stride) :
 Image::Image(const fs::path& path, int depth) :
     d(std::make_shared<Data>())
 {
-    d->bits = stbi_load(path.string().c_str(),
+    d->bits = stbi_load(path.generic_string().c_str(),
                         &d->size.w, &d->size.h, &d->depth, depth);
     if (depth > 0)
         d->depth = depth;
@@ -289,12 +289,12 @@ bool Image::write(const fs::path& path) const
 {
     const std::string ext(path.extension().string());
     if (ext == ".png")
-        return !stbi_write_png(path.string().c_str(),
+        return !stbi_write_png(path.generic_string().c_str(),
                                d->size.w, d->size.h, d->depth,
                                d->bits, d->stride);
     else
     if (ext == ".bmp")
-        return !stbi_write_bmp(path.string().c_str(),
+        return !stbi_write_bmp(path.generic_string().c_str(),
                                d->size.w, d->size.h, d->depth,
                                d->bits);
     return false;

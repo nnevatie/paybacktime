@@ -34,7 +34,7 @@ ImageCube::ImageCube(const fs::path& path, int depth)
         SideImage& sideImage = sideImages[i];
 
         const auto fn = boost::replace_all_copy(
-            path.string(), "*", sideImage.name);
+            path.generic_string(), "*", sideImage.name);
 
         if (fs::exists(fn))
             sideImage.image = side != Side::Top && side != Side::Bottom ?

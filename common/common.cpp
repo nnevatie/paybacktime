@@ -16,9 +16,9 @@ std::string str(const std::ostream& ostr)
 std::string readFile(const fs::path& path, bool binary)
 {
     if (!fs::exists(path))
-        throw std::runtime_error("File does not exist: " + path.string());
+        throw std::runtime_error("File does not exist: " + path.generic_string());
 
-    std::ifstream ifs(path.string().c_str(), std::ios::in |
+    std::ifstream ifs(path.generic_string().c_str(), std::ios::in |
                      (binary ? std::ios::binary : std::ios_base::openmode(0)));
 
     const int size = int(fs::file_size(path));

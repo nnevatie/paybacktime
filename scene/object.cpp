@@ -85,9 +85,11 @@ void accumulateMaterial(mat::Emission& emission,
 struct Meta
 {
     Meta(const Object::Path& path) :
+        id(fs::relative(path.first, path.second).generic_string()),
         name(path.first.filename().string()),
         scale(c::object::SCALE)
     {
+        PTLOG(Info) << id;
         const auto meta = readJson(path.first / c::object::METAFILE);
         if (!meta.is_null())
         {
@@ -95,13 +97,9 @@ struct Meta
             origin = glm::make_vec3(meta.value("origin",
                                     std::vector<float>(3)).data());
         }
-        PTLOG(Info) << "meta: "
-                    << name  << ", "  << path.first << ", " << path.second
-                     << ", " << scale << "; " << origin.x << ", "
-                                      << origin.y << ", "
-                                      << origin.z;
     }
 
+    std::string id;
     std::string name;
     float       scale;
     glm::vec3   origin;
@@ -146,6 +144,11 @@ Object::operator==(const Object& other) const
 Object::operator!=(const Object& other) const
 {
     return !operator==(other);
+}
+
+std::string Object::id() const
+{
+    return d->meta.id;
 }
 
 std::string Object::name() const
