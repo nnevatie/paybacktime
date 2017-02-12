@@ -33,7 +33,7 @@ struct Character
     };
 
     Character();
-    Character(const fs::path& path, TextureStore* textureStore);
+    Character(const fs::path& path, TextureStore& textureStore);
 
     const std::array<Object, 15>* parts() const;
 

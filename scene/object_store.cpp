@@ -10,7 +10,7 @@ namespace pt
 {
 
 int createObjects(ObjectStore::Objects& objects,
-                  const Object::Path& path, TextureStore* textureStore)
+                  const Object::Path& path, TextureStore& textureStore)
 {
     int objectCount = 0;
     for (const auto& entry : fs::directory_iterator(path.first))
@@ -41,7 +41,7 @@ struct ObjectStore::Data
     {}
 };
 
-ObjectStore::ObjectStore(const fs::path& path, TextureStore* textureStore) :
+ObjectStore::ObjectStore(const fs::path& path, TextureStore& textureStore) :
     d(std::make_shared<Data>())
 {
     PTTIME("create objects");
@@ -69,7 +69,7 @@ Object ObjectStore::object(const std::string& name) const
     return Object();
 }
 
-int ObjectStore::update(TextureStore* textureStore)
+int ObjectStore::update(TextureStore& textureStore)
 {
     int updateCount = 0;
     for (auto& object : d->objects)

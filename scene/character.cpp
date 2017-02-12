@@ -10,7 +10,7 @@ struct Character::Data
 {
     static const int partCount = 15;
 
-    Data(const fs::path& path, TextureStore* textureStore)
+    Data(const fs::path& path, TextureStore& textureStore)
     {
         const std::string partDirs[partCount] =
         {
@@ -51,7 +51,7 @@ struct Character::Data
 Character::Character()
 {}
 
-Character::Character(const fs::path& path, TextureStore* textureStore) :
+Character::Character(const fs::path& path, TextureStore& textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {}
 

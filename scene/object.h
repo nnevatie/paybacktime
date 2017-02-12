@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <functional>
 
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
@@ -18,11 +19,17 @@ namespace pt
 
 struct Object
 {
+    // ID
+    using Id       = std::string;
+
+    // Resolver
+    using Resolver = std::function<Object(const Id& id)>;
+
     // Object path, store root
-    using Path = std::pair<fs::path, fs::path>;
+    using Path     = std::pair<fs::path, fs::path>;
 
     Object();
-    Object(const Path& path, TextureStore* textureStore);
+    Object(const Path& path, TextureStore& textureStore);
 
     operator bool() const;
 
@@ -54,9 +61,9 @@ struct Object
 
     Object& updateApproximation();
 
-    bool update(TextureStore* textureStore);
+    bool update(TextureStore& textureStore);
 
-    Object flipped(TextureStore* textureStore) const;
+    Object flipped(TextureStore& textureStore) const;
 
     static bool exists(const fs::path& path);
 

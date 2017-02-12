@@ -92,13 +92,15 @@ struct Meta
         const auto meta = readJson(path.first / c::object::METAFILE);
         if (!meta.is_null())
         {
+            base   = meta.value("base",  Object::Id());
             scale  = meta.value("scale", c::object::SCALE);
             origin = glm::make_vec3(meta.value("origin",
                                     std::vector<float>(3)).data());
         }
     }
 
-    std::string id;
+    Object::Id  id;
+    Object::Id  base;
     std::string name;
     float       scale;
     glm::vec3   origin;
@@ -106,7 +108,7 @@ struct Meta
 
 struct Object::Data
 {
-    Data(const Path& path, TextureStore* textureStore) :
+    Data(const Path& path, TextureStore& textureStore) :
         meta(path),
         model(path.first, textureStore, meta.scale),
         transparent(false),
@@ -124,7 +126,7 @@ struct Object::Data
 Object::Object()
 {}
 
-Object::Object(const Path& path, TextureStore* textureStore) :
+Object::Object(const Path& path, TextureStore& textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {
     updateApproximation();
@@ -315,7 +317,7 @@ Object& Object::updateApproximation()
     return *this;
 }
 
-bool Object::update(TextureStore* textureStore)
+bool Object::update(TextureStore& textureStore)
 {
     if (d->model.update(textureStore))
     {
@@ -325,7 +327,7 @@ bool Object::update(TextureStore* textureStore)
     return false;
 }
 
-Object Object::flipped(TextureStore* textureStore) const
+Object Object::flipped(TextureStore& textureStore) const
 {
     if (d)
     {

@@ -27,13 +27,13 @@ struct Model::Data
     gl::TextureAtlas::EntryCube atlasEntry;
     gl::Primitive               primitive;
 
-    Data(const fs::path& path, TextureStore* textureStore, float scale) :
+    Data(const fs::path& path, TextureStore& textureStore, float scale) :
         lastUpdated(0), path(path), scale(scale)
     {
         update(textureStore);
     }
 
-    bool update(TextureStore* textureStore)
+    bool update(TextureStore& textureStore)
     {
         const auto modified = lastModified(path);
         if (modified > lastUpdated)
@@ -49,14 +49,14 @@ struct Model::Data
             // Atlas removal
             if (gl::valid(atlasEntry))
             {
-                textureStore->albedo.remove(atlasEntry);
-                textureStore->light.remove(atlasEntry);
-                textureStore->normal.remove(atlasEntry);
+                textureStore.albedo.remove(atlasEntry);
+                textureStore.light.remove(atlasEntry);
+                textureStore.normal.remove(atlasEntry);
             }
             // Atlas insert
-            atlasEntry  = textureStore->albedo.insert(cubeAlbedo);
-                          textureStore->light.insert(cubeLight);
-                          textureStore->normal.insert(cubeNormal);
+            atlasEntry  = textureStore.albedo.insert(cubeAlbedo);
+                          textureStore.light.insert(cubeLight);
+                          textureStore.normal.insert(cubeNormal);
             // Update mesh
             auto mesh   = ImageMesher::mesh(cubeDepth, atlasEntry.second, scale);
             primitive   = gl::Primitive(mesh);
@@ -70,7 +70,7 @@ struct Model::Data
 Model::Model()
 {}
 
-Model::Model(const fs::path& path, TextureStore* textureStore, float scale) :
+Model::Model(const fs::path& path, TextureStore& textureStore, float scale) :
     d(std::make_shared<Data>(path, textureStore, scale))
 {
 }
@@ -105,12 +105,12 @@ const ImageCube* Model::lightCube() const
     return &d->cubeLight;
 }
 
-bool Model::update(TextureStore* textureStore)
+bool Model::update(TextureStore& textureStore)
 {
     return d->update(textureStore);
 }
 
-Model Model::flipped(TextureStore* textureStore, float scale) const
+Model Model::flipped(TextureStore& textureStore, float scale) const
 {
     if (d)
     {
@@ -120,8 +120,8 @@ Model Model::flipped(TextureStore* textureStore, float scale) const
         data->cubeDepth  = d->cubeDepth.flipped();
         data->cubeAlbedo = d->cubeAlbedo.flipped();
         data->cubeLight  = d->cubeLight.flipped();
-        data->atlasEntry = textureStore->albedo.insert(data->cubeAlbedo);
-                           textureStore->light.insert(data->cubeLight);
+        data->atlasEntry = textureStore.albedo.insert(data->cubeAlbedo);
+                           textureStore.light.insert(data->cubeLight);
         auto mesh        = ImageMesher::mesh(data->cubeDepth,
                                              data->atlasEntry.second, scale);
         data->primitive  = gl::Primitive(mesh);

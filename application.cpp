@@ -90,9 +90,9 @@ struct Data
         antiAlias(renderSize),
 
         textureStore({512, 512}),
-        objectStore(fs::path("objects"), &textureStore),
+        objectStore(fs::path("objects"), textureStore),
         horizonStore(fs::path("horizons")),
-        character(fs::path("characters") / "male1", &textureStore),
+        character(fs::path("characters") / "male1", textureStore),
 
         // Camera
         camera({0.f, 0.f, 0.f}, 450.f,
@@ -171,7 +171,7 @@ struct Data
         if (boost::chrono::duration<float, boost::milli>
            (time - lastLiveUpdate).count() > 1000.f)
         {
-            if (objectStore.update(&textureStore))
+            if (objectStore.update(textureStore))
                 scene.updateLightmap();
 
             lastLiveUpdate = time;

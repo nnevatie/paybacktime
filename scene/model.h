@@ -16,7 +16,7 @@ namespace pt
 struct Model
 {
     Model();
-    Model(const fs::path& path, TextureStore* textureStore, float scale = 1.f);
+    Model(const fs::path& path, TextureStore& textureStore, float scale = 1.f);
 
     operator bool() const;
 
@@ -28,9 +28,9 @@ struct Model
     const ImageCube* albedoCube() const;
     const ImageCube* lightCube()  const;
 
-    bool update(TextureStore* textureStore);
+    bool update(TextureStore& textureStore);
 
-    Model flipped(TextureStore* textureStore, float scale = 1.f) const;
+    Model flipped(TextureStore& textureStore, float scale = 1.f) const;
 
 private:
     struct Data;

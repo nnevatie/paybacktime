@@ -15,14 +15,14 @@ struct ObjectStore
 {
     using Objects = std::vector<Object>;
 
-    ObjectStore(const fs::path& path, TextureStore* textureStore);
+    ObjectStore(const fs::path& path, TextureStore& textureStore);
 
     Objects objects() const;
 
     Object object(int index) const;
     Object object(const std::string& name) const;
 
-    int update(TextureStore* textureStore);
+    int update(TextureStore& textureStore);
 
 private:
     struct Data;
