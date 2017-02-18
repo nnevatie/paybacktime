@@ -1,5 +1,6 @@
 #pragma once
 
+#include "geom/size.h"
 #include "gl/primitive.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"
@@ -11,6 +12,8 @@ namespace gfx
 
 struct Output
 {
+    Size<int>         renderSize;
+
     gl::Primitive     rect;
 
     gl::Shader        vsQuad,
@@ -18,7 +21,7 @@ struct Output
 
     gl::ShaderProgram prog;
 
-    Output();
+    Output(const Size<int>& renderSize);
 
     Output& operator()(gl::Texture* tex);
 };

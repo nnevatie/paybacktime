@@ -17,7 +17,9 @@ AntiAlias::AntiAlias(const Size<int>& renderSize) :
 {
     // Texture and FBO
     auto fboSize = {renderSize.w, renderSize.h};
-    tex.bind().alloc(fboSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+    tex.bind().alloc(fboSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
+              .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+              .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     fbo.bind()
        .attach(tex, gl::Fbo::Attachment::Color)
        .unbind();

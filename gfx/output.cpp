@@ -5,7 +5,8 @@ namespace pt
 namespace gfx
 {
 
-Output::Output() :
+Output::Output(const Size<int>& renderSize) :
+    renderSize(renderSize),
     rect(squareMesh()),
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsTex(gl::Shader::path("texture.fs.glsl")),
@@ -16,6 +17,7 @@ Output::Output() :
 
 Output& Output::operator()(gl::Texture* tex)
 {
+    glViewport(0, 0, renderSize.w, renderSize.h);
     prog.bind().setUniform("tex", 0);
     glDisable(GL_DEPTH_TEST);
     tex->bindAs(GL_TEXTURE0);

@@ -38,6 +38,8 @@
 #include "scene/object_store.h"
 #include "scene/horizon_store.h"
 
+#include "common/config.h"
+
 namespace pt
 {
 
@@ -77,9 +79,9 @@ struct Data
 
     TimePoint          lastLiveUpdate;
 
-    Data(platform::Display* display) :
+    Data(platform::Display* display, const cfg::Video& config) :
         display(display),
-        renderSize(display->size()),
+        renderSize(display->size() * config.renderScale),
         geometry(renderSize),
         ssao(32, renderSize, {4, 4}),
         ssr(renderSize),
@@ -88,6 +90,7 @@ struct Data
         outline(renderSize, geometry.texDepth),
         colorGrade(renderSize),
         antiAlias(renderSize),
+        output(display->size()),
 
         textureStore({512, 512}),
         objectStore(fs::path("objects"), textureStore),
@@ -301,7 +304,7 @@ bool Application::run(const boost::program_options::variables_map& args)
     platform::Display display("Payback Time", size, fullscreen);
     display.open();
 
-    return Data(&display).run();
+    return Data(&display, cfg::preset::LOW).run();
 }
 
 } // namespace
