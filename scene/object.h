@@ -23,13 +23,15 @@ struct Object
     using Id       = std::string;
 
     // Resolver
-    using Resolver = std::function<Object(const Id& id)>;
-
+    using Resolver = std::function<Object(const Id& id,
+                                          TextureStore& textureStore)>;
     // Object path, store root
     using Path     = std::pair<fs::path, fs::path>;
 
     Object();
-    Object(const Path& path, TextureStore& textureStore);
+    Object(const Path& path,
+           const Resolver& resolver,
+           TextureStore& textureStore);
 
     operator bool() const;
 
@@ -65,6 +67,7 @@ struct Object
 
     Object flipped(TextureStore& textureStore) const;
 
+    static Id   pathId(const Path& path);
     static bool exists(const fs::path& path);
 
 private:

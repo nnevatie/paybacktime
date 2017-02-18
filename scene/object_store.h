@@ -20,7 +20,7 @@ struct ObjectStore
     Objects objects() const;
 
     Object object(int index) const;
-    Object object(const std::string& name) const;
+    Object object(const Object::Id& id) const;
 
     int update(TextureStore& textureStore);
 

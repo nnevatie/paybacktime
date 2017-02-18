@@ -70,7 +70,8 @@ struct Model::Data
 Model::Model()
 {}
 
-Model::Model(const fs::path& path, TextureStore& textureStore, float scale) :
+Model::Model(const fs::path& path, const Model& base,
+             TextureStore& textureStore, float scale) :
     d(std::make_shared<Data>(path, textureStore, scale))
 {
 }

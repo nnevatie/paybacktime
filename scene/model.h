@@ -16,7 +16,10 @@ namespace pt
 struct Model
 {
     Model();
-    Model(const fs::path& path, TextureStore& textureStore, float scale = 1.f);
+    Model(const fs::path& path,
+          const Model& base,
+          TextureStore& textureStore,
+          float scale = 1.f);
 
     operator bool() const;
 

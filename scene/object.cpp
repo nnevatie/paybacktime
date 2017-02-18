@@ -85,7 +85,7 @@ void accumulateMaterial(mat::Emission& emission,
 struct Meta
 {
     Meta(const Object::Path& path) :
-        id(fs::relative(path.first, path.second).generic_string()),
+        id(Object::pathId(path)),
         name(path.first.filename().string()),
         scale(c::object::SCALE)
     {
@@ -108,12 +108,21 @@ struct Meta
 
 struct Object::Data
 {
-    Data(const Path& path, TextureStore& textureStore) :
+    Data(const Path& path, const Resolver& resolver,
+         TextureStore& textureStore) :
         meta(path),
-        model(path.first, textureStore, meta.scale),
         transparent(false),
         emissive(false)
-    {}
+    {
+        if (!meta.base.empty())
+            PTLOG(Info) << meta.id << ", base: " << meta.base;
+
+        const auto base = !meta.base.empty() && resolver ?
+                           resolver(meta.base, textureStore) : Object();
+
+        model = Model(path.first, base ? base.model() : Model(),
+                      textureStore, meta.scale);
+    }
 
     Meta            meta;
     Model           model;
@@ -126,8 +135,9 @@ struct Object::Data
 Object::Object()
 {}
 
-Object::Object(const Path& path, TextureStore& textureStore) :
-    d(std::make_shared<Data>(path, textureStore))
+Object::Object(const Path& path, const Resolver& resolver,
+               TextureStore& textureStore) :
+    d(std::make_shared<Data>(path, resolver, textureStore))
 {
     updateApproximation();
 }
@@ -339,6 +349,11 @@ Object Object::flipped(TextureStore& textureStore) const
         return object;
     }
     return Object();
+}
+
+Object::Id Object::pathId(const Path& path)
+{
+    return fs::relative(path.first, path.second).generic_string();
 }
 
 bool Object::exists(const boost::filesystem::path& path)
