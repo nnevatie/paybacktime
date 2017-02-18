@@ -22,7 +22,6 @@ struct ObjectStore::Data
     Object resolve(const Object::Id& id, TextureStore& textureStore)
     {
         const auto index = indexOf(objects, id);
-        PTLOG(Info) << "id: " << id << " -> " << index;
         return index >= 0 ? objects.at(index) :
                createObject({path / id, path}, *this, textureStore);
     }
@@ -107,7 +106,7 @@ int ObjectStore::update(TextureStore& textureStore)
 {
     int updateCount = 0;
     for (auto& object : d->objects)
-         updateCount += object.update(textureStore);
+         updateCount += object.update(*d, textureStore);
 
     return updateCount;
 }

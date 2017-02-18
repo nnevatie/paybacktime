@@ -63,7 +63,7 @@ struct Object
 
     Object& updateApproximation();
 
-    bool update(TextureStore& textureStore);
+    bool update(const Resolver& resolver, TextureStore& textureStore);
 
     Object flipped(TextureStore& textureStore) const;
 

@@ -11,7 +11,7 @@ namespace pt
 ImageCube::ImageCube()
 {}
 
-ImageCube::ImageCube(const fs::path& path, int depth)
+ImageCube::ImageCube(const fs::path& path, int depth, bool fallback)
 {
     struct SideImage
     {
@@ -55,25 +55,26 @@ ImageCube::ImageCube(const fs::path& path, int depth)
     // Find fallbacks
     // TODO: Clone images
     const Image imageDefault(Image(Size<int>(2, 2), depth).fill(0x00));
-    for (int i = 0; i < 6; ++i)
-        if (!sideImages[i].image)
-        {
-            for (int f = 0; f < 5; ++f)
-            {
-                const SideImage& fallback = sideImages[fallbacks[i][f]];
-                if (fallback.image)
-                {
-                    sideImages[i].image = fallback.image;
-                    break;
-                }
-            }
-            // Finally, use the default image if all fallbacks failed
+    if (fallback)
+        for (int i = 0; i < 6; ++i)
             if (!sideImages[i].image)
-                sideImages[i].image = imageDefault;
-        }
+            {
+                for (int f = 0; f < 5; ++f)
+                {
+                    const SideImage& fallback = sideImages[fallbacks[i][f]];
+                    if (fallback.image)
+                    {
+                        sideImages[i].image = fallback.image;
+                        break;
+                    }
+                }
+                // Finally, use the default image if all fallbacks failed
+                if (!sideImages[i].image)
+                    sideImages[i].image = imageDefault;
+            }
 
     // Copy images
-    for (const SideImage& sideImage : sideImages)
+    for (const auto& sideImage : sideImages)
         sides.push_back(sideImage.image);
 }
 
@@ -128,14 +129,15 @@ bool ImageCube::emissive() const
 
 ImageCube ImageCube::scaled(const ImageCube& refCube) const
 {
-    ImageCube imageCube(*this);
+    ImageCube imageCube;
+    imageCube.sides.resize(6);
+
     for (int i = 0; i < 6; ++i)
     {
-        const Image& i0 = imageCube.sides[i];
+        const Image& i0 = sides[i];
         const Image& i1 = refCube.sides[i];
-        if (i0.size() != i1.size())
-            imageCube.sides[i] = i0 ? i0.scaled(i1.size()) :
-                                      Image(i1.size(), i1.depth()).fill(0x0);
+        if (i0 && i1)
+            imageCube.sides[i] = i0.scaled(i1.size());
     }
     return imageCube;
 }
@@ -159,10 +161,25 @@ ImageCube ImageCube::flipped() const
 ImageCube ImageCube::normals() const
 {
     ImageCube imageCube;
-    for (const auto& side : sides)
-        imageCube.sides.push_back(side.normals());
+    imageCube.sides.resize(6);
+
+    for (int i = 0; i < 6; ++i)
+        if (sides[i]) imageCube.sides[i] = sides[i].normals();
 
     return imageCube;
+}
+
+int ImageCube::merge(const ImageCube& cube)
+{
+    int mergeCount = 0;
+    for (int i = 0; i < 6; ++i)
+        if (const auto& side = cube.sides.at(i))
+        {
+            sides[i] = side.clone();
+            ++mergeCount;
+        }
+
+    return mergeCount;
 }
 
 } // namespace

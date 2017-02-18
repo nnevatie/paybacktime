@@ -18,7 +18,7 @@ struct ImageCube
     };
 
     ImageCube();
-    ImageCube(const fs::path& path, int depth);
+    ImageCube(const fs::path& path, int depth, bool fallback = true);
 
     operator bool() const;
 
@@ -37,6 +37,8 @@ struct ImageCube
     ImageCube flipped() const;
 
     ImageCube normals() const;
+
+    int merge(const ImageCube& cube);
 
     std::vector<Image> sides;
 };

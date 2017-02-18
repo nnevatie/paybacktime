@@ -114,14 +114,17 @@ struct Object::Data
         transparent(false),
         emissive(false)
     {
-        if (!meta.base.empty())
-            PTLOG(Info) << meta.id << ", base: " << meta.base;
-
-        const auto base = !meta.base.empty() && resolver ?
-                           resolver(meta.base, textureStore) : Object();
+        const auto base = baseObject(resolver, textureStore);
 
         model = Model(path.first, base ? base.model() : Model(),
                       textureStore, meta.scale);
+    }
+
+    Object baseObject(const Resolver& resolver,
+                      TextureStore& textureStore) const
+    {
+        return !meta.base.empty() && resolver ?
+                resolver(meta.base, textureStore) : Object();
     }
 
     Meta            meta;
@@ -327,9 +330,12 @@ Object& Object::updateApproximation()
     return *this;
 }
 
-bool Object::update(TextureStore& textureStore)
+bool Object::update(const Resolver& resolver, TextureStore& textureStore)
 {
-    if (d->model.update(textureStore))
+    auto base = d->baseObject(resolver, textureStore);
+    if (base) base.update(resolver, textureStore);
+
+    if (d->model.update(base ? base.d->model : Model(), textureStore))
     {
         updateApproximation();
         return true;
