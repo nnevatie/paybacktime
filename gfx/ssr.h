@@ -26,6 +26,7 @@ struct Ssr
     gl::Shader        vsQuad,
                       fsCommon,
                       fsTexture,
+                      fsErode,
                       fsGaussian,
                       fsSsr,
                       fsSsrComposite;

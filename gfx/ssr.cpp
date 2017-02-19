@@ -19,10 +19,11 @@ Ssr::Ssr(const Size<int>& displaySize, const Size<int>& renderSize) :
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
     fsTexture(gl::Shader::path("texture.fs.glsl")),
+    fsErode(gl::Shader::path("erode.fs.glsl")),
     fsGaussian(gl::Shader::path("gaussian.fs.glsl")),
     fsSsr(gl::Shader::path("ssr.fs.glsl")),
     fsSsrComposite(gl::Shader::path("ssr_composite.fs.glsl")),
-    progScale({vsQuad, fsTexture},
+    progScale({vsQuad, fsErode},
               {{0, "position"}, {1, "uv"}}),
     progBlur({vsQuad, fsGaussian},
             {{0, "position"}, {1, "uv"}}),
@@ -119,7 +120,8 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
             {
                 // Downscale
                 Binder<gl::Fbo> binder(fboScale[i]);
-                progScale.bind().setUniform("texColor", 0);
+                progScale.bind().setUniform("tex",    0)
+                                .setUniform("weight", 1.f / i);
 
                 glViewport(0, 0, size.x, size.y);
                 glDrawBuffer(GL_COLOR_ATTACHMENT0);
