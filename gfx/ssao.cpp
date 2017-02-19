@@ -48,9 +48,11 @@ std::vector<float> noiseData(int size)
 }
 
 Ssao::Ssao(int kernelSize,
+           const Size<int>& displaySize,
            const Size<int>& renderSize,
            const Size<int>& noiseSize) :
     kernelSize(kernelSize),
+    displaySize(displaySize),
     renderSize(renderSize),
     noiseSize(noiseSize),
     kernel(kernelData(kernelSize)),
@@ -58,7 +60,7 @@ Ssao::Ssao(int kernelSize,
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
     fsAo(gl::Shader::path("ssao.fs.glsl")),
-    fsBlur(gl::Shader::path("blur.fs.glsl")),
+    fsBlur(gl::Shader::path("ssao_blur.fs.glsl")),
     progAo({vsQuad, fsAo, fsCommon},
           {{0, "position"}, {1, "uv"}}),
     progBlur({vsQuad, fsBlur},
@@ -68,7 +70,9 @@ Ssao::Ssao(int kernelSize,
 
     // Alloc textures
     texAo.bind().alloc(fboSize,     GL_R8, GL_RED, GL_UNSIGNED_BYTE);
-    texAoBlur.bind().alloc(fboSize, GL_R8, GL_RED, GL_UNSIGNED_BYTE);
+    texAoBlur.bind().alloc(fboSize, GL_R8, GL_RED, GL_UNSIGNED_BYTE)
+                    .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
@@ -89,8 +93,8 @@ Ssao::Ssao(int kernelSize,
 
 glm::vec2 Ssao::noiseScale() const
 {
-    return glm::vec2(float(renderSize.w) / noiseSize.w,
-                     float(renderSize.h) / noiseSize.h);
+    return glm::vec2(float(displaySize.w) / noiseSize.w,
+                     float(displaySize.h) / noiseSize.h);
 }
 
 Ssao& Ssao::operator()(gl::Texture* texDepth,
@@ -122,11 +126,9 @@ Ssao& Ssao::operator()(gl::Texture* texDepth,
     {
         // Blur pass
         Binder<gl::Fbo> binder(fboAoBlur);
-        progBlur.bind().setUniform("texDepth", 0)
-                       .setUniform("texAo",    1);
+        progBlur.bind().setUniform("texAo", 0);
         glDisable(GL_DEPTH_TEST);
-        texDepth->bindAs(GL_TEXTURE0);
-        texAo.bindAs(GL_TEXTURE1);
+        texAo.bindAs(GL_TEXTURE0);
         rect.render();
     }
     return *this;

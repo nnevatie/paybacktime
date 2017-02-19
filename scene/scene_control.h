@@ -21,6 +21,7 @@ struct SceneControl
                  Camera* camera,
                  platform::Display* display,
                  platform::Mouse* mouse,
+                 const Size<int>& renderSize,
                  const gl::Texture& texDepth);
 
     SceneControl& operator()(Duration step, Object object);

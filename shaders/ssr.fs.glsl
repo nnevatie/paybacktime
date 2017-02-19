@@ -11,6 +11,7 @@ uniform mat4      pc;
 uniform vec3      viewPos;
 uniform float     zNear;
 uniform float     zFar;
+uniform float     scale;
 
 // Const
 vec2 sizeTex = textureSize(texDepth, 0);
@@ -20,15 +21,15 @@ vec4 up      = v * vec4(0, 1, 0, 0);
 #define float3 vec3
 #define float2 vec2
 
-int   _Iterations = 20;
-float _MaxRayDistance = 50.0;
-float _PixelStride = 20.0;
+int   _Iterations          = 20;
+float _MaxRayDistance      = 50.0;
+float _PixelStride         = 20.0;
 float _PixelStrideZCuttoff = 500.0;
-float _PixelThickness = 5.0;
-vec3  _ProjectionParams = vec3(0, zNear, zFar);
+float _PixelThickness      = 5.0;
+vec3  _ProjectionParams    = vec3(0, zNear, zFar);
 float _ScreenEdgeFadeStart = 0.75;
-float _EyeFadeStart = 0.0;
-float _EyeFadeEnd = 1.0;
+float _EyeFadeStart        = 0.0;
+float _EyeFadeEnd          = 1.0;
 
 // Input
 in Block

@@ -63,6 +63,7 @@ Lighting& Lighting::operator()(
                .setUniform("nm",          glm::transpose(glm::inverse(glm::mat3(v))))
                .setUniform("wm",          glm::inverse(p * v));
 
+    glViewport(0, 0, renderSize.w, renderSize.h);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(false);

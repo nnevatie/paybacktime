@@ -4,6 +4,7 @@
 uniform sampler2D texColor;
 uniform sampler2D texSsr;
 uniform sampler2D texLight;
+uniform float     scale;
 
 // Input
 in Block
@@ -22,6 +23,6 @@ void main(void)
     float r  = l.r;
     float g  = 2 * (1 - l.g);
     vec4 col = texture(texColor, ib.uv);
-    vec4 ssr = textureLod(texSsr, ib.uv, g);
+    vec4 ssr = textureLod(texSsr, ib.uv, scale * g);
     color    = vec4(mix(col.rgb, ssr.rgb, r * ssr.a), 1.0);
 }

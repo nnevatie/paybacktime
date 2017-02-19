@@ -81,10 +81,10 @@ struct Data
 
     Data(platform::Display* display, const cfg::Video& config) :
         display(display),
-        renderSize(display->size() * config.renderScale),
+        renderSize(display->size() * config.scales.render),
         geometry(renderSize),
-        ssao(32, renderSize, {4, 4}),
-        ssr(renderSize),
+        ssao(32, renderSize, renderSize * config.scales.ssao, {4, 4}),
+        ssr(renderSize, renderSize * config.scales.ssr),
         lighting(renderSize, geometry.texDepth),
         bloom(renderSize),
         outline(renderSize, geometry.texDepth),
@@ -104,7 +104,8 @@ struct Data
 
         // Controls
         cameraControl(&camera, display, &mouse),
-        sceneControl(&scene, &camera, display, &mouse, geometry.texDepth),
+        sceneControl(&scene, &camera, display, &mouse,
+                     renderSize, geometry.texDepth),
 
         // UI
         stats(display->nanoVg()),
@@ -113,37 +114,6 @@ struct Data
         objectPane(toolsWindow.add("Objects", true),
                    display, &objectStore, &textureStore)
     {
-        #if 0
-        auto floor = objectStore.object("floor");
-        auto light = objectStore.object("floor3");
-
-        #if 0
-        auto pillar = objectStore.object("pillar");
-        scene.add({pillar, TransformTrRot({0, 0, 0})});
-        #endif
-
-        for (int y = -5; y <= 5; ++y)
-            for (int x = -5; x <= 5; ++x)
-            {
-                auto tr = TransformTrRot({16 * x, -2, 16 * y});
-                scene.add({x || y ? floor : light, tr});
-            }
-
-        #if 0
-        for (int y = -20; y <= 20; ++y)
-            for (int x = -20; x <= 20; ++x)
-            {
-                auto tr = TransformTrRot({16 * x, -2, 16 * y});
-                scene.add({light, tr});
-            }
-        #endif
-
-        #if 0
-        scene.add({objectStore.object("chair"), TransformTrRot({-32, 0, 16 * -2})});
-        scene.add({objectStore.object("table"), TransformTrRot({32, 0, 16 * -2})});
-        #endif
-        #endif
-
         toolsWindow.select(1);
         display->update();
     }
@@ -304,7 +274,7 @@ bool Application::run(const boost::program_options::variables_map& args)
     platform::Display display("Payback Time", size, fullscreen);
     display.open();
 
-    return Data(&display, cfg::preset::LOW).run();
+    return Data(&display, cfg::preset::HIGH).run();
 }
 
 } // namespace

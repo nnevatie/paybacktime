@@ -10,8 +10,11 @@ namespace pt
 namespace gfx
 {
 
-Ssr::Ssr(const Size<int>& renderSize) :
+Ssr::Ssr(const Size<int>& displaySize, const Size<int>& renderSize) :
+    displaySize(displaySize),
     renderSize(renderSize),
+    scale(float(renderSize.w) / displaySize.w),
+    mipmapCount(scale * MIPMAP_COUNT_MAX),
     rect(squareMesh()),
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
@@ -60,7 +63,8 @@ Ssr::Ssr(const Size<int>& renderSize) :
             .attach(texColor, gl::Fbo::Attachment::Color)
             .unbind();
 
-    texSsr.bind().alloc(fboSize, GL_RGB16F, GL_RGB, GL_FLOAT);
+    auto outputSize = {displaySize.w, displaySize.h};
+    texSsr.bind().alloc(outputSize, GL_RGB16F, GL_RGB, GL_FLOAT);
     fboSsr.bind()
           .attach(texSsr, gl::Fbo::Attachment::Color)
           .unbind();
@@ -77,7 +81,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
         fboColor.attach(this->texColor, gl::Fbo::Attachment::Color);
 
         // View-to-screen transformation
-        auto sc0 = glm::scale({}, glm::vec3(renderSize.w, renderSize.h, 1));
+        auto sc0 = glm::scale({}, glm::vec3(displaySize.w, displaySize.h, 1));
         auto sc1 = glm::scale({}, glm::vec3(0.5f, 0.5f, 1));
         auto tr  = glm::translate({}, glm::vec3(0.5f, 0.5f, 0));
         auto pc  = (sc0 * (tr * sc1)) * camera.matrixProj();
@@ -94,7 +98,8 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                       .setUniform("p",           camera.matrixProj())
                       .setUniform("pc",          pc)
                       .setUniform("zNear",       camera.zNear)
-                      .setUniform("zFar",        camera.zFar);
+                      .setUniform("zFar",        camera.zFar)
+                      .setUniform("scale",       scale);
 
         glViewport(0, 0, renderSize.w, renderSize.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -165,9 +170,10 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                                .setUniform("texLight",    2)
                                .setUniform("z",           0.f)
                                .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
-                               .setUniform("aspectRatio", camera.ar);
+                               .setUniform("aspectRatio", camera.ar)
+                               .setUniform("scale",       scale);
 
-        glViewport(0, 0, renderSize.w, renderSize.h);
+        glViewport(0, 0, displaySize.w, displaySize.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         this->texColor.bind().set(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         texColor->bindAs(GL_TEXTURE0);

@@ -45,12 +45,13 @@ struct SceneControl::Data
          Camera* camera,
          platform::Display* display,
          platform::Mouse* mouse,
+         const Size<int>& renderSize,
          const gl::Texture& texDepth) :
         scene(scene),
         camera(camera),
         display(display),
         mouse(mouse),
-        outline(display->size(), texDepth),
+        outline(renderSize, texDepth),
         state(State::Idle)
     {}
 
@@ -73,8 +74,9 @@ SceneControl::SceneControl(Scene* scene,
                            Camera* camera,
                            platform::Display* display,
                            platform::Mouse* mouse,
+                           const Size<int>& renderSize,
                            const gl::Texture& texDepth) :
-    d(std::make_shared<Data>(scene, camera, display, mouse, texDepth))
+    d(std::make_shared<Data>(scene, camera, display, mouse, renderSize, texDepth))
 {}
 
 SceneControl& SceneControl::operator()(Duration /*step*/, Object object)

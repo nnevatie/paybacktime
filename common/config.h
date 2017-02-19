@@ -5,17 +5,24 @@ namespace pt
 namespace cfg
 {
 
+struct Scales
+{
+    float render,
+          ssao,
+          ssr;
+};
+
 struct Video
 {
-    float renderScale;
+    Scales scales;
 };
 
 namespace preset
 {
 
-static constexpr Video ULTRA = {1.00f},
-                       HIGH  = {0.75f},
-                       LOW   = {0.50f};
+static constexpr Video ULTRA = {{1.00f, 1.00f, 1.00f}},
+                       HIGH  = {{1.00f, 0.50f, 0.50f}},
+                       LOW   = {{0.75f, 0.50f, 0.50f}};
 
 } // namespace preset
 

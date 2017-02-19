@@ -21,7 +21,8 @@ struct Ssao
     typedef std::vector<glm::vec3> Kernel;
 
     int               kernelSize;
-    Size<int>         renderSize,
+    Size<int>         displaySize,
+                      renderSize,
                       noiseSize;
 
     Kernel            kernel;
@@ -43,7 +44,8 @@ struct Ssao
                       texAoBlur,
                       texNoise;
 
-    Ssao(int kernelSize, const Size<int>& renderSize,
+    Ssao(int kernelSize, const Size<int>& displaySize,
+                         const Size<int>& renderSize,
                          const Size<int>& noiseSize);
 
     glm::vec2 noiseScale() const;
