@@ -15,14 +15,14 @@ Bloom::Bloom(const Size<int>& renderSize) :
     fsBloom(gl::Shader::path("bloom.fs.glsl")),
     fsTexture(gl::Shader::path("texture.fs.glsl")),
     fsAdd(gl::Shader::path("add.fs.glsl")),
-    fsGaussian(gl::Shader::path("gaussian.fs.glsl")),
+    fsBlur(gl::Shader::path("blur.fs.glsl")),
     progBloom({vsQuadUv, fsBloom},
               {{0, "position"}, {1, "uv"}}),
     progScale({vsQuadUv, fsTexture},
               {{0, "position"}, {1, "uv"}}),
     progAdd({vsQuadUv, fsAdd},
             {{0, "position"}, {1, "uv"}}),
-    progBlur({vsQuadUv, fsGaussian},
+    progBlur({vsQuadUv, fsBlur},
             {{0, "position"}, {1, "uv"}})
 {
     PTLOG(Info) << "size " << renderSize.w << "x" << renderSize.h;
@@ -96,7 +96,7 @@ Bloom& Bloom::operator()(gl::Texture* texColor)
     // Blur and combine to next scale level up
     for (int i = scaleCount - 1; i >= 0; --i)
     {
-        const auto size = texScale[i].size();
+        const Size<int> size(texScale[i].size().xy());
 
         // Blur source will be either the downscaled texture or it
         // combined with the previous level's blurred version.
@@ -106,29 +106,22 @@ Bloom& Bloom::operator()(gl::Texture* texColor)
             // Add previous level
             progAdd.bind().setUniform("tex0", 0).setUniform("tex1", 1);
             Binder<gl::Fbo> binder(fboAdd[i]);
-            glViewport(0, 0, size.x, size.y);
+            glViewport(0, 0, size.w, size.h);
             texBloom.bindAs(GL_TEXTURE0);
             texScale[i + 1].bindAs(GL_TEXTURE1);
             rect.render();
             blurSrc = texAdd[i];
         }
+        // Blur passes
+        for (int d = 0; d < 2; ++d)
+        {
+            Binder<gl::Fbo> binder(d == 0 ? fboBlur[i] : fboScale[i]);
+            progBlur.bind().setUniform("tex",        0)
+                           .setUniform("invDirSize", size.inv<glm::vec2>(d))
+                           .setUniform("radius",     3);
 
-        // Seperable gaussian blur
-        progBlur.bind().setUniform("texColor", 0);
-        {
-            // Blur horizontal
-            progBlur.setUniform("horizontal", true);
-            Binder<gl::Fbo> binder(fboBlur[i]);
-            glViewport(0, 0, size.x, size.y);
-            blurSrc.bindAs(GL_TEXTURE0);
-            rect.render();
-        }
-        {
-            // Blur vertical
-            progBlur.setUniform("horizontal", false);
-            Binder<gl::Fbo> binder(fboScale[i]);
-            glViewport(0, 0, size.x, size.y);
-            texBlur[i].bindAs(GL_TEXTURE0);
+            glViewport(0, 0, size.w, size.h);
+            (d == 0 ? blurSrc : texBlur[i]).bindAs(GL_TEXTURE0);
             rect.render();
         }
     }

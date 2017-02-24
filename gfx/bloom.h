@@ -25,7 +25,7 @@ struct Bloom
                       fsBloom,
                       fsTexture,
                       fsAdd,
-                      fsGaussian;
+                      fsBlur;
 
     gl::ShaderProgram progBloom,
                       progScale,

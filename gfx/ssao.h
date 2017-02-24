@@ -41,7 +41,7 @@ struct Ssao
                       fboAoBlur;
 
     gl::Texture       texAo,
-                      texAoBlur,
+                      texAoBlur[2],
                       texNoise;
 
     Ssao(int kernelSize, const Size<int>& displaySize,
