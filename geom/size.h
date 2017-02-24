@@ -46,6 +46,12 @@ struct Size
         return RT(w, h);
     }
 
+    template <typename RT>
+    RT inv(int d) const
+    {
+        return RT(d == 0 ? 1.f / w : 0.f, d == 1 ? 1.f / h : 0.f);
+    }
+
     template <typename AT>
     Size operator+(AT d) const
     {
