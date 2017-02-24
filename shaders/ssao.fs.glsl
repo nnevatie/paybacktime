@@ -23,14 +23,10 @@ ib;
 // Output
 out vec4 color;
 
-// Externals
-float linearDepth(float depth, mat4 proj);
-
 void main(void)
 {
     vec3 normal    = texture(texNormal, ib.uv).xyz;
-    vec3 fragPos   = linearDepth(texture(texDepth, ib.uv).r, p) *
-                        ib.viewRay - 0.5 * normal;
+    vec3 fragPos   = texture(texDepth, ib.uv).r * -ib.viewRay - 0.5 * normal;
     vec3 randomVec = texture(texNoise, ib.uv * noiseScale).xyz;
     vec3 tangent   = normalize(randomVec - normal * dot(randomVec, normal));
     vec3 bitangent = cross(normal, tangent);
@@ -47,9 +43,10 @@ void main(void)
         offset.xy  /= offset.w;
         offset.xy   = offset.xy * 0.5 + 0.5;
 
-        float sampleDepth = -linearDepth(texture(texDepth, offset.xy).r, p);
-        float rangeCheck  = smoothstep(0.0, 1.0, RADIUS /
+        float sampleDepth = texture(texDepth, offset.xy).r;
+        float rangeCheck  = smoothstep(0.0, 1.0, 0.25 * RADIUS /
                                                  abs(fragPos.z - sampleDepth));
+
         occlusion        += rangeCheck * step(sampleDepth, sample.z);
     }
     color = vec4(pow(1.0 - (occlusion / KERNEL_SIZE), POW));
