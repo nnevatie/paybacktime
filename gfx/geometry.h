@@ -35,14 +35,17 @@ struct Geometry
                       fsGeometryTransparent,
                       fsOitComposite,
                       fsDenoise,
+                      fsLinearDepth,
                       fsCommon;
 
     gl::ShaderProgram progGeometry,
                       progGeometryTransparent,
                       progOitComposite,
-                      progDenoise;
+                      progDenoise,
+                      progLinearDepth;
 
     gl::Texture       texDepth,
+                      texDepthLinear,
                       texNormal,
                       texNormalDenoise,
                       texColor,
@@ -63,8 +66,7 @@ struct Geometry
                          gl::Texture* texNormalMap,
                          gl::Texture* texLightmap,
                          const Instances& instances,
-                         const glm::mat4& v,
-                         const glm::mat4& p);
+                         const Camera& camera);
 
     // Transparent
     Geometry& operator()(gl::Fbo* fbo,

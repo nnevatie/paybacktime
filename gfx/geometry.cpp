@@ -3,6 +3,7 @@
 #include <glbinding/gl/bitfield.h>
 
 #include "common/common.h"
+#include "common/log.h"
 
 namespace pt
 {
@@ -20,6 +21,7 @@ Geometry::Geometry(const Size<int>& renderSize) :
     fsGeometryTransparent(gl::Shader::path("geometry_transparent.fs.glsl")),
     fsOitComposite(gl::Shader::path("oit_composite.fs.glsl")),
     fsDenoise(gl::Shader::path("denoise.fs.glsl")),
+    fsLinearDepth(gl::Shader::path("linear_depth.fs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
     progGeometry({vsGeometry, /*gsWireframe,*/ fsGeometry, fsCommon},
                 {{0, "position"}, {1, "normal"}, {2, "tangent"}, {3, "uv"}}),
@@ -28,6 +30,8 @@ Geometry::Geometry(const Size<int>& renderSize) :
     progOitComposite({vsQuad, fsOitComposite},
                     {{0, "position"}, {1, "uv"}}),
     progDenoise({vsQuad, fsDenoise},
+        {{0, "position"}, {1, "uv"}}),
+    progLinearDepth({vsQuad, fsLinearDepth},
         {{0, "position"}, {1, "uv"}})
 {
     auto fboSize = {renderSize.w, renderSize.h};
@@ -36,6 +40,10 @@ Geometry::Geometry(const Size<int>& renderSize) :
                                    GL_DEPTH_COMPONENT, GL_FLOAT)
                    .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                    .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    texDepthLinear.bind().alloc(fboSize, GL_R32F, GL_RED, GL_FLOAT)
+                         .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                         .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     texNormal.bind().alloc(fboSize,        GL_RGB16F,  GL_RGB, GL_FLOAT);
     texNormalDenoise.bind().alloc(fboSize, GL_RGB16F,  GL_RGB, GL_FLOAT)
@@ -51,11 +59,13 @@ Geometry::Geometry(const Size<int>& renderSize) :
        .attach(texColor,         gl::Fbo::Attachment::Color, 1)
        .attach(texLight,         gl::Fbo::Attachment::Color, 2)
        .attach(texNormalDenoise, gl::Fbo::Attachment::Color, 3)
+       .attach(texDepthLinear,   gl::Fbo::Attachment::Color, 4)
        .unbind();
 
     // OIT
     texOit0.bind().alloc(fboSize, GL_RGBA16F, GL_RGBA, GL_FLOAT);
     texOit1.bind().alloc(fboSize, GL_R16F,    GL_RED,  GL_FLOAT);
+
     fboOit.bind()
           .attach(texDepth, gl::Fbo::Attachment::Depth)
           .attach(texOit0,  gl::Fbo::Attachment::Color, 0)
@@ -68,8 +78,7 @@ Geometry& Geometry::operator()(
     gl::Texture* texNormalMap,
     gl::Texture* texLightmap,
     const Instances& instances,
-    const glm::mat4& v,
-    const glm::mat4& p)
+    const Camera& camera)
 {
     {
         // Front faces
@@ -78,8 +87,8 @@ Geometry& Geometry::operator()(
                     .setUniform("texAlbedo", 0)
                     .setUniform("texNormal", 1)
                     .setUniform("texLight",  2)
-                    .setUniform("v",         v)
-                    .setUniform("p",         p)
+                    .setUniform("v",         camera.matrixView())
+                    .setUniform("p",         camera.matrixProj())
                     .setUniform("size",      renderSize.as<glm::vec2>());
 
         const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
@@ -112,6 +121,14 @@ Geometry& Geometry::operator()(
         glDrawBuffer(GL_COLOR_ATTACHMENT3);
         glDisable(GL_DEPTH_TEST);
         texNormal.bindAs(GL_TEXTURE0);
+        rect.render();
+
+        // Linearize depth
+        progLinearDepth.bind().setUniform("tex",  0)
+                              .setUniform("clip", camera.infoClip());
+        glDrawBuffer(GL_COLOR_ATTACHMENT4);
+        glDisable(GL_DEPTH_TEST);
+        texDepth.bindAs(GL_TEXTURE0);
         rect.render();
     }
     return *this;
