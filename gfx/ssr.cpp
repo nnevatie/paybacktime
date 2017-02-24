@@ -153,7 +153,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                                    .setUniform("texDepth",   1)
                                    .setUniform("invDirSize", size.inv<glm::vec2>(d))
                                    .setUniform("radius",     3)
-                                   .setUniform("sharpness",  0.01f);
+                                   .setUniform("sharpness",  1.f);
 
                     glViewport(0, 0, size.w, size.h);
                     (d == 0 ? texScale[i] : texBlur[i]).bindAs(GL_TEXTURE0);
