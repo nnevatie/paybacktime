@@ -32,15 +32,14 @@ ib;
 out vec4 color;
 
 // Externals
-float linearDepth(float depth, mat4 proj);
 vec4 textureTricubic(sampler3D, vec3, vec3);
 float ggx(vec3 N, vec3 V, vec3 L, float roughness, float F0);
 
 vec3 world(sampler2D depth, vec2 uv, mat4 v, mat4 p)
 {
-  vec4 clip  = vec4(uv * 2.0 - 1.0, texture(depth, uv).r * 2.0 - 1.0, 1.0);
-  vec4 world = wm * clip;
-  return world.xyz / world.w;
+    vec4 clip  = vec4(uv * 2.0 - 1.0, texture(depth, uv).r * 2.0 - 1.0, 1.0);
+    vec4 world = wm * clip;
+    return world.xyz / world.w;
 }
 
 vec3 giUvw(vec3 worldPos)
@@ -58,12 +57,12 @@ vec3 scattering(vec3 start)
     vec3 uvw1 = giUvw(end);
     vec3 uvws = (uvw1 - uvw0) / SCATTER_STEPS;
 
-    float weight = 0.005;
+    float weight = 0.01;
     vec3 scatter = vec3(0.0);
     for (int i = 0; i < SCATTER_STEPS && uvw0.z < 1.05; ++i)
     {
         vec3 gi  = texture(texGi, uvw0).rgb;
-        scatter += weight * gi;
+        scatter += weight * pow(gi, vec3(2.0));
         uvw0    += uvws;
     }
     return scatter;
@@ -71,7 +70,6 @@ vec3 scattering(vec3 start)
 
 void main(void)
 {
-    vec3 fragPos    = linearDepth(texture(texDepth, ib.uv).r, p) * ib.viewRay;
     vec3 worldPos   = world(texDepth, ib.uv, v, p);
     vec3 uvwGi      = giUvw(worldPos);
     vec3 gi         = textureTricubic(texGi, uvwGi, sizeTexGi).rgb;
