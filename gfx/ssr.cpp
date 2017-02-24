@@ -19,13 +19,12 @@ Ssr::Ssr(const Size<int>& displaySize, const Size<int>& renderSize) :
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
     fsTexture(gl::Shader::path("texture.fs.glsl")),
-    fsErode(gl::Shader::path("erode.fs.glsl")),
-    fsGaussian(gl::Shader::path("gaussian.fs.glsl")),
+    fsBlur(gl::Shader::path("blur_bi.fs.glsl")),
     fsSsr(gl::Shader::path("ssr.fs.glsl")),
     fsSsrComposite(gl::Shader::path("ssr_composite.fs.glsl")),
-    progScale({vsQuad, fsErode},
+    progScale({vsQuad, fsTexture},
               {{0, "position"}, {1, "uv"}}),
-    progBlur({vsQuad, fsGaussian},
+    progBlur({vsQuad, fsBlur},
             {{0, "position"}, {1, "uv"}}),
     progSsr({vsQuad, fsSsr, fsCommon},
            {{0, "position"}, {1, "uv"}}),
@@ -116,14 +115,12 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
         // Mipmap levels
         for (int i = 1; i < mipmapCount; ++i)
         {
-            const auto size = texScale[i].size();
+            const Size<int> size(texScale[i].size().xy());
             {
                 // Downscale
                 Binder<gl::Fbo> binder(fboScale[i]);
-                progScale.bind().setUniform("tex",    0)
-                                .setUniform("weight", 1.f / i);
-
-                glViewport(0, 0, size.x, size.y);
+                progScale.bind().setUniform("tex", 0);
+                glViewport(0, 0, size.w, size.h);
                 glDrawBuffer(GL_COLOR_ATTACHMENT0);
                 glDisable(GL_DEPTH_TEST);
                 glDepthMask(false);
@@ -133,22 +130,19 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                 rect.render();
             }
             {
-                // Blur
-                progBlur.bind().setUniform("texColor", 0);
+                // Blur passes
+                for (int d = 0; d < 2; ++d)
                 {
-                    // Horizontal
-                    progBlur.setUniform("horizontal", true);
-                    Binder<gl::Fbo> binder(fboBlur[i]);
-                    glViewport(0, 0, size.x, size.y);
-                    texScale[i].bindAs(GL_TEXTURE0);
-                    rect.render();
-                }
-                {
-                    // Vertical
-                    progBlur.setUniform("horizontal", false);
-                    Binder<gl::Fbo> binder(fboScale[i]);
-                    glViewport(0, 0, size.x, size.y);
-                    texBlur[i].bindAs(GL_TEXTURE0);
+                    Binder<gl::Fbo> binder(d == 0 ? fboBlur[i] : fboScale[i]);
+                    progBlur.bind().setUniform("texColor",   0)
+                                   .setUniform("texDepth",   1)
+                                   .setUniform("invDirSize", size.inv<glm::vec2>(d))
+                                   .setUniform("radius",     10)
+                                   .setUniform("sharpness",  50.0f);
+
+                    glViewport(0, 0, size.w, size.h);
+                    (d == 0 ? texScale[i] : texBlur[i]).bindAs(GL_TEXTURE0);
+                    texDepth->bindAs(GL_TEXTURE1);
                     rect.render();
                 }
             }
@@ -157,7 +151,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                 Binder<gl::Fbo> binder(fboColor);
                 progScale.bind().setUniform("texColor", 0);
                 fboColor.attach(this->texColor, gl::Fbo::Attachment::Color, 0, i);
-                glViewport(0, 0, size.x, size.y);
+                glViewport(0, 0, size.w, size.h);
                 glDrawBuffer(GL_COLOR_ATTACHMENT0);
                 texScale[i].bindAs(GL_TEXTURE0);
                 rect.render();
@@ -170,6 +164,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
         progSsrComposite.bind().setUniform("texColor",    0)
                                .setUniform("texSsr",      1)
                                .setUniform("texLight",    2)
+                               .setUniform("texNormal",   3)
                                .setUniform("z",           0.f)
                                .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
                                .setUniform("aspectRatio", camera.ar)
@@ -181,6 +176,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
         texColor->bindAs(GL_TEXTURE0);
         this->texColor.bindAs(GL_TEXTURE1);
         texLight->bindAs(GL_TEXTURE2);
+        texNormal->bindAs(GL_TEXTURE3);
         rect.render();
     }
     return *this;

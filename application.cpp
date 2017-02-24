@@ -175,11 +175,11 @@ struct Data
             geometry(&textureStore.albedo.texture,
                      &textureStore.normal.texture,
                      &textureStore.light.texture,
-                     geom, view, proj);
+                     geom, camera);
         }
         {
             auto time = timeTree.scope("ssao");
-            ssao(&geometry.texDepth, &geometry.texNormalDenoise,
+            ssao(&geometry.texDepthLinear, &geometry.texNormalDenoise,
                  proj, camera.fov);
         }
         {
@@ -188,7 +188,7 @@ struct Data
                      &geometry.texNormalDenoise,
                      &geometry.texColor,
                      &geometry.texLight,
-                     &ssao.texAoBlur,
+                     &ssao.texAoBlur[1],
                      scene.lightmap(),
                      scene.incidence(),
                      camera,
@@ -213,8 +213,9 @@ struct Data
         }
         {
             auto time = timeTree.scope("ssr");
-            ssr(&geometry.texDepth, &geometry.texNormalDenoise, lighting.output(),
-               &geometry.texLight, camera);
+            ssr(&geometry.texDepthLinear,
+                &geometry.texNormalDenoise, lighting.output(),
+                &geometry.texLight, camera);
         }
         {
             auto time = timeTree.scope("bloom");
@@ -234,6 +235,7 @@ struct Data
         {
             auto time = timeTree.scope("output");
             output(antiAlias.output());
+            //output(&ssr.texColor);
         }
         {
             auto time = timeTree.scope("ui");
