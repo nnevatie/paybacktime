@@ -42,17 +42,6 @@ ib;
 // Output
 out vec4 color;
 
-// Externals
-float linearDepth(float depth, float zNear, float zFar);
-float linearDepth(float depth, mat4 proj);
-
-float linearDepth(float depth)
-{
-    float z_n = 2.0 * depth - 1.0;
-    float z_e = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
-    return z_e;
-}
-
 void swap(inout float f0, inout float f1)
 {
     float t = f0;
@@ -68,7 +57,7 @@ float distanceSquared(vec2 a, vec2 b)
 
 bool intersectDepth(vec2 uv, float zMin, float zMax)
 {
-    float cameraZ = linearDepth(texture(texDepth, uv).r);
+    float cameraZ = texture(texDepth, uv).r;
     return -zMax >= cameraZ && -zMax <= cameraZ + _PixelThickness;
 }
 
@@ -198,13 +187,15 @@ float alpha(bool intersect,
     alpha *= 1.0 - clamp(distance(vsRayOrigin, hitPoint) / _MaxRayDistance,
                          0.0, 1.0);
 
+    // Fade with intersection
     alpha *= intersect ? 1.0 : 0.0;
+
     return clamp(alpha, 0, 1);
 }
 
 vec4 ssr()
 {
-    float depth = linearDepth(texture(texDepth, ib.uv).r);
+    float depth = texture(texDepth, ib.uv).r;
     vec3 origin = ib.viewRay * depth;
     vec3 normal = texture(texNormal, ib.uv).xyz;
     vec3 ray    = normalize(reflect(normalize(origin), normalize(normal)));
