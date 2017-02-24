@@ -23,6 +23,9 @@ struct Camera
     glm::mat4 matrixProj() const;
     glm::mat4 matrixView() const;
 
+    glm::vec4 infoClip() const;
+    glm::vec4 infoProj() const;
+
     glm::vec4 eye(const glm::vec4& clip) const;
     Ray     world(const glm::vec4& eye)  const;
 

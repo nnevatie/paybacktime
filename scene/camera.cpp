@@ -51,6 +51,23 @@ glm::mat4 Camera::matrixView() const
     return glm::lookAt(position(), target, up());
 }
 
+glm::vec4 Camera::infoClip() const
+{
+    return {zNear * zFar, zNear - zFar, zFar, 1.f};
+}
+
+glm::vec4 Camera::infoProj() const
+{
+    const auto proj = matrixProj();
+    const auto p    = glm::value_ptr(proj);
+    return {
+        2.0f / (p[4 * 0 + 0]),
+        2.0f / (p[4 * 1 + 1]),
+      -(1.0f -  p[4 * 2 + 0]) / p[4 * 0 + 0],
+      -(1.0f +  p[4 * 2 + 1]) / p[4 * 1 + 1]
+    };
+}
+
 glm::vec4 Camera::eye(const glm::vec4& clip) const
 {
     const glm::vec4 eye = glm::inverse(matrixProj()) * clip;
