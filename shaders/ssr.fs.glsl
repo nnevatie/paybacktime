@@ -3,8 +3,6 @@
 // Uniforms
 uniform sampler2D texDepth;
 uniform sampler2D texNormal;
-uniform sampler2D texColor;
-uniform sampler2D texLight;
 uniform mat4      v;
 uniform mat4      p;
 uniform mat4      pc;
@@ -171,7 +169,7 @@ float alpha(bool intersect,
     // Fade ray hits that approach the screen edge
     float screenFade = _ScreenEdgeFadeStart;
     float2 hitPixelNDC = (hitPixel * 2.0 - 1.0);
-    float maxDimension = min( 1.0, max( abs( hitPixelNDC.x), abs( hitPixelNDC.y)));
+    float maxDimension = min(1.0, max( abs( hitPixelNDC.x), abs( hitPixelNDC.y)));
     alpha *= 1.0 - (max( 0.0, maxDimension - screenFade) / (1.0 - screenFade));
 
     // Fade ray hits base on how much they face the camera
@@ -211,8 +209,7 @@ vec4 ssr()
     bool hit = raytrace(origin, ray, jitter, hitPixel, hitPoint, iters);
     float a  = alpha(hit, iters, hitPixel, hitPoint, origin, ray, normal);
 
-    return vec4(a > 0 ? texture(texColor, hitPixel).rgb :
-                        texture(texColor, ib.uv).rgb, a);
+    return vec4(hitPixel, a, 1.0);
 }
 
 void main(void)

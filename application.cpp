@@ -222,7 +222,7 @@ struct Data
             bloom(ssr.output());
         }
 
-        sceneControl(&ssr.fboSsr, ssr.output());
+        sceneControl(&ssr.fboComp, ssr.output());
 
         {
             auto time = timeTree.scope("colorgrade");
@@ -235,7 +235,6 @@ struct Data
         {
             auto time = timeTree.scope("output");
             output(antiAlias.output());
-            //output(&ssr.texColor);
         }
         {
             auto time = timeTree.scope("ui");

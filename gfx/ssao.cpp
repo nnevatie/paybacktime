@@ -61,7 +61,7 @@ Ssao::Ssao(int kernelSize,
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
     fsAo(gl::Shader::path("ssao.fs.glsl")),
-    fsBlur(gl::Shader::path("blur_bi.fs.glsl")),
+    fsBlur(gl::Shader::path("blur.fs.glsl")),
     progAo({vsQuad, fsAo, fsCommon},
           {{0, "position"}, {1, "uv"}}),
     progBlur({vsQuad, fsBlur},
@@ -129,17 +129,14 @@ Ssao& Ssao::operator()(gl::Texture* texDepth,
             Binder<gl::Fbo> binder(fboAoBlur);
             fboAoBlur.attach(texAoBlur[i], gl::Fbo::Attachment::Color);
             progBlur.bind().setUniform("texColor",   0)
-                           .setUniform("texDepth",   1)
                            .setUniform("invDirSize", renderSize.inv<glm::vec2>(i))
-                           .setUniform("radius",     3)
-                           .setUniform("sharpness",  0.1f);
+                           .setUniform("radius",     3);
 
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
             glViewport(0, 0, renderSize.w, renderSize.h);
             glDisable(GL_DEPTH_TEST);
 
             (i == 0 ? texAo : texAoBlur[0]).bindAs(GL_TEXTURE0);
-            texDepth->bindAs(GL_TEXTURE1);
             rect.render();
         }
     }

@@ -14,7 +14,7 @@ namespace gfx
 
 struct Ssr
 {
-    static const int  MIPMAP_COUNT_MAX = 8;
+    static const int  MIPMAP_COUNT_MAX = 4;
 
     Size<int>         displaySize;
     Size<int>         renderSize;
@@ -28,22 +28,24 @@ struct Ssr
                       fsTexture,
                       fsBlur,
                       fsSsr,
-                      fsSsrComposite;
+                      fsComp;
 
     gl::ShaderProgram progScale,
                       progBlur,
                       progSsr,
-                      progSsrComposite;
+                      progComp;
 
     gl::Texture       texScale[MIPMAP_COUNT_MAX],
                       texBlur[MIPMAP_COUNT_MAX],
-                      texColor,
-                      texSsr;
+                      texEnv,
+                      texSsr,
+                      texComp;
 
     gl::Fbo           fboScale[MIPMAP_COUNT_MAX],
                       fboBlur[MIPMAP_COUNT_MAX],
-                      fboColor,
-                      fboSsr;
+                      fboEnv,
+                      fboSsr,
+                      fboComp;
 
     Ssr(const Size<int>& displaySize, const Size<int>& renderSize);
 

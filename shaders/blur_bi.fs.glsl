@@ -42,5 +42,5 @@ void main()
         sc    += blur(ib.uv - o, r, cc, cd, sw);
         sc    += blur(ib.uv + o, r, cc, cd, sw);
     }
-    color = vec4(sc.rgb / sw, cc.a);
+    color = sc / sw;
 }

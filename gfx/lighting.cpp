@@ -23,7 +23,9 @@ Lighting::Lighting(const Size<int>& renderSize, const gl::Texture& texDepth) :
 {
     // Texture and FBO
     auto fboSize = {renderSize.w, renderSize.h};
-    tex.bind().alloc(fboSize, GL_RGB32F, GL_RGB, GL_FLOAT);
+    tex.bind().alloc(fboSize, GL_RGB32F, GL_RGB, GL_FLOAT)
+              .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+              .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     fbo.bind()
        .attach(texDepth, gl::Fbo::Attachment::Depth)

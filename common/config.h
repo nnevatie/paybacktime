@@ -21,7 +21,7 @@ namespace preset
 {
 
 static constexpr Video ULTRA = {{1.00f, 1.00f, 1.00f}},
-                       HIGH  = {{1.00f, 0.50f, 0.50f}},
+                       HIGH  = {{1.00f, 0.50f, 1.00f}},
                        LOW   = {{0.75f, 0.50f, 0.50f}};
 
 } // namespace preset
