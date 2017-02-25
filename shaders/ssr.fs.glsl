@@ -1,3 +1,7 @@
+// Inspired and partially based on shader by Morgan McGuire and Michael Mara:
+// http://casual-effects.blogspot.fi/2014/08/screen-space-ray-tracing.html
+// The above is released as open source under the BSD 2-Clause License
+// http://opensource.org/licenses/BSD-2-Clause
 #version 150
 
 // Uniforms
