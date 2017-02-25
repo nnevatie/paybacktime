@@ -46,6 +46,8 @@ namespace pt
 struct Data
 {
     platform::Display* display;
+    cfg::Config        config;
+
     Size<int>          renderSize;
 
     gfx::Geometry      geometry;
@@ -79,12 +81,13 @@ struct Data
 
     TimePoint          lastLiveUpdate;
 
-    Data(platform::Display* display, const cfg::Video& config) :
+    Data(platform::Display* display, const cfg::Config& config) :
         display(display),
-        renderSize(display->size() * config.scales.render),
+        config(config),
+        renderSize(display->size() * config.video.scales.render),
         geometry(renderSize),
-        ssao(32, renderSize, renderSize * config.scales.ssao, {4, 4}),
-        ssr(renderSize, renderSize * config.scales.ssr),
+        ssao(32, renderSize, renderSize * config.video.scales.ssao, {4, 4}),
+        ssr(renderSize, renderSize * config.video.scales.ssr),
         lighting(renderSize, geometry.texDepth),
         bloom(renderSize),
         outline(renderSize, geometry.texDepth),
@@ -162,6 +165,7 @@ struct Data
 
         TimeTree<GpuClock> timeTree;
         auto timeTotal = timeTree.scope("total");
+        const auto detailedStats = config.debug.detailedStats;
 
         const gfx::Geometry::Instances chars =
             scene.characterGeometry();
@@ -171,19 +175,19 @@ struct Data
         geom.insert(geom.end(), chars.begin(), chars.end());
 
         {
-            auto time = timeTree.scope("geom-opq");
+            auto time = timeTree.scope("geom-opq", detailedStats);
             geometry(&textureStore.albedo.texture,
                      &textureStore.normal.texture,
                      &textureStore.light.texture,
                      geom, camera);
         }
         {
-            auto time = timeTree.scope("ssao");
+            auto time = timeTree.scope("ssao", detailedStats);
             ssao(&geometry.texDepthLinear, &geometry.texNormalDenoise,
                  proj, camera.fov);
         }
         {
-            auto time = timeTree.scope("lighting");
+            auto time = timeTree.scope("lighting", detailedStats);
             lighting(&geometry.texDepth,
                      &geometry.texNormalDenoise,
                      &geometry.texColor,
@@ -196,11 +200,11 @@ struct Data
                      view, proj);
         }
         {
-            auto time = timeTree.scope("backdrop");
+            auto time = timeTree.scope("backdrop", detailedStats);
             backdrop(&lighting.fbo, camera);
         }
         {
-            auto time = timeTree.scope("geom-tr");
+            auto time = timeTree.scope("geom-tr", detailedStats);
             geometry(
                 &lighting.fbo,
                 &textureStore.albedo.texture,
@@ -212,32 +216,33 @@ struct Data
                 camera);
         }
         {
-            auto time = timeTree.scope("ssr");
+            auto time = timeTree.scope("ssr", detailedStats);
             ssr(&geometry.texDepthLinear,
                 &geometry.texNormalDenoise, lighting.output(),
                 &geometry.texLight, camera);
         }
         {
-            auto time = timeTree.scope("bloom");
+            auto time = timeTree.scope("bloom", detailedStats);
             bloom(ssr.output());
         }
-
-        sceneControl(&ssr.fboComp, ssr.output());
-
         {
-            auto time = timeTree.scope("colorgrade");
+            auto time = timeTree.scope("scene-ctrl", detailedStats);
+            sceneControl(&ssr.fboComp, ssr.output());
+        }
+        {
+            auto time = timeTree.scope("colorgrade", detailedStats);
             colorGrade(ssr.output(), bloom.output());
         }
         {
-            auto time = timeTree.scope("anti-alias");
+            auto time = timeTree.scope("anti-alias", detailedStats);
             antiAlias(colorGrade.output());
         }
         {
-            auto time = timeTree.scope("output");
+            auto time = timeTree.scope("output", detailedStats);
             output(antiAlias.output());
         }
         {
-            auto time = timeTree.scope("ui");
+            auto time = timeTree.scope("ui", detailedStats);
             display->renderWidgets();
         }
 
@@ -275,7 +280,7 @@ bool Application::run(const boost::program_options::variables_map& args)
     platform::Display display("Payback Time", size, fullscreen);
     display.open();
 
-    return Data(&display, cfg::preset::HIGH).run();
+    return Data(&display, cfg::preset::config).run();
 }
 
 } // namespace

@@ -54,20 +54,21 @@ struct TimeScope
 {
     using TimeT = Time<T>;
 
-    TimeScope(TimeT& time) : time(time)
-    {}
+    TimeScope() : time(nullptr) {}
+    TimeScope(TimeT* time) : time(time) {}
+
     ~TimeScope()
     {
-        time.mark();
+        end();
     }
     TimeScope& end()
     {
-        time.mark();
+        if (time) time->mark();
         return *this;
     }
 
 private:
-    TimeT& time;
+    TimeT* time;
 };
 
 template <typename T>
@@ -87,9 +88,9 @@ struct TimeTree
     {
         return times[key];
     }
-    TimeScope<T> scope(const Key& key)
+    TimeScope<T> scope(const Key& key, bool enabled = true)
     {
-        return TimeScope<T>(operator[](key));
+        return enabled ? TimeScope<T>(&operator[](key)) : TimeScope<T>();
     }
     const Map& map() const
     {
