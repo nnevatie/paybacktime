@@ -17,8 +17,9 @@ uniform mat3      nm;
 uniform mat4      wm;
 
 // Const
-vec3 sizeTexGi          = textureSize(texGi, 0);
-const int SCATTER_STEPS = 20;
+vec3 sizeTexGi            = textureSize(texGi, 0);
+const int   SCATTER_STEPS = 20;
+const float SCATTER_DIST  = 100.0;
 
 // Input
 in Block
@@ -50,9 +51,7 @@ vec3 giUvw(vec3 worldPos)
 vec3 scattering(vec3 start)
 {
     vec3 ray  = normalize(camPos - start);
-    vec3 step = 5.0 * ray;
-    vec3 end  = start + SCATTER_STEPS * step;
-
+    vec3 end  = start + ray * SCATTER_DIST;
     vec3 uvw0 = giUvw(start);
     vec3 uvw1 = giUvw(end);
     vec3 uvws = (uvw1 - uvw0) / SCATTER_STEPS;
