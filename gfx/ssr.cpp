@@ -99,13 +99,11 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                       .setUniform("z",           0.f)
                       .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
                       .setUniform("aspectRatio", camera.ar)
-                      .setUniform("viewPos",     camera.position())
                       .setUniform("v",           camera.matrixView())
                       .setUniform("p",           camera.matrixProj())
                       .setUniform("pc",          pc)
                       .setUniform("zNear",       camera.zNear)
-                      .setUniform("zFar",        camera.zFar)
-                      .setUniform("scale",       scale);
+                      .setUniform("zFar",        camera.zFar);
 
         glViewport(0, 0, renderSize.w, renderSize.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
