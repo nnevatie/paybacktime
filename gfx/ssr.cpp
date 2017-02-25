@@ -148,7 +148,10 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                 // Blur passes
                 for (int d = 0; d < 2; ++d)
                 {
-                    Binder<gl::Fbo> binder(d == 0 ? fboBlur[i] : fboScale[i]);
+                    Binder<gl::Fbo> binder(d == 0 ? fboBlur[i] : fboEnv);
+                    if (d == 1) fboEnv.attach(texEnv,
+                                              gl::Fbo::Attachment::Color, 0, i);
+
                     progBlur.bind().setUniform("texColor",   0)
                                    .setUniform("texDepth",   1)
                                    .setUniform("invDirSize", size.inv<glm::vec2>(d))
@@ -160,16 +163,6 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                     texDepth->bindAs(GL_TEXTURE1);
                     rect.render();
                 }
-            }
-            {
-                // Copy to mipmap
-                Binder<gl::Fbo> binder(fboEnv);
-                progScale.bind().setUniform("texColor", 0);
-                fboEnv.attach(texEnv, gl::Fbo::Attachment::Color, 0, i);
-                glViewport(0, 0, size.w, size.h);
-                glDrawBuffer(GL_COLOR_ATTACHMENT0);
-                texScale[i].bindAs(GL_TEXTURE0);
-                rect.render();
             }
         }
     }
