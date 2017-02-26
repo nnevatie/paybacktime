@@ -151,7 +151,7 @@ Texture& Texture::alloc(GLenum internalFormat, const Buffer& buffer)
     return *this;
 }
 
-Texture& Texture::alloc(const std::vector<int> &dim,
+Texture& Texture::alloc(const std::vector<int>& dim,
                         GLenum internalFormat, GLenum format,
                         GLenum type, const GLvoid* data)
 {

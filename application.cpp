@@ -201,12 +201,12 @@ struct Data
         }
         {
             auto time = timeTree.scope("backdrop", detailedStats);
-            backdrop(&lighting.fbo, camera);
+            backdrop(&lighting.fboOut, camera);
         }
         {
             auto time = timeTree.scope("geom-tr", detailedStats);
             geometry(
-                &lighting.fbo,
+                &lighting.fboOut,
                 &textureStore.albedo.texture,
                 &textureStore.light.texture,
                 scene.lightmap(),
@@ -240,6 +240,7 @@ struct Data
         {
             auto time = timeTree.scope("output", detailedStats);
             output(antiAlias.output());
+            //output(&lighting.texScattering);
         }
         {
             auto time = timeTree.scope("ui", detailedStats);

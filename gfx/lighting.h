@@ -23,13 +23,22 @@ struct Lighting
     gl::Primitive     rect;
 
     gl::Shader        vsQuad,
-                      fsLighting,
+                      fsGi,
+                      fsSc,
+                      fsOut,
                       fsCommon;
 
-    gl::ShaderProgram prog;
+    gl::ShaderProgram progGi,
+                      progSc,
+                      progOut;
 
-    gl::Texture       tex;
-    gl::Fbo           fbo;
+    gl::Texture       texGi,
+                      texSc,
+                      texOut;
+
+    gl::Fbo           fboGi,
+                      fboSc,
+                      fboOut;
 
     Lighting(const Size<int>& renderSize, const gl::Texture& texDepth);
 

@@ -23,6 +23,18 @@ float linearDepth(float depth, mat4 proj)
   return proj[3][2] / ((proj[2][3] * ndcZ) - proj[2][2]);
 }
 
+vec3 world(sampler2D depth, vec2 uv, mat4 w)
+{
+    vec4 clip  = vec4(uv * 2.0 - 1.0, texture(depth, uv).r * 2.0 - 1.0, 1.0);
+    vec4 world = w * clip;
+    return world.xyz / world.w;
+}
+
+vec3 worldUvw(vec3 pos, vec3 boundsMin, vec3 boundsSize)
+{
+    return ((pos - boundsMin) / (boundsSize)).xzy;
+}
+
 vec4 cubic(float v)
 {
     vec4 n  = vec4(1.0, 2.0, 3.0, 4.0) - v;

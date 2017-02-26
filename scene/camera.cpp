@@ -51,6 +51,11 @@ glm::mat4 Camera::matrixView() const
     return glm::lookAt(position(), target, up());
 }
 
+glm::mat4 Camera::matrixWorld() const
+{
+    return glm::inverse(matrixProj() * matrixView());
+}
+
 glm::vec4 Camera::infoClip() const
 {
     return {zNear * zFar, zNear - zFar, zFar, 1.f};
@@ -78,6 +83,16 @@ Ray Camera::world(const glm::vec4& rayEye) const
 {
     glm::vec3 world = (glm::inverse(matrixView()) * rayEye).xyz();
     return {position(), glm::normalize(world)};
+}
+
+glm::mat3 pt::Camera::matrixNormal() const
+{
+    return glm::transpose(glm::inverse(glm::mat3(matrixView())));
+}
+
+float Camera::tanHalfFov() const
+{
+    return std::tan(0.5f * fov);
 }
 
 } // namespace pt
