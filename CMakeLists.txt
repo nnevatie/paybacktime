@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
     -Wno-ignored-attributes \
     -Wno-deprecated-declarations \
     -Wno-misleading-indentation \
-    -fopenmp -ffast-math -march=core2")
+    -fopenmp -ffast-math -march=core2 -Ofast")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
     -Wl,--stack,16777216")
