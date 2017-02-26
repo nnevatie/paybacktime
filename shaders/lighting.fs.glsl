@@ -97,7 +97,6 @@ void main(void)
     float shininess = clamp(light.g, 0.0, 0.9);
     vec3 specular   = 16.f * incid * light.r * albedo *
                       ggx(normal, -viewDir, lightDir, 1.0 - shininess, 0.1);
-
     // Emissive
     vec3 emis       = 32.f * light.b * albedo;
 
