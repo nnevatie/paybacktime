@@ -84,11 +84,11 @@ struct Data
     Data(platform::Display* display, const cfg::Config& config) :
         display(display),
         config(config),
-        renderSize(display->size() * config.video.scales.render),
+        renderSize(display->size() * config.video.output.scale),
         geometry(renderSize),
-        ssao(32, renderSize, renderSize * config.video.scales.ssao, {4, 4}),
-        ssr(renderSize, renderSize * config.video.scales.ssr),
-        lighting(renderSize, geometry.texDepth),
+        ssao(32, renderSize, renderSize * config.video.ssao.scale, {4, 4}),
+        ssr(renderSize, renderSize * config.video.ssr.scale),
+        lighting(config.video, geometry.texDepth),
         bloom(renderSize),
         outline(renderSize, geometry.texDepth),
         colorGrade(renderSize),
@@ -281,7 +281,10 @@ bool Application::run(const boost::program_options::variables_map& args)
     platform::Display display("Payback Time", size, fullscreen);
     display.open();
 
-    return Data(&display, cfg::preset::config).run();
+    auto config = cfg::preset::config;
+    config.video.output.size = {size.w, size.h};
+
+    return Data(&display, config).run();
 }
 
 } // namespace

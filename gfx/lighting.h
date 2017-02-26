@@ -11,6 +11,7 @@
 #include "gl/fbo.h"
 
 #include "scene/camera.h"
+#include "common/config.h"
 
 namespace pt
 {
@@ -19,7 +20,6 @@ namespace gfx
 
 struct Lighting
 {
-    Size<int>         renderSize;
     gl::Primitive     rect;
 
     gl::Shader        vsQuad,
@@ -40,7 +40,7 @@ struct Lighting
                       fboSc,
                       fboOut;
 
-    Lighting(const Size<int>& renderSize, const gl::Texture& texDepth);
+    Lighting(const cfg::Video& config, const gl::Texture& texDepth);
 
     Lighting& operator()(
         gl::Texture* texDepth,

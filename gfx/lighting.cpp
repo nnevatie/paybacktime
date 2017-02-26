@@ -12,8 +12,7 @@ namespace pt
 namespace gfx
 {
 
-Lighting::Lighting(const Size<int>& renderSize, const gl::Texture& texDepth) :
-    renderSize(renderSize),
+Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
     rect(squareMesh()),
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsGi(gl::Shader::path("lighting_gi.fs.glsl")),
@@ -28,9 +27,10 @@ Lighting::Lighting(const Size<int>& renderSize, const gl::Texture& texDepth) :
             {{0, "position"}, {1, "uv"}})
 {
     // Texture and FBO
-    auto sizeGi  = {renderSize.w / 2, renderSize.h / 2};
-    auto sizeSc  = {renderSize.w / 4, renderSize.h / 4};
-    auto sizeOut = {renderSize.w,     renderSize.h};
+    auto size    = config.output.renderSize();
+    auto sizeGi  = {int(config.gi.scale * size.x), int(config.gi.scale * size.y)};
+    auto sizeSc  = {int(config.sc.scale * size.x), int(config.sc.scale * size.y)};
+    auto sizeOut = {int(size.x), int(size.y)};
 
     texGi.bind().alloc(sizeGi, GL_RGB32F, GL_RGB, GL_FLOAT)
                 .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
@@ -125,7 +125,8 @@ Lighting& Lighting::operator()(
                       .setUniform("boundsMin",   glm::floor(bounds.pos))
                       .setUniform("boundsSize",  glm::ceil(bounds.size));
 
-        glViewport(0, 0, renderSize.w, renderSize.h);
+        const auto size = texOut.size();
+        glViewport(0, 0, size.x, size.y);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_DEPTH_TEST);
         glDepthMask(false);

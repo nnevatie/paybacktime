@@ -1,20 +1,55 @@
 #pragma once
 
+#include <glm/vec2.hpp>
+
 namespace pt
 {
 namespace cfg
 {
-
-struct Scales
+namespace video
 {
-    float render,
-          ssao,
-          ssr;
+
+struct Output
+{
+    float     scale;
+    glm::vec2 size;
+
+    glm::vec2 renderSize() const
+    {
+        return scale * size;
+    }
 };
+
+struct Gi
+{
+    float scale;
+};
+
+struct Scattering
+{
+    float scale;
+    int   samples;
+};
+
+struct Ssao
+{
+    float scale;
+};
+
+struct Ssr
+{
+    float scale;
+};
+
+} // namespace video
 
 struct Video
 {
-    Scales scales;
+    video::Output     output;
+    video::Ssao       ssao;
+    video::Ssr        ssr;
+    video::Gi         gi;
+    video::Scattering sc;
 };
 
 struct Debug
@@ -31,9 +66,10 @@ struct Config
 namespace preset
 {
 
-static constexpr Video ULTRA = {{1.00f, 1.00f, 1.00f}},
-                       HIGH  = {{1.00f, 0.50f, 1.00f}},
-                       LOW   = {{0.75f, 0.50f, 0.50f}};
+static constexpr Video
+    ULTRA = {{1.00f}, {1.00f}, {1.00f}, {1.00f}, {1.00f, 20}},
+    HIGH  = {{1.00f}, {0.50f}, {1.00f}, {1.00f}, {0.50f, 20}},
+    LOW   = {{1.00f}, {0.50f}, {0.50f}, {0.50f}, {0.25f, 20}};
 
 static constexpr Config config = {HIGH,
                                  {true}};
