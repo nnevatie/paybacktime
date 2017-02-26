@@ -12,7 +12,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
-#define STBIR_ASSERT(x) if (!x) throw std::runtime_error(#x)
+#define STBIR_ASSERT(x) if (!(x)) throw std::runtime_error(#x)
 #include <stb_image_resize.h>
 
 #include <nanovg.h>
@@ -169,9 +169,6 @@ int Image::nvgImage(NVGcontext* nanoVg) const
 Image Image::scaled(const Size<int>& size) const
 {
     Image image(size, d->depth);
-
-    PTLOG(Info) << d->size.w << "x" << d->size.h << " -> "
-                << size.w << "x" << size.h;
 
     stbir_resize_uint8(
         d->bits, d->size.w, d->size.h, d->stride,
