@@ -65,7 +65,7 @@ Scene& Scene::add(const ObjectItem& item)
 bool Scene::remove(const ObjectItem& item)
 {
     for (int i = 0; i < int(d->objectItems.size()); ++i)
-        if (d->objectItems.at(i).trRot.tr == item.trRot.tr)
+        if (d->objectItems.at(i).posRot.pos == item.posRot.pos)
         {
             d->objectItems.erase(d->objectItems.begin() + i);
             updateLightmap();
@@ -125,7 +125,7 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 
         if (type == GeometryType::Any || gt == type)
         {
-            auto m = static_cast<glm::mat4x4>(item.trRot);
+            auto m = static_cast<glm::mat4x4>(item.posRot);
             instances.push_back({item.obj.model().primitive(), m});
         }
     }
@@ -138,7 +138,7 @@ gfx::Geometry::Instances Scene::characterGeometry() const
     instances.reserve(d->charItems.size() * 15);
     for (const auto& item : d->charItems)
     {
-        auto m = static_cast<glm::mat4x4>(item.trRot);
+        auto m = static_cast<glm::mat4x4>(item.posRot);
         for (const auto& obj : *item.obj.parts())
             if (obj) instances.push_back({obj.model().primitive(),
                                           m * glm::translate(obj.origin())});
@@ -167,33 +167,14 @@ Scene& Scene::updateLightmap()
         const auto& obj     = item.obj;
         const auto density  = obj.density();
         const auto emission = obj.emission();
-        const auto pos      = glm::ivec3((item.trRot.tr - box.pos).xzy() /
+        const auto pos      = glm::ivec3((item.posRot.pos - box.pos).xzy() /
                                           c::cell::SIZE.xzy());
-        const auto rot      = Rotation(density.size, item.trRot.rot);
+        const auto rot      = Rotation(density.size, item.posRot.rot);
 
         d->lightmapper.add(pos, rot, density, emission);
     }
     d->lightmapper(d->horizon);
     return *this;
-}
-
-bool containsItem(const ObjectItems& items, const ObjectItem& item)
-{
-    // TODO: Rewrite using bounds.
-    for (const auto& i : items)
-        if (i.obj == item.obj && i.trRot.tr == item.trRot.tr)
-            return true;
-
-    return false;
-}
-
-bool containsObject(const ObjectItems& items, const Object& object)
-{
-    for (const auto& item : items)
-        if (item.obj == object)
-            return true;
-
-    return false;
 }
 
 } // namespace pt

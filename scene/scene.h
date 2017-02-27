@@ -24,28 +24,27 @@ namespace pt
 template <typename T>
 struct SceneItem
 {
-    T              obj;
-    TransformTrRot trRot;
+    T           obj;
+    PosRotation posRot;
 
     SceneItem()
     {}
 
-    SceneItem(const T& obj, const TransformTrRot& trRot) :
-        obj(obj), trRot(trRot)
+    SceneItem(const T& obj, const PosRotation& posRot) :
+        obj(obj), posRot(posRot)
     {}
 
     Box bounds() const
     {
-        return Box(trRot.tr, obj.dimensions()).rotated(trRot.rot);
+        return Box(posRot.pos, obj.dimensions()).rotated(posRot.rot);
     }
-
     operator bool() const
     {
         return obj;
     }
     bool operator==(const SceneItem& other) const
     {
-        return obj == other.obj && trRot == other.trRot;
+        return obj == other.obj && posRot == other.posRot;
     }
     bool operator!=(const SceneItem& other) const
     {
@@ -97,8 +96,5 @@ private:
     struct Data;
     std::shared_ptr<Data> d;
 };
-
-bool containsItem(const ObjectItems& items, const ObjectItem& item);
-bool containsObject(const ObjectItems& items, const Object& object);
 
 } // namespace pt

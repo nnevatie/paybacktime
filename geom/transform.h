@@ -7,25 +7,25 @@
 namespace pt
 {
 
-struct TransformTrRot
+struct PosRotation
 {
     typedef glm::vec3 V;
 
-    V   tr;
+    V   pos;
     int rot;
 
-    TransformTrRot() : rot(0)
+    PosRotation() : rot(0)
     {}
 
-    TransformTrRot(const V& tr, int rot = 0) : tr(tr), rot(rot)
+    PosRotation(const V& pos, int rot = 0) : pos(pos), rot(rot)
     {}
 
-    bool operator==(const TransformTrRot& other) const
+    bool operator==(const PosRotation& other) const
     {
-        return tr == other.tr && rot == other.rot;
+        return pos == other.pos && rot == other.rot;
     }
 
-    bool operator!=(const TransformTrRot& other) const
+    bool operator!=(const PosRotation& other) const
     {
         return !operator==(other);
     }
@@ -33,7 +33,7 @@ struct TransformTrRot
     operator glm::mat4x4() const
     {
         auto ang = glm::half_pi<float>() * rot;
-        auto mtr = glm::translate(tr);
+        auto mtr = glm::translate(pos);
         return glm::rotate(mtr, ang, glm::vec3(0, 1, 0));
     }
 };
@@ -41,14 +41,14 @@ struct TransformTrRot
 struct Rotation
 {
     glm::vec3 dim;
-    int       r;
+    int       rot;
 
-    Rotation(const glm::ivec3& dim, int r) : dim(dim), r(r & 0x03)
+    Rotation(const glm::ivec3& dim, int rot) : dim(dim), rot(rot & 0x03)
     {}
 
     glm::ivec3 translation() const
     {
-        switch (r)
+        switch (rot)
         {
             case 1:  return {0,     0, dim.x};
             case 2:  return {dim.x, 0, dim.z};
@@ -59,7 +59,7 @@ struct Rotation
 
     glm::ivec3 operator()(const glm::ivec3& v) const
     {
-        switch (r)
+        switch (rot)
         {
             case 0: return    v;
             case 1: return {  v.y,      -(v.x + 1), v.z};

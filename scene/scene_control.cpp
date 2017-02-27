@@ -22,7 +22,7 @@ namespace
 
 OutlineTr outlineTransform(Camera* camera, const ObjectItem& object)
 {
-    const auto m   = static_cast<glm::mat4x4>(object.trRot);
+    const auto m   = static_cast<glm::mat4x4>(object.posRot);
     const auto v   = camera->matrixView();
     const auto p   = camera->matrixProj();
     const auto mvp = p * v * m;
@@ -106,7 +106,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             d->intersection = intersection;
 
             // Translation
-            const auto rot = umod(d->object.trRot.rot + mouseWheel, 4);
+            const auto rot = umod(d->object.posRot.rot + mouseWheel, 4);
             const auto dim = object.dimensions();
 
             auto& t = intersection.first;
@@ -116,7 +116,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             t      += object.origin();
 
             const ObjectItem objectItem(object, {intersection.first,
-                                                 d->object.trRot.rot});
+                                                 d->object.posRot.rot});
 
             if (d->state == Data::State::Adding && mouseButtons[0] &&
                 d->scene->intersect(objectItem).empty())
@@ -142,7 +142,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
                 d->removedObject = {};
 
             // Store current state
-            d->object.trRot = {intersection.first, rot};
+            d->object.posRot = {intersection.first, rot};
         }
     }
     else
