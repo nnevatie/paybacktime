@@ -55,11 +55,6 @@ Scene& Scene::setHorizon(const Horizon& horizon)
     return *this;
 }
 
-bool Scene::contains(const ObjectItem& item) const
-{
-    return containsItem(d->objectItems, item);
-}
-
 Scene& Scene::add(const ObjectItem& item)
 {
     d->objectItems.emplace_back(item);
@@ -84,6 +79,17 @@ Scene& Scene::add(const CharacterItem& item)
 {
     d->charItems.emplace_back(item);
     return *this;
+}
+
+ObjectItems Scene::intersect(const ObjectItem& item) const
+{
+    ObjectItems items;
+    const auto bounds = item.bounds();
+    for (const auto& i : d->objectItems)
+        if (i.bounds().intersect(bounds))
+            items.push_back(i);
+
+    return items;
 }
 
 Intersection Scene::intersect(const Ray& ray) const

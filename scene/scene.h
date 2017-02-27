@@ -52,6 +52,7 @@ struct SceneItem
         return !operator==(other);
     }
 };
+
 typedef SceneItem<Object>                 ObjectItem;
 typedef SceneItem<Character>              CharacterItem;
 typedef std::vector<ObjectItem>           ObjectItems;
@@ -74,13 +75,12 @@ struct Scene
 
     Scene& setHorizon(const Horizon& horizon);
 
-    bool contains(const ObjectItem& item) const;
-
     Scene& add(const ObjectItem& item);
     bool remove(const ObjectItem& item);
 
     Scene& add(const CharacterItem& item);
 
+    ObjectItems intersect(const ObjectItem& item) const;
     Intersection intersect(const Ray& ray) const;
 
     gfx::Geometry::Instances objectGeometry(

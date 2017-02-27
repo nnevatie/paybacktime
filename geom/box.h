@@ -5,6 +5,7 @@
 #include <glm/gtx/component_wise.hpp>
 
 #include "ray.h"
+#include "common/log.h"
 
 namespace pt
 {
@@ -65,6 +66,17 @@ struct Box
             case 3: return Box(pos - V(size.z, 0, 0), V(size.z, size.y, size.x));
         }
         return {};
+    }
+
+    inline bool intersect(const Box& box) const
+    {
+        const V a0 = min();
+        const V a1 = max();
+        const V b0 = box.min();
+        const V b1 = box.max();
+        return !(b0.x >= a1.x || b1.x <= a0.x ||
+                 b0.y >= a1.y || b1.y <= a0.y ||
+                 b0.z >= a1.z || b1.z <= a0.z);
     }
 
     inline bool intersect(const Ray& ray) const
