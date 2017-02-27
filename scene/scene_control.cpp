@@ -126,7 +126,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             }
             else
             if (d->state == Data::State::Removing && mouseButtons[0] &&
-                !intersection.second.empty())
+               !d->intersection.second.empty())
             {
                 // Remove items
                 const auto firstObj = d->intersection.second.front();

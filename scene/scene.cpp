@@ -65,7 +65,7 @@ Scene& Scene::add(const ObjectItem& item)
 bool Scene::remove(const ObjectItem& item)
 {
     for (int i = 0; i < int(d->objectItems.size()); ++i)
-        if (d->objectItems.at(i).posRot.pos == item.posRot.pos)
+        if (d->objectItems.at(i) == item)
         {
             d->objectItems.erase(d->objectItems.begin() + i);
             updateLightmap();
