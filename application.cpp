@@ -278,7 +278,8 @@ bool Application::run(const boost::program_options::variables_map& args)
     const auto fullscreen = args.count("fullscreen");
     const Size<int> size(1920, 1080);
 
-    platform::Display display("Payback Time", size, fullscreen);
+    platform::Display display("Payback Time", size, fullscreen,
+                              Image(fs::path("data/paybacktime.png")));
     display.open();
 
     auto config = cfg::preset::config;

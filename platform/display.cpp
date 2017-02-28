@@ -38,8 +38,9 @@ namespace platform
 
 struct Display::Data
 {
-    Data(const std::string& title, const Size<int>& size, bool fullscreen) :
-        title(title), size(size), fullscreen(fullscreen),
+    Data(const std::string& title, const Size<int>& size, bool fullscreen,
+         const Image& icon) :
+        title(title), size(size), fullscreen(fullscreen), icon(icon),
         window(nullptr), glContext(nullptr),
         nvgContext(nullptr), nanoGuiScreen(nullptr)
     {
@@ -51,14 +52,18 @@ struct Display::Data
     std::string      title;
     Size<int>        size;
     bool             fullscreen;
+    Image            icon;
     SDL_Window*      window;
     SDL_GLContext    glContext;
     NVGcontext*      nvgContext;
     nanogui::Screen* nanoGuiScreen;
 };
 
-Display::Display(const std::string& title, const Size<int>& size, bool fullscreen) :
-    d(std::make_shared<Data>(title, size, fullscreen))
+Display::Display(const std::string& title,
+                 const Size<int>& size,
+                 bool fullscreen,
+                 const Image& icon) :
+    d(std::make_shared<Data>(title, size, fullscreen, icon))
 {
 }
 
@@ -131,6 +136,10 @@ bool Display::open()
             SDL_WINDOW_OPENGL |
             SDL_WINDOW_ALLOW_HIGHDPI);
 
+        // Set icon
+        if (d->icon)
+            SDL_SetWindowIcon(d->window, d->icon.surface());
+
         // Create OpenGL context
         d->glContext = SDL_GL_CreateContext(d->window);
 
@@ -147,11 +156,9 @@ bool Display::open()
                 PTLOG(Error) << "GL error: " << std::hex << error << std::endl;
         });
 
-        if (glDebugMessageCallbackARB != nullptr)
-        {
-            glDebugMessageCallbackARB(debugCallback, 0);
-            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-        }
+        // Debug callback
+        glDebugMessageCallbackARB(debugCallback, 0);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 
         // Set swap interval
         SDL_GL_SetSwapInterval(0);

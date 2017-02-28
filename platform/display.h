@@ -25,14 +25,17 @@ namespace platform
 
 struct Display
 {
-    Display(const std::string& title, const Size<int>& size, bool fullscreen);
+    Display(const std::string& title,
+            const Size<int>& size,
+            bool fullscreen,
+            const Image& icon = {});
     ~Display();
 
-    Size<int>         size()    const;
-    SDL_Window*       window()  const;
-    SDL_Surface*      surface() const;
-    NVGcontext*       nanoVg()  const;
-    nanogui::Screen*  nanoGui() const;
+    Size<int>        size()    const;
+    SDL_Window*      window()  const;
+    SDL_Surface*     surface() const;
+    NVGcontext*      nanoVg()  const;
+    nanogui::Screen* nanoGui() const;
 
     bool open();
     bool close();
