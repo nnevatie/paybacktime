@@ -14,49 +14,10 @@
 #include "gfx/geometry.h"
 #include "gl/texture.h"
 
-#include "horizon.h"
-#include "object.h"
-#include "character.h"
+#include "scene_item.h"
 
 namespace pt
 {
-
-template <typename T>
-struct SceneItem
-{
-    T           obj;
-    PosRotation posRot;
-
-    SceneItem()
-    {}
-
-    SceneItem(const T& obj, const PosRotation& posRot) :
-        obj(obj), posRot(posRot)
-    {}
-
-    Box bounds() const
-    {
-        return Box(posRot.pos, obj.dimensions()).rotated(posRot.rot);
-    }
-    operator bool() const
-    {
-        return obj;
-    }
-    bool operator==(const SceneItem& other) const
-    {
-        return obj == other.obj && posRot == other.posRot;
-    }
-    bool operator!=(const SceneItem& other) const
-    {
-        return !operator==(other);
-    }
-};
-
-typedef SceneItem<Object>                 ObjectItem;
-typedef SceneItem<Character>              CharacterItem;
-typedef std::vector<ObjectItem>           ObjectItems;
-typedef std::vector<CharacterItem>        CharacterItems;
-typedef std::pair<glm::vec3, ObjectItems> Intersection;
 
 struct Scene
 {
