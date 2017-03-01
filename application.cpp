@@ -240,7 +240,6 @@ struct Data
         {
             auto time = timeTree.scope("output", detailedStats);
             output(antiAlias.output());
-            //output(&lighting.texScattering);
         }
         {
             auto time = timeTree.scope("ui", detailedStats);
