@@ -6,6 +6,8 @@
 
 #include <glm/vec3.hpp>
 
+#include <cereal/access.hpp>
+
 #include "geom/box.h"
 #include "geom/ray.h"
 #include "geom/transform.h"
@@ -14,6 +16,8 @@
 #include "gfx/geometry.h"
 #include "gl/texture.h"
 
+#include "horizon_store.h"
+#include "object_store.h"
 #include "scene_item.h"
 
 namespace pt
@@ -29,6 +33,9 @@ struct Scene
     };
 
     Scene();
+    Scene(const fs::path& path,
+          const HorizonStore& horizonStore,
+          const ObjectStore& objectStore);
 
     Box bounds() const;
     glm::ivec3 cellResolution() const;
@@ -53,9 +60,16 @@ struct Scene
 
     Scene& updateLightmap();
 
+    bool write(const fs::path& path) const;
+
 private:
     struct Data;
     std::shared_ptr<Data> d;
+
+    friend class cereal::access;
+
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 } // namespace pt

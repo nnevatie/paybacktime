@@ -7,6 +7,12 @@
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include <cereal/types/string.hpp>
+#include <cereal/types/tuple.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/archives/binary.hpp>
+
 #include "constants.h"
 
 #include "platform/clock.h"
@@ -15,6 +21,9 @@
 
 namespace pt
 {
+using ArchivePosRot   = std::tuple<float, float, float, int>;
+using ArchivePosRots  = std::vector<ArchivePosRot>;
+using ArchiveObjItems = std::unordered_map<Object::Id, ArchivePosRots>;
 
 struct Scene::Data
 {
@@ -32,6 +41,41 @@ struct Scene::Data
 Scene::Scene() :
     d(std::make_shared<Data>())
 {
+    updateLightmap();
+}
+
+Scene::Scene(const fs::path& path,
+             const HorizonStore& horizonStore,
+             const ObjectStore& objectStore) :
+    d(std::make_shared<Data>())
+{
+    PTTIME("read");
+    std::ifstream is(path.generic_string());
+    cereal::BinaryInputArchive ar(is);
+    {
+        // Horizon
+        std::string name;
+        ar(cereal::make_nvp("horizon", name));
+        d->horizon = horizonStore.horizon(name);
+    }
+    {
+        // Object items
+        ArchiveObjItems objItems;
+        ar(objItems);
+
+        for (const auto& objItem : objItems)
+            if (Object obj = objectStore.object(objItem.first))
+            {
+                for (const auto& pr : objItem.second)
+                    d->objectItems.push_back(
+                        ObjectItem(obj, {glm::vec3(std::get<0>(pr),
+                                                   std::get<1>(pr),
+                                                   std::get<2>(pr)),
+                                                   std::get<3>(pr)}));
+            }
+            else
+                PTLOG(Warn) << "object not found: " << objItem.first;
+    }
     updateLightmap();
 }
 
@@ -175,6 +219,30 @@ Scene& Scene::updateLightmap()
     }
     d->lightmapper(d->horizon);
     return *this;
+}
+
+bool Scene::write(const boost::filesystem::path& path) const
+{
+    PTTIME("write");
+    std::ofstream os(path.generic_string(), std::ios::binary);
+    cereal::BinaryOutputArchive ar(os);
+    {
+        // Horizon
+        ar(cereal::make_nvp("horizon", d->horizon.name()));
+    }
+    {
+        // Object items
+        ArchiveObjItems objItems;
+        for (const auto& objItem : d->objectItems)
+        {
+            const auto& pr = objItem.posRot;
+            objItems[objItem.obj.id()].push_back(
+                std::make_tuple(pr.pos.x, pr.pos.y, pr.pos.z, pr.rot));
+        }
+        ar(objItems);
+        PTLOG(Info) << "unique object items: " << objItems.size();
+    }
+    return true;
 }
 
 } // namespace pt
