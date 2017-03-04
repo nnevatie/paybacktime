@@ -40,6 +40,7 @@ struct Scene
     Box bounds() const;
     glm::ivec3 cellResolution() const;
 
+    Horizon horizon() const;
     Scene& setHorizon(const Horizon& horizon);
 
     Scene& add(const ObjectItem& item);

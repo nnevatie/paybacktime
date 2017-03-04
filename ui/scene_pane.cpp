@@ -42,6 +42,17 @@ struct ScenePane::Data
                                horizons.front().preview().nvgImage(nanovg));
         auto horizonSelector = &widget->add<ng::ComboBox>(horizonNames);
 
+        // Set current item
+        if (const auto horizon = horizonStore->horizon(scene->horizon().name()))
+        {
+            const auto it = std::find(horizons.begin(), horizons.end(), horizon);
+            horizonView->setImage(horizon.preview().nvgImage(nanovg));
+
+            horizonSelector->setSelectedIndex(
+                std::distance(horizons.begin(), it));
+        }
+
+        // Set selection callback
         horizonSelector->setCallback(
             [scene, horizonStore, horizonView, nanovg](int index)
             {

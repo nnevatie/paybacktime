@@ -126,8 +126,7 @@ struct Data
 
     ~Data()
     {
-        PTTIME("serialization");
-        //scene.write("c:/temp/scene.bin");
+        scene.write("c:/temp/scene.bin");
     }
 
     bool simulate(TimePoint time, Duration step)

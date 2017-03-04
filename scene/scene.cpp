@@ -61,7 +61,7 @@ Scene::Scene(const fs::path& path,
     {
         // Object items
         ArchiveObjItems objItems;
-        ar(objItems);
+        ar(cereal::make_nvp("object_items", objItems));
 
         for (const auto& objItem : objItems)
             if (Object obj = objectStore.object(objItem.first))
@@ -90,6 +90,11 @@ Box Scene::bounds() const
 glm::ivec3 Scene::cellResolution() const
 {
     return {glm::ceil(bounds().size.xzy() / c::cell::SIZE.xzy())};
+}
+
+Horizon Scene::horizon() const
+{
+    return d->horizon;
 }
 
 Scene& Scene::setHorizon(const Horizon& horizon)
@@ -239,7 +244,7 @@ bool Scene::write(const boost::filesystem::path& path) const
             objItems[objItem.obj.id()].push_back(
                 std::make_tuple(pr.pos.x, pr.pos.y, pr.pos.z, pr.rot));
         }
-        ar(objItems);
+        ar(cereal::make_nvp("object_items", objItems));
         PTLOG(Info) << "unique object items: " << objItems.size();
     }
     return true;
