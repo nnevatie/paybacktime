@@ -61,6 +61,23 @@ struct ScenePane::Data
                 horizonView->setImage(horizon.preview().nvgImage(nanovg));
             });
 
+        // Persistence
+        const auto fileType = std::make_pair<std::string, std::string>
+                             ("pts", "Payback Time Scene");
+
+        widget->add<ng::Label>("File");
+        widget->add<ng::Button>("Load").setCallback([=]
+            {
+                PathPreserver pathPreserver;
+                const auto path = ng::file_dialog({fileType}, false);
+            });
+        widget->add<ng::Button>("Save").setCallback([=]
+            {
+                PathPreserver pathPreserver;
+                const auto path = ng::file_dialog({fileType}, true);
+                scene->write(path);
+            });
+
         widget->setVisible(false);
     }
 

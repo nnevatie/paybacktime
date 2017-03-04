@@ -101,7 +101,7 @@ struct Data
         character(fs::path("characters") / "male1", textureStore),
 
         // Scene
-        scene("c:/temp/scene.bin", horizonStore, objectStore),
+        scene("c:/temp/scene.pts", horizonStore, objectStore),
 
         // Camera
         camera({0.f, 0.f, 0.f}, 450.f,
@@ -126,7 +126,7 @@ struct Data
 
     ~Data()
     {
-        scene.write("c:/temp/scene.bin");
+        scene.write("c:/temp/scene.pts");
     }
 
     bool simulate(TimePoint time, Duration step)

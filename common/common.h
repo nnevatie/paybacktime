@@ -37,6 +37,20 @@ struct Binder
     T& obj;
 };
 
+struct PathPreserver
+{
+    PathPreserver() :
+        path(fs::current_path())
+    {}
+
+    ~PathPreserver()
+    {
+        fs::current_path(path);
+    }
+
+    fs::path path;
+};
+
 template<typename T, std::size_t N>
 constexpr std::size_t countof(T const (&)[N]) noexcept
 {
