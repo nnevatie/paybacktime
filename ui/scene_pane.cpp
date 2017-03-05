@@ -10,6 +10,7 @@
 #include "platform/display.h"
 
 #include "scene/scene.h"
+#include "scene/object_store.h"
 #include "scene/horizon_store.h"
 
 namespace pt
@@ -23,7 +24,8 @@ struct ScenePane::Data
     explicit Data(ng::Widget* parent,
                   platform::Display* display,
                   Scene* scene,
-                  HorizonStore* horizonStore) :
+                  HorizonStore* horizonStore,
+                  ObjectStore* objectStore) :
         widget(new ng::Widget(parent))
     {
         auto nanovg = display->nanoVg();
@@ -68,14 +70,20 @@ struct ScenePane::Data
         widget->add<ng::Label>("File");
         widget->add<ng::Button>("Load").setCallback([=]
             {
-                PathPreserver pathPreserver;
-                const auto path = ng::file_dialog({fileType}, false);
+                std::string path;
+                {
+                    PathPreserver pathPreserver;
+                    path = ng::file_dialog({fileType}, false);
+                }
+                if (!path.empty())
+                    *scene = Scene(path, *horizonStore, *objectStore);
             });
         widget->add<ng::Button>("Save").setCallback([=]
             {
                 PathPreserver pathPreserver;
                 const auto path = ng::file_dialog({fileType}, true);
-                scene->write(path);
+                if (path.empty())
+                    scene->write(path);
             });
 
         widget->setVisible(false);
@@ -87,8 +95,9 @@ struct ScenePane::Data
 ScenePane::ScenePane(ng::Widget* parent,
                      platform::Display* display,
                      Scene* scene,
-                     HorizonStore* horizonStore) :
-    d(std::make_shared<Data>(parent, display, scene, horizonStore))
+                     HorizonStore* horizonStore,
+                     ObjectStore* objectStore) :
+    d(std::make_shared<Data>(parent, display, scene, horizonStore, objectStore))
 {}
 
 } // namespace ui

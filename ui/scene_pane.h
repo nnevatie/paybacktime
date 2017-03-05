@@ -15,6 +15,7 @@ struct Display;
 }
 
 struct Scene;
+struct ObjectStore;
 struct HorizonStore;
 
 namespace ui
@@ -25,7 +26,8 @@ struct ScenePane
     ScenePane(nanogui::Widget* parent,
               platform::Display* display,
               Scene* scene,
-              HorizonStore* horizonStore);
+              HorizonStore* horizonStore,
+              ObjectStore* objectStore);
 
 private:
     struct Data;

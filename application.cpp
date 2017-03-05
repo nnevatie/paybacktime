@@ -101,7 +101,7 @@ struct Data
         character(fs::path("characters") / "male1", textureStore),
 
         // Scene
-        scene("c:/temp/scene.pts", horizonStore, objectStore),
+        //scene("c:/temp/scene.pts", horizonStore, objectStore),
 
         // Camera
         camera({0.f, 0.f, 0.f}, 450.f,
@@ -116,17 +116,13 @@ struct Data
         // UI
         stats(display->nanoVg()),
         toolsWindow(display),
-        scenePane(toolsWindow.add("Scene"), display, &scene, &horizonStore),
+        scenePane(toolsWindow.add("Scene"), display, &scene,
+                  &horizonStore, &objectStore),
         objectPane(toolsWindow.add("Objects", true),
                    display, &objectStore, &textureStore)
     {
         toolsWindow.select(1);
         display->update();
-    }
-
-    ~Data()
-    {
-        scene.write("c:/temp/scene.pts");
     }
 
     bool simulate(TimePoint time, Duration step)
