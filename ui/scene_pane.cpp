@@ -53,7 +53,7 @@ struct ScenePane::Data
             {
                 PathPreserver pathPreserver;
                 const auto path = ng::file_dialog({fileType}, true);
-                if (path.empty())
+                if (!path.empty())
                     scene->write(path);
             });
 
