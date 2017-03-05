@@ -30,8 +30,33 @@ struct ScenePane::Data
     {
         auto nanovg = display->nanoVg();
 
+        // Layout
         widget->setLayout(new ng::BoxLayout(ng::Orientation::Vertical,
                                             ng::Alignment::Fill, 5, 5));
+
+        // Persistence
+        const auto fileType = std::make_pair<std::string, std::string>
+                             ("pts", "Payback Time Scene");
+
+        widget->add<ng::Label>("File");
+        widget->add<ng::Button>("Load").setCallback([=]
+            {
+                std::string path;
+                {
+                    PathPreserver pathPreserver;
+                    path = ng::file_dialog({fileType}, false);
+                }
+                if (!path.empty())
+                    *scene = Scene(path, *horizonStore, *objectStore);
+            });
+        widget->add<ng::Button>("Save").setCallback([=]
+            {
+                PathPreserver pathPreserver;
+                const auto path = ng::file_dialog({fileType}, true);
+                if (path.empty())
+                    scene->write(path);
+            });
+
         // Horizons
         widget->add<ng::Label>("Horizon");
         const auto horizons = horizonStore->horizons();
@@ -61,29 +86,6 @@ struct ScenePane::Data
                 const auto horizon = horizonStore->horizon(index);
                 scene->setHorizon(horizon);
                 horizonView->setImage(horizon.preview().nvgImage(nanovg));
-            });
-
-        // Persistence
-        const auto fileType = std::make_pair<std::string, std::string>
-                             ("pts", "Payback Time Scene");
-
-        widget->add<ng::Label>("File");
-        widget->add<ng::Button>("Load").setCallback([=]
-            {
-                std::string path;
-                {
-                    PathPreserver pathPreserver;
-                    path = ng::file_dialog({fileType}, false);
-                }
-                if (!path.empty())
-                    *scene = Scene(path, *horizonStore, *objectStore);
-            });
-        widget->add<ng::Button>("Save").setCallback([=]
-            {
-                PathPreserver pathPreserver;
-                const auto path = ng::file_dialog({fileType}, true);
-                if (path.empty())
-                    scene->write(path);
             });
 
         widget->setVisible(false);
