@@ -100,9 +100,6 @@ struct Data
         horizonStore(fs::path("horizons")),
         character(fs::path("characters") / "male1", textureStore),
 
-        // Scene
-        //scene("c:/temp/scene.pts", horizonStore, objectStore),
-
         // Camera
         camera({0.f, 0.f, 0.f}, 450.f,
                glm::half_pi<float>(), -glm::quarter_pi<float>() + 0,

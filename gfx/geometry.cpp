@@ -144,7 +144,7 @@ Geometry& Geometry::operator()(
     const Instances& instances,
     const Camera& camera)
 {
-    // OIT accumulation passes
+    // OIT accumulation pass
     {
         Binder<gl::Fbo> binder(fboOit);
         progGeometryTransparent.bind()

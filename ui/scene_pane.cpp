@@ -36,7 +36,7 @@ struct ScenePane::Data
 
         // Persistence
         const auto fileType = std::make_pair<std::string, std::string>
-                             ("pts", "Payback Time Scene");
+                             ("scn", "Payback Time Scene");
 
         widget->add<ng::Label>("File");
         widget->add<ng::Button>("Load").setCallback([=]
