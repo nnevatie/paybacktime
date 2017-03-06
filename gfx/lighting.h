@@ -13,7 +13,6 @@
 #include "scene/camera.h"
 #include "common/config.h"
 
-#include "erode.h"
 #include "blur.h"
 
 namespace pt
@@ -43,7 +42,6 @@ struct Lighting
                       fboSc,
                       fboOut;
 
-    gfx::Erode        erodeSc;
     gfx::Blur         blurSc;
 
     Lighting(const cfg::Video& config, const gl::Texture& texDepth);

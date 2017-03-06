@@ -25,7 +25,6 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
            {{0, "position"}, {1, "uv"}}),
     progOut({vsQuad, fsOut, fsCommon},
             {{0, "position"}, {1, "uv"}}),
-    erodeSc(Size<int>(config.sc.scale * config.output.renderSize())),
     blurSc(Size<int>(config.sc.scale * config.output.renderSize()))
 {
     // Texture and FBO
@@ -110,8 +109,7 @@ Lighting& Lighting::operator()(
         rect.render();
         if (float(texSc.size().x) / texOut.size().x < 1.f)
         {
-            erodeSc(&texSc, 1);
-            blurSc(&erodeSc.output(), nullptr, 3);
+            blurSc(&texSc, nullptr, 3);
             texScOut = &blurSc.output();
         }
     }
