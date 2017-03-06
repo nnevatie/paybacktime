@@ -40,7 +40,7 @@ vec3 scattering(vec3 start)
     for (int i = 0; i < SCATTER_STEPS && uvw0.z < 1.05; ++i)
     {
         vec3 gi  = texture(texGi, uvw0).rgb;
-        scatter += weight * pow(gi, vec3(2.0));
+        scatter += weight * pow(gi, vec3(1.75));
         uvw0    += uvws;
     }
     return scatter;

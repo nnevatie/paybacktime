@@ -150,7 +150,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                     if (d == 1) fboEnv.attach(texEnv,
                                               gl::Fbo::Attachment::Color, 0, i);
 
-                    progBlur.bind().setUniform("texColor",   0)
+                    progBlur.bind().setUniform("tex",        0)
                                    .setUniform("texDepth",   1)
                                    .setUniform("invDirSize", size.inv<glm::vec2>(d))
                                    .setUniform("radius",     3)

@@ -24,7 +24,9 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
     progSc({vsQuad, fsSc, fsCommon},
            {{0, "position"}, {1, "uv"}}),
     progOut({vsQuad, fsOut, fsCommon},
-            {{0, "position"}, {1, "uv"}})
+            {{0, "position"}, {1, "uv"}}),
+    erodeSc(Size<int>(config.sc.scale * config.output.renderSize())),
+    blurSc(Size<int>(config.sc.scale * config.output.renderSize()))
 {
     // Texture and FBO
     auto size    = config.output.renderSize();
@@ -87,6 +89,7 @@ Lighting& Lighting::operator()(
         texLightmap->bindAs(GL_TEXTURE1);
         rect.render();
     }
+    gl::Texture* texScOut = &texSc;
     {
         // Scattering pass
         Binder<gl::Fbo> binder(fboSc);
@@ -105,6 +108,12 @@ Lighting& Lighting::operator()(
         texDepth->bindAs(GL_TEXTURE0);
         texLightmap->bindAs(GL_TEXTURE1);
         rect.render();
+        if (float(texSc.size().x) / texOut.size().x < 1.f)
+        {
+            erodeSc(&texSc, 1);
+            blurSc(&erodeSc.output(), nullptr, 3);
+            texScOut = &blurSc.output();
+        }
     }
     {
         // Combine pass
@@ -136,7 +145,7 @@ Lighting& Lighting::operator()(
         texLight->bindAs(GL_TEXTURE3);
         texSsao->bindAs(GL_TEXTURE4);
         texGi.bindAs(GL_TEXTURE5);
-        texSc.bindAs(GL_TEXTURE6);
+        texScOut->bindAs(GL_TEXTURE6);
         texIncidence->bindAs(GL_TEXTURE7);
         rect.render();
     }

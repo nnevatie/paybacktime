@@ -1,7 +1,7 @@
 #version 150
 
 // Uniforms
-uniform sampler2D texColor;
+uniform sampler2D tex;
 uniform sampler2D texDepth;
 uniform vec2      invDirSize;
 uniform int       radius;
@@ -20,7 +20,7 @@ out vec4 color;
 
 vec4 blur(vec2 uv, float r, vec4 cc, float cd, inout float sw)
 {
-    vec4  c       = texture(texColor, uv);
+    vec4  c       = texture(tex,      uv);
     float d       = texture(texDepth, uv).r;
     float sigma   = 0.5 * radius;
     float falloff = 1.0 / (2.0 * sigma * sigma);
@@ -32,7 +32,7 @@ vec4 blur(vec2 uv, float r, vec4 cc, float cd, inout float sw)
 
 void main()
 {
-    vec4  cc = texture(texColor, ib.uv);
+    vec4  cc = texture(tex,      ib.uv);
     float cd = texture(texDepth, ib.uv).r;
     vec4  sc = cc;
     float sw = 1.0;
