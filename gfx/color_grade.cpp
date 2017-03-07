@@ -30,9 +30,9 @@ ColorGrade& ColorGrade::operator()(gl::Texture* texColor, gl::Texture* texBloom)
     Binder<gl::Fbo> binder(fbo);
     prog.bind().setUniform("tex0", 0)
                .setUniform("tex1", 1);
+    glViewport(0, 0, renderSize.w, renderSize.h);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);
-
     texColor->bindAs(GL_TEXTURE0);
     texBloom->bindAs(GL_TEXTURE1);
     rect.render();
