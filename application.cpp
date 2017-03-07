@@ -209,7 +209,7 @@ struct Data
         }
         {
             auto time = timeTree.scope("env-mips", detailedStats);
-            envMipmap(lighting.output());
+            envMipmap(lighting.output(), &geometry.texDepth);
         }
         {
             auto time = timeTree.scope("geom-tr", detailedStats);
