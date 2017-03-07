@@ -35,12 +35,12 @@ vec3 scattering(vec3 start)
     vec3 uvw1 = worldUvw(end, boundsMin, boundsSize);
     vec3 uvws = (uvw1 - uvw0) / SCATTER_STEPS;
 
-    float weight = 0.05;
+    float weight = 0.025;
     vec3 scatter = vec3(0.0);
     for (int i = 0; i < SCATTER_STEPS && uvw0.z < 1.05; ++i)
     {
         vec3 gi  = texture(texGi, uvw0).rgb;
-        scatter += weight * pow(gi, vec3(1.75));
+        scatter += weight * pow(gi, vec3(2.00));
         uvw0    += uvws;
     }
     return scatter;
