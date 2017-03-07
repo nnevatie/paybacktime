@@ -69,7 +69,7 @@ Mipmap::Mipmap(const Size<int>& size, int depth, bool bilateral) :
     d(std::make_shared<Data>(size, depth, bilateral))
 {}
 
-Mipmap& Mipmap::operator()(gl::Texture* tex)
+Mipmap& Mipmap::operator()(gl::Texture* tex, gl::Texture* texDepth)
 {
     {
         // Top level
@@ -97,7 +97,7 @@ Mipmap& Mipmap::operator()(gl::Texture* tex)
         gl::Texture& scaleSrc = i > 1 ? d->texScales[i - 1] : d->tex;
         scaleSrc.bindAs(GL_TEXTURE0);
         d->rect.render();
-        d->blurScales[i](&d->texScales[i], nullptr, 3);
+        d->blurScales[i](&d->texScales[i], texDepth, 3, 25.f);
     }
     d->tex.bindAs(GL_TEXTURE0).set(GL_TEXTURE_MIN_FILTER,
                                    GL_LINEAR_MIPMAP_LINEAR);

@@ -14,7 +14,7 @@ struct Mipmap
 {
     Mipmap(const Size<int>& size, int depth, bool bilateral = false);
 
-    Mipmap& operator()(gl::Texture* tex);
+    Mipmap& operator()(gl::Texture* tex, gl::Texture* texDepth = nullptr);
 
     gl::Texture* output();
 
