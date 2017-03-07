@@ -32,9 +32,9 @@ vec3 tonemap(vec3 x)
 
 void main(void)
 {
-   vec3 c0 = EXPA * (texture(tex0, ib.uv) + texture(tex1, ib.uv)).rgb;
-   vec3 c1 = tonemap(EXPB * c0);
-   vec3 c2 = vec3(1.0) / tonemap(vec3(W));
-   vec3 c3 = pow(c1 * c2, vec3(1.0 / 2.2));
-   color   = vec4(c3, dot(c3.rgb, vec3(0.299, 0.587, 0.114)));
+    vec3 c0 = EXPA * (texture(tex0, ib.uv) + texture(tex1, ib.uv)).rgb;
+    vec3 c1 = tonemap(EXPB * c0);
+    vec3 c2 = vec3(1.0) / tonemap(vec3(W));
+    vec3 c3 = pow(c1 * c2, vec3(1.0 / 2.2));
+    color   = vec4(c3, dot(c3.rgb, vec3(0.299, 0.587, 0.114)));
 }
