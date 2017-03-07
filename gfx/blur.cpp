@@ -1,5 +1,6 @@
 #include "blur.h"
 
+#include "common/log.h"
 #include "common/common.h"
 #include "gl/primitive.h"
 #include "gl/shaders.h"
@@ -12,13 +13,16 @@ namespace gfx
 
 struct Blur::Data
 {
-    Data(const Size<int>& size, bool bilateral) :
+    Data(const Size<int>& size, gl::Texture* out, int level, bool bilateral) :
         size(size),
         rect(squareMesh()),
         vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
         fsBlur(gl::Shader::path(bilateral ? "blur_bi.fs.glsl" : "blur.fs.glsl")),
-        prog({vsQuad, fsBlur}, {{0, "position"}, {1, "uv"}})
+        prog({vsQuad, fsBlur}, {{0, "position"}, {1, "uv"}}),
+        out(out),
+        level(level)
     {
+        // TODO: Configurable pixel type
         auto dim = {size.w, size.h};
         for (int i = 0; i < 2; ++i)
             texBlur[i].bind().alloc(dim, GL_RGBA16F, GL_RGBA, GL_FLOAT)
@@ -32,10 +36,20 @@ struct Blur::Data
     gl::Texture       texBlur[2];
     gl::Shader        vsQuad, fsBlur;
     gl::ShaderProgram prog;
+
+    gl::Texture*      out;
+    int               level;
 };
 
+Blur::Blur()
+{}
+
 Blur::Blur(const Size<int>& size, bool bilateral) :
-    d(std::make_shared<Data>(size, bilateral))
+    d(std::make_shared<Data>(size, nullptr, 0, bilateral))
+{}
+
+Blur::Blur(const Size<int>& size, gl::Texture* out, int level, bool bilateral) :
+    d(std::make_shared<Data>(size, out, level, bilateral))
 {}
 
 Blur& Blur::operator()(gl::Texture* tex, gl::Texture* texDepth,
@@ -55,7 +69,11 @@ Blur& Blur::operator()(gl::Texture* tex, gl::Texture* texDepth,
 
     for (int i = 0; i < 2; ++i)
     {
-        d->fbo.attach(d->texBlur[i], gl::Fbo::Attachment::Color, 0);
+        if (i == 1 && d->out)
+            d->fbo.attach(*d->out, gl::Fbo::Attachment::Color, 0, d->level);
+        else
+            d->fbo.attach(d->texBlur[i], gl::Fbo::Attachment::Color, 0);
+
         d->prog.setUniform("invDirSize", size.inv<glm::vec2>(i));
         (i == 0 ? *tex : d->texBlur[0]).bindAs(GL_TEXTURE0);
         if (texDepth) texDepth->bindAs(GL_TEXTURE1);

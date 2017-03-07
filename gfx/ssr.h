@@ -14,37 +14,24 @@ namespace gfx
 
 struct Ssr
 {
-    static const int  MIPMAP_COUNT_MAX = 4;
-
     Size<int>         displaySize;
     Size<int>         renderSize;
     float             scale;
-    int               mipmapCount;
 
     gl::Primitive     rect;
 
     gl::Shader        vsQuad,
                       fsCommon,
-                      fsTexture,
-                      fsBlur,
                       fsSsr,
                       fsComp;
 
-    gl::ShaderProgram progScale,
-                      progBlur,
-                      progSsr,
+    gl::ShaderProgram progSsr,
                       progComp;
 
-    gl::Texture       texScale[MIPMAP_COUNT_MAX],
-                      texBlur[MIPMAP_COUNT_MAX],
-                      texEnv,
-                      texSsr,
+    gl::Texture       texSsr,
                       texComp;
 
-    gl::Fbo           fboScale[MIPMAP_COUNT_MAX],
-                      fboBlur[MIPMAP_COUNT_MAX],
-                      fboEnv,
-                      fboSsr,
+    gl::Fbo           fboSsr,
                       fboComp;
 
     Ssr(const Size<int>& displaySize, const Size<int>& renderSize);
@@ -53,6 +40,7 @@ struct Ssr
                     gl::Texture* texNormal,
                     gl::Texture* texColor,
                     gl::Texture* texLight,
+                    gl::Texture* texEnv,
                     const Camera& camera);
 
     gl::Texture* output();

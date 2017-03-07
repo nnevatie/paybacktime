@@ -16,6 +16,7 @@
 #include "platform/mouse.h"
 
 #include "gfx/geometry.h"
+#include "gfx/mipmap.h"
 #include "gfx/ssao.h"
 #include "gfx/ssr.h"
 #include "gfx/lighting.h"
@@ -57,6 +58,7 @@ struct Data
     gfx::Bloom         bloom;
     gfx::Outline       outline;
     gfx::Backdrop      backdrop;
+    gfx::Mipmap        envMipmap;
     gfx::ColorGrade    colorGrade;
     gfx::AntiAlias     antiAlias;
     gfx::Output        output;
@@ -91,6 +93,7 @@ struct Data
         lighting(config.video, geometry.texDepth),
         bloom(renderSize),
         outline(renderSize, geometry.texDepth),
+        envMipmap(renderSize, 4, true),
         colorGrade(renderSize),
         antiAlias(renderSize),
         output(display->size()),
@@ -205,6 +208,10 @@ struct Data
             backdrop(&lighting.fboOut, camera);
         }
         {
+            auto time = timeTree.scope("env-mips", detailedStats);
+            envMipmap(lighting.output());
+        }
+        {
             auto time = timeTree.scope("geom-tr", detailedStats);
             geometry(
                 &lighting.fboOut,
@@ -220,7 +227,7 @@ struct Data
             auto time = timeTree.scope("ssr", detailedStats);
             ssr(&geometry.texDepthLinear,
                 &geometry.texNormalDenoise, lighting.output(),
-                &geometry.texLight, camera);
+                &geometry.texLight, envMipmap.output(), camera);
         }
         {
             auto time = timeTree.scope("bloom", detailedStats);
