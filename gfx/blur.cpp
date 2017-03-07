@@ -56,10 +56,10 @@ Blur& Blur::operator()(gl::Texture* tex, gl::Texture* texDepth,
                        int radius, float sharpness)
 {
     Binder<gl::Fbo> binder(d->fbo);
-    d->prog.bind().setUniform("texColor",   0)
-                  .setUniform("texDepth",   1)
-                  .setUniform("radius",     radius)
-                  .setUniform("sharpness",  sharpness);
+    d->prog.bind().setUniform("tex",       0)
+                  .setUniform("texDepth",  1)
+                  .setUniform("radius",    radius)
+                  .setUniform("sharpness", sharpness);
 
     const Size<int> size(d->size);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
