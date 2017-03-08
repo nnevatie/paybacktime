@@ -1,8 +1,10 @@
 #version 150
 
 // Uniforms
-uniform sampler2D tex0;
-uniform sampler2D tex1;
+uniform sampler2D texOpq;
+uniform sampler2D texEnv;
+uniform sampler2D texOit0;
+uniform sampler2D texOit1;
 
 // Input
 in Block
@@ -17,9 +19,11 @@ out vec4 color;
 
 void main(void)
 {
-    vec4 accum   = texture2D(tex0, ib.uv);
-    float reveal = accum.a;
-    accum.a      = texture2D(tex1, ib.uv).r;
-    if (reveal >= 1.0) discard;
-    color        = vec4(accum.rgb / clamp(accum.a, 1e-4, 5e4), reveal);
+    vec4 accum  = texture(texOit0, ib.uv);
+    float alpha = 1.0 - clamp(accum.a, 0.0, 1.0);
+    accum.a     = texture(texOit1, ib.uv).r;
+    vec3 opaque = alpha > 0.0 ? textureLod(texEnv, ib.uv, alpha * 2).rgb :
+                                texture(texOpq, ib.uv).rgb;
+    vec3 trans  = vec3(accum.rgb / clamp(accum.a, 1e-4, 5e4));
+    color       = vec4(mix(opaque, trans, alpha), 1.0);
 }

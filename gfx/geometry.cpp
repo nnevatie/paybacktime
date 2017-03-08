@@ -50,8 +50,8 @@ Geometry::Geometry(const Size<int>& renderSize) :
                            .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                            .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    texColor.bind().alloc(fboSize,         GL_RGB8,    GL_RGB, GL_UNSIGNED_BYTE);
-    texLight.bind().alloc(fboSize,         GL_RGB8,    GL_RGB, GL_UNSIGNED_BYTE);
+    texColor.bind().alloc(fboSize, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
+    texLight.bind().alloc(fboSize, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
 
     fbo.bind()
        .attach(texDepth,         gl::Fbo::Attachment::Depth)
@@ -71,6 +71,14 @@ Geometry::Geometry(const Size<int>& renderSize) :
           .attach(texOit0,  gl::Fbo::Attachment::Color, 0)
           .attach(texOit1,  gl::Fbo::Attachment::Color, 1)
           .unbind();
+
+    // Composite
+    texComp.bind().alloc(fboSize, GL_RGB32F, GL_RGB, GL_FLOAT)
+                  .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                  .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    fboComp.bind()
+           .attach(texComp, gl::Fbo::Attachment::Color)
+           .unbind();
 }
 
 Geometry& Geometry::operator()(
@@ -135,7 +143,8 @@ Geometry& Geometry::operator()(
 }
 
 Geometry& Geometry::operator()(
-    gl::Fbo* fbo,
+    gl::Texture* texOpaque,
+    gl::Texture* texEnv,
     gl::Texture* texAlbedo,
     gl::Texture* texLightmap,
     gl::Texture* texGi,
@@ -170,6 +179,8 @@ Geometry& Geometry::operator()(
         // Active buffer
         const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
                                       GL_COLOR_ATTACHMENT1};
+
+        glViewport(0, 0, renderSize.w, renderSize.h);
         glDrawBuffers(2, drawBuffers);
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -188,19 +199,25 @@ Geometry& Geometry::operator()(
     }
     // OIT composition pass
     {
-        Binder<gl::Fbo> binder(*fbo);
+        Binder<gl::Fbo> binder(fboComp);
         progOitComposite.bind()
-                        .setUniform("tex0", 0)
-                        .setUniform("tex1", 1);
+                        .setUniform("texOpq",  0)
+                        .setUniform("texEnv",  1)
+                        .setUniform("texOit0", 2)
+                        .setUniform("texOit1", 3);
+
+        glViewport(0, 0, renderSize.w, renderSize.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
-        texOit0.bindAs(GL_TEXTURE0);
-        texOit1.bindAs(GL_TEXTURE1);
+        //glDisable(GL_BLEND);
+        //glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+        texOpaque->bindAs(GL_TEXTURE0);
+        texEnv->bindAs(GL_TEXTURE1);
+        texOit0.bindAs(GL_TEXTURE2);
+        texOit1.bindAs(GL_TEXTURE3);
         rect.render();
-        glDisable(GL_BLEND);
+        //glDisable(GL_BLEND);
     }
     return *this;
 }

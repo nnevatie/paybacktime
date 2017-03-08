@@ -41,8 +41,8 @@ Ssr::Ssr(const Size<int>& displaySize, const Size<int>& renderSize) :
 
 Ssr& Ssr::operator()(gl::Texture* texDepth,
                      gl::Texture* texNormal,
-                     gl::Texture* texColor,
                      gl::Texture* texLight,
+                     gl::Texture* texColor,
                      gl::Texture* texEnv,
                      const Camera& camera)
 {
@@ -80,8 +80,9 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
         // Composite
         Binder<gl::Fbo> binder(fboComp);
         progComp.bind().setUniform("texColor",    0)
-                       .setUniform("texSsr",      1)
-                       .setUniform("texLight",    2)
+                       .setUniform("texEnv",      1)
+                       .setUniform("texSsr",      2)
+                       .setUniform("texLight",    3)
                        .setUniform("z",           0.f)
                        .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
                        .setUniform("aspectRatio", camera.ar)
@@ -89,9 +90,10 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
 
         glViewport(0, 0, displaySize.w, displaySize.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        texEnv->bindAs(GL_TEXTURE0);
-        texSsr.bindAs(GL_TEXTURE1);
-        texLight->bindAs(GL_TEXTURE2);
+        texColor->bindAs(GL_TEXTURE0);
+        texEnv->bindAs(GL_TEXTURE1);
+        texSsr.bindAs(GL_TEXTURE2);
+        texLight->bindAs(GL_TEXTURE3);
         rect.render();
     }
     return *this;

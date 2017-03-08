@@ -38,8 +38,8 @@ struct Ssr
 
     Ssr& operator()(gl::Texture* texDepth,
                     gl::Texture* texNormal,
-                    gl::Texture* texColor,
                     gl::Texture* texLight,
+                    gl::Texture* texColor,
                     gl::Texture* texEnv,
                     const Camera& camera);
 

@@ -2,6 +2,7 @@
 
 // Uniforms
 uniform sampler2D texColor;
+uniform sampler2D texEnv;
 uniform sampler2D texSsr;
 uniform sampler2D texLight;
 uniform float     scale;
@@ -24,6 +25,6 @@ void main(void)
     float g  = scale * 2 * (1 - l.g);
     vec4 col = texture(texColor, ib.uv);
     vec4 ssr = texture(texSsr, ib.uv);
-    vec4 ref = textureLod(texColor, ssr.xy, g);
+    vec4 ref = textureLod(texEnv, ssr.xy, g);
     color    = vec4(mix(col.rgb, ref.rgb, r * ssr.b), 1.0);
 }

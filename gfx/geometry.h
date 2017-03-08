@@ -51,10 +51,12 @@ struct Geometry
                       texColor,
                       texLight,
                       texOit0,
-                      texOit1;
+                      texOit1,
+                      texComp;
 
     gl::Fbo           fbo,
-                      fboOit;
+                      fboOit,
+                      fboComp;
 
     typedef std::pair<gl::Primitive, glm::mat4> Instance;
     typedef std::vector<Instance>               Instances;
@@ -69,7 +71,8 @@ struct Geometry
                          const Camera& camera);
 
     // Transparent
-    Geometry& operator()(gl::Fbo* fbo,
+    Geometry& operator()(gl::Texture* texOpaque,
+                         gl::Texture* texEnv,
                          gl::Texture* texAlbedo,
                          gl::Texture* texLightmap,
                          gl::Texture* texGi,

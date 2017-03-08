@@ -212,9 +212,19 @@ struct Data
             envMipmap(lighting.output(), &geometry.texDepth);
         }
         {
+            auto time = timeTree.scope("ssr", detailedStats);
+            ssr(&geometry.texDepthLinear,
+                &geometry.texNormalDenoise,
+                &geometry.texLight,
+                envMipmap.output(),
+                envMipmap.output(),
+                camera);
+        }
+        {
             auto time = timeTree.scope("geom-tr", detailedStats);
             geometry(
-                &lighting.fboOut,
+                ssr.output(),
+                envMipmap.output(),
                 &textureStore.albedo.texture,
                 &textureStore.light.texture,
                 scene.lightmap(),
@@ -224,22 +234,16 @@ struct Data
                 camera);
         }
         {
-            auto time = timeTree.scope("ssr", detailedStats);
-            ssr(&geometry.texDepthLinear,
-                &geometry.texNormalDenoise, lighting.output(),
-                &geometry.texLight, envMipmap.output(), camera);
-        }
-        {
             auto time = timeTree.scope("bloom", detailedStats);
-            bloom(ssr.output());
+            bloom(&geometry.texComp);
         }
         {
             auto time = timeTree.scope("scene-ctrl", detailedStats);
-            sceneControl(&ssr.fboComp, ssr.output());
+            sceneControl(&geometry.fboComp, &geometry.texComp);
         }
         {
             auto time = timeTree.scope("colorgrade", detailedStats);
-            colorGrade(ssr.output(), bloom.output());
+            colorGrade(&geometry.texComp, bloom.output());
         }
         {
             auto time = timeTree.scope("anti-alias", detailedStats);
