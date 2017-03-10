@@ -73,7 +73,7 @@ Geometry::Geometry(const Size<int>& renderSize) :
           .unbind();
 
     // Composite
-    texComp.bind().alloc(fboSize, GL_RGB32F, GL_RGB, GL_FLOAT)
+    texComp.bind().alloc(fboSize, GL_RGB16F, GL_RGB, GL_FLOAT)
                   .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                   .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     fboComp.bind()
