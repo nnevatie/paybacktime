@@ -25,7 +25,8 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
            {{0, "position"}, {1, "uv"}}),
     progOut({vsQuad, fsOut, fsCommon},
             {{0, "position"}, {1, "uv"}}),
-    blurSc(Size<int>(config.sc.scale * config.output.renderSize()))
+    blurSc(Size<int>(config.sc.scale * config.output.renderSize())),
+    scSampleCount(config.sc.samples)
 {
     // Texture and FBO
     auto size    = config.output.renderSize();
@@ -33,15 +34,15 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
     auto sizeSc  = {int(config.sc.scale * size.x), int(config.sc.scale * size.y)};
     auto sizeOut = {int(size.x), int(size.y)};
 
-    texGi.bind().alloc(sizeGi, GL_RGB32F, GL_RGB, GL_FLOAT)
+    texGi.bind().alloc(sizeGi, GL_RGB16F, GL_RGB, GL_FLOAT)
                 .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                 .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    texSc.bind().alloc(sizeSc, GL_RGB32F, GL_RGB, GL_FLOAT)
+    texSc.bind().alloc(sizeSc, GL_RGB16F, GL_RGB, GL_FLOAT)
                 .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                 .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    texOut.bind().alloc(sizeOut, GL_RGB32F, GL_RGB, GL_FLOAT)
+    texOut.bind().alloc(sizeOut, GL_RGB16F, GL_RGB, GL_FLOAT)
                  .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                  .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -92,12 +93,13 @@ Lighting& Lighting::operator()(
     {
         // Scattering pass
         Binder<gl::Fbo> binder(fboSc);
-        progSc.bind().setUniform("texDepth",   0)
-                     .setUniform("texGi",      1)
-                     .setUniform("w",          camera.matrixWorld())
-                     .setUniform("camPos",     camera.position())
-                     .setUniform("boundsMin",  glm::floor(bounds.pos))
-                     .setUniform("boundsSize", glm::ceil(bounds.size));
+        progSc.bind().setUniform("texDepth",    0)
+                     .setUniform("texGi",       1)
+                     .setUniform("w",           camera.matrixWorld())
+                     .setUniform("camPos",      camera.position())
+                     .setUniform("boundsMin",   glm::floor(bounds.pos))
+                     .setUniform("boundsSize",  glm::ceil(bounds.size))
+                     .setUniform("sampleCount", scSampleCount);
 
         const auto size = texSc.size();
         glViewport(0, 0, size.x, size.y);

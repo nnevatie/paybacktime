@@ -7,10 +7,10 @@ uniform mat4      w;
 uniform vec3      camPos;
 uniform vec3      boundsMin;
 uniform vec3      boundsSize;
+uniform int       sampleCount;
 
 // Const
-const int   SCATTER_STEPS = 20;
-const float SCATTER_DIST  = 100.0;
+const float SCATTER_DIST = 100.0;
 
 // Input
 in Block
@@ -33,11 +33,11 @@ vec3 scattering(vec3 start)
     vec3 end  = start + ray * SCATTER_DIST;
     vec3 uvw0 = worldUvw(start, boundsMin, boundsSize);
     vec3 uvw1 = worldUvw(end, boundsMin, boundsSize);
-    vec3 uvws = (uvw1 - uvw0) / SCATTER_STEPS;
+    vec3 uvws = (uvw1 - uvw0) / sampleCount;
 
     float weight = 0.025;
     vec3 scatter = vec3(0.0);
-    for (int i = 0; i < SCATTER_STEPS && uvw0.z < 1.05; ++i)
+    for (int i = 0; i < sampleCount && uvw0.z < 1.05; ++i)
     {
         vec3 gi  = texture(texGi, uvw0).rgb;
         scatter += weight * pow(gi, vec3(2.00));

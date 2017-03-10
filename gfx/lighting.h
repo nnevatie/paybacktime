@@ -44,6 +44,8 @@ struct Lighting
 
     gfx::Blur         blurSc;
 
+    int               scSampleCount;
+
     Lighting(const cfg::Video& config, const gl::Texture& texDepth);
 
     Lighting& operator()(
