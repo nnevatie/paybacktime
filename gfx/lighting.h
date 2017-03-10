@@ -42,7 +42,8 @@ struct Lighting
                       fboSc,
                       fboOut;
 
-    gfx::Blur         blurSc;
+    gfx::Blur         blurGi,
+                      blurSc;
 
     int               scSampleCount;
 

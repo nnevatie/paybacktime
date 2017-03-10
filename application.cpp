@@ -93,7 +93,7 @@ struct Data
         lighting(config.video, geometry.texDepth),
         bloom(renderSize),
         outline(renderSize, geometry.texDepth),
-        envMipmap(renderSize, 4, true),
+        envMipmap(renderSize * config.video.env.scale, 4, true),
         colorGrade(renderSize),
         antiAlias(renderSize),
         output(display->size()),
@@ -216,7 +216,7 @@ struct Data
             ssr(&geometry.texDepthLinear,
                 &geometry.texNormalDenoise,
                 &geometry.texLight,
-                envMipmap.output(),
+                lighting.output(),
                 envMipmap.output(),
                 camera);
         }
@@ -271,7 +271,7 @@ struct Data
     bool run()
     {
         namespace arg = std::placeholders;
-        Scheduler scheduler(boost::chrono::milliseconds(10),
+        Scheduler scheduler(boost::chrono::milliseconds(20),
                             std::bind(&Data::simulate, this, arg::_1, arg::_2),
                             std::bind(&Data::render,   this, arg::_1, arg::_2));
         return scheduler.start();

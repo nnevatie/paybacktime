@@ -25,6 +25,7 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
            {{0, "position"}, {1, "uv"}}),
     progOut({vsQuad, fsOut, fsCommon},
             {{0, "position"}, {1, "uv"}}),
+    blurGi(Size<int>(config.gi.scale * config.output.renderSize())),
     blurSc(Size<int>(config.sc.scale * config.output.renderSize())),
     scSampleCount(config.sc.samples)
 {
@@ -71,6 +72,7 @@ Lighting& Lighting::operator()(
     const glm::mat4& v,
     const glm::mat4& p)
 {
+    gl::Texture* texGiOut = &texGi;
     {
         // GI pass
         Binder<gl::Fbo> binder(fboGi);
@@ -88,6 +90,11 @@ Lighting& Lighting::operator()(
         texDepth->bindAs(GL_TEXTURE0);
         texLightmap->bindAs(GL_TEXTURE1);
         rect.render();
+        if (float(texGi.size().x) / texOut.size().x < 1.f)
+        {
+            blurGi(&texGi, nullptr, 1);
+            texGiOut = &blurGi.output();
+        }
     }
     gl::Texture* texScOut = &texSc;
     {
@@ -144,7 +151,7 @@ Lighting& Lighting::operator()(
         texColor->bindAs(GL_TEXTURE2);
         texLight->bindAs(GL_TEXTURE3);
         texSsao->bindAs(GL_TEXTURE4);
-        texGi.bindAs(GL_TEXTURE5);
+        texGiOut->bindAs(GL_TEXTURE5);
         texScOut->bindAs(GL_TEXTURE6);
         texIncidence->bindAs(GL_TEXTURE7);
         rect.render();
