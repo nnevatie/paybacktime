@@ -31,58 +31,9 @@ out vec3 light;
 out vec3 incidence;
 
 // Externals
+float vis(sampler3D tex, ivec3 p0, ivec3 p1, inout vec3 e, float el);
 float cmin(vec3 v);
 float cmax(vec3 v);
-
-float vis(vec3 p0, vec3 p1, inout vec3 e, float el)
-{
-    p0 += 0.5; p1 += 0.5;
-
-    // Grid deltas and step
-    vec3 d  = p1 - p0;
-    vec3 da = abs(d);
-    vec3 sg = sign(d);
-
-    // t-step, iteration count
-    vec3 st = 1.0 / da;
-    int   n = int(da.x + da.y + da.z);
-
-    // Loop
-    vec3  m = 0.5 * st;
-    vec3  p = p0;
-    float v = 1.0;
-
-    for (int i = 0; i < n && v > 0.0; ++i)
-    {
-        if (i > 0)
-        {
-            vec4 d  = texelFetch(density, ivec3(p), 0);
-            float a = abs(d.a);
-            e = d.a < 0 ? mix(e, el * d.rgb, min(1.0, 1.0 - a)) : e;
-            v -= a;
-        }
-
-        bvec3 lt  = lessThan(m.xxy, m.yzz);
-        bvec3 lti = not(lt);
-
-        if (lt.x && lt.y)
-        {
-            p.x += sg.x;
-            m.x += st.x;
-        }
-        if (lti.x && lt.z)
-        {
-            p.y += sg.y;
-            m.y += st.y;
-        }
-        if ((lt.x && lti.y) || (lti.x && lti.z))
-        {
-            p.z += sg.z;
-            m.z += st.z;
-        }
-    }
-    return v;
-}
 
 float distance2(vec3 v0, vec3 v1)
 {
@@ -126,7 +77,7 @@ void main(void)
             if (att > attMin)
             {
                 vec3  e = texelFetch(emission, p1, 0).rgb;
-                float v = vis(p1, p0, e, length(e));
+                float v = vis(density, p1, p0, e, length(e));
                 if (v > 0.0)
                 {
                     float a = v * v * att;
@@ -160,7 +111,7 @@ void main(void)
         if (h.a > 0.0)
         {
             vec3 e  = h.rgb;
-            float v = vis(p1, p0, e, length(e));
+            float v = vis(density, p1, p0, e, length(e));
             if (v > 0.0)
             {
                 l += weight * v * e;

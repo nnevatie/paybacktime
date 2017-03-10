@@ -82,8 +82,9 @@ struct Lightmapper::Data
         rect(squareMesh()),
         vsQuadUv(gl::Shader::path("quad_uv.vs.glsl")),
         fsLightmapper(gl::Shader::path("lightmapper.fs.glsl")),
+        fsVisibility(gl::Shader::path("visibility.fs.glsl")),
         fsCommon(gl::Shader::path("common.fs.glsl")),
-        prog({vsQuadUv, fsLightmapper, fsCommon},
+        prog({vsQuadUv, fsLightmapper, fsVisibility, fsCommon},
              {{0, "position"}, {1, "uv"}}),
         texLight(gl::Texture::Type::Texture3d),
         texIncidence(gl::Texture::Type::Texture3d),
@@ -96,6 +97,7 @@ struct Lightmapper::Data
 
     gl::Shader        vsQuadUv,
                       fsLightmapper,
+                      fsVisibility,
                       fsCommon;
 
     gl::ShaderProgram prog;
