@@ -45,8 +45,7 @@ struct Ssao
     Blur              blur;
 
     Ssao(int kernelSize, const Size<int>& displaySize,
-                         const Size<int>& renderSize,
-                         const Size<int>& noiseSize);
+                         const Size<int>& renderSize);
 
     glm::vec2 noiseScale() const;
 

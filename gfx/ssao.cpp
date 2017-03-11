@@ -25,7 +25,7 @@ Ssao::Kernel kernelData(int size)
     {
         // Positive Z-axis hemisphere
         // Scaled to include more samples near the center of the kernel
-        const float s0  = float(i) / size;
+        const float s0  = float(i) / (size - 1);
         const float s1  = clamp(s0 * s0, 0.1f, 1.f);
         glm::vec3 v     = glm::sphericalRand<float>(s1);
         data[i]         = glm::vec3(v.x, v.y, std::abs(v.z));
@@ -50,12 +50,11 @@ std::vector<float> noiseData(int size)
 
 Ssao::Ssao(int kernelSize,
            const Size<int>& displaySize,
-           const Size<int>& renderSize,
-           const Size<int>& noiseSize) :
+           const Size<int>& renderSize) :
     kernelSize(kernelSize),
     displaySize(displaySize),
     renderSize(renderSize),
-    noiseSize(noiseSize),
+    noiseSize(Size<int>(4, 4)),
     kernel(kernelData(kernelSize)),
     rect(squareMesh()),
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
@@ -100,6 +99,7 @@ Ssao& Ssao::operator()(gl::Texture* texDepth,
         progAo.bind().setUniform("texDepth",    0)
                      .setUniform("texNormal",   1)
                      .setUniform("texNoise",    2)
+                     .setUniform("kernelSize",  kernelSize)
                      .setUniform("kernel",      kernel)
                      .setUniform("noiseScale",  noiseScale())
                      .setUniform("p",           proj)

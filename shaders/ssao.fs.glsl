@@ -8,6 +8,7 @@
 uniform sampler2D texDepth;
 uniform sampler2D texNormal;
 uniform sampler2D texNoise;
+uniform int       kernelSize;
 uniform vec3      kernel[KERNEL_SIZE];
 uniform vec2      noiseScale;
 uniform mat4      p;
@@ -33,7 +34,7 @@ void main(void)
     mat3 tbn       = mat3(tangent, bitangent, normal);
 
     float occlusion = 0.0;
-    for(int i = 0; i < KERNEL_SIZE; ++i)
+    for(int i = 0; i < kernelSize; ++i)
     {
         vec3 ray    = tbn * kernel[i];
         vec3 sample = fragPos - ray * RADIUS;
@@ -49,5 +50,5 @@ void main(void)
 
         occlusion        += rangeCheck * step(sampleDepth, sample.z);
     }
-    color = vec4(pow(1.0 - (occlusion / KERNEL_SIZE), POW));
+    color = vec4(pow(1.0 - (occlusion / kernelSize), POW));
 }

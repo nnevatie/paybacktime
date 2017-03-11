@@ -20,11 +20,6 @@ struct Output
     }
 };
 
-struct Gi
-{
-    float scale;
-};
-
 struct Scattering
 {
     float scale;
@@ -34,6 +29,7 @@ struct Scattering
 struct Ssao
 {
     float scale;
+    int   samples;
 };
 
 struct Env
@@ -54,7 +50,6 @@ struct Video
     video::Ssao       ssao;
     video::Env        env;
     video::Ssr        ssr;
-    video::Gi         gi;
     video::Scattering sc;
 };
 
@@ -73,12 +68,12 @@ namespace preset
 {
 
 static constexpr Video
-    ULTRA = {{1.00f}, {1.00f}, {1.00f}, {1.00f}, {1.00f}, {1.00f, 20}},
-    HIGH  = {{1.00f}, {1.00f}, {0.50f}, {1.00f}, {1.00f}, {0.50f, 20}},
-    LOW   = {{1.00f}, {0.50f}, {0.25f}, {0.50f}, {0.50f}, {0.25f, 10}};
+    ULTRA = {{1.00f}, {1.00f, 32}, {1.00f}, {1.00f}, {1.00f, 20}},
+    HIGH  = {{1.00f}, {1.00f, 24}, {0.50f}, {1.00f}, {0.50f, 15}},
+    LOW   = {{1.00f}, {0.50f, 16}, {0.25f}, {0.50f}, {0.25f, 10}};
 
 static constexpr Config config = {HIGH,
-                                 {false}};
+                                 {true}};
 
 } // namespace preset
 
