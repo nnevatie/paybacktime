@@ -1,15 +1,15 @@
 #version 150
 
 #define RADIUS           10.0
-#define KERNEL_SIZE      32
-#define POW              4
+#define KERNEL_SIZE_MAX  32
+#define POW              3
 
 // Uniforms
 uniform sampler2D texDepth;
 uniform sampler2D texNormal;
 uniform sampler2D texNoise;
 uniform int       kernelSize;
-uniform vec3      kernel[KERNEL_SIZE];
+uniform vec3      kernel[KERNEL_SIZE_MAX];
 uniform vec2      noiseScale;
 uniform mat4      p;
 
