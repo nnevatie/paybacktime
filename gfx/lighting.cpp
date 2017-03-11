@@ -14,12 +14,10 @@ namespace gfx
 
 struct Lighting::Data
 {
-    Data() :
-        texGiOut(nullptr),
-        texScOut(nullptr)
+    Data() : texScOut(nullptr)
     {}
 
-    gl::Texture* texGiOut;
+    // TODO: Move internals here
     gl::Texture* texScOut;
 };
 
@@ -27,29 +25,20 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
     d(std::make_shared<Data>()),
     rect(squareMesh()),
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
-    fsGi(gl::Shader::path("lighting_gi.fs.glsl")),
     fsSc(gl::Shader::path("lighting_scattering.fs.glsl")),
     fsOut(gl::Shader::path("lighting.fs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
-    progGi({vsQuad, fsGi, fsCommon},
-           {{0, "position"}, {1, "uv"}}),
     progSc({vsQuad, fsSc, fsCommon},
            {{0, "position"}, {1, "uv"}}),
     progOut({vsQuad, fsOut, fsCommon},
             {{0, "position"}, {1, "uv"}}),
-    blurGi(Size<int>(config.gi.scale * config.output.renderSize())),
     blurSc(Size<int>(config.sc.scale * config.output.renderSize())),
     scSampleCount(config.sc.samples)
 {
     // Texture and FBO
     auto size    = config.output.renderSize();
-    auto sizeGi  = {int(config.gi.scale * size.x), int(config.gi.scale * size.y)};
     auto sizeSc  = {int(config.sc.scale * size.x), int(config.sc.scale * size.y)};
     auto sizeOut = {int(size.x), int(size.y)};
-
-    texGi.bind().alloc(sizeGi, GL_RGB16F, GL_RGB, GL_FLOAT)
-                .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     texSc.bind().alloc(sizeSc, GL_RGB16F, GL_RGB, GL_FLOAT)
                 .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
@@ -59,9 +48,6 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
                  .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                  .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    fboGi.bind()
-         .attach(texGi, gl::Fbo::Attachment::Color)
-         .unbind();
     fboSc.bind()
          .attach(texSc, gl::Fbo::Attachment::Color)
          .unbind();
@@ -69,36 +55,6 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
           .attach(texDepth, gl::Fbo::Attachment::Depth)
           .attach(texOut,   gl::Fbo::Attachment::Color)
           .unbind();
-}
-
-Lighting& Lighting::gi(gl::Texture* texDepth,
-                       gl::Texture* texLightmap,
-                       const Camera& camera,
-                       const Box& bounds)
-{
-    // GI pass
-    Binder<gl::Fbo> binder(fboGi);
-    progGi.bind().setUniform("texDepth",   0)
-                 .setUniform("texGi",      1)
-                 .setUniform("w",          camera.matrixWorld())
-                 .setUniform("boundsMin",  glm::floor(bounds.pos))
-                 .setUniform("boundsSize", glm::ceil(bounds.size));
-
-    const auto size = texGi.size();
-    glViewport(0, 0, size.x, size.y);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(false);
-    texDepth->bindAs(GL_TEXTURE0);
-    rect.render();
-
-    d->texGiOut = &texGi;
-    if (float(texGi.size().x) / texOut.size().x < 1.f)
-    {
-        blurGi(&texGi, nullptr, 1);
-        d->texGiOut = &blurGi.output();
-    }
-    return *this;
 }
 
 Lighting& Lighting::sc(gl::Texture* texDepth,

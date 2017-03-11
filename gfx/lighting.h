@@ -27,34 +27,24 @@ struct Lighting
     gl::Primitive     rect;
 
     gl::Shader        vsQuad,
-                      fsGi,
                       fsSc,
                       fsOut,
                       fsCommon;
 
-    gl::ShaderProgram progGi,
-                      progSc,
+    gl::ShaderProgram progSc,
                       progOut;
 
-    gl::Texture       texGi,
-                      texSc,
+    gl::Texture       texSc,
                       texOut;
 
-    gl::Fbo           fboGi,
-                      fboSc,
+    gl::Fbo           fboSc,
                       fboOut;
 
-    gfx::Blur         blurGi,
-                      blurSc;
+    gfx::Blur         blurSc;
 
     int               scSampleCount;
 
     Lighting(const cfg::Video& config, const gl::Texture& texDepth);
-
-    Lighting& gi(gl::Texture* texDepth,
-                 gl::Texture* texLightmap,
-                 const Camera& camera,
-                 const Box& bounds);
 
     Lighting& sc(gl::Texture* texDepth,
                  gl::Texture* texLightmap,
