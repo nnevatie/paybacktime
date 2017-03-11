@@ -6,8 +6,8 @@ uniform sampler2D texNormal;
 uniform sampler2D texColor;
 uniform sampler2D texLight;
 uniform sampler2D texAo;
-uniform sampler2D texGi;
 uniform sampler2D texSc;
+uniform sampler3D texGi;
 uniform sampler3D texIncid;
 uniform mat4      w;
 uniform mat3      n;
@@ -34,7 +34,7 @@ void main(void)
 {
     vec3 worldPos   = world(texDepth, ib.uv, w);
     vec3 uvwGi      = worldUvw(worldPos, boundsMin, boundsSize);
-    vec3 gi         = texture(texGi, ib.uv).rgb;
+    vec3 gi         = texture(texGi, uvwGi).rgb;
 
     vec3 ao         = texture(texAo, ib.uv).r * gi.rgb;
     vec3 normal     = texture(texNormal, ib.uv).rgb;

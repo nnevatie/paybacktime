@@ -90,7 +90,6 @@ Lighting& Lighting::gi(gl::Texture* texDepth,
     glDisable(GL_DEPTH_TEST);
     glDepthMask(false);
     texDepth->bindAs(GL_TEXTURE0);
-    texLightmap->bindAs(GL_TEXTURE1);
     rect.render();
 
     d->texGiOut = &texGi;
@@ -144,9 +143,7 @@ Lighting& Lighting::operator()(
     gl::Texture* texLightmap,
     gl::Texture* texIncidence,
     const Camera& camera,
-    const Box& bounds,
-    const glm::mat4& v,
-    const glm::mat4& p)
+    const Box& bounds)
 {
     // Combine pass
     Binder<gl::Fbo> binder(fboOut);
@@ -155,8 +152,8 @@ Lighting& Lighting::operator()(
                   .setUniform("texColor",    2)
                   .setUniform("texLight",    3)
                   .setUniform("texAo",       4)
-                  .setUniform("texGi",       5)
-                  .setUniform("texSc",       6)
+                  .setUniform("texSc",       5)
+                  .setUniform("texGi",       6)
                   .setUniform("texIncid",    7)
                   .setUniform("z",           0.f)
                   .setUniform("tanHalfFov",  camera.tanHalfFov())
@@ -176,8 +173,8 @@ Lighting& Lighting::operator()(
     texColor->bindAs(GL_TEXTURE2);
     texLight->bindAs(GL_TEXTURE3);
     texSsao->bindAs(GL_TEXTURE4);
-    d->texGiOut->bindAs(GL_TEXTURE5);
-    d->texScOut->bindAs(GL_TEXTURE6);
+    d->texScOut->bindAs(GL_TEXTURE5);
+    texLightmap->bindAs(GL_TEXTURE6);
     texIncidence->bindAs(GL_TEXTURE7);
     rect.render();
     return *this;

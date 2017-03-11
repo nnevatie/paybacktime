@@ -165,7 +165,6 @@ struct Data
             boost::chrono::duration<float>(time - TimePoint()).count();
 
         const glm::mat4 proj = camera.matrixProj();
-        const glm::mat4 view = camera.matrixView();
 
         TimeTree<GpuClock> timeTree;
         auto timeTotal = timeTree.scope("total");
@@ -191,13 +190,6 @@ struct Data
                  proj, camera.fov);
         }
         {
-            auto time = timeTree.scope("lighting-gi", detailedStats);
-            lighting.gi(&geometry.texDepth,
-                        scene.lightmap(),
-                        camera,
-                        scene.bounds());
-        }
-        {
             auto time = timeTree.scope("lighting-sc", detailedStats);
             lighting.sc(&geometry.texDepth,
                         scene.lightmap(),
@@ -214,8 +206,7 @@ struct Data
                      scene.lightmap(),
                      scene.incidence(),
                      camera,
-                     scene.bounds(),
-                     view, proj);
+                     scene.bounds());
         }
         {
             auto time = timeTree.scope("backdrop", detailedStats);

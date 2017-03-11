@@ -30,6 +30,6 @@ void main(void)
 {
     vec3 worldPos = world(texDepth, ib.uv, w);
     vec3 uvwGi    = worldUvw(worldPos, boundsMin, boundsSize);
-    vec3 gi       = textureTricubic(texGi, uvwGi, sizeTexGi).rgb;
-    color = vec4(gi, 1.0);
+    vec3 gi       = texture(texGi, uvwGi).rgb;
+    color         = vec4(gi, 1.0);
 }

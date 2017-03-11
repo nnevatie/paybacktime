@@ -70,9 +70,7 @@ struct Lighting
         gl::Texture* texLightmap,
         gl::Texture* texIncidence,
         const Camera& camera,
-        const Box& bounds,
-        const glm::mat4& v,
-        const glm::mat4& p);
+        const Box& bounds);
 
     gl::Texture* output();
 

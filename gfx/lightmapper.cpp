@@ -83,11 +83,16 @@ struct Lightmapper::Data
         vsQuadUv(gl::Shader::path("quad_uv.vs.glsl")),
         fsLightmapper(gl::Shader::path("lightmapper.fs.glsl")),
         fsVisibility(gl::Shader::path("visibility.fs.glsl")),
+        fsUpscale(gl::Shader::path("lightmapper_upscale.fs.glsl")),
         fsCommon(gl::Shader::path("common.fs.glsl")),
         prog({vsQuadUv, fsLightmapper, fsVisibility, fsCommon},
              {{0, "position"}, {1, "uv"}}),
+        progHq({vsQuadUv, fsUpscale, fsCommon},
+               {{0, "position"}, {1, "uv"}}),
         texLight(gl::Texture::Type::Texture3d),
+        texLightHq(gl::Texture::Type::Texture3d),
         texIncidence(gl::Texture::Type::Texture3d),
+        texIncidenceHq(gl::Texture::Type::Texture3d),
         texDensity(gl::Texture::Type::Texture3d),
         texEmission(gl::Texture::Type::Texture3d),
         texLightSources(gl::Texture::Type::Buffer)
@@ -98,16 +103,20 @@ struct Lightmapper::Data
     gl::Shader        vsQuadUv,
                       fsLightmapper,
                       fsVisibility,
+                      fsUpscale,
                       fsCommon;
 
-    gl::ShaderProgram prog;
+    gl::ShaderProgram prog,
+                      progHq;
 
     mat::Density      density;
     mat::Emission     emission;
     LightSources      lightSources;
 
     gl::Texture       texLight,
+                      texLightHq,
                       texIncidence,
+                      texIncidenceHq,
                       texDensity,
                       texEmission,
                       texLightSources;
@@ -120,12 +129,12 @@ Lightmapper::Lightmapper() :
 
 gl::Texture* Lightmapper::lightTexture() const
 {
-    return &d->texLight;
+    return &d->texLightHq;
 }
 
 gl::Texture* Lightmapper::incidenceTexture() const
 {
-    return &d->texIncidence;
+    return &d->texIncidenceHq;
 }
 
 Lightmapper& Lightmapper::reset(const glm::ivec3& size)
@@ -134,15 +143,29 @@ Lightmapper& Lightmapper::reset(const glm::ivec3& size)
     {
         const std::vector<int> dims = {size.x, size.y, size.z};
 
-        d->texLight.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
+        d->texLight.bind().alloc(dims, GL_RGB16F, GL_RGB, GL_FLOAT)
                           .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                           .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
                           .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
 
-        d->texIncidence.bind().alloc(dims, GL_RGB32F, GL_RGB, GL_FLOAT)
+        d->texIncidence.bind().alloc(dims, GL_RGB16F, GL_RGB, GL_FLOAT)
                               .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                               .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
                               .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+        // HQ versions
+        const int scaleHq = 4;
+        const auto sizeHq = scaleHq * size;
+        const std::vector<int> dimsHq = {sizeHq.x, sizeHq.y, sizeHq.z};
+
+        d->texLightHq.bind().alloc(dimsHq, GL_RGB16F, GL_RGB, GL_FLOAT)
+                            .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                            .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+                            .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+        d->texIncidenceHq.bind().alloc(dimsHq, GL_RGB16F, GL_RGB, GL_FLOAT)
+                                .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                                .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+                                .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
     }
     d->density      = mat::Density(size);
     d->emission     = mat::Emission(size);
@@ -176,76 +199,99 @@ Lightmapper& Lightmapper::operator()(const Horizon& horizon)
                                     int16_t(ls.y),
                                     int16_t(ls.z), 0});
 
+        // Upload lighting textures
         gl::Buffer lightSourcesBuf(gl::Buffer::Type::Texture);
         lightSourcesBuf.alloc(lightSources.data(),
                               sizeof(LightSource) * lightSourceCount);
-
         d->texDensity.bind().alloc(d->density);
         d->texEmission.bind().alloc(d->emission);
         d->texLightSources.bind().alloc(GL_RGBA16I, lightSourcesBuf);
-
-        gl::Fbo fbo;
-        Binder<gl::Fbo> fboBinder(&fbo);
-        Binder<gl::ShaderProgram> progBinder(&d->prog);
-        d->prog.setUniform("density",  0)
-               .setUniform("emission", 1)
-               .setUniform("horizon",  2)
-               .setUniform("lightSrc", 3)
-               .setUniform("lsc",      lightSourceCount)
-               .setUniform("attMin",   0.001f)
-               .setUniform("k0",       1.f)
-               .setUniform("k1",       0.22f)
-               .setUniform("k2",       0.2f)
-               .setUniform("cs",       c::cell::SIZE.xzy());
-
-        const GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-        glDrawBuffers(2, buffers);
-        glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
-
-        d->texDensity.bindAs(GL_TEXTURE0);
-        d->texEmission.bindAs(GL_TEXTURE1);
-        horizon.texture().bindAs(GL_TEXTURE2);
-        d->texLightSources.bindAs(GL_TEXTURE3);
-
-        glViewport(0, 0, size.x, size.y);
-
-        #if 0
-        mat::Light lightmap(size);
-        #endif
-
-        for (int z = 0; z < size.z; ++z)
         {
-            fbo.attach(d->texLight,     gl::Fbo::Attachment::Color, 0, 0, z);
-            fbo.attach(d->texIncidence, gl::Fbo::Attachment::Color, 1, 0, z);
-            d->prog.setUniform("wz", z);
-            d->rect.render();
+            // Bake pass
+            gl::Fbo fbo;
+            Binder<gl::Fbo> fboBinder(&fbo);
+            Binder<gl::ShaderProgram> progBinder(&d->prog);
+            d->prog.setUniform("density",  0)
+                   .setUniform("emission", 1)
+                   .setUniform("horizon",  2)
+                   .setUniform("lightSrc", 3)
+                   .setUniform("lsc",      lightSourceCount)
+                   .setUniform("attMin",   0.001f)
+                   .setUniform("k0",       1.f)
+                   .setUniform("k1",       0.22f)
+                   .setUniform("k2",       0.2f)
+                   .setUniform("cs",       c::cell::SIZE.xzy());
 
-            #if 0
-            glReadPixels(0, 0, lightmap.size.x, lightmap.size.y,
-                         GL_RGB, GL_FLOAT, static_cast<GLvoid*>(
-                                               &lightmap.at(0, 0, z)));
+            const GLenum buffers[] = {GL_COLOR_ATTACHMENT0,
+                                      GL_COLOR_ATTACHMENT1};
+
+            glViewport(0, 0, size.x, size.y);
+            glDrawBuffers(2, buffers);
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(false);
+
+            d->texDensity.bindAs(GL_TEXTURE0);
+            d->texEmission.bindAs(GL_TEXTURE1);
+            horizon.texture().bindAs(GL_TEXTURE2);
+            d->texLightSources.bindAs(GL_TEXTURE3);
+
+            // Z-layers
+            for (int z = 0; z < size.z; ++z)
+            {
+                fbo.attach(d->texLight,     gl::Fbo::Attachment::Color, 0, 0, z);
+                fbo.attach(d->texIncidence, gl::Fbo::Attachment::Color, 1, 0, z);
+                d->prog.setUniform("wz", z);
+                d->rect.render();
+            }
+
+            #if 1
+            const auto elapsed = boost::chrono::duration<float, boost::milli>
+                                (clock.elapsed()).count();
+            const auto vol     = size.x * size.y * size.z;
+            PTLOG(Info) << "elapsed " << elapsed << " ms, "
+                        << (vol / elapsed) << " cells/ms";
             #endif
         }
-
-        #if 1
-        const auto elapsed = boost::chrono::duration<float, boost::milli>
-                            (clock.elapsed()).count();
-        const auto vol     = size.x * size.y * size.z;
-
-        PTLOG(Info) << "elapsed " << elapsed << " ms, "
-                    << (vol / elapsed) << " cells/ms";
-        #endif
-
-        #if 0
-        for (int z = 0; z < size.z; ++z)
         {
-            const auto zs = std::to_string(z);
-            image(lightmap, z).write("c:/temp/" + zs + "_light.png");
-            image(d->density, z).write("c:/temp/" + zs + "_density.png");
-            image(d->emission, z).write("c:/temp/" + zs + "_emission.png");
+            // Upscale HQ textures
+            const Time<GpuClock> clockHq;
+            const auto sizeHq = d->texLightHq.size();
+
+            gl::Fbo fbo;
+            Binder<gl::Fbo> fboBinder(&fbo);
+            Binder<gl::ShaderProgram> progBinder(&d->progHq);
+            d->progHq.setUniform("texGi",  0)
+                     .setUniform("texInc", 1);
+
+            const GLenum buffers[] = {GL_COLOR_ATTACHMENT0,
+                                      GL_COLOR_ATTACHMENT1};
+
+            glViewport(0, 0, sizeHq.x, sizeHq.y);
+            glDrawBuffers(2, buffers);
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(false);
+
+            d->texLight.bindAs(GL_TEXTURE0);
+            d->texIncidence.bindAs(GL_TEXTURE1);
+
+            // Z-layers
+            for (int z = 0; z < sizeHq.z; ++z)
+            {
+                fbo.attach(d->texLightHq,     gl::Fbo::Attachment::Color, 0, 0, z);
+                fbo.attach(d->texIncidenceHq, gl::Fbo::Attachment::Color, 1, 0, z);
+                d->progHq.setUniform("z", float(z) / (sizeHq.z - 1));
+                d->rect.render();
+            }
+
+            #if 1
+            const auto elapsed = boost::chrono::duration<float, boost::milli>
+                                (clockHq.elapsed()).count();
+            const auto vol     = sizeHq.x * sizeHq.y * sizeHq.z;
+            PTLOG(Info) << "HQ elapsed " << elapsed << " ms, "
+                        << "size: " << sizeHq.x << "x" << sizeHq.y << "x" << sizeHq.z
+                        << ", " << (vol / elapsed) << " cells/ms";
+            #endif
         }
-        #endif
     }
     return *this;
 }
