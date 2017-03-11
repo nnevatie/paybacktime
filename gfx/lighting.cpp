@@ -12,7 +12,19 @@ namespace pt
 namespace gfx
 {
 
+struct Lighting::Data
+{
+    Data() :
+        texGiOut(nullptr),
+        texScOut(nullptr)
+    {}
+
+    gl::Texture* texGiOut;
+    gl::Texture* texScOut;
+};
+
 Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
+    d(std::make_shared<Data>()),
     rect(squareMesh()),
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsGi(gl::Shader::path("lighting_gi.fs.glsl")),
@@ -59,6 +71,70 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
           .unbind();
 }
 
+Lighting& Lighting::gi(gl::Texture* texDepth,
+                       gl::Texture* texLightmap,
+                       const Camera& camera,
+                       const Box& bounds)
+{
+    // GI pass
+    Binder<gl::Fbo> binder(fboGi);
+    progGi.bind().setUniform("texDepth",   0)
+                 .setUniform("texGi",      1)
+                 .setUniform("w",          camera.matrixWorld())
+                 .setUniform("boundsMin",  glm::floor(bounds.pos))
+                 .setUniform("boundsSize", glm::ceil(bounds.size));
+
+    const auto size = texGi.size();
+    glViewport(0, 0, size.x, size.y);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(false);
+    texDepth->bindAs(GL_TEXTURE0);
+    texLightmap->bindAs(GL_TEXTURE1);
+    rect.render();
+
+    d->texGiOut = &texGi;
+    if (float(texGi.size().x) / texOut.size().x < 1.f)
+    {
+        blurGi(&texGi, nullptr, 1);
+        d->texGiOut = &blurGi.output();
+    }
+    return *this;
+}
+
+Lighting& Lighting::sc(gl::Texture* texDepth,
+                       gl::Texture* texLightmap,
+                       const Camera& camera,
+                       const Box& bounds)
+{
+    // Scattering pass
+    Binder<gl::Fbo> binder(fboSc);
+    progSc.bind().setUniform("texDepth",    0)
+                 .setUniform("texGi",       1)
+                 .setUniform("w",           camera.matrixWorld())
+                 .setUniform("camPos",      camera.position())
+                 .setUniform("boundsMin",   glm::floor(bounds.pos))
+                 .setUniform("boundsSize",  glm::ceil(bounds.size))
+                 .setUniform("sampleCount", scSampleCount);
+
+    const auto size = texSc.size();
+    glViewport(0, 0, size.x, size.y);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(false);
+    texDepth->bindAs(GL_TEXTURE0);
+    texLightmap->bindAs(GL_TEXTURE1);
+    rect.render();
+
+    d->texScOut = &texSc;
+    if (float(texSc.size().x) / texOut.size().x < 1.f)
+    {
+        blurSc(&texSc, nullptr, 3);
+        d->texScOut = &blurSc.output();
+    }
+    return *this;
+}
+
 Lighting& Lighting::operator()(
     gl::Texture* texDepth,
     gl::Texture* texNormal,
@@ -72,90 +148,38 @@ Lighting& Lighting::operator()(
     const glm::mat4& v,
     const glm::mat4& p)
 {
-    gl::Texture* texGiOut = &texGi;
-    {
-        // GI pass
-        Binder<gl::Fbo> binder(fboGi);
-        progGi.bind().setUniform("texDepth",   0)
-                     .setUniform("texGi",      1)
-                     .setUniform("w",          camera.matrixWorld())
-                     .setUniform("boundsMin",  glm::floor(bounds.pos))
-                     .setUniform("boundsSize", glm::ceil(bounds.size));
+    // Combine pass
+    Binder<gl::Fbo> binder(fboOut);
+    progOut.bind().setUniform("texDepth",    0)
+                  .setUniform("texNormal",   1)
+                  .setUniform("texColor",    2)
+                  .setUniform("texLight",    3)
+                  .setUniform("texAo",       4)
+                  .setUniform("texGi",       5)
+                  .setUniform("texSc",       6)
+                  .setUniform("texIncid",    7)
+                  .setUniform("z",           0.f)
+                  .setUniform("tanHalfFov",  camera.tanHalfFov())
+                  .setUniform("aspectRatio", camera.ar)
+                  .setUniform("w",           camera.matrixWorld())
+                  .setUniform("n",           camera.matrixNormal())
+                  .setUniform("boundsMin",   glm::floor(bounds.pos))
+                  .setUniform("boundsSize",  glm::ceil(bounds.size));
 
-        const auto size = texGi.size();
-        glViewport(0, 0, size.x, size.y);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
-        texDepth->bindAs(GL_TEXTURE0);
-        texLightmap->bindAs(GL_TEXTURE1);
-        rect.render();
-        if (float(texGi.size().x) / texOut.size().x < 1.f)
-        {
-            blurGi(&texGi, nullptr, 1);
-            texGiOut = &blurGi.output();
-        }
-    }
-    gl::Texture* texScOut = &texSc;
-    {
-        // Scattering pass
-        Binder<gl::Fbo> binder(fboSc);
-        progSc.bind().setUniform("texDepth",    0)
-                     .setUniform("texGi",       1)
-                     .setUniform("w",           camera.matrixWorld())
-                     .setUniform("camPos",      camera.position())
-                     .setUniform("boundsMin",   glm::floor(bounds.pos))
-                     .setUniform("boundsSize",  glm::ceil(bounds.size))
-                     .setUniform("sampleCount", scSampleCount);
-
-        const auto size = texSc.size();
-        glViewport(0, 0, size.x, size.y);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
-        texDepth->bindAs(GL_TEXTURE0);
-        texLightmap->bindAs(GL_TEXTURE1);
-        rect.render();
-        if (float(texSc.size().x) / texOut.size().x < 1.f)
-        {
-            blurSc(&texSc, nullptr, 3);
-            texScOut = &blurSc.output();
-        }
-    }
-    {
-        // Combine pass
-        Binder<gl::Fbo> binder(fboOut);
-        progOut.bind().setUniform("texDepth",    0)
-                      .setUniform("texNormal",   1)
-                      .setUniform("texColor",    2)
-                      .setUniform("texLight",    3)
-                      .setUniform("texAo",       4)
-                      .setUniform("texGi",       5)
-                      .setUniform("texSc",       6)
-                      .setUniform("texIncid",    7)
-                      .setUniform("z",           0.f)
-                      .setUniform("tanHalfFov",  camera.tanHalfFov())
-                      .setUniform("aspectRatio", camera.ar)
-                      .setUniform("w",           camera.matrixWorld())
-                      .setUniform("n",           camera.matrixNormal())
-                      .setUniform("boundsMin",   glm::floor(bounds.pos))
-                      .setUniform("boundsSize",  glm::ceil(bounds.size));
-
-        const auto size = texOut.size();
-        glViewport(0, 0, size.x, size.y);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
-        texDepth->bindAs(GL_TEXTURE0);
-        texNormal->bindAs(GL_TEXTURE1);
-        texColor->bindAs(GL_TEXTURE2);
-        texLight->bindAs(GL_TEXTURE3);
-        texSsao->bindAs(GL_TEXTURE4);
-        texGiOut->bindAs(GL_TEXTURE5);
-        texScOut->bindAs(GL_TEXTURE6);
-        texIncidence->bindAs(GL_TEXTURE7);
-        rect.render();
-    }
+    const auto size = texOut.size();
+    glViewport(0, 0, size.x, size.y);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(false);
+    texDepth->bindAs(GL_TEXTURE0);
+    texNormal->bindAs(GL_TEXTURE1);
+    texColor->bindAs(GL_TEXTURE2);
+    texLight->bindAs(GL_TEXTURE3);
+    texSsao->bindAs(GL_TEXTURE4);
+    d->texGiOut->bindAs(GL_TEXTURE5);
+    d->texScOut->bindAs(GL_TEXTURE6);
+    texIncidence->bindAs(GL_TEXTURE7);
+    rect.render();
     return *this;
 }
 

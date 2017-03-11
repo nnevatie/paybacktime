@@ -191,6 +191,20 @@ struct Data
                  proj, camera.fov);
         }
         {
+            auto time = timeTree.scope("lighting-gi", detailedStats);
+            lighting.gi(&geometry.texDepth,
+                        scene.lightmap(),
+                        camera,
+                        scene.bounds());
+        }
+        {
+            auto time = timeTree.scope("lighting-sc", detailedStats);
+            lighting.sc(&geometry.texDepth,
+                        scene.lightmap(),
+                        camera,
+                        scene.bounds());
+        }
+        {
             auto time = timeTree.scope("lighting", detailedStats);
             lighting(&geometry.texDepth,
                      &geometry.texNormalDenoise,

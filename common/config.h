@@ -78,7 +78,7 @@ static constexpr Video
     LOW   = {{1.00f}, {0.50f}, {0.25f}, {0.50f}, {0.50f}, {0.25f, 10}};
 
 static constexpr Config config = {HIGH,
-                                 {false}};
+                                 {true}};
 
 } // namespace preset
 

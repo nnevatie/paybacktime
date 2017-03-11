@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <glm/mat4x4.hpp>
 
 #include "geom/size.h"
@@ -49,6 +51,16 @@ struct Lighting
 
     Lighting(const cfg::Video& config, const gl::Texture& texDepth);
 
+    Lighting& gi(gl::Texture* texDepth,
+                 gl::Texture* texLightmap,
+                 const Camera& camera,
+                 const Box& bounds);
+
+    Lighting& sc(gl::Texture* texDepth,
+                 gl::Texture* texLightmap,
+                 const Camera& camera,
+                 const Box& bounds);
+
     Lighting& operator()(
         gl::Texture* texDepth,
         gl::Texture* texNormal,
@@ -63,6 +75,10 @@ struct Lighting
         const glm::mat4& p);
 
     gl::Texture* output();
+
+private:
+    struct Data;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace gfx
