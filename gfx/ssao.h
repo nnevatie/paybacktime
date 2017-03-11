@@ -11,6 +11,8 @@
 #include "gl/texture.h"
 #include "gl/fbo.h"
 
+#include "blur.h"
+
 namespace pt
 {
 namespace gfx
@@ -31,18 +33,16 @@ struct Ssao
 
     gl::Shader        vsQuad,
                       fsCommon,
-                      fsAo,
-                      fsBlur;
+                      fsAo;
 
-    gl::ShaderProgram progAo,
-                      progBlur;
+    gl::ShaderProgram progAo;
 
-    gl::Fbo           fboAo,
-                      fboAoBlur;
+    gl::Fbo           fboAo;
 
     gl::Texture       texAo,
-                      texAoBlur[2],
                       texNoise;
+
+    Blur              blur;
 
     Ssao(int kernelSize, const Size<int>& displaySize,
                          const Size<int>& renderSize,
@@ -54,6 +54,8 @@ struct Ssao
                      gl::Texture* texNormal,
                      const glm::mat4& proj,
                      float fov);
+
+    gl::Texture& output();
 };
 
 } // namespace gfx

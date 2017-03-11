@@ -74,7 +74,7 @@ namespace preset
 
 static constexpr Video
     ULTRA = {{1.00f}, {1.00f}, {1.00f}, {1.00f}, {1.00f}, {1.00f, 20}},
-    HIGH  = {{1.00f}, {0.50f}, {0.50f}, {1.00f}, {1.00f}, {0.50f, 20}},
+    HIGH  = {{1.00f}, {1.00f}, {0.50f}, {1.00f}, {1.00f}, {0.50f, 20}},
     LOW   = {{1.00f}, {0.50f}, {0.25f}, {0.50f}, {0.50f}, {0.25f, 10}};
 
 static constexpr Config config = {HIGH,

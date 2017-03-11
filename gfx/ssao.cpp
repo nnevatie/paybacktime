@@ -61,21 +61,14 @@ Ssao::Ssao(int kernelSize,
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsCommon(gl::Shader::path("common.fs.glsl")),
     fsAo(gl::Shader::path("ssao.fs.glsl")),
-    fsBlur(gl::Shader::path("blur.fs.glsl")),
     progAo({vsQuad, fsAo, fsCommon},
           {{0, "position"}, {1, "uv"}}),
-    progBlur({vsQuad, fsBlur},
-            {{0, "position"}, {1, "uv"}})
+    blur(renderSize)
 {
     auto fboSize = {renderSize.w, renderSize.h};
 
     // Alloc textures
     texAo.bind().alloc(fboSize, GL_R8, GL_RED, GL_UNSIGNED_BYTE);
-
-    for (int i = 0; i < 2; ++i)
-        texAoBlur[i].bind().alloc(fboSize, GL_R8, GL_RED, GL_UNSIGNED_BYTE)
-                           .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                           .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Alloc and generate noise texture
     texNoise.bind().alloc({noiseSize.w, noiseSize.h},
@@ -121,26 +114,14 @@ Ssao& Ssao::operator()(gl::Texture* texDepth,
         texNormal->bindAs(GL_TEXTURE1);
         texNoise.bindAs(GL_TEXTURE2);
         rect.render();
-    }
-    {
-        // Blur passes
-        for (int i = 0; i < 2; ++i)
-        {
-            Binder<gl::Fbo> binder(fboAoBlur);
-            fboAoBlur.attach(texAoBlur[i], gl::Fbo::Attachment::Color);
-            progBlur.bind().setUniform("texColor",   0)
-                           .setUniform("invDirSize", renderSize.inv<glm::vec2>(i))
-                           .setUniform("radius",     3);
-
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
-            glViewport(0, 0, renderSize.w, renderSize.h);
-            glDisable(GL_DEPTH_TEST);
-
-            (i == 0 ? texAo : texAoBlur[0]).bindAs(GL_TEXTURE0);
-            rect.render();
-        }
+        blur(&texAo, nullptr, 3);
     }
     return *this;
+}
+
+gl::Texture& Ssao::output()
+{
+    return blur.output();
 }
 
 } // namespace gfx

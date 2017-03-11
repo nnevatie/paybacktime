@@ -202,7 +202,7 @@ struct Data
                      &geometry.texNormalDenoise,
                      &geometry.texColor,
                      &geometry.texLight,
-                     &ssao.texAoBlur[1],
+                     &ssao.output(),
                      scene.lightmap(),
                      scene.incidence(),
                      camera,
@@ -294,7 +294,7 @@ bool Application::run(const boost::program_options::variables_map& args)
     const auto fullscreen = args.count("fullscreen");
     const Size<int> size(1920, 1080);
 
-    platform::Display display("Payback Time", size, fullscreen,
+    platform::Display display("Payback Time - Scene Editor", size, fullscreen,
                               Image(fs::path("data/paybacktime.png")));
     display.open();
 
