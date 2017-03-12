@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <boost/algorithm/clamp.hpp>
+
 #include "img/image.h"
 #include "img/image_cube.h"
 
@@ -45,8 +47,10 @@ struct Heightfield
 
     inline int f(int x, int y) const
     {
-        return x >= 0 && x < width && y >= 0 && y < height ?
-               values.at(y * width + x) : 0;
+        using namespace boost::algorithm;
+        x = clamp(x, 0, width  - 1);
+        y = clamp(y, 0, height - 1);
+        return values[y * width + x];
     }
 
     inline int g(int x, int y, int z) const
