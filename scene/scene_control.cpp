@@ -118,11 +118,14 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             const ObjectItem objectItem(object, {intersection.first,
                                                  d->object.posRot.rot});
 
-            if (d->state == Data::State::Adding && mouseButtons[0] &&
-                d->scene->intersect(objectItem).empty())
+            if (d->state == Data::State::Adding)
             {
                 // Add item
-                d->scene->add(objectItem);
+                if (mouseButtons[0] && d->scene->intersect(objectItem).empty())
+                    d->scene->add(objectItem);
+                else
+                if (mouseButtons[2] && !d->scene->contains(objectItem.bounds()))
+                    d->scene->add(objectItem);
             }
             else
             if (d->state == Data::State::Removing && mouseButtons[0] &&

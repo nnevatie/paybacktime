@@ -130,6 +130,15 @@ Scene& Scene::add(const CharacterItem& item)
     return *this;
 }
 
+bool Scene::contains(const Box& bounds) const
+{
+    for (const auto& i : d->objectItems)
+        if (i.bounds() == bounds)
+            return true;
+
+    return false;
+}
+
 ObjectItems Scene::intersect(const ObjectItem& item) const
 {
     ObjectItems items;

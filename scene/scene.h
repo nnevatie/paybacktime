@@ -48,6 +48,8 @@ struct Scene
 
     Scene& add(const CharacterItem& item);
 
+    bool contains(const Box& bounds) const;
+
     ObjectItems intersect(const ObjectItem& item) const;
     Intersection intersect(const Ray& ray) const;
 
