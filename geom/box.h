@@ -36,9 +36,19 @@ struct Box
         return pos + 0.5f * size;
     }
 
-    inline operator bool() const
+    inline explicit operator bool() const
     {
         return pos != V() || size != V();
+    }
+
+    inline operator==(const Box& box) const
+    {
+        return pos == box.pos && size == box.size;
+    }
+
+    inline operator!=(const Box& box) const
+    {
+        return !operator==(box);
     }
 
     inline Box operator|(const Box& box) const
