@@ -56,7 +56,7 @@ Preview& Preview::operator()(
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glDisable(GL_BLEND);
-        glDepthMask(true);
+        glDepthMask(GL_TRUE);
 
         glViewport(0, 0, renderSize.w, renderSize.h);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

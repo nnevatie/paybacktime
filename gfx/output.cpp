@@ -20,6 +20,7 @@ Output& Output::operator()(gl::Texture* tex)
     glViewport(0, 0, renderSize.w, renderSize.h);
     prog.bind().setUniform("tex", 0);
     glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
     tex->bindAs(GL_TEXTURE0);
     rect.render();
     return* this;

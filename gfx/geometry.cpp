@@ -107,7 +107,7 @@ Geometry& Geometry::operator()(
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glDisable(GL_BLEND);
-        glDepthMask(true);
+        glDepthMask(GL_TRUE);
 
         glViewport(0, 0, renderSize.w, renderSize.h);
         glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -168,7 +168,7 @@ Geometry& Geometry::operator()(
                                .setUniform("p",          camera.matrixProj());
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
-        glDepthMask(false);
+        glDepthMask(GL_FALSE);
         glEnable(GL_BLEND);
 
         texAlbedo->bindAs(GL_TEXTURE0);
@@ -209,15 +209,12 @@ Geometry& Geometry::operator()(
         glViewport(0, 0, renderSize.w, renderSize.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
-        //glDisable(GL_BLEND);
-        //glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+        glDepthMask(GL_FALSE);
         texOpaque->bindAs(GL_TEXTURE0);
         texEnv->bindAs(GL_TEXTURE1);
         texOit0.bindAs(GL_TEXTURE2);
         texOit1.bindAs(GL_TEXTURE3);
         rect.render();
-        //glDisable(GL_BLEND);
     }
     return *this;
 }

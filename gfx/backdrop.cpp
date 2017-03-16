@@ -27,14 +27,14 @@ Backdrop& Backdrop::operator()(gl::Fbo* fboOut, const Camera& camera)
         .setUniform("v",           camera.matrixView())
         .setUniform("pos",         camera.position())
         .setUniform("z",           1.f)
-        .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
+        .setUniform("tanHalfFov",  camera.tanHalfFov())
         .setUniform("aspectRatio", camera.ar)
         .setUniform("gridColor",   glm::vec4(0, 0.5, 0, 1));
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glDepthMask(false);
+    glDepthMask(GL_FALSE);
 
     tex.bindAs(GL_TEXTURE0);
     rect.render();

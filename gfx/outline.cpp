@@ -49,7 +49,7 @@ Outline& Outline::operator()(gl::Fbo* fboOut,
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glDepthMask(false);
+        glDepthMask(GL_FALSE);
 
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(0, -1000.f);

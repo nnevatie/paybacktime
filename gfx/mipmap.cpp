@@ -79,7 +79,7 @@ Mipmap& Mipmap::operator()(gl::Texture* tex, gl::Texture* texDepth)
         glViewport(0, 0, d->size.w, d->size.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
+        glDepthMask(GL_FALSE);
         tex->bindAs(GL_TEXTURE0);
         d->rect.render();
     }
@@ -93,7 +93,7 @@ Mipmap& Mipmap::operator()(gl::Texture* tex, gl::Texture* texDepth)
         glViewport(0, 0, size.w, size.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
+        glDepthMask(GL_FALSE);
         gl::Texture& scaleSrc = i > 1 ? d->texScales[i - 1] : d->tex;
         scaleSrc.bindAs(GL_TEXTURE0);
         d->rect.render();

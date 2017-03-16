@@ -228,7 +228,7 @@ Lightmapper& Lightmapper::operator()(const Horizon& horizon)
             glViewport(0, 0, size.x, size.y);
             glDrawBuffers(2, buffers);
             glDisable(GL_DEPTH_TEST);
-            glDepthMask(false);
+            glDepthMask(GL_FALSE);
 
             d->texDensity.bindAs(GL_TEXTURE0);
             d->texEmission.bindAs(GL_TEXTURE1);
@@ -269,7 +269,7 @@ Lightmapper& Lightmapper::operator()(const Horizon& horizon)
             glViewport(0, 0, sizeHq.x, sizeHq.y);
             glDrawBuffers(2, buffers);
             glDisable(GL_DEPTH_TEST);
-            glDepthMask(false);
+            glDepthMask(GL_FALSE);
 
             d->texLight.bindAs(GL_TEXTURE0);
             d->texIncidence.bindAs(GL_TEXTURE1);

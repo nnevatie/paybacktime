@@ -50,7 +50,7 @@ Erode& Erode::operator()(gl::Texture* tex, int radius)
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glViewport(0, 0, size.w, size.h);
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(false);
+    glDepthMask(GL_FALSE);
 
     for (int i = 0; i < 2; ++i)
     {

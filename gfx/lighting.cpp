@@ -76,7 +76,7 @@ Lighting& Lighting::sc(gl::Texture* texDepth,
     glViewport(0, 0, size.x, size.y);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(false);
+    glDepthMask(GL_FALSE);
     texDepth->bindAs(GL_TEXTURE0);
     texLightmap->bindAs(GL_TEXTURE1);
     rect.render();
@@ -123,7 +123,7 @@ Lighting& Lighting::operator()(
     glViewport(0, 0, size.x, size.y);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(false);
+    glDepthMask(GL_FALSE);
     texDepth->bindAs(GL_TEXTURE0);
     texNormal->bindAs(GL_TEXTURE1);
     texColor->bindAs(GL_TEXTURE2);

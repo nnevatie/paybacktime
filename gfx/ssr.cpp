@@ -71,7 +71,7 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
         glViewport(0, 0, renderSize.w, renderSize.h);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
+        glDepthMask(GL_FALSE);
         texDepth->bindAs(GL_TEXTURE0);
         texNormal->bindAs(GL_TEXTURE1);
         rect.render();

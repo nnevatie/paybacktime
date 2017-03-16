@@ -24,7 +24,7 @@ Arrow& Arrow::operator()(gl::Fbo* fboOut, const glm::mat4& mvp)
     Binder<gl::Fbo> binder(fboOut);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(false);
+    glDepthMask(GL_FALSE);
 
     const auto t = glm::translate(glm::vec3(c::cell::SIZE.x, 0.f, 0.f));
     progArrow.bind().setUniform("mvp", mvp * t)
