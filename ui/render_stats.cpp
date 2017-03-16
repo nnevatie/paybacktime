@@ -59,8 +59,6 @@ RenderStats& RenderStats::operator()(float fps, const glm::ivec3& sceneSize)
     nvgFontFace(d->vg, "conradi");
     nvgFillColor(d->vg, nvgRGBA(255, 255, 255, 255));
 
-    const auto timeTotal = d->times.at("total").mean();
-
     nvgText(d->vg, 10, 20, str(std::stringstream()
                                << std::fixed << std::setprecision(1)
                                << "FPS: " << fps).c_str(), 0);
@@ -82,22 +80,26 @@ RenderStats& RenderStats::operator()(float fps, const glm::ivec3& sceneSize)
         times.insert(times.begin() + index, std::make_pair(t.first, time));
     }
 
-    int row = 0;
-    nvgFillColor(d->vg, nvgRGBA(150, 180, 200, 255));
-    for (const auto& t : times)
+    if (d->times.find("total") != d->times.end())
     {
-        const auto time = t.second;
-        const auto f    = time / timeTotal;
-        nvgText(d->vg, 10, 40 + row * 20,
-                str(std::stringstream()
-                    << t.first << ":").c_str(), 0);
-        nvgText(d->vg, 140, 40 + row * 20,
-                str(std::stringstream()
-                    << std::fixed << std::setprecision(3)
-                    << time << " ms, " << (f * 100.f) << "%").c_str(), 0);
-        ++row;
-    }
+        const auto timeTotal = d->times.at("total").mean();
 
+        int row = 0;
+        nvgFillColor(d->vg, nvgRGBA(150, 180, 200, 255));
+        for (const auto& t : times)
+        {
+            const auto time = t.second;
+            const auto f    = time / timeTotal;
+            nvgText(d->vg, 10, 40 + row * 20,
+                    str(std::stringstream()
+                        << t.first << ":").c_str(), 0);
+            nvgText(d->vg, 140, 40 + row * 20,
+                    str(std::stringstream()
+                        << std::fixed << std::setprecision(3)
+                        << time << " ms, " << (f * 100.f) << "%").c_str(), 0);
+            ++row;
+        }
+    }
     nvgEndFrame(d->vg);
     return *this;
 }

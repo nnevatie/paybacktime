@@ -164,14 +164,10 @@ struct Data
 
     bool render(TimePoint time, float /*a*/)
     {
-        const float timeSec =
-            boost::chrono::duration<float>(time - TimePoint()).count();
-
-        const glm::mat4 proj = camera.matrixProj();
+        const auto detailedStats = config.debug.detailedStats;
 
         TimeTree<GpuClock> timeTree;
-        auto timeTotal = timeTree.scope("total");
-        const auto detailedStats = config.debug.detailedStats;
+        auto timeTotal = timeTree.scope("total", detailedStats);
 
         const gfx::Geometry::Instances chars =
             scene.characterGeometry();
@@ -190,7 +186,7 @@ struct Data
         {
             auto time = timeTree.scope("ssao", detailedStats);
             ssao(&geometry.texDepthLinear, &geometry.texNormalDenoise,
-                 proj, camera.fov);
+                 camera.matrixProj(), camera.fov);
         }
         {
             auto time = timeTree.scope("lighting-sc", detailedStats);
@@ -270,6 +266,9 @@ struct Data
 
         stats.accumulate(timeTree);
         stats(throughput(), scene.cellResolution());
+
+        const float timeSec =
+            boost::chrono::duration<float>(time - TimePoint()).count();
 
         fader(1.f - timeSec);
 

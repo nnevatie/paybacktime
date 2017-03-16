@@ -104,7 +104,7 @@ private:
 template <typename T>
 struct Throughput
 {
-    Throughput(float interval = 1.f) :
+    Throughput(float interval = 0.1f) :
         interval(interval),
         elapsed(now()),
         value(0.f),
