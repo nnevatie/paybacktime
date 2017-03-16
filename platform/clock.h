@@ -101,6 +101,45 @@ private:
     Map times;
 };
 
+template <typename T>
+struct Throughput
+{
+    Throughput(float interval = 1.f) :
+        interval(interval),
+        elapsed(now()),
+        value(0.f),
+        count(0)
+    {}
+
+    float operator()()
+    {
+        ++count;
+        const float t = now();
+        const float d = t - elapsed;
+        if (d >= interval)
+        {
+            value    = count / interval;
+            count    = 0;
+            elapsed += d;
+        }
+        return value;
+    }
+
+private:
+    float now() const
+    {
+        return boost::chrono::duration<float>(time.elapsed()).count();
+    }
+
+    Time<T> time;
+    float   interval,
+            elapsed,
+            value;
+
+    int     count;
+};
+using ThroughputCpu = Throughput<ChronoClock>;
+
 #define PTTIME(description) \
     pt::ScopedClock<ChronoClock> scopedClock_(PTSRC(), description)
 
