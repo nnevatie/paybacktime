@@ -23,7 +23,7 @@ struct RenderStats
 
     void accumulate(const Time& frameTime);
 
-    RenderStats& operator()(const glm::ivec3& sceneSize);
+    RenderStats& operator()(float fps, const glm::ivec3& sceneSize);
 
 private:
     struct Data;

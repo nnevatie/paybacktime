@@ -49,7 +49,7 @@ void RenderStats::accumulate(const Time& frameTime)
     }
 }
 
-RenderStats& RenderStats::operator()(const glm::ivec3& sceneSize)
+RenderStats& RenderStats::operator()(float fps, const glm::ivec3& sceneSize)
 {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -63,7 +63,7 @@ RenderStats& RenderStats::operator()(const glm::ivec3& sceneSize)
 
     nvgText(d->vg, 10, 20, str(std::stringstream()
                                << std::fixed << std::setprecision(1)
-                               << "FPS: " << (1000.f / timeTotal)).c_str(), 0);
+                               << "FPS: " << fps).c_str(), 0);
     nvgText(d->vg, 140, 20, str(std::stringstream()
                                << "Scene: "
                                << sceneSize.x << "x"

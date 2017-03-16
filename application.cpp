@@ -83,6 +83,8 @@ struct Data
 
     TimePoint          lastLiveUpdate;
 
+    ThroughputCpu      throughput;
+
     Data(platform::Display* display, const cfg::Config& config) :
         display(display),
         config(config),
@@ -265,8 +267,9 @@ struct Data
         }
 
         timeTotal.end();
+
         stats.accumulate(timeTree);
-        stats(scene.cellResolution());
+        stats(throughput(), scene.cellResolution());
 
         fader(1.f - timeSec);
 
