@@ -50,8 +50,8 @@ Geometry::Geometry(const Size<int>& renderSize) :
                            .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                            .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    texColor.bind().alloc(fboSize, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
-    texLight.bind().alloc(fboSize, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
+    texColor.bind().alloc(fboSize, GL_RGB8,  GL_RGB,  GL_UNSIGNED_BYTE);
+    texLight.bind().alloc(fboSize, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
 
     fbo.bind()
        .attach(texDepth,         gl::Fbo::Attachment::Depth)

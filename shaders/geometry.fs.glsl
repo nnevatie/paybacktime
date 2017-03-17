@@ -18,7 +18,7 @@ ib;
 // Output
 out vec3 normal;
 out vec4 color;
-out vec3 light;
+out vec4 light;
 
 float edge(vec3 bc)
 {
@@ -34,5 +34,5 @@ void main()
     normal   = normalize(ib.tbn * normalize(n * 2.0 - 1.0));
     color    = alb;
     //color    = vec4(mix(alb + 0.25, alb, edge(ib.bc)).rgb, 1.0);
-    light    = texture(texLight, ib.uv).rgb;
+    light    = texture(texLight, ib.uv);
 }

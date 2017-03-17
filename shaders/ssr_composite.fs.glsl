@@ -26,5 +26,5 @@ void main(void)
     vec4 col = texture(texColor, ib.uv);
     vec4 ssr = texture(texSsr, ib.uv);
     vec4 ref = textureLod(texEnv, ssr.xy, g);
-    color    = vec4(mix(col.rgb, ref.rgb, r * ssr.b), 1.0);
+    color    = vec4(mix(col.rgb, ref.rgb, r * ssr.b * l.a), 1.0);
 }
