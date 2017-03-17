@@ -101,7 +101,7 @@ struct Data
         antiAlias(renderSize),
         output(display->size()),
 
-        textureStore({512, 512}),
+        textureStore({1024, 1024}),
         objectStore(fs::path("objects"), textureStore),
         horizonStore(fs::path("horizons")),
         character(fs::path("characters") / "male1", textureStore),
@@ -159,6 +159,11 @@ struct Data
 
             lastLiveUpdate = time;
         }
+
+        // Add character
+        if (scene.characterGeometry().empty())
+            scene.add(CharacterItem(character, {glm::vec3(0, 0, 0)}));
+
         return true;
     }
 
