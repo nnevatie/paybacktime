@@ -104,7 +104,7 @@ private:
 template <typename T>
 struct Throughput
 {
-    Throughput(float interval = 0.1f) :
+    Throughput(float interval = 0.5f) :
         interval(interval),
         elapsed(now()),
         value(0.f),
@@ -118,7 +118,7 @@ struct Throughput
         const float d = t - elapsed;
         if (d >= interval)
         {
-            value    = count / interval;
+            value    = count / d;
             count    = 0;
             elapsed += d;
         }
