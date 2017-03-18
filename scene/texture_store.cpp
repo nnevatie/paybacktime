@@ -7,7 +7,7 @@ namespace pt
 
 TextureStore::TextureStore(const Size<int>& size) :
     albedo(size, true,  2),
-    light(size,  false, 2),
+    light(size,  true,  2),
     normal(size, false, 2)
 {
     PTLOG(Info) << "size: " << size.w << "x" << size.h;
