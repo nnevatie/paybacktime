@@ -3,6 +3,8 @@
 #include "common/log.h"
 #include "mesh.h"
 
+#include "mesher_common.h"
+
 namespace pt
 {
 namespace SnMesher
@@ -49,32 +51,6 @@ struct EdgeTable
 };
 
 static EdgeTable edgeTable;
-
-inline int dominantAxis(const glm::vec3& v)
-{
-    const glm::vec3 axes[] =
-    {
-        glm::vec3( 0,  0, +1),
-        glm::vec3( 0,  0, -1),
-        glm::vec3(-1,  0,  0),
-        glm::vec3(+1,  0,  0),
-        glm::vec3( 0, +1,  0),
-        glm::vec3( 0, -1,  0)
-    };
-
-    int axisIndex = -1;
-    float score   = 0.f;
-    for (int i = 0; i < 6; ++i)
-    {
-        const auto d = glm::dot(axes[i], v);
-        if (d >= score)
-        {
-            axisIndex = i;
-            score     = d;
-        }
-    }
-    return axisIndex;
-}
 
 template <typename V>
 Mesh_P_N_T_UV mesh(const V& vol, const RectCube<float>& uvCube, float scale = 1.f)
@@ -190,35 +166,17 @@ Mesh_P_N_T_UV mesh(const V& vol, const RectCube<float>& uvCube, float scale = 1.
                     const auto& vb = vertices[buffer[m - du]];
                     const auto& vc = vertices[buffer[m - du - dv]];
                     const auto& vd = vertices[buffer[m - dv]];
-                    const auto ns  = mask & 1 ? 1 : -1;
-                    const auto n0  = ns * glm::normalize(
-                                          glm::cross(vb - va, vc - va));
-                    const auto n1  = ns * glm::normalize(
-                                          glm::cross(vd - vc, va - vc));
+                    const int axis = i * 2 + ((mask & 1) ? 1 : 0);
 
-                    // Remember to flip orientation
-                    // depending on the sign of the corner
-                    const Mesh_P_N_UV::Index ib = mesh.vertices.size();
+                    glm::vec3 size(1.f, 1.f, 1.f); // TODO: Determine
+                    glm::vec3 dim(dims[0], dims[1], dims[2]);
+
                     if (mask & 1)
-                        mesh.vertices.insert(mesh.vertices.begin(),
-                                           {{va, n0},
-                                            {vb, n0},
-                                            {vc, n0},
-                                            {vc, n1},
-                                            {vd, n1},
-                                            {va, n1}});
+                        emitQuad(&mesh, axis, va, size, dim,
+                                {va, vb, vc, vd}, uvCube);
                     else
-                        mesh.vertices.insert(mesh.vertices.begin(),
-                                           {{vc, n0},
-                                            {vb, n0},
-                                            {va, n0},
-                                            {va, n1},
-                                            {vd, n1},
-                                            {vc, n1}});
-
-                    mesh.indices.insert(mesh.indices.end(),
-                                       {ib + 0, ib + 1, ib + 2,
-                                        ib + 3, ib + 4, ib + 5});
+                        emitQuad(&mesh, axis, vc, size, dim,
+                                {vc, vb, va, vd}, uvCube);
                 }
             }
     }
