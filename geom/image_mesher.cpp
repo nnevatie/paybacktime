@@ -234,12 +234,14 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
         // Smoothing types
         using Indices       = std::vector<int>;
         using Neighbors     = std::vector<Indices>;
-        using Displacements = std::vector<Mesh_P_N_T_UV::Vertex>;
+        using Displacements = std::vector<glm::vec3>;
         Neighbors neighbors(mesh.vertices.size());
 
         // Find neighbors
         const auto vc = int(mesh.vertices.size());
         const auto ic = int(mesh.indices.size());
+
+        #pragma omp parallel for
         for (int i = 0; i < ic; ++i)
         {
             const auto  i0 = mesh.indices[i];
@@ -249,7 +251,6 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
             {
                 const auto  i1 = mesh.indices[j];
                 const auto& v1 = mesh.vertices[i1];
-
                 if (v0.p == v1.p)
                 {
                     // Triangle base-index
@@ -267,8 +268,9 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
         for (int c = 0; c < smoothness; ++c)
         {
             // Determine displacements
-            Mesh_P_N_T_UV::Vertex none = {};
-            Displacements displacements(vc, none);
+            Displacements displacements(vc, glm::vec3());
+
+            #pragma omp parallel for
             for (int i = 0; i < vc; ++i)
             {
                 const auto& v0 = mesh.vertices[i];
@@ -280,19 +282,19 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
                     for (int j = 0; j < nc; ++j)
                     {
                         const auto& v1 = mesh.vertices[n[j]];
-                        displacements[i].p += w * (v0.p - v1.p);
+                        displacements[i] += w * (v0.p - v1.p);
                     }
                 }
             }
             // Apply displacements
-            float s = !(c % 2) ? lambda : -lambda;
+            const float s = !(c % 2) ? lambda : -lambda;
+
+            #pragma omp parallel for
             for(int i = 0; i < vc; ++i)
-            {
-                const auto& d = displacements[i];
-                mesh.vertices[i].p += s * d.p;
-            }
+                mesh.vertices[i].p += s * displacements[i];
         }
         // Recompute triangle normals and tangents
+        #pragma omp parallel for
         for (int i = 0; i < vc; i += 3)
         {
             auto& va = mesh.vertices[i + 0];
