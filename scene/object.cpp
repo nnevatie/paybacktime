@@ -87,15 +87,17 @@ struct Meta
     Meta(const Object::Path& path) :
         id(Object::pathId(path)),
         name(path.first.filename().string()),
-        scale(c::object::SCALE)
+        scale(c::object::SCALE),
+        smoothness(c::object::SMOOTHNESS)
     {
         const auto meta = readJson(path.first / c::object::METAFILE);
         if (!meta.is_null())
         {
-            base   = meta.value("base",  Object::Id());
-            scale  = meta.value("scale", c::object::SCALE);
-            origin = glm::make_vec3(meta.value("origin",
-                                    std::vector<float>(3)).data());
+            base       = meta.value("base",       Object::Id());
+            scale      = meta.value("scale",      c::object::SCALE);
+            smoothness = meta.value("smoothness", c::object::SMOOTHNESS);
+            origin     = glm::make_vec3(meta.value("origin",
+                                        std::vector<float>(3)).data());
         }
     }
 
@@ -103,6 +105,7 @@ struct Meta
     Object::Id  base;
     std::string name;
     float       scale;
+    int         smoothness;
     glm::vec3   origin;
 };
 
@@ -117,7 +120,7 @@ struct Object::Data
         const auto base = baseObject(resolver, textureStore);
 
         model = Model(path.first, base ? base.model() : Model(),
-                      textureStore, meta.scale);
+                      textureStore, meta.smoothness, meta.scale);
     }
 
     Object baseObject(const Resolver& resolver,
@@ -348,7 +351,8 @@ Object Object::flipped(TextureStore& textureStore) const
     if (d)
     {
         auto data   = std::make_shared<Data>(*d);
-        data->model = data->model.flipped(textureStore, d->meta.scale);
+        data->model = data->model.flipped(textureStore,
+                                          d->meta.smoothness, d->meta.scale);
         data->meta.origin.x += c::cell::SIZE.x; // TODO
         auto object = Object();
         object.d    = data;

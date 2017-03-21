@@ -73,7 +73,9 @@ void collapseConstants(int cc[8][3], int g)
 
 template <typename V>
 Mesh_P_N_T_UV meshGreedy(const V& vol,
-                         const RectCube<float>& uvCube, float scale = 1.f)
+                         const RectCube<float>& uvCube,
+                         float scale = 1.f,
+                         bool greedy = true)
 {
     struct Cell
     {
@@ -156,17 +158,19 @@ Mesh_P_N_T_UV meshGreedy(const V& vol,
                     if (m.d)
                     {
                         // Dimensions
-                        int w = 0, h = 0;
-                        // Compute width
-                        for (w = 1; m == mask[n + w] && i + w < dims[u]; ++w)
-                        {}
-                        // Compute height
-                        for (h = 1; j + h < dims[v]; ++h)
-                            for (int k = 0; k < w; ++k)
-                                if (m != mask[n + k + h * dims[u]])
-                                    goto dims_done;
+                        int w = 1, h = 1;
+                        if (greedy)
+                        {
+                            // Compute width
+                            for (w = 1; m == mask[n + w] && i + w < dims[u]; ++w)
+                            {}
+                            // Compute height
+                            for (h = 1; j + h < dims[v]; ++h)
+                                for (int k = 0; k < w; ++k)
+                                    if (m != mask[n + k + h * dims[u]])
+                                        goto dims_done;
+                        }
                         dims_done:
-
                         x[u] = i;
                         x[v] = j;
 
@@ -212,19 +216,100 @@ Mesh_P_N_T_UV meshGreedy(const V& vol,
 
 } // namespace
 
-Mesh_P_N_T_UV mesh(const Image& image, float scale)
+Mesh_P_N_T_UV mesh(const Image& image, int smoothness, float scale)
 {
     const Heightfield hfield(image, std::min(image.size().w, image.size().h));
-    return meshGreedy(hfield, RectCube<float>(), scale);
+    return meshGreedy(hfield, RectCube<float>(), smoothness, scale);
 }
 
 Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
                    const RectCube<float>& uvCube,
+                   int smoothness,
                    float scale)
 {
     const Cubefield cfield(imageCube);
-    return meshGreedy(cfield, uvCube, scale);
-    //return SnMesher::mesh(cfield, uvCube, scale);
+    auto mesh = meshGreedy(cfield, uvCube, scale, !smoothness);
+    if (smoothness > 0)
+    {
+        // Smoothing types
+        using Indices       = std::vector<int>;
+        using Neighbors     = std::vector<Indices>;
+        using Displacements = std::vector<Mesh_P_N_T_UV::Vertex>;
+        Neighbors neighbors(mesh.vertices.size());
+
+        // Find neighbors
+        const auto vc = int(mesh.vertices.size());
+        const auto ic = int(mesh.indices.size());
+        for (int i = 0; i < ic; ++i)
+        {
+            const auto  i0 = mesh.indices[i];
+            const auto& v0 = mesh.vertices[i0];
+
+            for (int j = 0; j < ic; ++j)
+            {
+                const auto  i1 = mesh.indices[j];
+                const auto& v1 = mesh.vertices[i1];
+
+                if (v0.p == v1.p)
+                {
+                    // Triangle base-index
+                    const auto ti = i1 % 3;
+                    const auto ib = i1 - ti;
+                    const auto n0 = ib + ((ti + 1) % 3);
+                    const auto n1 = ib + ((ti + 2) % 3);
+                    neighbors[i0].push_back(n0);
+                    neighbors[i0].push_back(n1);
+                }
+            }
+        }
+        // Smooth iteratively
+        const auto lambda = 0.5f;
+        for (int c = 0; c < smoothness; ++c)
+        {
+            // Determine displacements
+            Mesh_P_N_T_UV::Vertex none = {};
+            Displacements displacements(vc, none);
+            for (int i = 0; i < vc; ++i)
+            {
+                const auto& v0 = mesh.vertices[i];
+                const auto& n  = neighbors[i];
+                const auto nc  = int(n.size());
+                if (nc)
+                {
+                    const auto w = 1.f / nc;
+                    for (int j = 0; j < nc; ++j)
+                    {
+                        const auto& v1 = mesh.vertices[n[j]];
+                        displacements[i].p += w * (v0.p - v1.p);
+                    }
+                }
+            }
+            // Apply displacements
+            float s = !(c % 2) ? lambda : -lambda;
+            for(int i = 0; i < vc; ++i)
+            {
+                const auto& d = displacements[i];
+                mesh.vertices[i].p += s * d.p;
+            }
+        }
+        // Recompute triangle normals and tangents
+        for (int i = 0; i < vc; i += 3)
+        {
+            auto& va = mesh.vertices[i + 0];
+            auto& vb = mesh.vertices[i + 1];
+            auto& vc = mesh.vertices[i + 2];
+            auto n   = glm::normalize(glm::cross(vb.p - va.p, vc.p - va.p));
+            auto t   = tangent({va.p,  vb.p,  vc.p},
+                               {va.uv, vb.uv, vc.uv}, n);
+            va.n = n;
+            vb.n = n;
+            vc.n = n;
+            va.t = t;
+            vb.t = t;
+            vc.t = t;
+        }
+    }
+    return mesh;
 }
 
 } // namespace ImageMesher

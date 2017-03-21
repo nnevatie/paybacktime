@@ -54,6 +54,7 @@ struct Model::Data
 {
     std::time_t lastUpdated;
     fs::path    path;
+    int         smoothness;
     float       scale;
     Cubes       cubes;
 
@@ -61,8 +62,8 @@ struct Model::Data
     gl::Primitive               primitive;
 
     Data(const fs::path& path, const Model& base,
-         TextureStore& textureStore, float scale) :
-        lastUpdated(0), path(path), scale(scale)
+         TextureStore& textureStore, int smoothness, float scale) :
+         lastUpdated(0), path(path), smoothness(smoothness), scale(scale)
     {
         update(base, textureStore);
     }
@@ -90,7 +91,8 @@ struct Model::Data
                           textureStore.light.insert(cubes.light);
                           textureStore.normal.insert(cubes.normal);
             // Update mesh
-            auto mesh   = ImageMesher::mesh(cubes.depth, atlasEntry.second, scale);
+            auto mesh   = ImageMesher::mesh(cubes.depth, atlasEntry.second,
+                                            smoothness, scale);
             primitive   = gl::Primitive(mesh);
             lastUpdated = modified;
             return true;
@@ -103,8 +105,8 @@ Model::Model()
 {}
 
 Model::Model(const fs::path& path, const Model& base,
-             TextureStore& textureStore, float scale) :
-    d(std::make_shared<Data>(path, base, textureStore, scale))
+             TextureStore& textureStore, int smoothness, float scale) :
+    d(std::make_shared<Data>(path, base, textureStore, smoothness,  scale))
 {
 }
 
@@ -144,7 +146,8 @@ bool Model::update(const Model& base, TextureStore& textureStore)
     return d->update(base, textureStore);
 }
 
-Model Model::flipped(TextureStore& textureStore, float scale) const
+Model Model::flipped(TextureStore& textureStore,
+                     int smoothness, float scale) const
 {
     if (d)
     {
@@ -156,7 +159,9 @@ Model Model::flipped(TextureStore& textureStore, float scale) const
                            textureStore.light.insert(data->cubes.light);
                            textureStore.normal.insert(data->cubes.normal);
         auto mesh        = ImageMesher::mesh(data->cubes.depth,
-                                             data->atlasEntry.second, scale);
+                                             data->atlasEntry.second,
+                                             smoothness,
+                                             scale);
         data->primitive  = gl::Primitive(mesh);
         return model;
     }

@@ -19,6 +19,7 @@ struct Model
     Model(const fs::path& path,
           const Model& base,
           TextureStore& textureStore,
+          int smoothness,
           float scale = 1.f);
 
     operator bool() const;
@@ -33,7 +34,8 @@ struct Model
 
     bool update(const Model& base, TextureStore& textureStore);
 
-    Model flipped(TextureStore& textureStore, float scale = 1.f) const;
+    Model flipped(TextureStore& textureStore,
+                  int smoothness, float scale = 1.f) const;
 
 private:
     struct Data;
