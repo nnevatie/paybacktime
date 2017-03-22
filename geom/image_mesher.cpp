@@ -3,6 +3,7 @@
 #include <array>
 
 #include <glm/ext.hpp>
+#include <glm/gtx/hash.hpp>
 
 #include "platform/clock.h"
 #include "common/log.h"
@@ -229,41 +230,37 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
 {
     const Cubefield cfield(imageCube);
     auto mesh = meshGreedy(cfield, uvCube, scale, !smoothness);
-    if (false/*smoothness > 0*/)
+    if (smoothness > 0)
     {
         PTTIMEU("smooth", boost::milli);
 
         // Smoothing types
         using Indices       = std::vector<int>;
+        using Locations     = std::unordered_map<glm::vec3, Indices>;
         using Neighbors     = std::vector<Indices>;
         using Displacements = std::vector<glm::vec3>;
-        Neighbors neighbors(mesh.vertices.size());
+
+        // Vertex/index counts
+        const auto vc = int(mesh.vertices.size());
 
         // Find neighbors
-        const auto vc = int(mesh.vertices.size());
-        const auto ic = int(mesh.indices.size());
-
-        //#pragma omp parallel for
-        for (int i = 0; i < ic; ++i)
+        Locations locations;
+        for (int i = 0; i < vc; i += 3)
         {
-            const auto  i0 = mesh.indices[i];
-            const auto& v0 = mesh.vertices[i0];
-            for (int j = 0; j < ic; ++j)
-            {
-                const auto  i1 = mesh.indices[j];
-                const auto& v1 = mesh.vertices[i1];
-                if (v0.p == v1.p)
-                {
-                    // Triangle base-index
-                    const auto ti = i1 % 3;
-                    const auto ib = i1 - ti;
-                    const auto n0 = ib + ((ti + 1) % 3);
-                    const auto n1 = ib + ((ti + 2) % 3);
-                    neighbors[i0].push_back(n0);
-                    neighbors[i0].push_back(n1);
-                }
-            }
+            auto& l0 = locations[mesh.vertices[i + 0].p];
+            auto& l1 = locations[mesh.vertices[i + 1].p];
+            auto& l2 = locations[mesh.vertices[i + 2].p];
+            l0.insert(l0.end(), {i + 1, i + 2});
+            l1.insert(l1.end(), {i + 0, i + 2});
+            l2.insert(l2.end(), {i + 0, i + 1});
         }
+
+        Neighbors neighbors(mesh.vertices.size());
+
+        #pragma omp parallel for
+        for (int i = 0; i < vc; ++i)
+            neighbors[i] = locations[mesh.vertices[i].p];
+
         // Smooth iteratively
         const auto lambda = 0.5f;
         for (int c = 0; c < smoothness; ++c)
@@ -271,7 +268,7 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
             // Determine displacements
             Displacements displacements(vc, glm::vec3());
 
-            //#pragma omp parallel for
+            #pragma omp parallel for
             for (int i = 0; i < vc; ++i)
             {
                 const auto& v0 = mesh.vertices[i];
@@ -294,8 +291,9 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
             for(int i = 0; i < vc; ++i)
                 mesh.vertices[i].p += s * displacements[i];
         }
+
         // Recompute triangle normals and tangents
-        //#pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0; i < vc; i += 3)
         {
             auto& va = mesh.vertices[i + 0];
