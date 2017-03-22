@@ -2,6 +2,7 @@
 
 #include <glm/mat4x4.hpp>
 
+#include "geom/size.h"
 #include "gl/primitive.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"
@@ -16,6 +17,7 @@ namespace gfx
 
 struct Backdrop
 {
+    Size<int>         renderSize;
     gl::Primitive     rect;
 
     gl::Shader        vsQuad,
@@ -25,7 +27,7 @@ struct Backdrop
 
     gl::Texture       tex;
 
-    Backdrop();
+    Backdrop(const Size<int>& renderSize);
 
     Backdrop& operator()(gl::Fbo* fboOut, const Camera& camera);
 };

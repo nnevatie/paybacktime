@@ -96,6 +96,7 @@ struct Data
         lighting(config.video, geometry.texDepth),
         bloom(renderSize),
         outline(renderSize, geometry.texDepth),
+        backdrop(renderSize),
         envMipmap(renderSize * config.video.env.scale, 4, true),
         colorGrade(renderSize),
         antiAlias(renderSize),
@@ -215,12 +216,12 @@ struct Data
                      scene.bounds());
         }
         {
-            auto time = timeTree.scope("backdrop", detailedStats);
-            backdrop(&lighting.fboOut, camera);
-        }
-        {
             auto time = timeTree.scope("env-mips", detailedStats);
             envMipmap(lighting.output(), &geometry.texDepth);
+        }
+        {
+            auto time = timeTree.scope("backdrop", detailedStats);
+            backdrop(&lighting.fboOut, camera);
         }
         {
             auto time = timeTree.scope("ssr", detailedStats);

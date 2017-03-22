@@ -7,7 +7,8 @@ namespace pt
 namespace gfx
 {
 
-Backdrop::Backdrop() :
+Backdrop::Backdrop(const Size<int>& renderSize) :
+    renderSize(renderSize),
     rect(squareMesh()),
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsBackdrop(gl::Shader::path("backdrop.fs.glsl")),
@@ -31,6 +32,7 @@ Backdrop& Backdrop::operator()(gl::Fbo* fboOut, const Camera& camera)
         .setUniform("aspectRatio", camera.ar)
         .setUniform("gridColor",   glm::vec4(0, 0.5, 0, 1));
 
+    glViewport(0, 0, renderSize.w, renderSize.h);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
