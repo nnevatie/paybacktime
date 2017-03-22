@@ -296,24 +296,22 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
         #pragma omp parallel for
         for (int i = 0; i < vc; i += 3)
         {
-            auto& va = mesh.vertices[i + 0];
-            auto& vb = mesh.vertices[i + 1];
-            auto& vc = mesh.vertices[i + 2];
-            auto n   = glm::normalize(glm::cross(vb.p - va.p, vc.p - va.p));
-            auto t   = tangent({va.p,  vb.p,  vc.p},
-                               {va.uv, vb.uv, vc.uv}, n);
-            va.n = n;
-            vb.n = n;
-            vc.n = n;
-            va.t = t;
-            vb.t = t;
-            vc.t = t;
+            auto& va1 = mesh.vertices[i + 0];
+            auto& vb1 = mesh.vertices[i + 1];
+            auto& vc1 = mesh.vertices[i + 2];
+            auto n    = glm::normalize(glm::cross(vb1.p - va1.p, vc1.p - va1.p));
+            auto t    = tangent({va1.p,  vb1.p,  vc1.p},
+                                {va1.uv, vb1.uv, vc1.uv}, n);
+            va1.n = n;
+            vb1.n = n;
+            vc1.n = n;
+            va1.t = t;
+            vb1.t = t;
+            vc1.t = t;
         }
-    }
-    if (smoothness > 0)
         PTLOG(Info) << "v: "   << mesh.vertices.size()
                     << ", i: " << mesh.indices.size();
-
+    }
     return mesh;
 }
 
