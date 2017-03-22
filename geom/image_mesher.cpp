@@ -244,7 +244,7 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
         const auto vc = int(mesh.vertices.size());
 
         // Find neighbors
-        Locations locations;
+        Locations locations(vc / 4);
         for (int i = 0; i < vc; i += 3)
         {
             auto& l0 = locations[mesh.vertices[i + 0].p];
