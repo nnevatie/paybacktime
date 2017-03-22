@@ -229,8 +229,10 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
 {
     const Cubefield cfield(imageCube);
     auto mesh = meshGreedy(cfield, uvCube, scale, !smoothness);
-    if (smoothness > 0)
+    if (false/*smoothness > 0*/)
     {
+        PTTIMEU("smooth", boost::milli);
+
         // Smoothing types
         using Indices       = std::vector<int>;
         using Neighbors     = std::vector<Indices>;
@@ -241,12 +243,11 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
         const auto vc = int(mesh.vertices.size());
         const auto ic = int(mesh.indices.size());
 
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (int i = 0; i < ic; ++i)
         {
             const auto  i0 = mesh.indices[i];
             const auto& v0 = mesh.vertices[i0];
-
             for (int j = 0; j < ic; ++j)
             {
                 const auto  i1 = mesh.indices[j];
@@ -270,7 +271,7 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
             // Determine displacements
             Displacements displacements(vc, glm::vec3());
 
-            #pragma omp parallel for
+            //#pragma omp parallel for
             for (int i = 0; i < vc; ++i)
             {
                 const auto& v0 = mesh.vertices[i];
@@ -294,7 +295,7 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
                 mesh.vertices[i].p += s * displacements[i];
         }
         // Recompute triangle normals and tangents
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (int i = 0; i < vc; i += 3)
         {
             auto& va = mesh.vertices[i + 0];
@@ -311,6 +312,10 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
             vc.t = t;
         }
     }
+    if (smoothness > 0)
+        PTLOG(Info) << "v: "   << mesh.vertices.size()
+                    << ", i: " << mesh.indices.size();
+
     return mesh;
 }
 
