@@ -28,8 +28,7 @@ struct Ssr
     gl::ShaderProgram progSsr,
                       progComp;
 
-    gl::Texture       texSsrUv,
-                      texSsrA,
+    gl::Texture       texSsrUva,
                       texComp;
 
     gl::Fbo           fboSsr,

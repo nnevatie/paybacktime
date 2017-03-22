@@ -35,8 +35,7 @@ in Block
 ib;
 
 // Outputs
-out vec2  uv;
-out float alpha;
+out vec3 uva;
 
 void swap(inout float f0, inout float f1)
 {
@@ -138,11 +137,11 @@ bool raytrace(vec3 rayOrigin,
     return intersect;
 }
 
-float hitAlpha(float iterCount,
-               vec2 hitUv,
-               vec3 hitPoint,
-               vec3 vsRayOrigin,
-               vec3 vsRayDir)
+float alpha(float iterCount,
+            vec2 hitUv,
+            vec3 hitPoint,
+            vec3 vsRayOrigin,
+            vec3 vsRayDir)
 {
     // Iterations
     float attIter = 1.0 - (iterCount / ITER_MAX);
@@ -177,12 +176,12 @@ void main(void)
     vec3 ray     = normalize(reflect(normalize(origin), normalize(normal)));
     vec2 uv2     = ib.uv * sizeTex;
     float c      = (uv2.x + uv2.y) * 0.25;
-    float jitter = mod(c, 1.0);
+    float jitter = 0;//mod(c, 1.0);
 
     vec2  hitUv;
     vec3  hitPoint;
     float iters;
     bool hit = raytrace(origin, ray, jitter, hitUv, hitPoint, iters);
-    uv       = hitUv;
-    alpha    = hit ? hitAlpha(iters, hitUv, hitPoint, origin, ray) : 0.0;
+    float a  = hit ? alpha(iters, hitUv, hitPoint, origin, ray) : 0.0;
+    uva      = vec3(hitUv, a);
 }
