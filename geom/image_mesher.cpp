@@ -309,8 +309,6 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
             vb1.t = t;
             vc1.t = t;
         }
-        PTLOG(Info) << "v: "   << mesh.vertices.size()
-                    << ", i: " << mesh.indices.size();
     }
     return mesh;
 }
