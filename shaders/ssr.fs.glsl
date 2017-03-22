@@ -118,7 +118,7 @@ bool raytrace(vec3 rayOrigin,
     vec4 dpqk = vec4(dp, dq.z, dk);
     bool intersect = false;
 
-    for( i=0; i < ITER_MAX && intersect == false; ++i)
+    for(i = 0; i < ITER_MAX && !intersect; ++i)
     {
         pqk += dpqk;
         za   = zb;
@@ -150,7 +150,7 @@ float alpha(float iterCount,
     vec2 hitNdc       = hitUv * 2.0 - 1.0;
     float dimMax      = min(1.0, max(abs(hitNdc.x), abs(hitNdc.y)));
     float attScrEdges = 1.0 - max(0.0, dimMax - EDGE_FADE_START) /
-                              (1.0 - EDGE_FADE_START);
+                                         (1.0 - EDGE_FADE_START);
     // Back faces
     vec3 normal       = normalize(texture(texNormal, hitUv).xyz);
     float attBackFace = smoothstep(-0.17, 0.0, dot(normal, -vsRayDir));
@@ -183,6 +183,5 @@ void main(void)
     float iters;
     bool hit = raytrace(origin, ray, jitter, hitUv, hitPoint, iters);
     float a  = hit ? alpha(iters, hitUv, hitPoint, origin, ray) : 0.0;
-
-    color = vec4(hitUv, a, 1.0);
+    color    = vec4(hitUv, a, 1.0);
 }
