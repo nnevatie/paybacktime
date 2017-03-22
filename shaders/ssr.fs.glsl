@@ -34,8 +34,9 @@ in Block
 }
 ib;
 
-// Output
-out vec4 color;
+// Outputs
+out vec2  uv;
+out float alpha;
 
 void swap(inout float f0, inout float f1)
 {
@@ -137,11 +138,11 @@ bool raytrace(vec3 rayOrigin,
     return intersect;
 }
 
-float alpha(float iterCount,
-            vec2 hitUv,
-            vec3 hitPoint,
-            vec3 vsRayOrigin,
-            vec3 vsRayDir)
+float hitAlpha(float iterCount,
+               vec2 hitUv,
+               vec3 hitPoint,
+               vec3 vsRayOrigin,
+               vec3 vsRayDir)
 {
     // Iterations
     float attIter = 1.0 - (iterCount / ITER_MAX);
@@ -182,6 +183,6 @@ void main(void)
     vec3  hitPoint;
     float iters;
     bool hit = raytrace(origin, ray, jitter, hitUv, hitPoint, iters);
-    float a  = hit ? alpha(iters, hitUv, hitPoint, origin, ray) : 0.0;
-    color    = vec4(hitUv, a, 1.0);
+    uv       = hitUv;
+    alpha    = hit ? hitAlpha(iters, hitUv, hitPoint, origin, ray) : 0.0;
 }

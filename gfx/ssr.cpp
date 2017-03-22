@@ -26,9 +26,15 @@ Ssr::Ssr(const Size<int>& displaySize, const Size<int>& renderSize) :
 {
     // SSR
     auto ssrSize = {renderSize.w, renderSize.h};
-    texSsr.bind().alloc(ssrSize, GL_RGB16F, GL_RGB, GL_FLOAT);
+    texSsrUv.bind().alloc(ssrSize, GL_RG16F, GL_RG, GL_FLOAT)
+                   .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                   .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    texSsrA.bind().alloc(ssrSize, GL_R8, GL_RED, GL_UNSIGNED_BYTE)
+                  .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                  .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     fboSsr.bind()
-          .attach(texSsr, gl::Fbo::Attachment::Color)
+          .attach(texSsrUv, gl::Fbo::Attachment::Color, 0)
+          .attach(texSsrA,  gl::Fbo::Attachment::Color, 1)
           .unbind();
 
     // Composite
@@ -49,7 +55,6 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
     {
         // SSR
         Binder<gl::Fbo> binder(fboSsr);
-        fboSsr.attach(texSsr, gl::Fbo::Attachment::Color);
 
         // View-to-screen transformation
         auto sc0 = glm::scale({}, glm::vec3(displaySize.w, displaySize.h, 1));
@@ -69,7 +74,9 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
                       .setUniform("zFar",        camera.zFar);
 
         glViewport(0, 0, renderSize.w, renderSize.h);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        const GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0,
+                                      GL_COLOR_ATTACHMENT1};
+        glDrawBuffers(2, drawBuffers);
         glDisable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
         texDepth->bindAs(GL_TEXTURE0);
@@ -81,8 +88,9 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
         Binder<gl::Fbo> binder(fboComp);
         progComp.bind().setUniform("texColor",    0)
                        .setUniform("texEnv",      1)
-                       .setUniform("texSsr",      2)
-                       .setUniform("texLight",    3)
+                       .setUniform("texSsrUv",    2)
+                       .setUniform("texSsrA",     3)
+                       .setUniform("texLight",    4)
                        .setUniform("z",           0.f)
                        .setUniform("tanHalfFov",  std::tan(0.5f * camera.fov))
                        .setUniform("aspectRatio", camera.ar)
@@ -92,8 +100,9 @@ Ssr& Ssr::operator()(gl::Texture* texDepth,
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         texColor->bindAs(GL_TEXTURE0);
         texEnv->bindAs(GL_TEXTURE1);
-        texSsr.bindAs(GL_TEXTURE2);
-        texLight->bindAs(GL_TEXTURE3);
+        texSsrUv.bindAs(GL_TEXTURE2);
+        texSsrA.bindAs(GL_TEXTURE3);
+        texLight->bindAs(GL_TEXTURE4);
         rect.render();
     }
     return *this;
