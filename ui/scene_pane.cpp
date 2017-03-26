@@ -1,5 +1,7 @@
 #include "scene_pane.h"
 
+#include <queue>
+
 #include <nanogui/widget.h>
 #include <nanogui/layout.h>
 #include <nanogui/label.h>
@@ -40,6 +42,8 @@ struct ScenePane::Data
 
         widget->add<ng::Label>("File");
         widget->add<ng::Button>("Load").setCallback([=]
+        {
+            actions.push([=]()
             {
                 std::string path;
                 {
@@ -49,13 +53,17 @@ struct ScenePane::Data
                 if (!path.empty())
                     *scene = Scene(path, *horizonStore, *objectStore);
             });
+        });
         widget->add<ng::Button>("Save").setCallback([=]
+        {
+            actions.push([=]()
             {
                 PathPreserver pathPreserver;
                 const auto path = ng::file_dialog({fileType}, true);
                 if (!path.empty())
                     scene->write(path);
             });
+        });
 
         // Horizons
         widget->add<ng::Label>("Horizon");
@@ -91,7 +99,8 @@ struct ScenePane::Data
         widget->setVisible(false);
     }
 
-    ng::Widget* widget;
+    ng::Widget*                   widget;
+    std::queue<ScenePane::Action> actions;
 };
 
 ScenePane::ScenePane(ng::Widget* parent,
@@ -101,6 +110,17 @@ ScenePane::ScenePane(ng::Widget* parent,
                      ObjectStore* objectStore) :
     d(std::make_shared<Data>(parent, display, scene, horizonStore, objectStore))
 {}
+
+ScenePane::Action ScenePane::nextAction()
+{
+    if (!d->actions.empty())
+    {
+        const Action action = d->actions.front();
+        d->actions.pop();
+        return action;
+    }
+    return {};
+}
 
 } // namespace ui
 } // namespace pt

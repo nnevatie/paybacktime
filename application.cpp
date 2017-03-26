@@ -167,6 +167,11 @@ struct Data
             scene.add(CharacterItem(character, {glm::vec3(32, 0, -96)}));
             scene.updateLightmap();
         }
+
+        // UI actions
+        if (ui::ScenePane::Action action = scenePane.nextAction())
+            action();
+
         return true;
     }
 
