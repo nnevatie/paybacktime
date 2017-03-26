@@ -30,7 +30,6 @@ struct Mouse
 
     glm::ivec2 position() const;
     Buttons buttons() const;
-    Buttons buttonTransitions() const;
     int wheel() const;
 
     Mouse& setCursor(Cursor cursor);

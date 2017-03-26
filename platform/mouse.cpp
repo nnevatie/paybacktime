@@ -10,20 +10,18 @@ namespace pt
 {
 namespace platform
 {
+using Cursors = std::vector<SDL_Cursor*>;
 
 struct Mouse::Data
 {
-    std::vector<SDL_Cursor*> cursors;
-    int                      wheel;
-    Buttons                  buttons;
-    Buttons                  transitions;
+    Cursors cursors;
+    Buttons buttons;
+    int     wheel;
 
     Data() :
+        buttons({}),
         wheel(0)
     {
-        buttons.fill(0);
-        transitions.fill(0);
-
         SDL_SystemCursor cursorIds[] = {
             SDL_SYSTEM_CURSOR_ARROW,
             SDL_SYSTEM_CURSOR_WAITARROW,
@@ -59,11 +57,6 @@ Mouse::Buttons Mouse::buttons() const
     return d->buttons;
 }
 
-Mouse::Buttons Mouse::buttonTransitions() const
-{
-    return d->transitions;
-}
-
 int Mouse::wheel() const
 {
     return d->wheel;
@@ -80,8 +73,7 @@ Mouse& Mouse::setCursor(Mouse::Cursor cursor)
 
 Mouse& Mouse::reset()
 {
-    d->wheel       = {};
-    d->transitions = {};
+    d->wheel = {};
     return *this;
 }
 
@@ -93,16 +85,13 @@ Mouse& Mouse::update(const SDL_Event& event)
     // Clear button states on window defocus
     if (event.type         == SDL_WINDOWEVENT &&
         event.window.event == SDL_WINDOWEVENT_LEAVE)
-        d->buttons.fill(0);
+        d->buttons = {};
 
     if (event.type == SDL_MOUSEBUTTONDOWN ||
         event.type == SDL_MOUSEBUTTONUP)
     {
-        const int index = event.button.button == SDL_BUTTON_LEFT   ? 0 :
-                          event.button.button == SDL_BUTTON_MIDDLE ? 1 : 2;
-
-        d->buttons[index]     = event.type == SDL_MOUSEBUTTONDOWN ? 1 :  0;
-        d->transitions[index] = event.type == SDL_MOUSEBUTTONDOWN ? 1 : -1;
+        const int index   = event.button.button - SDL_BUTTON_LEFT;
+        d->buttons[index] = event.type == SDL_MOUSEBUTTONDOWN ? 1 : 0;
     }
     return *this;
 }
