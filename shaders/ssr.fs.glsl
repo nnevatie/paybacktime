@@ -176,7 +176,7 @@ void main(void)
     vec3 ray     = normalize(reflect(normalize(origin), normalize(normal)));
     vec2 uv2     = ib.uv * sizeTex;
     float c      = (uv2.x + uv2.y) * 0.25;
-    float jitter = 0;//mod(c, 1.0);
+    float jitter = mod(c, 1.0);
 
     vec2  hitUv;
     vec3  hitPoint;
