@@ -15,11 +15,15 @@ struct Mouse::Data
 {
     std::vector<SDL_Cursor*> cursors;
     int                      wheel;
+    Buttons                  buttons;
     Buttons                  transitions;
 
     Data() :
         wheel(0)
     {
+        buttons.fill(0);
+        transitions.fill(0);
+
         SDL_SystemCursor cursorIds[] = {
             SDL_SYSTEM_CURSOR_ARROW,
             SDL_SYSTEM_CURSOR_WAITARROW,
@@ -52,10 +56,7 @@ glm::ivec2 Mouse::position() const
 
 Mouse::Buttons Mouse::buttons() const
 {
-    const uint32_t mask = SDL_GetMouseState(nullptr, nullptr);
-    return {(mask & SDL_BUTTON_LMASK) > 0,
-            (mask & SDL_BUTTON_MMASK) > 0,
-            (mask & SDL_BUTTON_RMASK) > 0};
+    return d->buttons;
 }
 
 Mouse::Buttons Mouse::buttonTransitions() const
@@ -89,12 +90,18 @@ Mouse& Mouse::update(const SDL_Event& event)
     if (event.type == SDL_MOUSEWHEEL)
         d->wheel += event.wheel.y;
 
+    // Clear button states on window defocus
+    if (event.type         == SDL_WINDOWEVENT &&
+        event.window.event == SDL_WINDOWEVENT_LEAVE)
+        d->buttons.fill(0);
+
     if (event.type == SDL_MOUSEBUTTONDOWN ||
         event.type == SDL_MOUSEBUTTONUP)
     {
         const int index = event.button.button == SDL_BUTTON_LEFT   ? 0 :
                           event.button.button == SDL_BUTTON_MIDDLE ? 1 : 2;
 
+        d->buttons[index]     = event.type == SDL_MOUSEBUTTONDOWN ? 1 :  0;
         d->transitions[index] = event.type == SDL_MOUSEBUTTONDOWN ? 1 : -1;
     }
     return *this;
