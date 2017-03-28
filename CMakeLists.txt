@@ -79,6 +79,12 @@ set(OPENGL_LIBS
     opengl32
     )
 
+# Ozz dependencies
+set(OZZ_LIBS
+    ozz_animation_offline_r
+    ozz_base_r
+    )
+
 # Include paths
 include_directories(
     ${CMAKE_SOURCE_DIR}
@@ -109,6 +115,7 @@ target_link_libraries(${PROJECT_NAME}
                       ${BOOST_LIBS}
                       ${SDL_LIBS}
                       ${OPENGL_LIBS}
+                      ${OZZ_LIBS}
                       )
 
 ################################################################################
