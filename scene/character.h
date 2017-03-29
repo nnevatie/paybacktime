@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "common/file_system.h"
 
@@ -13,6 +15,8 @@ namespace pt
 
 struct Character
 {
+    // Parts
+    static constexpr int PART_COUNT = 15;
     enum class Part
     {
         Head,
@@ -32,10 +36,15 @@ struct Character
         HandRight
     };
 
-    Character();
-    Character(const fs::path& path, TextureStore& textureStore);
+    // Types
+    using Id    = std::string;
+    using Path  = std::pair<fs::path, fs::path>; // path, root
+    using Parts = std::array<Object, PART_COUNT>;
 
-    const std::array<Object, 15>* parts() const;
+    Character();
+    Character(const Path& path, TextureStore& textureStore);
+
+    const Parts* parts() const;
 
 private:
     struct Data;

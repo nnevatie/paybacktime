@@ -20,13 +20,13 @@ namespace pt
 struct Object
 {
     // ID
-    using Id       = std::string;
+    using Id = std::string;
 
     // Resolver
     using Resolver = std::function<Object(const Id& id,
                                           TextureStore& textureStore)>;
     // Object path, store root
-    using Path     = std::pair<fs::path, fs::path>;
+    using Path = std::pair<fs::path, fs::path>;
 
     Object();
     Object(const Path& path,

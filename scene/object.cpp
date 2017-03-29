@@ -80,8 +80,6 @@ void accumulateMaterial(mat::Emission& emission,
     }
 }
 
-}
-
 struct Meta
 {
     Meta(const Object::Path& path) :
@@ -108,6 +106,8 @@ struct Meta
     int         smoothness;
     glm::vec3   origin;
 };
+
+} // namespace
 
 struct Object::Data
 {

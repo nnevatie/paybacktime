@@ -12,8 +12,44 @@ using ozz::math::Float3;
 using ozz::math::Quaternion;
 using ozz::animation::offline::RawSkeleton;
 
+static const std::string PART_DIRS[Character::PART_COUNT] =
+{
+    "head",
+    "torso",
+    "waist",
+    "thigh.left",
+    "thigh.right",
+    "leg.left",
+    "leg.right",
+    "foot.left",
+    "foot.right",
+    "arm.left",
+    "arm.right",
+    "forearm.left",
+    "forearm.right",
+    "hand.left",
+    "hand.right"
+};
+
 namespace
 {
+
+void readParts(Character::Parts& parts,
+               const Character::Path& path,
+               TextureStore& textureStore)
+{
+    for (int i = 0; i < Character::PART_COUNT; ++i)
+    {
+        const fs::path partPath(path.first / PART_DIRS[i]);
+        if (fs::exists(partPath))
+            parts[i] = Object({partPath, path.first}, {}, textureStore);
+    }
+    const int fallbacks[Character::PART_COUNT] =
+        {-1, -1, -1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13};
+
+    for (int i = 0; i < Character::PART_COUNT; ++i)
+        if (!parts[i]) parts[i] = parts[fallbacks[i]].flipped(textureStore);
+}
 
 void setupSkeleton(RawSkeleton& skeleton)
 {
@@ -31,49 +67,24 @@ void setupSkeleton(RawSkeleton& skeleton)
     }
 }
 
+struct Meta
+{
+    Meta(const Character::Path& path)
+    {}
+};
+
 } // namespace
 
 struct Character::Data
 {
-    static constexpr int PART_COUNT = 15;
-    using Parts = std::array<Object, PART_COUNT>;
-
-    Data(const fs::path& path, TextureStore& textureStore)
+    Data(const Path& path, TextureStore& textureStore) :
+        meta(path)
     {
-        const std::string partDirs[PART_COUNT] =
-        {
-            "head",
-            "torso",
-            "waist",
-            "thigh.left",
-            "thigh.right",
-            "leg.left",
-            "leg.right",
-            "foot.left",
-            "foot.right",
-            "arm.left",
-            "arm.right",
-            "forearm.left",
-            "forearm.right",
-            "hand.left",
-            "hand.right"
-        };
-        for (int i = 0; i < PART_COUNT; ++i)
-        {
-            const fs::path partPath(path / partDirs[i]);
-            if (fs::exists(partPath))
-                parts[i] = Object({partPath, path}, {}, textureStore);
-        }
-        const int fallbacks[PART_COUNT] =
-        {
-            -1, -1, -1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13
-        };
-        for (int i = 0; i < PART_COUNT; ++i)
-            if (!parts[i]) parts[i] = parts[fallbacks[i]].flipped(textureStore);
-
+        readParts(parts, path, textureStore);
         setupSkeleton(skeleton);
     }
 
+    Meta        meta;
     Parts       parts;
     RawSkeleton skeleton;
 };
@@ -81,11 +92,11 @@ struct Character::Data
 Character::Character()
 {}
 
-Character::Character(const fs::path& path, TextureStore& textureStore) :
+Character::Character(const Path& path, TextureStore& textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {}
 
-const std::array<Object, 15>* Character::parts() const
+const Character::Parts* Character::parts() const
 {
     return &d->parts;
 }

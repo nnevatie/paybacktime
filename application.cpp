@@ -105,7 +105,7 @@ struct Data
         textureStore({1024, 1024}),
         objectStore(fs::path("objects"), textureStore),
         horizonStore(fs::path("horizons")),
-        character(fs::path("characters") / "male1", textureStore),
+        character({fs::path("characters") / "male1", "characters"}, textureStore),
 
         // Camera
         camera({0.f, 0.f, 0.f}, 450.f,
