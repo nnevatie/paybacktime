@@ -23,5 +23,10 @@ namespace object
     constexpr auto SMOOTHNESS = 0;
 }
 
+namespace character
+{
+    constexpr auto METAFILE = "character.json";
+}
+
 } // namespace c
 } // namespace pt
