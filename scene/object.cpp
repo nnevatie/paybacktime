@@ -9,9 +9,9 @@
 #include "geom/volume.h"
 #include "img/color.h"
 
+#include "common/metadata.h"
 #include "common/json.h"
 #include "common/log.h"
-#include "common/metadata.h"
 
 #include "constants.h"
 

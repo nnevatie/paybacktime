@@ -2,8 +2,12 @@
 
 #include <ozz/animation/offline/raw_skeleton.h>
 
+#include "common/metadata.h"
+#include "common/json.h"
 #include "common/log.h"
 #include "object.h"
+
+#include "constants.h"
 
 namespace pt
 {
@@ -51,12 +55,18 @@ void readParts(Character::Parts& parts,
         if (!parts[i]) parts[i] = parts[fallbacks[i]].flipped(textureStore);
 }
 
-void setupSkeleton(RawSkeleton& skeleton)
+void setupSkeleton(RawSkeleton& rawSkeleton, const json& meta)
 {
     {
+        const auto skeleton = meta["skeleton"];
+        for (const auto& joint : json::iterator_wrapper(skeleton))
+        {
+            PTLOG(Info) << joint.key() << "|" << joint.value();
+        }
+
         // Root
-        skeleton.roots.resize(1);
-        auto& root = skeleton.roots.front();
+        rawSkeleton.roots.resize(1);
+        auto& root = rawSkeleton.roots.front();
         root.name = "root";
         auto& transform = root.transform;
         transform.scale       = Float3::one();
@@ -69,8 +79,11 @@ void setupSkeleton(RawSkeleton& skeleton)
 
 struct Meta
 {
-    Meta(const Character::Path& path)
+    Meta(const Character::Path& path) :
+        meta(readJson(path.first / c::character::METAFILE))
     {}
+
+    json meta;
 };
 
 } // namespace
@@ -81,7 +94,7 @@ struct Character::Data
         meta(path)
     {
         readParts(parts, path, textureStore);
-        setupSkeleton(skeleton);
+        setupSkeleton(skeleton, meta.meta);
     }
 
     Meta        meta;
