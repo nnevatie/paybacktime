@@ -55,26 +55,44 @@ void readParts(Character::Parts& parts,
         if (!parts[i]) parts[i] = parts[fallbacks[i]].flipped(textureStore);
 }
 
+void setupJoints(RawSkeleton::Joint::Children& joints, const json& meta)
+{
+    const auto TR_DEFAULT  = std::vector<float> {0.f, 0.f, 0.f};
+    const auto ROT_DEFAULT = std::vector<float> {0.f, 1.f, 0.f, 0.f};
+
+    for (const auto& nameValue : json::iterator_wrapper(meta))
+    {
+        // Name and value
+        auto  name = nameValue.key();
+        auto& node = nameValue.value();
+
+        PTLOG(Info) << name << "|" << node;
+
+        // Create joint
+        RawSkeleton::Joint joint = {};
+
+        // Name
+        joint.name = name.c_str();
+
+        // Transform
+        auto  tr          = node.value("tr",  TR_DEFAULT);
+        auto  rot         = node.value("rot", ROT_DEFAULT);
+        auto& tform       = joint.transform;
+        tform.scale       = Float3::one();
+        tform.translation = Float3(tr[0], tr[1], tr[2]);
+        tform.rotation    = Quaternion::FromAxisAngle(
+                                {rot[0], rot[1], rot[2], rot[3]});
+        // Children
+        setupJoints(joint.children, node.value("children", json::object()));
+
+        // Add to joints
+        joints.push_back(joint);
+    }
+}
+
 void setupSkeleton(RawSkeleton& rawSkeleton, const json& meta)
 {
-    {
-        const auto skeleton = meta["skeleton"];
-        for (const auto& joint : json::iterator_wrapper(skeleton))
-        {
-            PTLOG(Info) << joint.key() << "|" << joint.value();
-        }
-
-        // Root
-        rawSkeleton.roots.resize(1);
-        auto& root = rawSkeleton.roots.front();
-        root.name = "root";
-        auto& transform = root.transform;
-        transform.scale       = Float3::one();
-        transform.translation = Float3(0.f, 0.f, 0.f);
-        transform.rotation    = Quaternion::identity();
-
-        // TODO: read the skeleton data from character.json
-    }
+    setupJoints(rawSkeleton.roots, meta["skeleton"]);
 }
 
 struct Meta
