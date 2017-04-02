@@ -1,6 +1,8 @@
 #include "character.h"
 
+#include <ozz/animation/runtime/skeleton.h>
 #include <ozz/animation/offline/raw_skeleton.h>
+#include <ozz/animation/offline/skeleton_builder.h>
 
 #include "common/metadata.h"
 #include "common/json.h"
@@ -14,7 +16,9 @@ namespace pt
 // Ozz types
 using ozz::math::Float3;
 using ozz::math::Quaternion;
+using ozz::animation::Skeleton;
 using ozz::animation::offline::RawSkeleton;
+using ozz::animation::offline::SkeletonBuilder;
 
 static const std::string PART_DIRS[Character::PART_COUNT] =
 {
@@ -38,10 +42,10 @@ static const std::string PART_DIRS[Character::PART_COUNT] =
 namespace
 {
 
-void readParts(Character::Parts& parts,
-               const Character::Path& path,
-               TextureStore& textureStore)
+Character::Parts readParts(const Character::Path& path,
+                           TextureStore& textureStore)
 {
+    Character::Parts parts;
     for (int i = 0; i < Character::PART_COUNT; ++i)
     {
         const fs::path partPath(path.first / PART_DIRS[i]);
@@ -53,6 +57,8 @@ void readParts(Character::Parts& parts,
 
     for (int i = 0; i < Character::PART_COUNT; ++i)
         if (!parts[i]) parts[i] = parts[fallbacks[i]].flipped(textureStore);
+
+    return parts;
 }
 
 void setupJoints(RawSkeleton::Joint::Children& joints, const json& meta)
@@ -91,10 +97,16 @@ void setupJoints(RawSkeleton::Joint::Children& joints, const json& meta)
     }
 }
 
-void setupSkeleton(RawSkeleton& rawSkeleton, const json& meta)
+Skeleton* createSkeleton(const json& meta)
 {
+    // Raw skeleton
+    RawSkeleton rawSkeleton;
     setupJoints(rawSkeleton.roots, meta["skeleton"]);
     PTLOG(Info) << "joints: " << rawSkeleton.num_joints();
+
+    // Runtime skeleton
+    SkeletonBuilder skeletonBuilder;
+    return skeletonBuilder(rawSkeleton);
 }
 
 struct Meta
@@ -111,15 +123,14 @@ struct Meta
 struct Character::Data
 {
     Data(const Path& path, TextureStore& textureStore) :
-        meta(path)
-    {
-        readParts(parts, path, textureStore);
-        setupSkeleton(skeleton, meta.meta);
-    }
+        meta(path),
+        parts(readParts(path, textureStore)),
+        skeleton(createSkeleton(meta.meta))
+    {}
 
-    Meta        meta;
-    Parts       parts;
-    RawSkeleton skeleton;
+    Meta      meta;
+    Parts     parts;
+    Skeleton* skeleton;
 };
 
 Character::Character()

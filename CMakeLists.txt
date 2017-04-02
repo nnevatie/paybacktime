@@ -82,6 +82,7 @@ set(OPENGL_LIBS
 # Ozz dependencies
 set(OZZ_LIBS
     ozz_animation_offline_r
+    ozz_animation_r
     ozz_base_r
     )
 
