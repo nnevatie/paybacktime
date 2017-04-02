@@ -94,6 +94,7 @@ void setupJoints(RawSkeleton::Joint::Children& joints, const json& meta)
 void setupSkeleton(RawSkeleton& rawSkeleton, const json& meta)
 {
     setupJoints(rawSkeleton.roots, meta["skeleton"]);
+    PTLOG(Info) << "joints: " << rawSkeleton.num_joints();
 }
 
 struct Meta
