@@ -57,6 +57,7 @@ void readParts(Character::Parts& parts,
 
 void setupJoints(RawSkeleton::Joint::Children& joints, const json& meta)
 {
+    // Default transformation
     const auto TR_DEFAULT  = std::vector<float> {0.f, 0.f, 0.f};
     const auto ROT_DEFAULT = std::vector<float> {0.f, 1.f, 0.f, 0.f};
 
