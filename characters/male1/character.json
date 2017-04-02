@@ -4,13 +4,13 @@
         "root":
         {
             "tr":  [0, 0, 0],
-            "rot": [0, 0, 0, 0],
+            "rot": [0, 1, 0, 0],
             "children":
             {
-                "waist":
+                "torso":
                 {
                 },
-                "torso":
+                "waist":
                 {
                 }
             }
