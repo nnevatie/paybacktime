@@ -1,7 +1,10 @@
 #include "animation.h"
 
+#include <ozz/base/maths/soa_float4x4.h>
+#include <ozz/base/maths/soa_transform.h>
 #include <ozz/animation/runtime/skeleton.h>
 #include <ozz/animation/runtime/animation.h>
+#include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/animation/offline/raw_skeleton.h>
 #include "ozz/animation/offline/raw_animation.h"
 #include <ozz/animation/offline/skeleton_builder.h>
@@ -15,9 +18,12 @@
 namespace ozz
 {
 using ozz::math::Float3;
+using ozz::math::Float4x4;
 using ozz::math::Quaternion;
+using ozz::math::SoaTransform;
 using ozz::animation::Skeleton;
 using ozz::animation::Animation;
+using ozz::animation::SamplingCache;
 using ozz::animation::offline::RawSkeleton;
 using ozz::animation::offline::RawAnimation;
 using ozz::animation::offline::SkeletonBuilder;
@@ -94,10 +100,31 @@ struct Animation::Data
     Data(const json& meta) :
         skeleton(createSkeleton(meta)),
         animation(createAnimation(meta))
-    {}
+    {
+        // Runtime buffers and cache
+        const auto jointCount = skeleton->num_soa_joints();
+        auto allocator = ozz::memory::default_allocator();
+        locals = allocator->AllocateRange<ozz::SoaTransform>(jointCount);
+        models = allocator->AllocateRange<ozz::Float4x4>(jointCount);
+        cache  = allocator->New<ozz::SamplingCache>(jointCount);
+    }
 
-    ozz::Skeleton*  skeleton;
-    ozz::Animation* animation;
+    ~Data()
+    {
+        auto allocator = ozz::memory::default_allocator();
+        allocator->Delete(skeleton);
+        allocator->Delete(animation);
+        allocator->Deallocate(locals);
+        allocator->Deallocate(models);
+        allocator->Delete(cache);
+    }
+
+    ozz::Skeleton*                skeleton;
+    ozz::Animation*               animation;
+    ozz::SamplingCache*           cache;
+    ozz::Range<ozz::SoaTransform> locals;
+    ozz::Range<ozz::Float4x4>     models;
+
 };
 
 Animation::Animation(const json& meta) :
