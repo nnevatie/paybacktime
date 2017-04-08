@@ -15,5 +15,9 @@
                 }
             }
         }
-    }
+    },
+    "animations":
+    {
+        "idle": "idle.ozz"
+    } 
 }

@@ -68,7 +68,7 @@ struct Character::Data
     Data(const Path& path, TextureStore& textureStore) :
         meta(path),
         parts(readParts(path, textureStore)),
-        anim(meta.meta)
+        anim(path.first, meta.meta)
     {}
 
     Meta      meta;

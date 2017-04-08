@@ -1,5 +1,8 @@
 #include "animation.h"
 
+#include <unordered_map>
+
+#include "ozz/base/io/archive.h"
 #include <ozz/base/maths/soa_float4x4.h>
 #include <ozz/base/maths/soa_transform.h>
 #include <ozz/animation/runtime/skeleton.h>
@@ -28,6 +31,8 @@ using ozz::animation::offline::RawSkeleton;
 using ozz::animation::offline::RawAnimation;
 using ozz::animation::offline::SkeletonBuilder;
 using ozz::animation::offline::AnimationBuilder;
+
+using Animations = std::unordered_map<std::string, ozz::Animation*>;
 }
 
 namespace pt
@@ -71,6 +76,38 @@ void setupJoints(ozz::RawSkeleton::Joint::Children& joints, const json& meta)
     }
 }
 
+void setupAnimations(ozz::Animations& animations,
+                     const fs::path& path, const json& meta)
+{
+    for (const auto& nameValue : json::iterator_wrapper(meta))
+    {
+        // Name and value
+        auto  name = nameValue.key();
+        auto& node = nameValue.value();
+
+        PTLOG(Info) << name << "|" << node;
+
+        ozz::Animation* animation = nullptr;
+        if (node.is_string())
+        {
+            std::string filename = node;
+            ozz::io::File file(filename.c_str(), "rb");
+            PTLOG(Info) << "opened: " << file.opened();
+        }
+        else
+        {
+            // Raw animation
+            ozz::RawAnimation rawAnimation;
+
+            // Runtime animation
+            ozz::AnimationBuilder animationBuilder;
+            animation = animationBuilder(rawAnimation);
+        }
+        if (animation)
+            animations[name] = animation;
+    }
+}
+
 ozz::Skeleton* createSkeleton(const json& meta)
 {
     // Raw skeleton
@@ -83,23 +120,20 @@ ozz::Skeleton* createSkeleton(const json& meta)
     return skeletonBuilder(rawSkeleton);
 }
 
-ozz::Animation* createAnimation(const json& meta)
+ozz::Animations createAnimations(const fs::path& path, const json& meta)
 {
-    // Raw animation
-    ozz::RawAnimation rawAnimation;
-
-    // Runtime animation
-    ozz::AnimationBuilder animationBuilder;
-    return animationBuilder(rawAnimation);
+    ozz::Animations animations;
+    setupAnimations(animations, path, meta["animations"]);
+    return animations;
 }
 
 } // namespace
 
 struct Animation::Data
 {
-    Data(const json& meta) :
+    Data(const fs::path& path, const json& meta) :
         skeleton(createSkeleton(meta)),
-        animation(createAnimation(meta))
+        animations(createAnimations(path, meta))
     {
         // Runtime buffers and cache
         const auto jointCount = skeleton->num_soa_joints();
@@ -112,23 +146,24 @@ struct Animation::Data
     ~Data()
     {
         auto allocator = ozz::memory::default_allocator();
-        allocator->Delete(skeleton);
-        allocator->Delete(animation);
         allocator->Deallocate(locals);
         allocator->Deallocate(models);
         allocator->Delete(cache);
+        allocator->Delete(skeleton);
+        for (auto& animation : animations)
+            allocator->Delete(animation.second);
     }
 
     ozz::Skeleton*                skeleton;
-    ozz::Animation*               animation;
+    ozz::Animations               animations;
     ozz::SamplingCache*           cache;
     ozz::Range<ozz::SoaTransform> locals;
     ozz::Range<ozz::Float4x4>     models;
 
 };
 
-Animation::Animation(const json& meta) :
-    d(std::make_shared<Data>(meta))
+Animation::Animation(const fs::path& path, const json& meta) :
+    d(std::make_shared<Data>(path, meta))
 {}
 
 } // namespace pt

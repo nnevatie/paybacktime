@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "common/file_system.h"
 #include "common/json.h"
 
 namespace pt
@@ -9,7 +10,7 @@ namespace pt
 
 struct Animation
 {
-    Animation(const json& meta);
+    Animation(const fs::path& path, const json& meta);
 
 private:
     struct Data;
