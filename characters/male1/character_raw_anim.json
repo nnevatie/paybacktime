@@ -1,0 +1,23 @@
+{
+    "skeleton":
+    {
+        "root":
+        {
+            "tr":  [0, 0, 0],
+            "rot": [0, 1, 0, 0],
+            "children":
+            {
+                "torso":
+                {
+                },
+                "waist":
+                {
+                }
+            }
+        }
+    },
+    "animations":
+    {
+        "idle": "idle.ozz"
+    } 
+}
