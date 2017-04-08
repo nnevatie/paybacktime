@@ -32,6 +32,7 @@ using ozz::animation::offline::RawAnimation;
 using ozz::animation::offline::SkeletonBuilder;
 using ozz::animation::offline::AnimationBuilder;
 
+// Animations map
 using Animations = std::unordered_map<std::string, ozz::Animation*>;
 }
 
@@ -79,6 +80,7 @@ void setupJoints(ozz::RawSkeleton::Joint::Children& joints, const json& meta)
 void setupAnimations(ozz::Animations& animations,
                      const fs::path& path, const json& meta)
 {
+    auto allocator = ozz::memory::default_allocator();
     for (const auto& nameValue : json::iterator_wrapper(meta))
     {
         // Name and value
@@ -90,9 +92,17 @@ void setupAnimations(ozz::Animations& animations,
         ozz::Animation* animation = nullptr;
         if (node.is_string())
         {
-            std::string filename = node;
-            ozz::io::File file(filename.c_str(), "rb");
-            PTLOG(Info) << "opened: " << file.opened();
+            const auto fn = (path / node.get<std::string>()).generic_string();
+            ozz::io::File file(fn.c_str(), "rb");
+            if (file.opened())
+            {
+                ozz::io::IArchive archive(&file);
+                if (archive.TestTag<ozz::Animation>())
+                {
+                    animation = allocator->New<ozz::Animation>();
+                    archive >> *animation;
+                }
+            }
         }
         else
         {
@@ -104,20 +114,58 @@ void setupAnimations(ozz::Animations& animations,
             animation = animationBuilder(rawAnimation);
         }
         if (animation)
+        {
+            // Store by name
             animations[name] = animation;
+            PTLOG(Info) << name << ", '"
+                        << animation->name() << "', "
+                        << animation->duration() << ", "
+                        << animation->num_tracks();
+        }
     }
 }
 
-ozz::Skeleton* createSkeleton(const json& meta)
+ozz::Skeleton* createSkeleton(const fs::path& path, const json& meta)
 {
-    // Raw skeleton
-    ozz::RawSkeleton rawSkeleton;
-    setupJoints(rawSkeleton.roots, meta["skeleton"]);
-    PTLOG(Info) << "joints: " << rawSkeleton.num_joints();
+    auto allocator   = ozz::memory::default_allocator();
+    const auto& node = meta["skeleton"];
 
-    // Runtime skeleton
-    ozz::SkeletonBuilder skeletonBuilder;
-    return skeletonBuilder(rawSkeleton);
+    ozz::Skeleton* skeleton = nullptr;
+    if (node.is_string())
+    {
+        const auto fn = (path / node.get<std::string>()).generic_string();
+        ozz::io::File file(fn.c_str(), "rb");
+        if (file.opened())
+        {
+            ozz::io::IArchive archive(&file);
+            if (archive.TestTag<ozz::Skeleton>())
+            {
+                skeleton = allocator->New<ozz::Skeleton>();
+                archive >> *skeleton;
+            }
+        }
+    }
+    else
+    {
+        // Raw skeleton
+        ozz::RawSkeleton rawSkeleton;
+        setupJoints(rawSkeleton.roots, node);
+        PTLOG(Info) << "joints: " << rawSkeleton.num_joints();
+
+        // Runtime skeleton
+        ozz::SkeletonBuilder skeletonBuilder;
+        skeleton = skeletonBuilder(rawSkeleton);
+    }
+    if (skeleton)
+    {
+        const auto jointCount = skeleton->num_joints();
+        const auto jointNames = skeleton->joint_names();
+
+        PTLOG(Info) << "joints: " << jointCount;
+        for (int i = 0; i < jointCount; ++i)
+            PTLOG(Info) << "joint: '" << jointNames[i] << "'";
+    }
+    return skeleton;
 }
 
 ozz::Animations createAnimations(const fs::path& path, const json& meta)
@@ -132,7 +180,7 @@ ozz::Animations createAnimations(const fs::path& path, const json& meta)
 struct Animation::Data
 {
     Data(const fs::path& path, const json& meta) :
-        skeleton(createSkeleton(meta)),
+        skeleton(createSkeleton(path, meta)),
         animations(createAnimations(path, meta))
     {
         // Runtime buffers and cache
