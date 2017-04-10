@@ -151,6 +151,9 @@ struct Data
         // Scene control
         sceneControl(step, objectPane.selected());
 
+        // Animate scene
+        scene.animate(time, step);
+
         // Update object store
         if (boost::chrono::duration<float, boost::milli>
            (time - lastLiveUpdate).count() > 1000.f)

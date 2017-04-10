@@ -235,6 +235,14 @@ Scene& Scene::updateLightmap()
     return *this;
 }
 
+Scene& Scene::animate(TimePoint time, Duration step)
+{
+    for (auto& charItem : d->charItems)
+        charItem.obj.animate(time, step);
+
+    return *this;
+}
+
 bool Scene::write(const boost::filesystem::path& path) const
 {
     PTTIME("write");

@@ -12,6 +12,7 @@
 #include "geom/ray.h"
 #include "geom/transform.h"
 
+#include "platform/clock.h"
 #include "img/image.h"
 #include "gfx/geometry.h"
 #include "gl/texture.h"
@@ -62,6 +63,8 @@ struct Scene
     gl::Texture* incidence() const;
 
     Scene& updateLightmap();
+
+    Scene& animate(TimePoint time, Duration step);
 
     bool write(const fs::path& path) const;
 

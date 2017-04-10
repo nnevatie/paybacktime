@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 
+#include "platform/clock.h"
 #include "common/file_system.h"
 
 #include "texture_store.h"
@@ -45,6 +46,8 @@ struct Character
     Character(const Path& path, TextureStore& textureStore);
 
     const Parts* parts() const;
+
+    Character& animate(TimePoint time, Duration step);
 
 private:
     struct Data;

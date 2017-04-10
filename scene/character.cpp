@@ -88,4 +88,10 @@ const Character::Parts* Character::parts() const
     return &d->parts;
 }
 
+Character& Character::animate(TimePoint time, Duration step)
+{
+    d->anim.animate(time, step);
+    return *this;
+}
+
 } // namespace pt

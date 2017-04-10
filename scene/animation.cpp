@@ -26,6 +26,7 @@ using ozz::math::Quaternion;
 using ozz::math::SoaTransform;
 using ozz::animation::Skeleton;
 using ozz::animation::Animation;
+using ozz::animation::SamplingJob;
 using ozz::animation::SamplingCache;
 using ozz::animation::offline::RawSkeleton;
 using ozz::animation::offline::RawAnimation;
@@ -184,9 +185,10 @@ struct Animation::Data
         animations(createAnimations(path, meta))
     {
         // Runtime buffers and cache
-        const auto jointCount = skeleton->num_soa_joints();
-        auto allocator = ozz::memory::default_allocator();
-        locals = allocator->AllocateRange<ozz::SoaTransform>(jointCount);
+        const auto jointCount    = skeleton->num_joints();
+        const auto soaJointCount = skeleton->num_soa_joints();
+        auto allocator           = ozz::memory::default_allocator();
+        locals = allocator->AllocateRange<ozz::SoaTransform>(soaJointCount);
         models = allocator->AllocateRange<ozz::Float4x4>(jointCount);
         cache  = allocator->New<ozz::SamplingCache>(jointCount);
     }
@@ -213,5 +215,25 @@ struct Animation::Data
 Animation::Animation(const fs::path& path, const json& meta) :
     d(std::make_shared<Data>(path, meta))
 {}
+
+Animation& Animation::animate(TimePoint time, Duration step)
+{
+    const auto t0 = boost::chrono::duration<float>
+                   (time.time_since_epoch()).count();
+
+    // TODO: Cache per animation
+    ozz::SamplingJob job;
+    for (auto& animation : d->animations)
+    {
+        const auto  a = animation.second;
+        const auto t1 = std::fmod(t0, a->duration());
+        job.animation = a;
+        job.cache     = d->cache;
+        job.time      = t1;
+        job.output    = d->locals;
+        job.Run();
+    }
+    return *this;
+}
 
 } // namespace pt
