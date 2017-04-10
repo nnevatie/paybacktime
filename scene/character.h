@@ -4,6 +4,8 @@
 #include <string>
 #include <utility>
 
+#include <glm/mat4x4.hpp>
+
 #include "platform/clock.h"
 #include "common/file_system.h"
 
@@ -40,12 +42,15 @@ struct Character
     // Types
     using Id    = std::string;
     using Path  = std::pair<fs::path, fs::path>; // path, root
+    using Bone  = std::pair<Object, glm::mat4x4>;
     using Parts = std::array<Object, PART_COUNT>;
+    using Bones = std::array<Bone, PART_COUNT>;
 
     Character();
     Character(const Path& path, TextureStore& textureStore);
 
     const Parts* parts() const;
+    const Bones* bones() const;
 
     Character& animate(TimePoint time, Duration step);
 

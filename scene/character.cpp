@@ -73,6 +73,7 @@ struct Character::Data
 
     Meta      meta;
     Parts     parts;
+    Bones     bones;
     Animation anim;
 };
 
@@ -86,6 +87,11 @@ Character::Character(const Path& path, TextureStore& textureStore) :
 const Character::Parts* Character::parts() const
 {
     return &d->parts;
+}
+
+const Character::Bones* Character::bones() const
+{
+    return &d->bones;
 }
 
 Character& Character::animate(TimePoint time, Duration step)
