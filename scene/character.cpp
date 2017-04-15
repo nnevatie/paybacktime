@@ -90,9 +90,8 @@ Character::Bones createBones(const Character::Parts& parts,
     Character::Bones bones;
     const int boneCount = bones.size();
     for (int i = 0; i < boneCount; ++i)
-    {
         bones[i] = {parts[i], {}};
-    }
+
     return bones;
 }
 
