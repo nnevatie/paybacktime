@@ -2,6 +2,6 @@
     "skeleton": "skeleton.ozz",
     "animations":
     {
-        "idle": "idle.ozz"
+        "death_from_front_headshot": "death_from_front_headshot.ozz"
     } 
 }
