@@ -258,6 +258,7 @@ Animation& Animation::animate(TimePoint time, Duration step)
         ltmJob.skeleton   = d->skeleton;
         ltmJob.input      = d->locals;
         ltmJob.output     = d->models;
+        ltmJob.Run();
     }
     return *this;
 }

@@ -192,14 +192,22 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 
 gfx::Geometry::Instances Scene::characterGeometry() const
 {
+    const float s = 25.f;
     gfx::Geometry::Instances instances;
-    instances.reserve(d->charItems.size() * 15);
+    instances.reserve(Character::PART_COUNT * d->charItems.size());
     for (const auto& item : d->charItems)
     {
         auto m = static_cast<glm::mat4x4>(item.posRot);
-        for (const auto& obj : *item.obj.parts())
-            if (obj) instances.push_back({obj.model().primitive(),
-                                          m * glm::translate(obj.origin())});
+        for (const auto& bone : *item.obj.bones())
+        {
+            if (const auto& obj = bone.first)
+            {
+                auto mj  = bone.second;
+                mj[3]   *= glm::vec4(s, s, s, 1.f);
+                auto mo  = glm::translate(obj.origin());
+                instances.push_back({obj.model().primitive(), m * mj * mo});
+            }
+        }
     }
     return instances;
 }

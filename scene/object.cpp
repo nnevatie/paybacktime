@@ -353,7 +353,6 @@ Object Object::flipped(TextureStore& textureStore) const
         auto data   = std::make_shared<Data>(*d);
         data->model = data->model.flipped(textureStore,
                                           d->meta.smoothness, d->meta.scale);
-        data->meta.origin.x += c::cell::SIZE.x; // TODO
         auto object = Object();
         object.d    = data;
         return object;
