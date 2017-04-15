@@ -30,6 +30,27 @@ static const std::string PART_DIRS[Character::PART_COUNT] =
     "hand.right"
 };
 
+static const std::string JOINT_NAMES[Character::PART_COUNT] =
+{
+    "Head",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+};
+
+using BoneMap = std::array<int, Character::PART_COUNT>;
+
 namespace
 {
 
@@ -52,6 +73,29 @@ Character::Parts readParts(const Character::Path& path,
     return parts;
 }
 
+BoneMap createBoneMap(const Animation& anim)
+{
+    BoneMap map;
+    for (int i = 0; i < Character::PART_COUNT; ++i)
+    {
+        map[i] = anim.jointIndex(JOINT_NAMES[i]);
+        PTLOG(Info) << "'" << JOINT_NAMES[i] << "' -> " << map[i];
+    }
+    return map;
+}
+
+Character::Bones createBones(const Character::Parts& parts,
+                             const Animation& anim)
+{
+    Character::Bones bones;
+    const int boneCount = bones.size();
+    for (int i = 0; i < boneCount; ++i)
+    {
+        bones[i] = {parts[i], {}};
+    }
+    return bones;
+}
+
 struct Meta
 {
     Meta(const Character::Path& path) :
@@ -67,14 +111,19 @@ struct Character::Data
 {
     Data(const Path& path, TextureStore& textureStore) :
         meta(path),
+        anim(path.first, meta.meta),
+        boneMap(createBoneMap(anim)),
         parts(readParts(path, textureStore)),
-        anim(path.first, meta.meta)
-    {}
+        bones(createBones(parts, anim))
+    {
+        anim.animate(TimePoint(), Duration(0));
+    }
 
     Meta      meta;
+    Animation anim;
+    BoneMap   boneMap;
     Parts     parts;
     Bones     bones;
-    Animation anim;
 };
 
 Character::Character()
@@ -97,6 +146,12 @@ const Character::Bones* Character::bones() const
 Character& Character::animate(TimePoint time, Duration step)
 {
     d->anim.animate(time, step);
+    for (int i = 0; i < PART_COUNT; ++i)
+    {
+        const auto boneIndex = d->boneMap[i];
+        if (boneIndex >= 0)
+            d->bones[i].second = d->anim.jointMatrix(boneIndex);
+    }
     return *this;
 }
 

@@ -2,12 +2,15 @@
 
 #include <unordered_map>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "ozz/base/io/archive.h"
 #include <ozz/base/maths/soa_float4x4.h>
 #include <ozz/base/maths/soa_transform.h>
 #include <ozz/animation/runtime/skeleton.h>
 #include <ozz/animation/runtime/animation.h>
 #include <ozz/animation/runtime/sampling_job.h>
+#include <ozz/animation/runtime/local_to_model_job.h>
 #include <ozz/animation/offline/raw_skeleton.h>
 #include "ozz/animation/offline/raw_animation.h"
 #include <ozz/animation/offline/skeleton_builder.h>
@@ -27,6 +30,7 @@ using ozz::math::SoaTransform;
 using ozz::animation::Skeleton;
 using ozz::animation::Animation;
 using ozz::animation::SamplingJob;
+using ozz::animation::LocalToModelJob;
 using ozz::animation::SamplingCache;
 using ozz::animation::offline::RawSkeleton;
 using ozz::animation::offline::RawAnimation;
@@ -216,22 +220,44 @@ Animation::Animation(const fs::path& path, const json& meta) :
     d(std::make_shared<Data>(path, meta))
 {}
 
+int Animation::jointIndex(const std::string& name) const
+{
+    const auto jointCount = d->skeleton->num_joints();
+    const auto jointNames = d->skeleton->joint_names();
+    for (int i = 0; i < jointCount; ++i)
+        if (jointNames[i] == name)
+            return i;
+
+    return -1;
+}
+
+glm::mat4x4 Animation::jointMatrix(int index) const
+{
+    const auto& model = d->models[index];
+    return glm::make_mat4(reinterpret_cast<const float*>(&model.cols[0]));
+}
+
 Animation& Animation::animate(TimePoint time, Duration step)
 {
     const auto t0 = boost::chrono::duration<float>
                    (time.time_since_epoch()).count();
 
     // TODO: Cache per animation
-    ozz::SamplingJob job;
+    ozz::SamplingJob     sampJob;
+    ozz::LocalToModelJob ltmJob;
     for (auto& animation : d->animations)
     {
-        const auto  a = animation.second;
-        const auto t1 = std::fmod(t0, a->duration());
-        job.animation = a;
-        job.cache     = d->cache;
-        job.time      = t1;
-        job.output    = d->locals;
-        job.Run();
+        const auto  a     = animation.second;
+        const auto t1     = std::fmod(t0, a->duration());
+        sampJob.animation = a;
+        sampJob.cache     = d->cache;
+        sampJob.time      = t1;
+        sampJob.output    = d->locals;
+        sampJob.Run();
+
+        ltmJob.skeleton   = d->skeleton;
+        ltmJob.input      = d->locals;
+        ltmJob.output     = d->models;
     }
     return *this;
 }
