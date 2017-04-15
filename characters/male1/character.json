@@ -1,7 +1,7 @@
 {
-    "skeleton": "skeleton.ozz",
+    "skeleton": "skeleton2.ozz",
     "animations":
     {
-        "death_from_front_headshot": "death_from_front_headshot.ozz"
+        "death": "death_from_back_headshot.ozz"
     } 
 }
