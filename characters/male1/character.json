@@ -1,5 +1,5 @@
 {
-    "skeleton": "skeleton2.ozz",
+    "skeleton": "skeleton.ozz",
     "animations":
     {
         "idle": "idle.ozz"
