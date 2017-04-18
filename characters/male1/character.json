@@ -1,4 +1,5 @@
 {
+    "animation_root": "animations/character",
     "skeleton": "skeleton.ozz",
     "animations":
     {
