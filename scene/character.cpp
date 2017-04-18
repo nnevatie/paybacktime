@@ -98,10 +98,12 @@ Character::Bones createBones(const Character::Parts& parts,
 struct Meta
 {
     Meta(const Character::Path& path) :
-        meta(readJson(path.first / c::character::METAFILE))
+        meta(readJson(path.first / c::character::METAFILE)),
+        animRoot(meta["animation_root"].get<std::string>())
     {}
 
-    json meta;
+    json     meta;
+    fs::path animRoot;
 };
 
 } // namespace
@@ -110,7 +112,7 @@ struct Character::Data
 {
     Data(const Path& path, TextureStore& textureStore) :
         meta(path),
-        anim(path.first, meta.meta),
+        anim(meta.animRoot, meta.meta),
         boneMap(createBoneMap(anim)),
         parts(readParts(path, textureStore)),
         bones(createBones(parts, anim))
