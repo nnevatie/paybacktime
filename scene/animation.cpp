@@ -36,15 +36,46 @@ using ozz::animation::offline::RawSkeleton;
 using ozz::animation::offline::RawAnimation;
 using ozz::animation::offline::SkeletonBuilder;
 using ozz::animation::offline::AnimationBuilder;
-
-// Animations map
-using Animations = std::unordered_map<std::string, ozz::Animation*>;
 }
 
 namespace pt
 {
 namespace
 {
+// Animation item type
+struct AnimationItem
+{
+    ozz::Animation*               anim;
+    ozz::SamplingCache*           cache;
+    ozz::Range<ozz::SoaTransform> locals;
+    ozz::Range<ozz::Float4x4>     models;
+
+    AnimationItem() : anim(nullptr), cache(nullptr)
+    {}
+
+    AnimationItem(ozz::Animation*               anim,
+                  ozz::SamplingCache*           cache,
+                  ozz::Range<ozz::SoaTransform> locals,
+                  ozz::Range<ozz::Float4x4>     models) :
+        anim(anim), cache(cache), locals(locals), models(models)
+    {}
+
+    ~AnimationItem()
+    {
+        if (anim)
+        {
+            auto allocator = ozz::memory::default_allocator();
+            allocator->Deallocate(locals);
+            allocator->Deallocate(models);
+            allocator->Delete(cache);
+            allocator->Delete(anim);
+        }
+    }
+};
+using AnimationItemPtr = std::unique_ptr<AnimationItem>;
+
+// Animations map
+using Animations = std::unordered_map<std::string, AnimationItemPtr>;
 
 void setupJoints(ozz::RawSkeleton::Joint::Children& joints, const json& meta)
 {
@@ -82,7 +113,8 @@ void setupJoints(ozz::RawSkeleton::Joint::Children& joints, const json& meta)
     }
 }
 
-void setupAnimations(ozz::Animations& animations,
+void setupAnimations(Animations& animations,
+                     ozz::Skeleton* skeleton,
                      const fs::path& path, const json& meta)
 {
     auto allocator = ozz::memory::default_allocator();
@@ -121,7 +153,15 @@ void setupAnimations(ozz::Animations& animations,
         if (animation)
         {
             // Store by name
-            animations[name] = animation;
+            const auto jointCount    = skeleton->num_joints();
+            const auto soaJointCount = skeleton->num_soa_joints();
+            animations[name] = std::make_unique<AnimationItem>
+            (
+                animation,
+                allocator->New<ozz::SamplingCache>(jointCount),
+                allocator->AllocateRange<ozz::SoaTransform>(soaJointCount),
+                allocator->AllocateRange<ozz::Float4x4>(jointCount)
+            );
             PTLOG(Info) << name << ", '"
                         << animation->name() << "', "
                         << animation->duration() << ", "
@@ -173,10 +213,11 @@ ozz::Skeleton* createSkeleton(const fs::path& path, const json& meta)
     return skeleton;
 }
 
-ozz::Animations createAnimations(const fs::path& path, const json& meta)
+Animations createAnimations(ozz::Skeleton* skeleton,
+                            const fs::path& path, const json& meta)
 {
-    ozz::Animations animations;
-    setupAnimations(animations, path, meta["animations"]);
+    Animations animations;
+    setupAnimations(animations, skeleton, path, meta["animations"]);
     return animations;
 }
 
@@ -186,34 +227,19 @@ struct Animation::Data
 {
     Data(const fs::path& path, const json& meta) :
         skeleton(createSkeleton(path, meta)),
-        animations(createAnimations(path, meta))
-    {
-        // Runtime buffers and cache
-        const auto jointCount    = skeleton->num_joints();
-        const auto soaJointCount = skeleton->num_soa_joints();
-        auto allocator           = ozz::memory::default_allocator();
-        locals = allocator->AllocateRange<ozz::SoaTransform>(soaJointCount);
-        models = allocator->AllocateRange<ozz::Float4x4>(jointCount);
-        cache  = allocator->New<ozz::SamplingCache>(jointCount);
-    }
+        animations(createAnimations(skeleton, path, meta)),
+        active(nullptr)
+    {}
 
     ~Data()
     {
         auto allocator = ozz::memory::default_allocator();
-        allocator->Deallocate(locals);
-        allocator->Deallocate(models);
-        allocator->Delete(cache);
         allocator->Delete(skeleton);
-        for (auto& animation : animations)
-            allocator->Delete(animation.second);
     }
 
-    ozz::Skeleton*                skeleton;
-    ozz::Animations               animations;
-    ozz::SamplingCache*           cache;
-    ozz::Range<ozz::SoaTransform> locals;
-    ozz::Range<ozz::Float4x4>     models;
-
+    ozz::Skeleton* skeleton;
+    Animations     animations;
+    AnimationItem* active;
 };
 
 Animation::Animation(const fs::path& path, const json& meta) :
@@ -233,31 +259,45 @@ int Animation::jointIndex(const std::string& name) const
 
 glm::mat4x4 Animation::jointMatrix(int index) const
 {
-    const auto& model = d->models[index];
-    return glm::make_mat4(reinterpret_cast<const float*>(&model.cols[0]));
+    if (d->active)
+    {
+        const auto& model = d->active->models[index];
+        return glm::make_mat4(reinterpret_cast<const float*>(&model.cols[0]));
+    }
+    return {};
+}
+
+Animation& Animation::activate(const std::string& name)
+{
+    for (auto& animation : d->animations)
+        if (animation.first == name)
+            d->active = animation.second.get();
+
+    return *this;
 }
 
 Animation& Animation::animate(TimePoint time, Duration step)
 {
-    const auto t0 = boost::chrono::duration<float>
-                   (time.time_since_epoch()).count();
-
-    // TODO: Cache per animation
-    ozz::SamplingJob     sampJob;
-    ozz::LocalToModelJob ltmJob;
-    for (auto& animation : d->animations)
+    if (d->active)
     {
-        const auto  a     = animation.second;
+        const auto t0 = boost::chrono::duration<float>
+                       (time.time_since_epoch()).count();
+
+        ozz::SamplingJob     sampJob;
+        ozz::LocalToModelJob ltmJob;
+
+              auto item   = d->active;
+        const auto  a     = item->anim;
         const auto t1     = std::fmod(t0, a->duration());
         sampJob.animation = a;
-        sampJob.cache     = d->cache;
+        sampJob.cache     = item->cache;
         sampJob.time      = t1;
-        sampJob.output    = d->locals;
+        sampJob.output    = item->locals;
         sampJob.Run();
 
         ltmJob.skeleton   = d->skeleton;
-        ltmJob.input      = d->locals;
-        ltmJob.output     = d->models;
+        ltmJob.input      = item->locals;
+        ltmJob.output     = item->models;
         ltmJob.Run();
     }
     return *this;

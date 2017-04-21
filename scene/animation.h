@@ -19,6 +19,7 @@ struct Animation
     int jointIndex(const std::string& name) const;
     glm::mat4x4 jointMatrix(int index) const;
 
+    Animation& activate(const std::string& name);
     Animation& animate(TimePoint time, Duration step);
 
 private:
