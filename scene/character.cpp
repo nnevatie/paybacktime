@@ -14,7 +14,8 @@ namespace pt
 static const std::string PART_DIRS[Character::PART_COUNT] =
 {
     "head",
-    "torso",
+    "chest",
+    "abdomen",
     "waist",
     "thigh.left",
     "thigh.right",
@@ -33,6 +34,7 @@ static const std::string PART_DIRS[Character::PART_COUNT] =
 static const std::string JOINT_NAMES[Character::PART_COUNT] =
 {
     "Head",
+    "Spine1",
     "Spine",
     "Hips",
     "LeftUpLeg",
@@ -65,7 +67,7 @@ Character::Parts readParts(const Character::Path& path,
             parts[i] = Object({partPath, path.first}, {}, textureStore);
     }
     const int fallbacks[Character::PART_COUNT] =
-        {-1, -1, -1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13};
+        {-1, -1, -1, -1, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14};
 
     for (int i = 0; i < Character::PART_COUNT; ++i)
         if (!parts[i]) parts[i] = parts[fallbacks[i]].flipped(textureStore);

@@ -108,7 +108,7 @@ struct Data
         character({fs::path("characters") / "male1", "characters"}, textureStore),
 
         // Camera
-        camera({0.f, 0.f, 0.f}, 450.f,
+        camera({0.f, 0.f, 0.f}, 200.f,
                glm::half_pi<float>(), -glm::quarter_pi<float>() + 0,
                glm::radians(45.f), renderSize.aspect<float>(), 100.f, 750.f),
 

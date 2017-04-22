@@ -19,11 +19,12 @@ namespace pt
 struct Character
 {
     // Parts
-    static constexpr int PART_COUNT = 15;
+    static constexpr int PART_COUNT = 16;
     enum class Part
     {
         Head,
-        Torso,
+        Chest,
+        Abdomen,
         Waist,
         ThighLeft,
         ThighRight,
