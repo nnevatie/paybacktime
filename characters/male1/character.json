@@ -3,6 +3,7 @@
     "skeleton": "skeleton.ozz",
     "animations":
     {
+        "pose": "pose.ozz",
         "idle": "idle.ozz"
     } 
 }
