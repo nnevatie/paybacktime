@@ -378,8 +378,8 @@ bool Screen::cursorPosCallbackEvent(double x, double y) {
         p -= Vector2i(1, 2);
 
         if (!mDragActive) {
-            Widget *widget = findWidget(p);
-            /*if (widget != nullptr && widget->cursor() != mCursor) {
+            /*Widget *widget = findWidget(p);
+            if (widget != nullptr && widget->cursor() != mCursor) {
                 mCursor = widget->cursor();
                 glfwSetCursor(mGLFWWindow, mCursors[(int) mCursor]);
             }*/

@@ -54,7 +54,6 @@ Erode& Erode::operator()(gl::Texture* tex, int radius)
 
     for (int i = 0; i < 2; ++i)
     {
-        auto s = size.inv<glm::vec2>(i);
         d->fbo.attach(d->texErode[i], gl::Fbo::Attachment::Color, 0);
         d->prog.setUniform("invDirSize", size.inv<glm::vec2>(i));
         (i == 0 ? *tex : d->texErode[0]).bindAs(GL_TEXTURE0);

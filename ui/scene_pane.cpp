@@ -84,7 +84,7 @@ struct ScenePane::Data
             horizonView->setImage(horizon.preview().nvgImage(nanovg));
 
             horizonSelector->setSelectedIndex(
-                std::distance(horizons.begin(), it));
+                int(std::distance(horizons.begin(), it)));
         }
 
         // Set selection callback
