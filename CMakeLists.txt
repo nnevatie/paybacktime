@@ -86,9 +86,14 @@ set(OZZ_LIBS
     ozz_base_r
     )
 
-# Include paths
+# Project include paths
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    )
+
+# External include paths
+include_directories(
+    SYSTEM
     ${CMAKE_SOURCE_DIR}/ext
     ${CMAKE_SOURCE_DIR}/ext/stb
     ${CMAKE_SOURCE_DIR}/ext/eigen
