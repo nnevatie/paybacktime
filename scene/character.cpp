@@ -14,6 +14,7 @@ namespace pt
 static const std::string PART_DIRS[Character::PART_COUNT] =
 {
     "head",
+    "neck",
     "chest",
     "abdomen",
     "waist",
@@ -34,6 +35,7 @@ static const std::string PART_DIRS[Character::PART_COUNT] =
 static const std::string JOINT_NAMES[Character::PART_COUNT] =
 {
     "Head",
+    "Neck1",
     "Spine1",
     "Spine",
     "Hips",
@@ -67,7 +69,7 @@ Character::Parts readParts(const Character::Path& path,
             parts[i] = Object({partPath, path.first}, {}, textureStore);
     }
     const int fallbacks[Character::PART_COUNT] =
-        {-1, -1, -1, -1, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14};
+        {-1, -1, -1, -1, -1, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15};
 
     for (int i = 0; i < Character::PART_COUNT; ++i)
         if (!parts[i]) parts[i] = parts[fallbacks[i]].flipped(textureStore);
@@ -86,8 +88,7 @@ BoneMap createBoneMap(const Animation& anim)
     return map;
 }
 
-Character::Bones createBones(const Character::Parts& parts,
-                             const Animation& anim)
+Character::Bones createBones(const Character::Parts& parts)
 {
     Character::Bones bones;
     const int boneCount = bones.size();
@@ -117,9 +118,9 @@ struct Character::Data
         anim(meta.animRoot, meta.meta),
         boneMap(createBoneMap(anim)),
         parts(readParts(path, textureStore)),
-        bones(createBones(parts, anim))
+        bones(createBones(parts))
     {
-        anim.activate("idle");
+        anim.activate("pose");
         anim.animate(TimePoint(), Duration(0));
     }
 
