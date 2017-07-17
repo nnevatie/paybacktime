@@ -58,15 +58,18 @@ using BoneMap = std::array<int, Character::PART_COUNT>;
 namespace
 {
 
-Character::Parts readParts(const Character::Path& path,
+Character::Parts readParts(const fs::path& path,
+                           ObjectStore& objectStore,
                            TextureStore& textureStore)
 {
     Character::Parts parts;
     for (int i = 0; i < Character::PART_COUNT; ++i)
     {
-        const fs::path partPath(path.first / PART_DIRS[i]);
-        if (fs::exists(partPath))
-            parts[i] = Object({partPath, path.first}, {}, textureStore);
+        const fs::path partPath(path / PART_DIRS[i]);
+        parts[i] = objectStore.object(partPath.generic_path().string());
+        PTLOG(Info) << "part " << i << ", "
+                    << partPath.generic_path().string()
+                    << ": " << bool(parts[i]);
     }
     const int fallbacks[Character::PART_COUNT] =
         {-1, -1, -1, -1, -1, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15};
@@ -100,8 +103,8 @@ Character::Bones createBones(const Character::Parts& parts)
 
 struct Meta
 {
-    Meta(const Character::Path& path) :
-        meta(readJson(path.first / c::character::METAFILE)),
+    Meta(const fs::path& path) :
+        meta(readJson(path / c::character::METAFILE)),
         animRoot(meta["animation_root"].get<std::string>())
     {}
 
@@ -113,11 +116,13 @@ struct Meta
 
 struct Character::Data
 {
-    Data(const Path& path, TextureStore& textureStore) :
-        meta(path),
+    Data(const fs::path& path,
+         ObjectStore& objectStore,
+         TextureStore& textureStore) :
+        meta(objectStore.path() / path),
         anim(meta.animRoot, meta.meta),
         boneMap(createBoneMap(anim)),
-        parts(readParts(path, textureStore)),
+        parts(readParts(path, objectStore, textureStore)),
         bones(createBones(parts))
     {
         anim.activate("pose");
@@ -134,8 +139,10 @@ struct Character::Data
 Character::Character()
 {}
 
-Character::Character(const Path& path, TextureStore& textureStore) :
-    d(std::make_shared<Data>(path, textureStore))
+Character::Character(const Id& id,
+                     ObjectStore& objectStore,
+                     TextureStore& textureStore) :
+    d(std::make_shared<Data>(id, objectStore, textureStore))
 {}
 
 const Character::Parts* Character::parts() const

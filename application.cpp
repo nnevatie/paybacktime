@@ -65,7 +65,8 @@ struct Data
     gfx::Fader         fader;
 
     TextureStore       textureStore;
-    ObjectStore        objectStore;
+    ObjectStore        objectStore,
+                       characterStore;
     HorizonStore       horizonStore;
     Character          character;
 
@@ -104,8 +105,9 @@ struct Data
 
         textureStore({1024, 1024}),
         objectStore(fs::path("objects"), textureStore),
+        characterStore(fs::path("characters"), textureStore),
         horizonStore(fs::path("horizons")),
-        character({fs::path("characters") / "male1", "characters"}, textureStore),
+        character("male1", characterStore, textureStore),
 
         // Camera
         camera({0.f, 0.f, 0.f}, 200.f,
@@ -161,6 +163,7 @@ struct Data
             if (objectStore.update(textureStore))
                 scene.updateLightmap();
 
+            characterStore.update(textureStore);
             lastLiveUpdate = time;
         }
 

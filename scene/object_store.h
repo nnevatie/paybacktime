@@ -17,6 +17,8 @@ struct ObjectStore
 
     ObjectStore(const fs::path& path, TextureStore& textureStore);
 
+    fs::path path() const;
+
     Objects objects() const;
 
     Object object(int index) const;

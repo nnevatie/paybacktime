@@ -82,6 +82,11 @@ ObjectStore::ObjectStore(const fs::path& path, TextureStore& textureStore) :
     d(std::make_shared<Data>(path, textureStore))
 {}
 
+fs::path ObjectStore::path() const
+{
+    return d->path;
+}
+
 ObjectStore::Objects ObjectStore::objects() const
 {
     return d->objects;

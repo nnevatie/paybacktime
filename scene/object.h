@@ -35,8 +35,8 @@ struct Object
 
     operator bool() const;
 
-    operator==(const Object& other) const;
-    operator!=(const Object& other) const;
+    bool operator==(const Object& other) const;
+    bool operator!=(const Object& other) const;
 
     Model       model()     const;
 

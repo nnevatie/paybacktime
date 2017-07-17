@@ -153,12 +153,12 @@ Object::operator bool() const
     return d.operator bool();
 }
 
-Object::operator==(const Object& other) const
+bool Object::operator==(const Object& other) const
 {
     return d == other.d;
 }
 
-Object::operator!=(const Object& other) const
+bool Object::operator!=(const Object& other) const
 {
     return !operator==(other);
 }
