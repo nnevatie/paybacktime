@@ -1,5 +1,5 @@
 {
-    "scale": 0.4,
+    "scale": 0.2,
     "origin": [-1.75, 0, -2],
-    "smoothness": 20
+    "smoothness": 40
 }
