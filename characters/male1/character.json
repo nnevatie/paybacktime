@@ -6,7 +6,8 @@
         "pose": "pose.ozz",
         "idle": "idle.ozz",
         "walk_forward": "walk_forward.ozz",
-        "run_forward_inPlace": "run_forward_inPlace.ozz",
-        "death": "death_from_front_headshot.ozz"
+        "run_forward_inplace": "run_forward_inPlace.ozz",
+        "death": "death_from_front_headshot.ozz",
+        "death_crouching": "death_crouching_headshot_front.ozz"
     } 
 }
