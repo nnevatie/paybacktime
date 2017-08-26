@@ -94,8 +94,8 @@ struct Meta
             base       = meta.value("base",       Object::Id());
             scale      = meta.value("scale",      c::object::SCALE);
             smoothness = meta.value("smoothness", c::object::SMOOTHNESS);
-            origin     = glm::make_vec3(meta.value("origin",
-                                        std::vector<float>(3)).data());
+            origin     = scale * glm::make_vec3(meta.value("origin",
+                                                std::vector<float>(3)).data());
         }
     }
 
@@ -190,7 +190,7 @@ glm::mat4x4 Object::transform() const
 
 glm::vec3 Object::dimensions() const
 {
-    return d->model.dimensions() / scale();
+    return d->model.dimensions();
 }
 
 bool Object::transparent() const
@@ -350,11 +350,15 @@ Object Object::flipped(TextureStore& textureStore) const
 {
     if (d)
     {
-        auto data   = std::make_shared<Data>(*d);
-        data->model = data->model.flipped(textureStore,
-                                          d->meta.smoothness, d->meta.scale);
+        // Clone object
         auto object = Object();
-        object.d    = data;
+        object.d    = std::make_shared<Data>(*d);
+
+        // Flip model
+        object.d->model = d->model.flipped(textureStore);
+
+        // Flip origin
+        object.d->meta.origin.x = -d->model.dimensions().x - d->meta.origin.x;
         return object;
     }
     return Object();

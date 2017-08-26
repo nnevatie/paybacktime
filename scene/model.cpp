@@ -118,7 +118,7 @@ pt::Model::operator bool() const
 glm::vec3 Model::dimensions() const
 {
     const auto& depth = d->cubes.depth;
-    return {depth.width(), depth.height(), depth.depth()};
+    return d->scale * glm::vec3(depth.width(), depth.height(), depth.depth());
 }
 
 gl::Primitive Model::primitive() const
@@ -146,8 +146,7 @@ bool Model::update(const Model& base, TextureStore& textureStore)
     return d->update(base, textureStore);
 }
 
-Model Model::flipped(TextureStore& textureStore,
-                     int smoothness, float scale) const
+Model Model::flipped(TextureStore& textureStore) const
 {
     if (d)
     {
@@ -160,8 +159,8 @@ Model Model::flipped(TextureStore& textureStore,
                            textureStore.normal.insert(data->cubes.normal);
         auto mesh        = ImageMesher::mesh(data->cubes.depth,
                                              data->atlasEntry.second,
-                                             smoothness,
-                                             scale);
+                                             d->smoothness,
+                                             d->scale);
         data->primitive  = gl::Primitive(mesh);
         return model;
     }

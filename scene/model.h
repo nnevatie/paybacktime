@@ -34,8 +34,7 @@ struct Model
 
     bool update(const Model& base, TextureStore& textureStore);
 
-    Model flipped(TextureStore& textureStore,
-                  int smoothness, float scale = 1.f) const;
+    Model flipped(TextureStore& textureStore) const;
 
 private:
     struct Data;
