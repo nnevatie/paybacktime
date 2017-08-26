@@ -45,10 +45,10 @@ static const std::string JOINT_NAMES[Character::PART_COUNT] =
     "RightLeg",
     "LeftToeBase",
     "RightToeBase",
-    "",
-    "",
-    "",
-    "",
+    "LeftArm",
+    "RightArm",
+    "LeftForeArm",
+    "RightForeArm",
     "",
     ""
 };
