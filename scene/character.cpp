@@ -49,8 +49,8 @@ static const std::string JOINT_NAMES[Character::PART_COUNT] =
     "RightArm",
     "LeftForeArm",
     "RightForeArm",
-    "",
-    ""
+    "LeftHand",
+    "RightHand"
 };
 
 using BoneMap = std::array<int, Character::PART_COUNT>;
