@@ -29,7 +29,8 @@ static const std::string PART_DIRS[Character::PART_COUNT] =
     "forearm.left",
     "forearm.right",
     "hand.left",
-    "hand.right"
+    "hand.right",
+    "weapon"
 };
 
 static const std::string JOINT_NAMES[Character::PART_COUNT] =
@@ -50,7 +51,8 @@ static const std::string JOINT_NAMES[Character::PART_COUNT] =
     "LeftForeArm",
     "RightForeArm",
     "LeftHand",
-    "RightHand"
+    "RightHand",
+    "RightHandMiddle1"
 };
 
 using BoneMap = std::array<int, Character::PART_COUNT>;
@@ -72,7 +74,7 @@ Character::Parts readParts(const fs::path& path,
                     << ": " << bool(parts[i]);
     }
     const int fallbacks[Character::PART_COUNT] =
-        {-1, -1, -1, -1, -1, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15};
+        {-1, -1, -1, -1, -1, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15, -1};
 
     for (int i = 0; i < Character::PART_COUNT; ++i)
         if (!parts[i]) parts[i] = parts[fallbacks[i]].flipped(textureStore);

@@ -20,7 +20,7 @@ namespace pt
 struct Character
 {
     // Parts
-    static constexpr int PART_COUNT = 17;
+    static constexpr int PART_COUNT = 18;
     enum class Part
     {
         Head,
@@ -39,7 +39,8 @@ struct Character
         ForearmLeft,
         ForearmRight,
         HandLeft,
-        HandRight
+        HandRight,
+        Weapon
     };
 
     // Types
