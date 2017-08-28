@@ -101,10 +101,15 @@ struct Mesh
          const std::vector<I>& indices) :
          vertices(vertices), indices(indices) {}
 
+    int triangleCount() const
+    {
+        return indices.size() / 3;
+    }
+
     friend std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
     {
         out << "Mesh[vertices: " << mesh.vertices.size()
-            << ", triangles: " << mesh.indices.size() / 3 << "]";
+            << ", triangles: " << mesh.triangleCount() << "]";
 
         return out;
     }
