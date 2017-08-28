@@ -12,7 +12,7 @@
 #include "rect.h"
 
 #include "mesher_common.h"
-#include "sn_mesher.h"
+#include "mesh_deformer.h"
 
 namespace pt
 {
@@ -220,7 +220,9 @@ Mesh_P_N_T_UV meshGreedy(const V& vol,
 Mesh_P_N_T_UV mesh(const Image& image, int smoothness, float scale)
 {
     const Heightfield hfield(image, std::min(image.size().w, image.size().h));
-    return meshGreedy(hfield, RectCube<float>(), smoothness, scale);
+    auto mesh0 = meshGreedy(hfield, RectCube<float>(), scale);
+    PTLOG(Info) << "mesh vertices: " << mesh0.vertices.size();
+    return MeshDeformer::smooth(mesh0, smoothness);
 }
 
 Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
@@ -229,89 +231,12 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
                    float scale)
 {
     const Cubefield cfield(imageCube);
-    auto mesh = meshGreedy(cfield, uvCube, scale, !smoothness);
-    if (smoothness > 0)
-    {
-        PTTIMEU("smooth", boost::milli);
-
-        // Smoothing types
-        using Indices       = std::vector<int>;
-        using Locations     = std::unordered_map<glm::vec3, Indices>;
-        using Neighbors     = std::vector<Indices>;
-        using Displacements = std::vector<glm::vec3>;
-
-        // Vertex/index counts
-        const auto vc = int(mesh.vertices.size());
-
-        // Find neighbors
-        Locations locations(vc / 4);
-        for (int i = 0; i < vc; i += 3)
-        {
-            auto& l0 = locations[mesh.vertices[i + 0].p];
-            auto& l1 = locations[mesh.vertices[i + 1].p];
-            auto& l2 = locations[mesh.vertices[i + 2].p];
-            l0.insert(l0.end(), {i + 1, i + 2});
-            l1.insert(l1.end(), {i + 0, i + 2});
-            l2.insert(l2.end(), {i + 0, i + 1});
-        }
-
-        Neighbors neighbors(mesh.vertices.size());
-
-        #pragma omp parallel for
-        for (int i = 0; i < vc; ++i)
-            neighbors[i] = locations[mesh.vertices[i].p];
-
-        // Smooth iteratively
-        const auto lambda = 0.5f;
-        for (int c = 0; c < smoothness; ++c)
-        {
-            // Determine displacements
-            Displacements displacements(vc, glm::vec3());
-
-            #pragma omp parallel for
-            for (int i = 0; i < vc; ++i)
-            {
-                const auto& v0 = mesh.vertices[i];
-                const auto& n  = neighbors[i];
-                const auto nc  = int(n.size());
-                if (nc)
-                {
-                    const auto w = 1.f / nc;
-                    for (int j = 0; j < nc; ++j)
-                    {
-                        const auto& v1 = mesh.vertices[n[j]];
-                        displacements[i] += w * (v0.p - v1.p);
-                    }
-                }
-            }
-            // Apply displacements
-            const float s = !(c % 2) ? lambda : -lambda;
-
-            #pragma omp parallel for
-            for(int i = 0; i < vc; ++i)
-                mesh.vertices[i].p += s * displacements[i];
-        }
-
-        // Recompute triangle normals and tangents
-        #pragma omp parallel for
-        for (int i = 0; i < vc; i += 3)
-        {
-            auto& va1 = mesh.vertices[i + 0];
-            auto& vb1 = mesh.vertices[i + 1];
-            auto& vc1 = mesh.vertices[i + 2];
-            auto n    = glm::normalize(glm::cross(vb1.p - va1.p, vc1.p - va1.p));
-            auto t    = tangent({va1.p,  vb1.p,  vc1.p},
-                                {va1.uv, vb1.uv, vc1.uv}, n);
-            va1.n = n;
-            vb1.n = n;
-            vc1.n = n;
-            va1.t = t;
-            vb1.t = t;
-            vc1.t = t;
-        }
-        PTLOG(Info) << "mesh vertices: " << mesh.vertices.size();
-    }
-    return mesh;
+    auto mesh0 = meshGreedy(cfield, uvCube, scale, !smoothness);
+    auto mesh1 = MeshDeformer::smooth(mesh0, smoothness);
+    auto mesh2 = MeshDeformer::reduce(mesh1, 1000);
+    PTLOG(Info) << "mesh vertices: " << mesh1.vertices.size()
+                << " -> " << mesh2.vertices.size();
+    return mesh2;
 }
 
 } // namespace ImageMesher
