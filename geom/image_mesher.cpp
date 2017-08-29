@@ -233,6 +233,7 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
     const Cubefield cfield(imageCube);
     auto mesh0 = meshGreedy(cfield, uvCube, scale, !smoothness);
     auto mesh1 = MeshDeformer::smooth(mesh0, smoothness);
+    PTTIMEU("reduce", boost::milli);
     auto mesh2 = MeshDeformer::reduce(mesh1, 1000);
     PTLOG(Info) << "mesh vertices: " << mesh1.vertices.size()
                 << " -> " << mesh2.vertices.size();

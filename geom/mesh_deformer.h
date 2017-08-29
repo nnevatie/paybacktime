@@ -14,6 +14,11 @@ namespace pt
 {
 namespace MeshDeformer
 {
+// Common types
+using Indices       = std::vector<int>;
+using Locations     = std::unordered_map<glm::vec3, Indices>;
+using Neighbors     = std::vector<Indices>;
+using Displacements = std::vector<glm::vec3>;
 
 struct Triangle;
 struct Vertex;
@@ -26,11 +31,11 @@ struct Triangle
     Triangle(Vertex* v0, Vertex* v1, Vertex* v2);
     ~Triangle();
 
-    bool      contains(Vertex* v) const;
+    bool      contains(const Vertex* v) const;
     bool      updateNormal();
     Triangle& replace(Vertex* v0, Vertex* v1);
 };
-using Triangles = std::vector<Triangle>;
+using Triangles = std::vector<Triangle*>;
 
 struct Vertex
 {
@@ -49,20 +54,20 @@ struct Vertex
     float     cost;
     Vertex*   collapse;
 };
-using Vertices = std::vector<Vertex>;
+using Vertices = std::vector<Vertex*>;
 
 template <typename M>
-M smooth(const M& mesh0, int count)
+M shared(const M& mesh0)
+{
+    return mesh0;
+}
+
+template <typename M>
+M smooth(const M& mesh0, int iterCount)
 {
     M mesh1(mesh0);
-    if (count > 0)
+    if (iterCount > 0)
     {
-        // Types
-        using Indices       = std::vector<int>;
-        using Locations     = std::unordered_map<glm::vec3, Indices>;
-        using Neighbors     = std::vector<Indices>;
-        using Displacements = std::vector<glm::vec3>;
-
         // Vertex/index counts
         const auto vc = int(mesh1.vertices.size());
 
@@ -86,7 +91,7 @@ M smooth(const M& mesh0, int count)
 
         // Smooth iteratively
         const auto lambda = 0.5f;
-        for (int c = 0; c < count; ++c)
+        for (int c = 0; c < iterCount; ++c)
         {
             // Determine displacements
             Displacements displacements(vc, glm::vec3());
@@ -140,12 +145,11 @@ template <typename M>
 Vertices meshVertices(const M& mesh)
 {
     const auto vertexCount = int(mesh.vertices.size());
-
     Vertices vertices;
     vertices.reserve(vertexCount);
 
     for (int i = 0; i < vertexCount; ++i)
-        vertices.push_back({mesh.vertices[i].p, i});
+        vertices.emplace_back(new Vertex(mesh.vertices[i].p, i));
 
     return vertices;
 }
@@ -154,22 +158,27 @@ template <typename M>
 Triangles meshTriangles(const M& mesh, Vertices& vertices)
 {
     const auto triangleCount = mesh.triangleCount();
-
     Triangles triangles;
     triangles.reserve(triangleCount);
 
     for (int i = 0; i < triangleCount; ++i)
-        triangles.push_back({&vertices[mesh.indices[3 * i + 0]],
-                             &vertices[mesh.indices[3 * i + 1]],
-                             &vertices[mesh.indices[3 * i + 2]]});
+        triangles.emplace_back(new Triangle(vertices[mesh.indices[3 * i + 0]],
+                                            vertices[mesh.indices[3 * i + 1]],
+                                            vertices[mesh.indices[3 * i + 2]]));
     return triangles;
 }
 
+void reduce(Vertices& vertices, Triangles& triangles, int vertexCount);
+
 template <typename M>
-M reduce(const M& mesh0, int count)
+M reduce(const M& mesh0, int vertexCount)
 {
     auto vertices  = meshVertices(mesh0);
     auto triangles = meshTriangles(mesh0, vertices);
+
+    // Run reduce
+    reduce(vertices, triangles, vertexCount);
+
     return mesh0;
 }
 
