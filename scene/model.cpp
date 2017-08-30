@@ -95,6 +95,8 @@ struct Model::Data
                                             smoothness, scale);
             primitive   = gl::Primitive(mesh);
             lastUpdated = modified;
+
+            PTLOG(Info) << path.string() << " tris: " << mesh.triangleCount();
             return true;
         }
         return false;
