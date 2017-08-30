@@ -70,7 +70,7 @@ struct Heightfield
             vc - f(x + 1, y + 1)
         };
 
-        const float e  = depth / 2.f;
+        const float e  = 0.5f * depth;
         auto collapsed = [&](int i) {return v[i] > 0 && v[i] < e;};
 
         int gradient = 0;
