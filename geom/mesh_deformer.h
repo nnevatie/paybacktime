@@ -139,9 +139,9 @@ M smooth(const M& mesh0, int iterCount)
                 for (int j = 0; j < nc; ++j)
                 {
                     const auto& v1 = mesh1.vertices[n[j]];
-                    d[i][0] += (v0.p - v1.p);
-                    d[i][1] += (v0.n - v1.n);
-                    d[i][2] += (v0.t - v1.t);
+                    d[i][0] += v0.p - v1.p;
+                    d[i][1] += v0.n - v1.n;
+                    d[i][2] += v0.t - v1.t;
                 }
             }
             // Apply displacements

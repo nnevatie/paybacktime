@@ -233,16 +233,6 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
     const Cubefield cfield(imageCube);
     auto mesh0 = meshGreedy(cfield, uvCube, scale, !smoothness);
     return MeshDeformer::smooth(mesh0, smoothness);
-    /*
-    if (smoothness > 0)
-    {
-        auto mesh1 = MeshDeformer::smooth(mesh0, smoothness);
-        auto mesh2 = MeshDeformer::connect(mesh1);
-        return MeshDeformer::reduce(mesh2, 100);
-    }
-    else
-        return mesh0;
-    */
 }
 
 } // namespace ImageMesher
