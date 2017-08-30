@@ -89,8 +89,8 @@ struct IndexSpec
 template <typename V, typename I>
 struct Mesh
 {
-    typedef V Vertex;
-    typedef I Index;
+    using Vertex = V;
+    using Index  = I;
 
     std::vector<V> vertices;
     std::vector<I> indices;
