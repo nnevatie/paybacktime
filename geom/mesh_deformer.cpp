@@ -1,13 +1,72 @@
 #include "mesh_deformer.h"
 
-#include <boost/thread.hpp>
-namespace std {using thread = boost::thread;}
-#include <igl/decimate.h>
-
 namespace pt
 {
 namespace MeshDeformer
 {
+
+struct Triangle;
+struct Vertex;
+
+struct Triangle
+{
+    Vertex*   vertices[3];
+    glm::vec3 normal;
+
+    Triangle(Vertex* v0, Vertex* v1, Vertex* v2);
+    ~Triangle();
+
+    bool      contains(const Vertex* v) const;
+    bool      updateNormal();
+    Triangle& replace(Vertex* v0, Vertex* v1);
+};
+using Triangles = std::vector<Triangle*>;
+
+struct Vertex
+{
+    using Neighbors = std::vector<Vertex*>;
+    using Triangles = std::vector<Triangle*>;
+
+    Vertex(const glm::vec3& pos, int id);
+    ~Vertex();
+
+    bool removeNonNeighbor(Vertex* v);
+
+    glm::vec3 pos;
+    int       id;
+    Neighbors neighbors;
+    Triangles triangles;
+    float     cost;
+    Vertex*   collapse;
+};
+using Vertices = std::vector<Vertex*>;
+
+template <typename M>
+Vertices meshVertices(const M& mesh)
+{
+    const auto vertexCount = int(mesh.vertices.size());
+    Vertices vertices;
+    vertices.reserve(vertexCount);
+
+    for (int i = 0; i < vertexCount; ++i)
+        vertices.emplace_back(new Vertex(mesh.vertices[i].p, i));
+
+    return vertices;
+}
+
+template <typename M>
+Triangles meshTriangles(const M& mesh, Vertices& vertices)
+{
+    const auto triangleCount = mesh.triangleCount();
+    Triangles triangles;
+    triangles.reserve(triangleCount);
+
+    for (int i = 0; i < triangleCount; ++i)
+        triangles.emplace_back(new Triangle(vertices[mesh.indices[3 * i + 0]],
+                                            vertices[mesh.indices[3 * i + 1]],
+                                            vertices[mesh.indices[3 * i + 2]]));
+    return triangles;
+}
 
 namespace
 {
@@ -136,17 +195,20 @@ void collapseEdge(Vertices& vertices, Triangles& triangles, Vertex* v0, Vertex* 
         return;
     }
 
-    for (auto triangle : v0->triangles)
+    Vertices neighbors = v0->neighbors;
+
+    for (int i = int(v0->triangles.size() - 1); i >= 0; --i)
+    {
+        auto triangle = v0->triangles[i];
         if (triangle->contains(v1))
         {
             remove(triangles, triangle);
             delete triangle;
         }
+    }
 
-    for (auto triangle : v0->triangles)
-        triangle->replace(v0, v1);
-
-    Vertices neighbors = v0->neighbors;
+    for (int i = int(v0->triangles.size() - 1); i >= 0; --i)
+        v0->triangles[i]->replace(v0, v1);
 
     remove(vertices, v0);
     delete v0;
@@ -262,12 +324,34 @@ bool Vertex::removeNonNeighbor(Vertex* v)
 void reduce(Vertices& vertices, Triangles& triangles, int vertexCount)
 {
     updateCollapseCosts(vertices);
-
     while (int(vertices.size()) > vertexCount)
     {
         auto v = costMin(vertices);
         collapseEdge(vertices, triangles, v, v->collapse);
     }
+}
+
+Mesh_P_N_T_UV reduce(const Mesh_P_N_T_UV& mesh0, int vertexCount)
+{
+    auto v = meshVertices(mesh0);
+    auto t = meshTriangles(mesh0, v);
+    reduce(v, t, vertexCount);
+
+    const int vc = int(v.size());
+    const int tc = int(t.size());
+
+    Mesh_P_N_T_UV mesh1;
+
+    for (int i = 0; i < vc; ++i)
+        mesh1.vertices.push_back(mesh0.vertices[v[i]->id]);
+
+    for (int i = 0; i < tc; ++i)
+    {
+        mesh1.indices.push_back(indexOf(v, t[i]->vertices[0]));
+        mesh1.indices.push_back(indexOf(v, t[i]->vertices[1]));
+        mesh1.indices.push_back(indexOf(v, t[i]->vertices[2]));
+    }
+    return mesh1;
 }
 
 } // namespace ImageDeformer

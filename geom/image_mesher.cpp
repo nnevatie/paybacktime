@@ -11,7 +11,7 @@
 #include "volume.h"
 #include "rect.h"
 
-#include "mesher_common.h"
+#include "mesh_common.h"
 #include "mesh_deformer.h"
 
 namespace pt
@@ -232,12 +232,17 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
 {
     const Cubefield cfield(imageCube);
     auto mesh0 = meshGreedy(cfield, uvCube, scale, !smoothness);
-    auto mesh1 = MeshDeformer::smooth(mesh0, smoothness);
-    PTTIMEU("reduce", boost::milli);
-    auto mesh2 = MeshDeformer::reduce(mesh1, 1000);
-    PTLOG(Info) << "mesh vertices: " << mesh1.vertices.size()
-                << " -> " << mesh2.vertices.size();
-    return mesh2;
+    return MeshDeformer::smooth(mesh0, smoothness);
+    /*
+    if (smoothness > 0)
+    {
+        auto mesh1 = MeshDeformer::smooth(mesh0, smoothness);
+        auto mesh2 = MeshDeformer::connect(mesh1);
+        return MeshDeformer::reduce(mesh2, 100);
+    }
+    else
+        return mesh0;
+    */
 }
 
 } // namespace ImageMesher
