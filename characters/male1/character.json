@@ -5,6 +5,7 @@
     {
         "pose": "pose.ozz",
         "idle": "idle.ozz",
+        "idle_aim": "idle_aiming.ozz",
         "walk_forward": "walk_forward.ozz",
         "run_forward_inplace": "run_forward_inPlace.ozz",
         "death": "death_from_front_headshot.ozz",
