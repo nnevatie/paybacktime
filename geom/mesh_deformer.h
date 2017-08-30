@@ -1,22 +1,29 @@
 #pragma once
 
 #include <vector>
+#include <unordered_set>
 #include <unordered_map>
+#include <algorithm>
 
 #include <glm/vec3.hpp>
 #include <glm/gtx/hash.hpp>
 
+#include "platform/clock.h"
 #include "common/log.h"
 
+#include "mesh_common.h"
 #include "mesh.h"
 
 namespace pt
 {
 namespace MeshDeformer
 {
+
 // Common types
 using Indices       = std::vector<int>;
+using PosNormal     = std::pair<glm::vec3, glm::vec3>;
 using Locations     = std::unordered_map<glm::vec3, Indices>;
+using Locations2    = std::unordered_map<PosNormal, Indices>;
 using Neighbors     = std::vector<Indices>;
 using Displacements = std::vector<glm::vec3>;
 
@@ -57,22 +64,77 @@ struct Vertex
 using Vertices = std::vector<Vertex*>;
 
 template <typename M>
-M shared(const M& mesh0)
+M connect(const M& mesh0)
 {
-    return mesh0;
+    PTTIMEU("connect", boost::milli);
+
+    const auto vc0 = int(mesh0.vertices.size());
+
+    Locations2 locations(vc0 / 8);
+    for (int i = 0; i < vc0; ++i)
+        locations[{mesh0.vertices[i].p, mesh0.vertices[i].n}].emplace_back(i);
+
+    std::vector<int> indexMap(vc0);
+    std::vector<typename M::Vertex> vertexMap(locations.size());
+
+    auto vertex = [&](const std::vector<int>& indices)
+    {
+        glm::vec3 p(glm::zero<glm::vec3>()),
+                  n(glm::zero<glm::vec3>()),
+                  t(glm::zero<glm::vec3>());
+        glm::vec2 uv(glm::zero<glm::vec2>());
+
+        for (const auto i : indices)
+        {
+            p  += mesh0.vertices[i].p;
+            n  += mesh0.vertices[i].n;
+            t  += mesh0.vertices[i].t;
+            uv += mesh0.vertices[i].uv;
+        }
+        const float c = float(indices.size());
+        return typename M::Vertex {p / c, n / c, t / c, uv / c};
+    };
+
+    int index = 0;
+    for (const auto& loc : locations)
+    {
+        for (const auto i : loc.second)
+            indexMap[i] = index;
+
+        vertexMap[index++] = vertex(loc.second);
+    }
+
+    // Reconstruct mesh
+    const auto vc1 = int(vertexMap.size());
+    const auto ic1 = int(mesh0.indices.size());
+    std::vector<typename M::Vertex> vertices(vc1);
+    std::vector<typename M::Index>  indices(ic1);
+
+    // Vertices
+    for (int i = 0; i < vc1; ++i)
+        vertices[i] = vertexMap[i];
+
+    // Indices
+    for (int i = 0; i < ic1; ++i)
+        indices[i] = indexMap[i];
+
+    PTLOG(Info) << "verts: " << vc0 << " -> " << vc1;
+    return M(vertices, indices);
 }
 
 template <typename M>
 M smooth(const M& mesh0, int iterCount)
 {
-    M mesh1(mesh0);
     if (iterCount > 0)
     {
-        // Vertex/index counts
+        M mesh1(mesh0);
+        //M mesh1(connect(mesh0));
+        //return mesh1;
+
         const auto vc = int(mesh1.vertices.size());
 
         // Find neighbors
-        Locations locations(vc / 4);
+        Locations locations(vc / 8);
         for (int i = 0; i < vc; i += 3)
         {
             auto& l0 = locations[mesh1.vertices[i + 0].p];
@@ -137,8 +199,9 @@ M smooth(const M& mesh0, int iterCount)
             vb1.t = t;
             vc1.t = t;
         }
+        return mesh1;
     }
-    return mesh1;
+    return mesh0;
 }
 
 template <typename M>
@@ -173,11 +236,11 @@ void reduce(Vertices& vertices, Triangles& triangles, int vertexCount);
 template <typename M>
 M reduce(const M& mesh0, int vertexCount)
 {
+    #if 0
     auto vertices  = meshVertices(mesh0);
     auto triangles = meshTriangles(mesh0, vertices);
-
-    // Run reduce
     reduce(vertices, triangles, vertexCount);
+    #endif
 
     return mesh0;
 }
