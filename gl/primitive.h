@@ -36,17 +36,26 @@ struct Primitive
 
         // Enable attrib arrays
         for (std::size_t i = 0; i < attribCount; ++i)
-            glEnableVertexAttribArray(i);
+            glEnableVertexAttribArray(GLuint(i));
 
         // Set attrib pointers
         size_t offset = 0;
         for (std::size_t i = 0; i < attribCount; ++i)
         {
             const VertexSpec::Attrib& attrib = vertexSpec.attribs.at(i);
-            glVertexAttribPointer(i, std::get<0>(attrib), std::get<1>(attrib),
-                                  GL_FALSE, stride,
-                                  reinterpret_cast<const void*>(offset));
-            offset += std::get<2>(attrib);
+            const auto count = std::get<0>(attrib);
+            const auto type  = std::get<1>(attrib);
+            const auto size  = std::get<2>(attrib);
+
+            if (type == GL_INT)
+                glVertexAttribIPointer(GLuint(i), GLint(count), type,
+                                       GLsizei(stride),
+                                       reinterpret_cast<const void*>(offset));
+            else
+                glVertexAttribPointer(GLuint(i), GLint(count), type,
+                                      GL_FALSE, GLsizei(stride),
+                                      reinterpret_cast<const void*>(offset));
+            offset += size;
         }
     }
 
