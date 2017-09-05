@@ -1,9 +1,29 @@
 #include "mesh_deformer.h"
 
+#include <vector>
+#include <unordered_set>
+#include <unordered_map>
+#include <algorithm>
+
+#include <glm/vec3.hpp>
+#include <glm/gtx/hash.hpp>
+
+#include "platform/clock.h"
+#include "common/log.h"
+
+#include "mesh_common.h"
+
 namespace pt
 {
 namespace MeshDeformer
 {
+// Types
+using Indices       = std::vector<int>;
+using PosNormal     = std::pair<glm::vec3, glm::vec3>;
+using Locations     = std::unordered_map<glm::vec3, Indices>;
+using Neighbors     = std::vector<Indices>;
+using Displacements = std::vector<std::array<glm::vec3, 3>>;
+using UniqueMesh    = std::pair<Mesh, Locations>;
 
 struct Triangle;
 struct Vertex;
@@ -321,37 +341,170 @@ bool Vertex::removeNonNeighbor(Vertex* v)
     return false;
 }
 
-void reduce(Vertices& vertices, Triangles& triangles, int vertexCount)
+UniqueMesh connect(const Mesh_P_N_T_UV& mesh0)
+{
+    PTTIMEU("connect", boost::milli);
+    const auto vc0 = int(mesh0.vertices.size());
+
+    Locations locations(vc0 / 8);
+    for (int i = 0; i < vc0; ++i)
+        locations[mesh0.vertices[i].p].emplace_back(i);
+
+    std::vector<int> indexMap(vc0);
+    std::vector<Mesh::Vertex> vertexMap(locations.size());
+
+    int index = 0;
+    for (const auto& loc : locations)
+    {
+        for (const auto i : loc.second)
+            indexMap[i] = index;
+
+        vertexMap[index++] = mesh0.vertices[loc.second.front()];
+    }
+
+    // Reconstruct mesh
+    const auto vc1 = int(vertexMap.size());
+    const auto ic1 = int(mesh0.indices.size());
+    std::vector<Mesh::Vertex> vertices(vc1);
+    std::vector<Mesh::Index>  indices(ic1);
+
+    // Vertices
+    for (int i = 0; i < vc1; ++i)
+        vertices[i] = vertexMap[i];
+
+    // Indices
+    for (int i = 0; i < ic1; ++i)
+        indices[i] = indexMap[i];
+
+    return {Mesh(vertices, indices), locations};
+}
+
+void decimate(Vertices& vertices, Triangles& triangles, int triangleCount)
 {
     updateCollapseCosts(vertices);
-    while (int(vertices.size()) > vertexCount)
+    while (int(triangles.size()) > triangleCount)
     {
         auto v = costMin(vertices);
         collapseEdge(vertices, triangles, v, v->collapse);
     }
 }
 
-Mesh_P_N_T_UV reduce(const Mesh_P_N_T_UV& mesh0, int vertexCount)
+Mesh_P_N_T_UV decimate(const Mesh_P_N_T_UV& mesh0, int triangleCount)
 {
-    auto v = meshVertices(mesh0);
-    auto t = meshTriangles(mesh0, v);
-    reduce(v, t, vertexCount);
+    auto mesh1 = connect(mesh0);
+    PTTIMEU("decimate", boost::milli);
 
-    const int vc = int(v.size());
+    auto v = meshVertices(mesh1.first);
+    auto t = meshTriangles(mesh1.first, v);
+    decimate(v, t, triangleCount);
+
     const int tc = int(t.size());
 
-    Mesh_P_N_T_UV mesh1;
+    Mesh_P_N_T_UV mesh2;
+    mesh2.vertices.resize(tc * 3);
+    mesh2.indices.resize(tc * 3);
 
-    for (int i = 0; i < vc; ++i)
-        mesh1.vertices.push_back(mesh0.vertices[v[i]->id]);
-
-    for (int i = 0; i < tc; ++i)
+    auto bestUv = [&](const glm::vec3& tn, const Indices& indices)
     {
-        mesh1.indices.push_back(indexOf(v, t[i]->vertices[0]));
-        mesh1.indices.push_back(indexOf(v, t[i]->vertices[1]));
-        mesh1.indices.push_back(indexOf(v, t[i]->vertices[2]));
+        int bi   = -1;
+        float bd = -2.f;
+        for (const auto i : indices)
+        {
+            const auto vn = mesh0.vertices[i].n;
+            const auto d  = glm::dot(tn, vn);
+            if (d > bd)
+            {
+                bi = i;
+                bd = d;
+            }
+        }
+        return mesh0.vertices[bi].uv;
+    };
+
+    for (int ti = 0; ti < tc; ++ti)
+    {
+        auto& tri = t[ti];
+        for (int vi = 0; vi < 3; ++vi)
+        {
+            const auto& p = tri->vertices[vi]->pos;
+            const auto& v = mesh0.vertices[mesh1.second[p].front()];
+            const auto uv = bestUv(tri->normal, mesh1.second[p]);
+            mesh2.vertices[3 * ti + vi] = {p, v.n, v.t, uv};
+            mesh2.indices[3 * ti + vi] = 3 * ti + vi;
+        }
     }
-    return mesh1;
+    return mesh2;
+}
+
+Mesh smooth(const Mesh& mesh0, int iterCount)
+{
+    if (iterCount > 0)
+    {
+        PTTIMEU("smooth", boost::milli);
+        Mesh mesh1(mesh0);
+        const auto vc = int(mesh1.vertices.size());
+
+        // Find neighbors
+        Neighbors neighbors(vc);
+        Locations locations(vc / 8);
+
+        PTLOG(Info) << "verts: " << vc;
+        for (int i = 0; i < vc; i += 3)
+        {
+            auto& l0 = locations[mesh1.vertices[i + 0].p.xyz];
+            auto& l1 = locations[mesh1.vertices[i + 1].p.xyz];
+            auto& l2 = locations[mesh1.vertices[i + 2].p.xyz];
+            l0.insert(l0.end(), {i + 1, i + 2});
+            l1.insert(l1.end(), {i + 0, i + 2});
+            l2.insert(l2.end(), {i + 0, i + 1});
+        }
+
+        #pragma omp parallel for
+        for (int i = 0; i < vc; ++i)
+            neighbors[i] = locations[mesh1.vertices[i].p];
+
+        // Smooth iteratively with strength lambda
+        const auto lambda = 0.5f;
+
+        Displacements d(vc);
+        std::array<glm::vec3, 3> zero;
+        zero.fill(glm::zero<glm::vec3>());
+
+        for (int c = 0; c < iterCount; ++c)
+        {
+            // Determine displacements
+            std::fill(std::begin(d), std::end(d), zero);
+
+            #pragma omp parallel for
+            for (int i = 0; i < vc; ++i)
+            {
+                const auto& v0 = mesh1.vertices[i];
+                const auto& n  = neighbors[i];
+                const auto nc  = int(n.size());
+                for (int j = 0; j < nc; ++j)
+                {
+                    const auto& v1 = mesh1.vertices[n[j]];
+                    d[i][0] += v0.p.xyz - v1.p.xyz;
+                    d[i][1] += v0.n - v1.n;
+                    d[i][2] += v0.t - v1.t;
+                }
+            }
+            // Apply displacements
+            const float s = !(c % 2) ? lambda : -lambda;
+
+            #pragma omp parallel for
+            for(int i = 0; i < vc; ++i)
+            {
+                const auto w = 1.f / neighbors[i].size();
+                auto& v1     = mesh1.vertices[i];
+                v1.p += s * w * d[i][0];
+                v1.n += s * w * d[i][1];
+                v1.t += s * w * d[i][2];
+            }
+        }
+        return decimate(mesh1, 50);
+    }
+    return mesh0;
 }
 
 } // namespace ImageDeformer
