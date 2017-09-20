@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
     -Wno-ignored-attributes \
     -Wno-deprecated-declarations \
     -Wno-misleading-indentation \
-    -fopenmp -ffast-math -march=core2")
+    -fopenmp -ffast-math -march=core2 -s")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
     -Wl,--stack,16777216")
@@ -42,6 +42,7 @@ file(GLOB EXT_HEADER_FILES
 file(GLOB EXT_SOURCE_FILES
     ext/nanovg/src/*.c
     ext/nanogui-sdl/src/*.cpp
+    ext/ozz-animation/src_fused/*.cc
     )
 
 file(GLOB SHADER_FILES
@@ -79,13 +80,6 @@ set(OPENGL_LIBS
     opengl32
     )
 
-# Ozz dependencies
-set(OZZ_LIBS
-    ozz_animation_offline_r
-    ozz_animation_r
-    ozz_base_r
-    )
-
 # Project include paths
 include_directories(
     ${CMAKE_SOURCE_DIR}
@@ -100,6 +94,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/ext/nanovg/src
     ${CMAKE_SOURCE_DIR}/ext/nanogui-sdl/include
     ${CMAKE_SOURCE_DIR}/ext/gsl-lite/include
+    ${CMAKE_SOURCE_DIR}/ext/ozz-animation/include
     )
 
 # Build definitions
@@ -121,7 +116,6 @@ target_link_libraries(${PROJECT_NAME}
                       ${BOOST_LIBS}
                       ${SDL_LIBS}
                       ${OPENGL_LIBS}
-                      ${OZZ_LIBS}
                       )
 
 ################################################################################
