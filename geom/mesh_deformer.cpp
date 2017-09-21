@@ -502,7 +502,7 @@ Mesh smooth(const Mesh& mesh0, int iterCount)
                 v1.t += s * w * d[i][2];
             }
         }
-        return decimate(mesh1, 50);
+        return mesh1;
     }
     return mesh0;
 }

@@ -192,7 +192,7 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 
 gfx::Geometry::Instances Scene::characterGeometry() const
 {
-    const float s = 25.f;
+    const float s = 28.125f;
     gfx::Geometry::Instances instances;
     instances.reserve(Character::PART_COUNT * d->charItems.size());
     for (const auto& item : d->charItems)
