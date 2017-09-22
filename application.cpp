@@ -1,5 +1,7 @@
 #include "application.h"
 
+#include <boost/format.hpp>
+
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -292,6 +294,20 @@ struct Data
         fader(1.f - timeSec);
 
         display->swap();
+
+        #if 0
+        static int f = 0;
+        if (timeSec > 10.f)
+        {
+            auto cap = display->capture().scaled({1920, 1080});
+            boost::format fmt("%05d");
+            fmt % (f++);
+            auto fn = "c:/temp/pt/" + fmt.str() + ".png";
+            cap.write(fn);
+            camera.yaw += 0.01f;
+        }
+        #endif
+
         return true;
     }
 
