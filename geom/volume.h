@@ -4,6 +4,8 @@
 
 #include <boost/algorithm/clamp.hpp>
 
+#include <glm/vec3.hpp>
+
 #include "img/image.h"
 #include "img/image_cube.h"
 
@@ -135,6 +137,11 @@ struct Cubefield
                hfields[3](z, y,  width - x - 1) &&
                hfields[4](x, z,              y) &&
                hfields[5](x, z, height - y - 1);
+    }
+
+    inline glm::vec3 size() const
+    {
+        return {width, height, depth};
     }
 
     // Front, back, left, right, top, bottom
