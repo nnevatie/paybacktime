@@ -235,7 +235,7 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
     auto mesh0 = meshGreedy(cfield, uvCube, scale, !smoothness);
     auto mesh1 = MeshDeformer::smooth(mesh0, smoothness);
     return smoothness > 0 ?
-           MeshDeformer::decimate(mesh1, uvCube, size, 100) :
+           MeshDeformer::decimate(mesh1, uvCube, size) :
            mesh1;
 }
 

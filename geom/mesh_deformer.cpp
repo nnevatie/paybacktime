@@ -129,8 +129,7 @@ UniqueMesh connect(const Mesh_P_N_T_UV& mesh0)
 
 Mesh_P_N_T_UV decimate(const Mesh_P_N_T_UV& mesh0,
                        const RectCube<float>& uvCube,
-                       const glm::vec3& size,
-                       int triangleCount)
+                       const glm::vec3& size)
 {
     auto mesh1 = connect(mesh0);
     PTTIMEU("decimate", boost::milli);
