@@ -231,8 +231,12 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
                    float scale)
 {
     const Cubefield cfield(imageCube);
+    auto size  = scale * cfield.size();
     auto mesh0 = meshGreedy(cfield, uvCube, scale, !smoothness);
-    return MeshDeformer::smooth(mesh0, smoothness);
+    auto mesh1 = MeshDeformer::smooth(mesh0, smoothness);
+    return smoothness > 0 ?
+           MeshDeformer::decimate(mesh1, uvCube, size, 100) :
+           mesh1;
 }
 
 } // namespace ImageMesher
