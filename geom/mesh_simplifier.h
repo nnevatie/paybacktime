@@ -135,28 +135,22 @@ struct Simplifier
         triangles(triangles), vertices(vertices)
     {}
 
-    void simplify(int iterCount, Scalar strength)
+    void simplify(int iterCount, float threshold, float scaler)
     {
         int deletedTriangles = 0;
         std::vector<int> deleted0, deleted1;
 
-        for (int i = 0, c = int(triangles.size()); i < c; ++i)
-            triangles[i].deleted = 0;
-
-        auto threshold = 0.1f;
+        for (auto& t : triangles)
+            t.deleted = 0;
 
         for (int iter = 0; iter < iterCount; ++iter)
         {
-            // Update mesh regularly
-            //if (iter % 5 == 0)
-                updateMesh(iter);
+            // Update mesh
+            updateMesh(iter);
 
             // Clear dirty flags
             for (auto& t : triangles)
                 t.dirty = 0;
-
-            // Threshold
-            //auto threshold = 0.000000001f * std::pow(Scalar(iter + 3), strength);
 
             // Iterate over triangles
             for (const auto& t : triangles)
@@ -199,9 +193,8 @@ struct Simplifier
                         if(tcount <= v0.tcount)
                         {
                             if(tcount)
-                                memcpy(&refs[v0.tstart], &refs[tstart], tcount * sizeof(Ref));
-                                //std::copy(&refs[tstart], &refs[tstart] + tcount,
-                                //          &refs[v0.tstart]);
+                                std::copy(&refs[tstart], &refs[tstart] + tcount,
+                                          &refs[v0.tstart]);
                         }
                         else
                             v0.tstart = tstart;
@@ -209,11 +202,10 @@ struct Simplifier
                         v0.tcount = tcount;
                         break;
                     }
-
-                threshold *= 10.f;
             }
-            compactMesh();
+            threshold *= scaler;
         }
+        compactMesh();
     }
 
     bool flipped(const glm::vec3& p, int /*i0*/, int i1,
@@ -273,10 +265,9 @@ struct Simplifier
             Scalar error1 = vertexError(q, p1.x, p1.y, p1.z);
             Scalar error2 = vertexError(q, p2.x, p2.y, p2.z);
             Scalar error3 = vertexError(q, p3.x, p3.y, p3.z);
-            error = std::min(error1, std::min(error2, error3));
-            if (error1 == error) result = p1;
-            if (error2 == error) result = p2;
-            if (error3 == error) result = p3;
+            error  = std::min(error1, std::min(error2, error3));
+            result = error == error1 ? p1 :
+                     error == error2 ? p2 : p3;
         }
         return error;
     }
@@ -321,7 +312,7 @@ struct Simplifier
 
             triangles.resize(dst);
         }
-        if(iter == 0)
+        //if (iter == 0)
         {
             for (auto& v : vertices)
                 v.q = SymMat(0.f);
@@ -377,7 +368,7 @@ struct Simplifier
             }
         }
 
-        if(iter == 0)
+        //if (iter == 0)
         {
             std::vector<int> vcount, vids;
 
