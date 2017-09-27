@@ -12,6 +12,7 @@
 #include "common/log.h"
 
 #include "mesh_common.h"
+#include "mesh_simplifier.h"
 
 namespace pt
 {
@@ -25,320 +26,65 @@ using Neighbors     = std::vector<Indices>;
 using Displacements = std::vector<std::array<glm::vec3, 3>>;
 using UniqueMesh    = std::pair<Mesh, Locations>;
 
-struct Triangle;
-struct Vertex;
-
-struct Triangle
-{
-    Vertex*   vertices[3];
-    glm::vec3 normal;
-
-    Triangle(Vertex* v0, Vertex* v1, Vertex* v2);
-    ~Triangle();
-
-    bool      contains(const Vertex* v) const;
-    bool      updateNormal();
-    Triangle& replace(Vertex* v0, Vertex* v1);
-};
-using Triangles = std::vector<Triangle*>;
-
-struct Vertex
-{
-    using Neighbors = std::vector<Vertex*>;
-    using Triangles = std::vector<Triangle*>;
-
-    Vertex(const glm::vec3& pos, int id);
-    ~Vertex();
-
-    bool removeNonNeighbor(Vertex* v);
-
-    glm::vec3 pos;
-    int       id;
-    Neighbors neighbors;
-    Triangles triangles;
-    float     cost;
-    Vertex*   collapse;
-};
-using Vertices = std::vector<Vertex*>;
-
 template <typename M>
-Vertices meshVertices(const M& mesh)
+MeshSimplifier::Simplifier::Verts meshVertices(const M& mesh)
 {
     const auto vertexCount = int(mesh.vertices.size());
-    Vertices vertices;
+    MeshSimplifier::Simplifier::Verts vertices;
     vertices.reserve(vertexCount);
 
     for (int i = 0; i < vertexCount; ++i)
-        vertices.emplace_back(new Vertex(mesh.vertices[i].p, i));
+        vertices.emplace_back(mesh.vertices[i].p);
 
     return vertices;
 }
 
 template <typename M>
-Triangles meshTriangles(const M& mesh, Vertices& vertices)
+MeshSimplifier::Simplifier::Tris meshTriangles(const M& mesh)
 {
     const auto triangleCount = mesh.triangleCount();
-    Triangles triangles;
+    MeshSimplifier::Simplifier::Tris triangles;
     triangles.reserve(triangleCount);
 
     for (int i = 0; i < triangleCount; ++i)
-        triangles.emplace_back(new Triangle(vertices[mesh.indices[3 * i + 0]],
-                                            vertices[mesh.indices[3 * i + 1]],
-                                            vertices[mesh.indices[3 * i + 2]]));
+    {
+        auto i0 = mesh.indices[3 * i + 0];
+        auto i1 = mesh.indices[3 * i + 1];
+        auto i2 = mesh.indices[3 * i + 2];
+        auto p0 = mesh.vertices[i0].p;
+        auto p1 = mesh.vertices[i1].p;
+        auto p2 = mesh.vertices[i2].p;
+        auto n  = glm::normalize(glm::cross(p1 - p0, p2 - p1));
+        triangles.emplace_back(i0, i1, i2, n);
+    }
     return triangles;
 }
 
 namespace
 {
 
-template<class T>
-bool contains(const std::vector<T>& c, T t)
+Neighbors vertexNeighbors(const Mesh& mesh)
 {
-    return std::find(std::begin(c), std::end(c), t) != std::end(c);
-}
+    const auto& v = mesh.vertices;
+    const int vc  = int(v.size());
 
-template<class T>
-int indexOf(const std::vector<T>& c, T t)
-{
-    return std::find(std::begin(c), std::end(c), t) - std::begin(c);
-}
-
-template<class T>
-T& add(std::vector<T>& c, T t)
-{
-    c.push_back(t);
-    return c.back();
-}
-
-template<class T>
-T pop(std::vector<T>& c)
-{
-    auto val = std::move(c.back());
-    c.pop_back();
-    return val;
-}
-
-template<class T>
-void addUnique(std::vector<T>& c, T t)
-{
-    if (!contains(c, t))
-        c.push_back(t);
-}
-
-template<class T>
-bool remove(std::vector<T>& c, T t)
-{
-    auto it = std::find(std::begin(c), std::end(c), t);
-    if (it != end(c))
+    Locations locations(vc / 8);
+    for (int i = 0; i < vc; i += 3)
     {
-        c.erase(it);
-        return true;
-    }
-    return false;
-}
-
-float edgeCollapseCost(const Vertex* v0, const Vertex* v1)
-{
-    float edgeLength = glm::length(v0->pos - v1->pos);
-    float curvature  = 0.f;
-
-    std::vector<Triangle*> sides;
-    for (const auto tri : v0->triangles)
-        if (tri->contains(v1))
-            sides.push_back(tri);
-
-    for (const auto& tri : v0->triangles)
-    {
-        float curvatureMin = 1.f;
-        for (const auto side : sides)
-        {
-            float dot    = glm::dot(tri->normal, side->normal);
-            curvatureMin = std::min(curvatureMin, 0.5f * (1.f - dot));
-        }
-        curvature = std::max(curvature, curvatureMin);
-    }
-    return edgeLength * curvature;
-}
-
-bool updateEdgeCost(Vertex* vertex)
-{
-    if (!vertex->neighbors.empty())
-    {
-        float   costBest = std::numeric_limits<float>::max();
-        Vertex* collapse = nullptr;
-
-        for (const auto neighbor : vertex->neighbors)
-        {
-            float cost = edgeCollapseCost(vertex, neighbor);
-            if (cost < costBest)
-            {
-                costBest = cost;
-                collapse = neighbor;
-            }
-        }
-        vertex->cost     = costBest;
-        vertex->collapse = collapse;
-        return true;
-    }
-    else
-    {
-        // No neighbors
-        vertex->cost     = -1.f;
-        vertex->collapse = nullptr;
-        return false;
-    }
-}
-
-void updateCollapseCosts(Vertices& vertices)
-{
-    for (auto& vertex : vertices)
-        updateEdgeCost(vertex);
-}
-
-Vertex* costMin(const Vertices& vertices)
-{
-    // TODO: priority_queue
-    Vertex* vertex = !vertices.empty() ? vertices.front() : nullptr;
-    for (auto v : vertices)
-        if (v->cost < vertex->cost)
-            vertex = v;
-
-    return vertex;
-}
-
-void collapseEdge(Vertices& vertices, Triangles& triangles, Vertex* v0, Vertex* v1)
-{
-    if (!v1)
-    {
-        remove(vertices, v0);
-        delete v0;
-        return;
+        auto& l0 = locations[v[i + 0].p];
+        auto& l1 = locations[v[i + 1].p];
+        auto& l2 = locations[v[i + 2].p];
+        l0.insert(l0.end(), {i + 1, i + 2});
+        l1.insert(l1.end(), {i + 2, i + 0});
+        l2.insert(l2.end(), {i + 0, i + 1});
     }
 
-    Vertices neighbors = v0->neighbors;
+    Neighbors neighbors(vc);
+    #pragma omp parallel for
+    for (int i = 0; i < vc; ++i)
+        neighbors[i] = locations[v[i].p];
 
-    for (int i = int(v0->triangles.size() - 1); i >= 0; --i)
-    {
-        auto triangle = v0->triangles[i];
-        if (triangle->contains(v1))
-        {
-            remove(triangles, triangle);
-            delete triangle;
-        }
-    }
-
-    for (int i = int(v0->triangles.size() - 1); i >= 0; --i)
-        v0->triangles[i]->replace(v0, v1);
-
-    remove(vertices, v0);
-    delete v0;
-
-    for (auto neighbor : neighbors)
-        updateEdgeCost(neighbor);
-}
-
-} // namespace
-
-Triangle::Triangle(Vertex* v0, Vertex* v1, Vertex* v2) :
-    vertices {v0, v1, v2}
-{
-    updateNormal();
-    for(int i = 0; i < 3; ++i)
-    {
-        vertices[i]->triangles.push_back(this);
-        for(int j = 0; j < 3; ++j)
-            if(i != j)
-                addUnique(vertices[i]->neighbors, vertices[j]);
-    }
-}
-
-Triangle::~Triangle()
-{
-    for(int i = 0; i < 3; ++i)
-        if(vertices[i])
-            remove(vertices[i]->triangles, this);
-
-    for (int i0 = 0; i0 < 3; ++i0)
-    {
-        int i1 = (i0 + 1) % 3;
-        if(vertices[i0] && vertices[i1])
-        {
-            vertices[i0]->removeNonNeighbor(vertices[i1]);
-            vertices[i1]->removeNonNeighbor(vertices[i0]);
-        }
-    }
-}
-
-bool Triangle::contains(const Vertex* v) const
-{
-    return v == vertices[0] || v == vertices[1] || v == vertices[2];
-}
-
-bool Triangle::updateNormal()
-{
-    auto v0 = vertices[0]->pos;
-    auto v1 = vertices[1]->pos;
-    auto v2 = vertices[2]->pos;
-    normal  = glm::cross(v1 - v0, v2 - v1);
-    if(glm::length(normal) > 0.f)
-    {
-        normal = normalize(normal);
-        return true;
-    }
-    return false;
-}
-
-Triangle& Triangle::replace(Vertex* v0, Vertex* v1)
-{
-    if(v0 == vertices[0])
-        vertices[0] = v1;
-    else
-    if(v0 == vertices[1])
-        vertices[1] = v1;
-    else
-        vertices[2] = v1;
-
-    remove(v0->triangles, this);
-    v1->triangles.push_back(this);
-
-    for (int i = 0; i < 3; ++i)
-    {
-        v0->removeNonNeighbor(vertices[i]);
-        vertices[i]->removeNonNeighbor(v0);
-    }
-    for (int i = 0; i < 3; ++i)
-        for(int j = 0; j < 3; ++j)
-            if(i != j)
-                addUnique(vertices[i]->neighbors, vertices[j]);
-
-    updateNormal();
-    return *this;
-}
-
-Vertex::Vertex(const glm::vec3& pos, int id) :
-    pos(pos), id(id), cost(0.f), collapse(nullptr)
-{}
-
-Vertex::~Vertex()
-{
-    while(neighbors.size())
-    {
-        remove(neighbors[0]->neighbors, this);
-        remove(neighbors, neighbors[0]);
-    }
-}
-
-bool Vertex::removeNonNeighbor(Vertex* v)
-{
-    if(contains(neighbors, v))
-    {
-        for (const auto& tri : triangles)
-            if (tri->contains(v)) return false;
-
-        remove(neighbors, v);
-        return true;
-    }
-    return false;
+    return neighbors;
 }
 
 UniqueMesh connect(const Mesh_P_N_T_UV& mesh0)
@@ -379,59 +125,97 @@ UniqueMesh connect(const Mesh_P_N_T_UV& mesh0)
     return {Mesh(vertices, indices), locations};
 }
 
-void decimate(Vertices& vertices, Triangles& triangles, int triangleCount)
-{
-    updateCollapseCosts(vertices);
-    while (int(triangles.size()) > triangleCount)
-    {
-        auto v = costMin(vertices);
-        collapseEdge(vertices, triangles, v, v->collapse);
-    }
-}
+} // namespace
 
-Mesh_P_N_T_UV decimate(const Mesh_P_N_T_UV& mesh0, int triangleCount)
+Mesh_P_N_T_UV decimate(const Mesh_P_N_T_UV& mesh0,
+                       const RectCube<float>& uvCube,
+                       const glm::vec3& size,
+                       int triangleCount)
 {
     auto mesh1 = connect(mesh0);
     PTTIMEU("decimate", boost::milli);
 
     auto v = meshVertices(mesh1.first);
-    auto t = meshTriangles(mesh1.first, v);
-    decimate(v, t, triangleCount);
+    auto t = meshTriangles(mesh1.first);
 
-    const int tc = int(t.size());
+    MeshSimplifier::Simplifier simplifier(t, v);
+    simplifier.simplify(5, 0.01f, 2.f);
+
+    const int vc0 = int(v.size());
+    const int tc0 = int(t.size());
+
+    PTLOG(Info) << mesh1.first.vertices.size() << " / "
+                << mesh1.first.triangleCount() << " -> " << vc0 << " / " << tc0;
 
     Mesh_P_N_T_UV mesh2;
-    mesh2.vertices.resize(tc * 3);
-    mesh2.indices.resize(tc * 3);
+    mesh2.vertices.resize(tc0 * 3);
+    mesh2.indices.resize(tc0 * 3);
 
-    auto bestUv = [&](const glm::vec3& tn, const Indices& indices)
-    {
-        int bi   = -1;
-        float bd = -2.f;
-        for (const auto i : indices)
-        {
-            const auto vn = mesh0.vertices[i].n;
-            const auto d  = glm::dot(tn, vn);
-            if (d > bd)
-            {
-                bi = i;
-                bd = d;
-            }
-        }
-        return mesh0.vertices[bi].uv;
-    };
-
-    for (int ti = 0; ti < tc; ++ti)
+    // Reconstruct non-vertex-sharing triangles
+    #pragma omp parallel for
+    for (int ti = 0; ti < tc0; ++ti)
     {
         auto& tri = t[ti];
+        auto n    = glm::normalize(glm::cross(v[tri.v[1]].p - v[tri.v[0]].p,
+                                              v[tri.v[2]].p - v[tri.v[1]].p));
+        auto t    = glm::zero<glm::vec3>();
         for (int vi = 0; vi < 3; ++vi)
         {
-            const auto& p = tri->vertices[vi]->pos;
-            const auto& v = mesh0.vertices[mesh1.second[p].front()];
-            const auto uv = bestUv(tri->normal, mesh1.second[p]);
-            mesh2.vertices[3 * ti + vi] = {p, v.n, v.t, uv};
-            mesh2.indices[3 * ti + vi] = 3 * ti + vi;
+            const auto& p               = v[tri.v[vi]].p;
+            const auto uv               = glm::vec2(0, 0);
+            mesh2.vertices[3 * ti + vi] = {p, n, t, uv};
+            mesh2.indices[3 * ti + vi]  = 3 * ti + vi;
         }
+    }
+
+    // Reconstruct normals and UVs
+    const int axisUV[6][2] =
+    {
+        {2, 1}, {2, 1},
+        {0, 2}, {0, 2},
+        {0, 1}, {0, 1},
+    };
+    const int axisSide[6] = {2, 3, 5, 4, 1, 0};
+    const auto neighbors  = vertexNeighbors(mesh2);
+    const auto vc1        = int(mesh2.vertices.size());
+    const auto tc1        = int(mesh2.triangleCount());
+    for (int i = 0; i < vc1; ++i)
+    {
+        auto&       v0  = mesh2.vertices[i];
+        const auto& idx = neighbors[i];
+        const auto  ic  = int(idx.size());
+        glm::vec3   n   = glm::zero<glm::vec3>();
+        for (int j = 0; j < ic; j += 2)
+        {
+            const auto& v1 = mesh2.vertices[idx[j + 0]];
+            const auto& v2 = mesh2.vertices[idx[j + 1]];
+            const auto  e0 = v1.p - v0.p,
+                        e1 = v2.p - v1.p;
+            const auto  l0 = glm::length(e0),
+                        l1 = glm::length(e1);
+            const auto  a  = glm::angle(e0 / l0, e1 / l1);
+            const auto  ar = 0.5f * l0 * l1 * glm::sin(a);
+            n             += a * ar * glm::normalize(glm::cross(e0, e1));
+        }
+        const auto axis = dominantAxis(v0.n);
+        const auto uvn  = glm::vec2(v0.p[axisUV[axis][0]] / size[axisUV[axis][0]],
+                                    v0.p[axisUV[axis][1]] / size[axisUV[axis][1]]);
+        const auto uv   = uvCube[axisSide[axis]].point(uvn.x, uvn.y);
+        v0.n            = glm::normalize(n);
+        v0.uv           = uv;
+    }
+    // Reconstruct tangents
+    for (int i = 0; i < tc1; ++i)
+    {
+        auto& v0 = mesh2.vertices[i * 3 + 0];
+        auto& v1 = mesh2.vertices[i * 3 + 1];
+        auto& v2 = mesh2.vertices[i * 3 + 2];
+        const auto n = glm::normalize(glm::cross(v1.p - v0.p, v2.p - v1.p));
+        const auto t = tangent({v0.p, v1.p, v2.p},
+                               {v0.uv, v1.uv, v2.uv}, n);
+        v0.t = t;
+        v1.t = t;
+        v2.t = t;
     }
     return mesh2;
 }
@@ -445,23 +229,7 @@ Mesh smooth(const Mesh& mesh0, int iterCount)
         const auto vc = int(mesh1.vertices.size());
 
         // Find neighbors
-        Neighbors neighbors(vc);
-        Locations locations(vc / 8);
-
-        PTLOG(Info) << "verts: " << vc;
-        for (int i = 0; i < vc; i += 3)
-        {
-            auto& l0 = locations[mesh1.vertices[i + 0].p.xyz];
-            auto& l1 = locations[mesh1.vertices[i + 1].p.xyz];
-            auto& l2 = locations[mesh1.vertices[i + 2].p.xyz];
-            l0.insert(l0.end(), {i + 1, i + 2});
-            l1.insert(l1.end(), {i + 0, i + 2});
-            l2.insert(l2.end(), {i + 0, i + 1});
-        }
-
-        #pragma omp parallel for
-        for (int i = 0; i < vc; ++i)
-            neighbors[i] = locations[mesh1.vertices[i].p];
+        const auto neighbors = vertexNeighbors(mesh1);
 
         // Smooth iteratively with strength lambda
         const auto lambda = 0.5f;
@@ -484,7 +252,7 @@ Mesh smooth(const Mesh& mesh0, int iterCount)
                 for (int j = 0; j < nc; ++j)
                 {
                     const auto& v1 = mesh1.vertices[n[j]];
-                    d[i][0] += v0.p.xyz - v1.p.xyz;
+                    d[i][0] += v0.p - v1.p;
                     d[i][1] += v0.n - v1.n;
                     d[i][2] += v0.t - v1.t;
                 }
