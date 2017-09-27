@@ -44,26 +44,26 @@ inline int dominantAxis(const glm::vec3& v)
 {
     static const glm::vec3 axes[] =
     {
-        glm::vec3( 0,  0, +1),
-        glm::vec3( 0,  0, -1),
         glm::vec3(-1,  0,  0),
         glm::vec3(+1,  0,  0),
+        glm::vec3( 0, -1,  0),
         glm::vec3( 0, +1,  0),
-        glm::vec3( 0, -1,  0)
+        glm::vec3( 0,  0, -1),
+        glm::vec3( 0,  0, +1)
     };
 
-    int axisIndex = -1;
-    float score   = 0.f;
+    int index   = -1;
+    float score = 0.f;
     for (int i = 0; i < 6; ++i)
     {
         const auto d = glm::dot(axes[i], v);
         if (d >= score)
         {
-            axisIndex = i;
-            score     = d;
+            index = i;
+            score = d;
         }
     }
-    return axisIndex;
+    return index;
 }
 
 template <typename V>
