@@ -1,7 +1,10 @@
 #pragma once
 
 #include <ostream>
+
 #include <boost/algorithm/clamp.hpp>
+
+#include <glm/vec2.hpp>
 
 #include "size.h"
 
@@ -26,6 +29,14 @@ struct Rect
     Rect(const Size<T>& size) :
         x(0), y(0), size(size)
     {}
+
+    glm::vec2 point(float fx, float fy) const
+    {
+        using namespace boost::algorithm;
+        const float cfx = clamp(fx, 0.f, 1.f);
+        const float cfy = clamp(fy, 0.f, 1.f);
+        return {x + cfx * size.w, y + cfy * size.h};
+    }
 
     Rect rect(float fx, float fy, float fw, float fh) const
     {
