@@ -1,5 +1,7 @@
 #include "image_cube.h"
 
+#include <unordered_set>
+
 #include <boost/algorithm/string/replace.hpp>
 
 #include "platform/clock.h"
@@ -37,9 +39,17 @@ ImageCube::ImageCube(const fs::path& path, int depth, bool fallback)
             path.generic_string(), "*", sideImage.name);
 
         if (fs::exists(fn))
+        {
             sideImage.image = side != Side::Top && side != Side::Bottom ?
                               Image(fn, depth).flipped(Image::Axis::X) :
                               Image(fn, depth);
+
+            const auto imageDepth = sideImage.image.depth();
+            if (sideImage.image.depth() != depth)
+                throw std::runtime_error("Unexpected depth: " +
+                                         std::to_string(imageDepth) +
+                                         " != " + std::to_string(depth));
+        }
     }
 
     // Mirror missing images with priority ordered fallbacks
@@ -86,6 +96,12 @@ ImageCube::operator bool() const
 const Image& ImageCube::side(ImageCube::Side s) const
 {
     return sides[int(s)];
+}
+
+SizeCube<int> ImageCube::sideSizes() const
+{
+    return {sides[0].size(), sides[1].size(), sides[2].size(),
+            sides[3].size(), sides[4].size(), sides[5].size()};
 }
 
 int ImageCube::width() const
@@ -180,6 +196,19 @@ int ImageCube::merge(const ImageCube& cube)
         }
 
     return mergeCount;
+}
+
+const ImageCube& ImageCube::validate() const
+{
+    // Validate depth
+    std::unordered_set<int> depths;
+    for (const auto& side : sides)
+        depths.insert(side.depth());
+
+    if (depths.size() > 1)
+        throw std::runtime_error("Mismatching depths");
+
+    return *this;
 }
 
 } // namespace

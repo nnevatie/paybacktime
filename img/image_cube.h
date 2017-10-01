@@ -10,6 +10,12 @@
 namespace pt
 {
 
+template <typename T>
+using SizeCube = std::array<Size<T>, 6>;
+
+template <typename T>
+using RectCube = std::array<Rect<T>, 6>;
+
 struct ImageCube
 {
     enum class Side
@@ -23,6 +29,8 @@ struct ImageCube
     operator bool() const;
 
     const Image& side(Side s) const;
+
+    SizeCube<int> sideSizes() const;
 
     int width()  const;
     int height() const;
@@ -40,10 +48,9 @@ struct ImageCube
 
     int merge(const ImageCube& cube);
 
+    const ImageCube& validate() const;
+
     std::vector<Image> sides;
 };
-
-template <typename T>
-using RectCube = std::array<Rect<T>, 6>;
 
 } // namespace

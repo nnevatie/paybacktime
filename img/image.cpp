@@ -169,11 +169,11 @@ int Image::nvgImage(NVGcontext* nanoVg) const
 Image Image::scaled(const Size<int>& size) const
 {
     Image image(size, d->depth);
-
-    stbir_resize_uint8(
-        d->bits, d->size.w, d->size.h, d->stride,
-        image.d->bits, image.d->size.w, image.d->size.h, image.d->stride,
-        d->depth);
+    if(!stbir_resize_uint8(
+           d->bits, d->size.w, d->size.h, d->stride,
+           image.d->bits, image.d->size.w, image.d->size.h, image.d->stride,
+           d->depth))
+        throw std::runtime_error("Scaling failed");
 
     return image;
 }

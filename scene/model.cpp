@@ -47,6 +47,19 @@ struct Cubes
         return flipped;
     }
 
+    const Cubes& validate() const
+    {
+        for (auto cube : {&depth, &albedo, &light, &normal})
+            cube->validate();
+
+        const auto albedoSizes = albedo.sideSizes();
+        for (auto cube : {&light, &normal})
+            if (cube->sideSizes() != albedoSizes)
+                throw std::runtime_error("Mismatching cube side sizes");
+
+        return *this;
+    }
+
     ImageCube depth, albedo, light, normal;
 };
 
@@ -78,6 +91,9 @@ struct Model::Data
             PTLOG(Info) << path << " base: " << (base ? base.d->path : "none");
             cubes = base ? base.d->cubes.merged(Cubes(path, false)) :
                            Cubes(path);
+
+            // Cube validation
+            cubes.validate();
 
             // Atlas removal
             if (gl::valid(atlasEntry))
