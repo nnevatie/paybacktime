@@ -92,7 +92,39 @@ struct Meta
         {
             base       = meta.value(c::object::meta::BASE, Object::Id());
             geom.scale = meta.value(c::object::meta::SCALE, 1.f);
-            geom.smooth.iterations = meta.value(c::object::meta::SMOOTH, 0);
+            {
+                // Smooth deformer
+                const auto it = meta.find(c::object::meta::SMOOTH);
+                if (it != meta.end())
+                {
+                    const auto smooth = *it;
+                    if (smooth.is_number_integer())
+                        geom.smooth.iterations = smooth;
+                    else
+                    if (smooth.is_array())
+                    {
+                        geom.smooth.iterations = smooth[0];
+                        geom.smooth.strength   = smooth[1];
+                    }
+                }
+            }
+            {
+                // Simplify deformer
+                const auto it = meta.find(c::object::meta::SIMPLIFY);
+                if (it != meta.end())
+                {
+                    const auto simplify = *it;
+                    if (simplify.is_number_integer())
+                        geom.simplify.iterations = simplify;
+                    else
+                    if (simplify.is_array())
+                    {
+                        geom.simplify.iterations = simplify[0];
+                        geom.simplify.strength   = simplify[1];
+                        geom.simplify.scale      = simplify[2];
+                    }
+                }
+            }
             origin = geom.scale *
                      glm::make_vec3(meta.value(c::object::meta::ORIGIN,
                                                std::vector<float>(3)).data());
