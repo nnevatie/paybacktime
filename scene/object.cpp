@@ -200,7 +200,7 @@ bool Object::transparent() const
 
 Object& Object::updateTransparency()
 {
-    d->transparent = d->model.albedoCube()->transparent();
+    d->transparent = d->model.albedoCube().transparent();
     return *this;
 }
 
@@ -219,7 +219,7 @@ Object& Object::updateDensity()
     const auto size = dimensions().xzy() / c::cell::SIZE.xzy();
 
     mat::Density map(glm::ceil(size));
-    const Cubefield cfield(*d->model.depthCube());
+    const Cubefield cfield(d->model.depthCube());
 
     for (int z = 0; z < size.z; ++z)
         for (int y = 0; y < size.y; ++y)
@@ -265,7 +265,7 @@ mat::Emission Object::emission() const
 
 Object& Object::updateEmissivity()
 {
-    d->emissive = d->model.lightCube()->emissive();
+    d->emissive = d->model.lightCube().emissive();
     return *this;
 }
 
@@ -315,9 +315,9 @@ Object& Object::updateMaterial()
     {
         const auto side = ImageCube::Side(i);
         accumulateMaterial(emission, d->density,
-                           projections[i], cubeDepth->side(side),
-                           cubeAlbedo->side(side),
-                           cubeLight->side(side),
+                           projections[i], cubeDepth.side(side),
+                           cubeAlbedo.side(side),
+                           cubeLight.side(side),
                            d->meta.scale, areas[i]);
     }
     d->emission = emission;

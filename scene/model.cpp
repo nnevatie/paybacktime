@@ -144,19 +144,19 @@ gl::Primitive Model::primitive() const
     return d->primitive;
 }
 
-const ImageCube* Model::depthCube() const
+const ImageCube& Model::depthCube() const
 {
-    return &d->cubes.depth;
+    return d->cubes.depth;
 }
 
-const ImageCube* Model::albedoCube() const
+const ImageCube& Model::albedoCube() const
 {
-    return &d->cubes.albedo;
+    return d->cubes.albedo;
 }
 
-const ImageCube* Model::lightCube() const
+const ImageCube& Model::lightCube() const
 {
-    return &d->cubes.light;
+    return d->cubes.light;
 }
 
 bool Model::update(const Model& base, TextureStore& textureStore)

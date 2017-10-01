@@ -28,9 +28,9 @@ struct Model
 
     gl::Primitive primitive() const;
 
-    const ImageCube* depthCube()  const;
-    const ImageCube* albedoCube() const;
-    const ImageCube* lightCube()  const;
+    const ImageCube& depthCube()  const;
+    const ImageCube& albedoCube() const;
+    const ImageCube& lightCube()  const;
 
     bool update(const Model& base, TextureStore& textureStore);
 
