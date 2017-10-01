@@ -154,8 +154,10 @@ inline Mesh_P_UV squareMesh(float halfWidth = 1.f)
 
 inline Mesh_P gridMesh(float interval, float halfWidth, float halfHeight)
 {
-    const Size<int>   size(halfWidth * 2 / interval, halfHeight * 2 / interval);
-    const Size<float> step(halfWidth * 2 / size.w,   halfHeight * 2 / size.h);
+    const Size<int>   size(int(halfWidth * 2 / interval),
+                           int(halfHeight * 2 / interval));
+    const Size<float> step(halfWidth * 2 / size.w,
+                           halfHeight * 2 / size.h);
 
     Mesh_P mesh;
     for (int y = 0; y <= size.h; ++y)
@@ -163,7 +165,7 @@ inline Mesh_P gridMesh(float interval, float halfWidth, float halfHeight)
         {
             if (x < size.w)
             {
-                const Mesh_P::Index index0 = mesh.vertices.size();
+                const auto index0 = Mesh_P::Index(mesh.vertices.size());
                 mesh.indices.insert(mesh.indices.end(), {index0, index0 + 1});
                 mesh.vertices.insert(mesh.vertices.end(),
                     {{{-halfWidth  + (x + 0) * step.w, 0,
@@ -173,7 +175,7 @@ inline Mesh_P gridMesh(float interval, float halfWidth, float halfHeight)
             }
             if (y < size.h)
             {
-                const Mesh_P::Index index1 = mesh.vertices.size();
+                const auto index1 = Mesh_P::Index(mesh.vertices.size());
                 mesh.indices.insert(mesh.indices.end(), {index1, index1 + 1});
                 mesh.vertices.insert(mesh.vertices.end(),
                     {{{-halfWidth  + (x + 0) * step.w, 0,
