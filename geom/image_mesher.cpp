@@ -222,7 +222,7 @@ Mesh_P_N_T_UV mesh(const Image& image, const geom::Meta& geom)
     const Heightfield hfield(image, std::min(image.size().w, image.size().h));
     auto mesh0 = meshGreedy(hfield, RectCube<float>(), geom.scale);
     PTLOG(Info) << "mesh vertices: " << mesh0.vertices.size();
-    return MeshDeformer::smooth(mesh0, geom.smooth.iterations);
+    return MeshDeformer::smooth(mesh0, geom.smooth);
 }
 
 Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
@@ -231,10 +231,10 @@ Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
 {
     const Cubefield cfield(imageCube);
     auto size  = geom.scale * cfield.size();
-    auto mesh0 = meshGreedy(cfield, uvCube, geom.scale, !geom.smooth.iterations);
-    auto mesh1 = MeshDeformer::smooth(mesh0, geom.smooth.iterations);
-    return geom.smooth.iterations > 0 ?
-           MeshDeformer::decimate(mesh1, uvCube, size) :
+    auto mesh0 = meshGreedy(cfield, uvCube, geom.scale, !geom.smooth);
+    auto mesh1 = MeshDeformer::smooth(mesh0, geom.smooth);
+    return geom.smooth && geom.simplify ?
+           MeshDeformer::decimate(mesh1, uvCube, size, geom.simplify) :
            mesh1;
 }
 

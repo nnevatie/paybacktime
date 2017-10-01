@@ -9,8 +9,13 @@ namespace geom
 
 struct Smooth
 {
-    Smooth() : iterations(0), strength(0.f)
+    Smooth() : iterations(0), strength(0.5f)
     {}
+
+    operator bool() const
+    {
+        return iterations > 0;
+    }
 
     int   iterations;
     float strength;
@@ -18,8 +23,13 @@ struct Smooth
 
 struct Simplify
 {
-    Simplify() :  iterations(0), strength(0.f), scale(0.f)
+    Simplify() :  iterations(5), strength(0.01f), scale(2.f)
     {}
+
+    operator bool() const
+    {
+        return iterations > 0;
+    }
 
     int   iterations;
     float strength;

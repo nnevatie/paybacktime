@@ -129,7 +129,8 @@ UniqueMesh connect(const Mesh_P_N_T_UV& mesh0)
 
 Mesh_P_N_T_UV decimate(const Mesh_P_N_T_UV& mesh0,
                        const RectCube<float>& uvCube,
-                       const glm::vec3& size)
+                       const glm::vec3& size,
+                       const geom::Simplify& params)
 {
     auto mesh1 = connect(mesh0);
     PTTIMEU("decimate", boost::milli);
@@ -138,7 +139,7 @@ Mesh_P_N_T_UV decimate(const Mesh_P_N_T_UV& mesh0,
     auto t = meshTriangles(mesh1.first);
 
     MeshSimplifier::Simplifier simplifier(t, v);
-    simplifier.simplify(5, 0.01f, 2.f);
+    simplifier.simplify(params.iterations, params.strength, params.scale);
 
     const int vc0 = int(v.size());
     const int tc0 = int(t.size());
@@ -219,9 +220,9 @@ Mesh_P_N_T_UV decimate(const Mesh_P_N_T_UV& mesh0,
     return mesh2;
 }
 
-Mesh smooth(const Mesh& mesh0, int iterCount)
+Mesh smooth(const Mesh& mesh0, const geom::Smooth& params)
 {
-    if (iterCount > 0)
+    if (params.iterations > 0)
     {
         PTTIMEU("smooth", boost::milli);
         Mesh mesh1(mesh0);
@@ -231,13 +232,13 @@ Mesh smooth(const Mesh& mesh0, int iterCount)
         const auto neighbors = vertexNeighbors(mesh1);
 
         // Smooth iteratively with strength lambda
-        const auto lambda = 0.5f;
+        const auto lambda = params.strength;
 
         Displacements d(vc);
         std::array<glm::vec3, 3> zero;
         zero.fill(glm::zero<glm::vec3>());
 
-        for (int c = 0; c < iterCount; ++c)
+        for (int c = 0; c < params.iterations; ++c)
         {
             // Determine displacements
             std::fill(std::begin(d), std::end(d), zero);
