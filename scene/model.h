@@ -6,6 +6,7 @@
 
 #include "common/file_system.h"
 #include "img/image.h"
+#include "geom/meta.h"
 #include "gl/primitive.h"
 
 #include "texture_store.h"
@@ -19,8 +20,7 @@ struct Model
     Model(const fs::path& path,
           const Model& base,
           TextureStore& textureStore,
-          int smoothness,
-          float scale = 1.f);
+          const geom::Meta& geom);
 
     operator bool() const;
 

@@ -2,6 +2,7 @@
 
 #include "img/image_cube.h"
 #include "img/image.h"
+#include "geom/meta.h"
 #include "mesh.h"
 
 namespace pt
@@ -10,13 +11,11 @@ namespace ImageMesher
 {
 
 Mesh_P_N_T_UV mesh(const Image& image,
-                   int smoothness,
-                   float scale = 1.f);
+                   const geom::Meta& geom);
 
 Mesh_P_N_T_UV mesh(const ImageCube& imageCube,
                    const RectCube<float>& uvCube,
-                   int smoothness,
-                   float scale = 1.f);
+                   const geom::Meta& geom);
 
 } // namespace ImageMesher
 } // namespace pt

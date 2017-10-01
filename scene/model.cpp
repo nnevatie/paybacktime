@@ -67,16 +67,15 @@ struct Model::Data
 {
     std::time_t lastUpdated;
     fs::path    path;
-    int         smoothness;
-    float       scale;
+    geom::Meta  geom;
     Cubes       cubes;
 
     gl::TextureAtlas::EntryCube atlasEntry;
     gl::Primitive               primitive;
 
     Data(const fs::path& path, const Model& base,
-         TextureStore& textureStore, int smoothness, float scale) :
-         lastUpdated(0), path(path), smoothness(smoothness), scale(scale)
+         TextureStore& textureStore, const geom::Meta& geom) :
+         lastUpdated(0), path(path), geom(geom)
     {
         update(base, textureStore);
     }
@@ -107,8 +106,7 @@ struct Model::Data
                           textureStore.light.insert(cubes.light);
                           textureStore.normal.insert(cubes.normal);
             // Update mesh
-            auto mesh   = ImageMesher::mesh(cubes.depth, atlasEntry.second,
-                                            smoothness, scale);
+            auto mesh   = ImageMesher::mesh(cubes.depth, atlasEntry.second, geom);
             primitive   = gl::Primitive(mesh);
             lastUpdated = modified;
 
@@ -123,8 +121,8 @@ Model::Model()
 {}
 
 Model::Model(const fs::path& path, const Model& base,
-             TextureStore& textureStore, int smoothness, float scale) :
-    d(std::make_shared<Data>(path, base, textureStore, smoothness,  scale))
+             TextureStore& textureStore, const geom::Meta& geom) :
+    d(std::make_shared<Data>(path, base, textureStore, geom))
 {
 }
 
@@ -136,7 +134,7 @@ pt::Model::operator bool() const
 glm::vec3 Model::dimensions() const
 {
     const auto& depth = d->cubes.depth;
-    return d->scale * glm::vec3(depth.width(), depth.height(), depth.depth());
+    return d->geom.scale * glm::vec3(depth.width(), depth.height(), depth.depth());
 }
 
 gl::Primitive Model::primitive() const
@@ -177,8 +175,7 @@ Model Model::flipped(TextureStore& textureStore) const
                            textureStore.normal.insert(data->cubes.normal);
         auto mesh        = ImageMesher::mesh(data->cubes.depth,
                                              data->atlasEntry.second,
-                                             d->smoothness,
-                                             d->scale);
+                                             d->geom);
         data->primitive  = gl::Primitive(mesh);
         return model;
     }

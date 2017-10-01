@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "geom/meta.h"
 #include "geom/volume.h"
 #include "img/color.h"
 
@@ -84,27 +85,25 @@ struct Meta
 {
     Meta(const Object::Path& path) :
         id(Object::pathId(path)),
-        name(path.first.filename().string()),
-        scale(c::object::SCALE),
-        smoothness(c::object::SMOOTHNESS)
+        name(path.first.filename().string())
     {
         const auto meta = readJson(path.first / c::object::METAFILE);
         if (!meta.is_null())
         {
-            base       = meta.value("base",       Object::Id());
-            scale      = meta.value("scale",      c::object::SCALE);
-            smoothness = meta.value("smoothness", c::object::SMOOTHNESS);
-            origin     = scale * glm::make_vec3(meta.value("origin",
-                                                std::vector<float>(3)).data());
+            base       = meta.value(c::object::meta::BASE, Object::Id());
+            geom.scale = meta.value(c::object::meta::SCALE, 1.f);
+            geom.smooth.iterations = meta.value(c::object::meta::SMOOTH, 0);
+            origin = geom.scale *
+                     glm::make_vec3(meta.value(c::object::meta::ORIGIN,
+                                               std::vector<float>(3)).data());
         }
     }
 
     Object::Id  id;
     Object::Id  base;
     std::string name;
-    float       scale;
-    int         smoothness;
     glm::vec3   origin;
+    geom::Meta  geom;
 };
 
 } // namespace
@@ -120,7 +119,7 @@ struct Object::Data
         const auto base = baseObject(resolver, textureStore);
 
         model = Model(path.first, base ? base.model() : Model(),
-                      textureStore, meta.smoothness, meta.scale);
+                      textureStore, meta.geom);
     }
 
     Object baseObject(const Resolver& resolver,
@@ -313,7 +312,7 @@ Object& Object::updateMaterial()
                            projections[i], cubeDepth.side(side),
                            cubeAlbedo.side(side),
                            cubeLight.side(side),
-                           d->meta.scale, areas[i]);
+                           d->meta.geom.scale, areas[i]);
     }
     d->emission = emission;
     return *this;

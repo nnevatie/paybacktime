@@ -16,10 +16,17 @@ namespace cell
 
 namespace object
 {
-    constexpr auto METAFILE   = "object.json";
-    constexpr auto SCALE      = 1.f,
-                   EXPOSURE   = 0.25f;
-    constexpr auto SMOOTHNESS = 0;
+    constexpr auto METAFILE = "object.json";
+    constexpr auto EXPOSURE = 0.25f;
+
+    namespace meta
+    {
+        constexpr auto BASE     = "base",
+                       ORIGIN   = "origin",
+                       SCALE    = "scale",
+                       SMOOTH   = "smooth",
+                       SIMPLIFY = "simplify";
+    }
 }
 
 namespace character
