@@ -173,11 +173,6 @@ std::string Object::name() const
     return d->meta.name;
 }
 
-float Object::scale() const
-{
-    return d->meta.scale;
-}
-
 glm::vec3 Object::origin() const
 {
     return d->meta.origin;
