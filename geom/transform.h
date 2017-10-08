@@ -7,34 +7,44 @@
 namespace pt
 {
 
-struct PosRotation
+struct Transform
 {
-    typedef glm::vec3 V;
+    using V = glm::vec3;
 
     V   pos;
     int rot;
 
-    PosRotation() : rot(0)
+    Transform() : rot(0)
     {}
 
-    PosRotation(const V& pos, int rot = 0) : pos(pos), rot(rot)
+    Transform(const V& pos, int rot = 0) : pos(pos), rot(rot)
     {}
 
-    bool operator==(const PosRotation& other) const
+    bool operator==(const Transform& other) const
     {
         return pos == other.pos && rot == other.rot;
     }
 
-    bool operator!=(const PosRotation& other) const
+    bool operator!=(const Transform& other) const
     {
         return !operator==(other);
     }
 
-    operator glm::mat4x4() const
+    glm::mat4x4 translation() const
     {
-        auto ang = glm::half_pi<float>() * rot;
-        auto mtr = glm::translate(pos);
-        return glm::rotate(mtr, ang, glm::vec3(0, 1, 0));
+        return glm::translate(pos);
+    }
+
+    glm::mat4x4 rotation() const
+    {
+        const auto ang = 0.5f * glm::half_pi<float>() * rot;
+        return glm::rotate(ang, glm::vec3(0.f, 1.f, 0.f));
+    }
+
+    glm::mat4x4 matrix(const glm::vec3& size) const
+    {
+        auto hwh = glm::vec3(0.5f * size.x, 0.f, 0.5f * size.z);
+        return glm::translate(translation() * rotation(), -hwh);
     }
 };
 
@@ -45,17 +55,6 @@ struct Rotation
 
     Rotation(const glm::ivec3& dim, int rot) : dim(dim), rot(rot & 0x03)
     {}
-
-    glm::ivec3 translation() const
-    {
-        switch (rot)
-        {
-            case 1:  return {0,     0, dim.x};
-            case 2:  return {dim.x, 0, dim.z};
-            case 3:  return {dim.z, 0,     0};
-            default: return {0,     0,     0};
-        }
-    }
 
     glm::ivec3 operator()(const glm::ivec3& v) const
     {
