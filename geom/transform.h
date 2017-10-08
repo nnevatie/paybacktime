@@ -32,19 +32,29 @@ struct Transform
 
     glm::mat4x4 translation() const
     {
-        return glm::translate(pos);
+        return translation(pos);
     }
 
     glm::mat4x4 rotation() const
     {
-        const auto ang = 0.5f * glm::half_pi<float>() * rot;
-        return glm::rotate(ang, glm::vec3(0.f, 1.f, 0.f));
+        return rotation(rot);
     }
 
     glm::mat4x4 matrix(const glm::vec3& size) const
     {
         auto hwh = glm::vec3(0.5f * size.x, 0.f, 0.5f * size.z);
         return glm::translate(translation() * rotation(), -hwh);
+    }
+
+    static glm::mat4x4 translation(const glm::vec3& pos)
+    {
+        return glm::translate(pos);
+    }
+
+    static glm::mat4x4 rotation(int rot)
+    {
+        const auto a = 0.5f * glm::half_pi<float>() * rot;
+        return glm::rotate(a, glm::vec3(0.f, 1.f, 0.f));
     }
 };
 
