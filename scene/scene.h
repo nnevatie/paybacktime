@@ -38,7 +38,7 @@ struct Scene
           const HorizonStore& horizonStore,
           const ObjectStore& objectStore);
 
-    Box bounds() const;
+    Aabb bounds() const;
     glm::ivec3 cellResolution() const;
 
     Horizon horizon() const;
@@ -49,7 +49,7 @@ struct Scene
 
     Scene& add(const CharacterItem& item);
 
-    bool contains(const Box& bounds) const;
+    bool contains(const Aabb& bounds) const;
 
     ObjectItems intersect(const ObjectItem& item) const;
     Intersection intersect(const Ray& ray) const;

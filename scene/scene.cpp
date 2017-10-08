@@ -79,12 +79,12 @@ Scene::Scene(const fs::path& path,
     updateLightmap();
 }
 
-Box Scene::bounds() const
+Aabb Scene::bounds() const
 {
-    Box box;
+    Aabb aabb;
     for (const auto& item : d->objectItems)
-        box |= item.bounds();
-    return box;
+        aabb |= item.bounds();
+    return aabb;
 }
 
 glm::ivec3 Scene::cellResolution() const
@@ -130,7 +130,7 @@ Scene& Scene::add(const CharacterItem& item)
     return *this;
 }
 
-bool Scene::contains(const Box& bounds) const
+bool Scene::contains(const Aabb& bounds) const
 {
     for (const auto& i : d->objectItems)
         if (i.bounds() == bounds)
@@ -183,7 +183,7 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 
         if (type == GeometryType::Any || gt == type)
         {
-            auto m = static_cast<glm::mat4x4>(item.posRot);
+            auto m = item.xform.matrix(item.obj.dimensions());
             instances.push_back({item.obj.model().primitive(), m});
         }
     }
@@ -197,7 +197,6 @@ gfx::Geometry::Instances Scene::characterGeometry() const
     instances.reserve(Character::PART_COUNT * d->charItems.size());
     for (const auto& item : d->charItems)
     {
-        auto m = static_cast<glm::mat4x4>(item.posRot);
         for (const auto& bone : *item.obj.bones())
         {
             if (const auto& obj = bone.first)
@@ -205,7 +204,7 @@ gfx::Geometry::Instances Scene::characterGeometry() const
                 auto mj  = bone.second;
                 mj[3]   *= glm::vec4(s, s, s, 1.f);
                 auto mo  = glm::translate(obj.origin());
-                instances.push_back({obj.model().primitive(), m * mj * mo});
+                instances.push_back({obj.model().primitive(), mj * mo});
             }
         }
     }
@@ -233,9 +232,9 @@ Scene& Scene::updateLightmap()
         const auto& obj     = item.obj;
         const auto density  = obj.density();
         const auto emission = obj.emission();
-        const auto pos      = glm::ivec3((item.posRot.pos - box.pos).xzy() /
+        const auto pos      = glm::ivec3((item.posMin() - box.pos).xzy() /
                                           c::cell::SIZE.xzy());
-        const auto rot      = Rotation(density.size, item.posRot.rot);
+        const auto rot      = Rotation(density.size, item.xform.rot);
 
         d->lightmapper.add(pos, rot, density, emission);
     }
@@ -265,9 +264,9 @@ bool Scene::write(const boost::filesystem::path& path) const
         ArchiveObjItems objItems;
         for (const auto& objItem : d->objectItems)
         {
-            const auto& pr = objItem.posRot;
+            const auto& xf = objItem.xform;
             objItems[objItem.obj.id()].push_back(
-                std::make_tuple(pr.pos.x, pr.pos.y, pr.pos.z, pr.rot));
+                std::make_tuple(xf.pos.x, xf.pos.y, xf.pos.z, xf.rot));
         }
         ar(cereal::make_nvp("object_items", objItems));
         PTLOG(Info) << "unique object items: " << objItems.size();

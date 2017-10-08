@@ -49,7 +49,7 @@ struct Lighting
     Lighting& sc(gl::Texture* texDepth,
                  gl::Texture* texLightmap,
                  const Camera& camera,
-                 const Box& bounds);
+                 const Aabb& bounds);
 
     Lighting& operator()(
         gl::Texture* texDepth,
@@ -60,7 +60,7 @@ struct Lighting
         gl::Texture* texLightmap,
         gl::Texture* texIncidence,
         const Camera& camera,
-        const Box& bounds);
+        const Aabb& bounds);
 
     gl::Texture* output();
 

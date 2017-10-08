@@ -149,7 +149,7 @@ Geometry& Geometry::operator()(
     gl::Texture* texLightmap,
     gl::Texture* texGi,
     gl::Texture* texIncid,
-    const Box& bounds,
+    const Aabb& bounds,
     const Instances& instances,
     const Camera& camera)
 {

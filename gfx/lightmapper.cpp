@@ -5,6 +5,7 @@
 
 #include <glm/gtc/constants.hpp>
 #include <glm/vec3.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "common/log.h"
 
@@ -48,6 +49,8 @@ void accumulate(
     const mat::Density& density1,
     const mat::Emission& emission1)
 {
+    PTLOG(Info) << "pos: " << glm::to_string(pos);
+
     glm::ivec3 p0;
     auto const size = density1.size;
     for (p0.z = 0; p0.z < size.z; ++p0.z)
@@ -55,6 +58,9 @@ void accumulate(
             for (p0.x = 0; p0.x < size.x; ++p0.x)
             {
                 const auto p1   = pos + rot(p0);
+                PTLOG(Info) << "p0: "   << glm::to_string(p0)
+                            << ", p1: " << glm::to_string(p1);
+
                 auto& d0        = density0.at(p1);
                 const auto& d1  = density1.at(p0);
 
@@ -139,6 +145,7 @@ gl::Texture* Lightmapper::incidenceTexture() const
 
 Lightmapper& Lightmapper::reset(const glm::ivec3& size)
 {
+    PTLOG(Info) << size.x << "x" << size.y << "x" << size.z;
     if (glm::any(glm::notEqual(d->texLight.size(), size)))
     {
         const std::vector<int> dims = {size.x, size.y, size.z};
@@ -178,6 +185,8 @@ Lightmapper& Lightmapper::add(const glm::ivec3& pos,
                               const mat::Density& density,
                               const mat::Emission& emission)
 {
+    PTLOG(Info) << "pos: " << pos.x << ", " << pos.y << ", " << pos.z;
+    PTLOG(Info) << "size: " << density.size.x << ", " << density.size.y << ", " << density.size.z;
     accumulate(d->density, d->emission, d->lightSources,
                pos, rot, density, emission);
     return *this;

@@ -60,7 +60,7 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
 Lighting& Lighting::sc(gl::Texture* texDepth,
                        gl::Texture* texLightmap,
                        const Camera& camera,
-                       const Box& bounds)
+                       const Aabb& bounds)
 {
     // Scattering pass
     Binder<gl::Fbo> binder(fboSc);
@@ -99,7 +99,7 @@ Lighting& Lighting::operator()(
     gl::Texture* texLightmap,
     gl::Texture* texIncidence,
     const Camera& camera,
-    const Box& bounds)
+    const Aabb& bounds)
 {
     // Combine pass
     Binder<gl::Fbo> binder(fboOut);

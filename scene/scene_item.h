@@ -16,19 +16,24 @@ namespace pt
 template <typename T>
 struct SceneItem
 {
-    T           obj;
-    PosRotation posRot;
+    T         obj;
+    Transform xform;
 
     SceneItem()
     {}
 
-    SceneItem(const T& obj, const PosRotation& posRot) :
-        obj(obj), posRot(posRot)
+    SceneItem(const T& obj, const Transform& xform) :
+        obj(obj), xform(xform)
     {}
 
-    Box bounds() const
+    glm::vec3 posMin() const
     {
-        return Box(posRot.pos, obj.dimensions()).rotated(posRot.rot);
+        const auto dim = obj.dimensions();
+        return xform.pos - glm::vec3(0.5f * dim.x, 0.f, 0.5 * dim.z);
+    }
+    Aabb bounds() const
+    {
+        return Aabb(posMin(), obj.dimensions()).rotated(xform.rot);
     }
     operator bool() const
     {
@@ -36,7 +41,7 @@ struct SceneItem
     }
     bool operator==(const SceneItem& other) const
     {
-        return obj == other.obj && posRot == other.posRot;
+        return obj == other.obj && xform == other.xform;
     }
     bool operator!=(const SceneItem& other) const
     {
