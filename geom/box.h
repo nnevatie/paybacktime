@@ -10,14 +10,14 @@
 namespace pt
 {
 
-struct Box
+struct Aabb
 {
     typedef glm::vec3 V;
 
-    Box()
+    Aabb()
     {}
 
-    Box(const V& pos, const V& size) :
+    Aabb(const V& pos, const V& size) :
         pos(pos), size(size)
     {}
 
@@ -41,49 +41,53 @@ struct Box
         return pos != V() || size != V();
     }
 
-    inline operator==(const Box& box) const
+    inline bool operator==(const Aabb& box) const
     {
         return pos == box.pos && size == box.size;
     }
 
-    inline operator!=(const Box& box) const
+    inline bool operator!=(const Aabb& box) const
     {
         return !operator==(box);
     }
 
-    inline Box operator|(const Box& box) const
+    inline Aabb operator|(const Aabb& aabb) const
     {
-        if (!*this) return box;
-        if (!box)   return *this;
-        auto posMin = glm::min(pos, box.pos);
-        auto posMax = glm::max(pos + size, box.pos + box.size);
+        if (!*this) return aabb;
+        if (!aabb)  return *this;
+        auto posMin = glm::min(pos, aabb.pos);
+        auto posMax = glm::max(pos + size, aabb.pos + aabb.size);
         return {posMin, posMax - posMin};
     }
 
-    inline Box& operator|=(const Box& box)
+    inline Aabb& operator|=(const Aabb& aabb)
     {
-        *this = *this | box;
+        *this = *this | aabb;
         return *this;
     }
 
-    inline Box rotated(int r)
+    inline Aabb rotated(int r)
     {
+        const auto c = center();
+        const auto s = 0.5f * size;
         switch (r & 0x03)
         {
-            case 0: return *this;
-            case 1: return Box(pos - V(0, 0, size.x), V(size.z, size.y, size.x));
-            case 2: return Box(pos - V(size.x, 0, size.z), size);
-            case 3: return Box(pos - V(size.z, 0, 0), V(size.z, size.y, size.x));
+            case 0:
+            case 2:
+                return *this;
+            case 1:
+            case 3:
+                return Aabb(c - V(s.z, s.y, s.x), V(size.z, size.y, size.x));
         }
         return {};
     }
 
-    inline bool intersect(const Box& box) const
+    inline bool intersect(const Aabb& aabb) const
     {
         const V a0 = min();
         const V a1 = max();
-        const V b0 = box.min();
-        const V b1 = box.max();
+        const V b0 = aabb.min();
+        const V b1 = aabb.max();
         return !(b0.x >= a1.x || b1.x <= a0.x ||
                  b0.y >= a1.y || b1.y <= a0.y ||
                  b0.z >= a1.z || b1.z <= a0.z);
