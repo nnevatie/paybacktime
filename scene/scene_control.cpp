@@ -6,7 +6,7 @@
 
 #include "common/log.h"
 
-#include "geom/box.h"
+#include "geom/aabb.h"
 #include "geom/ray.h"
 #include "geom/transform.h"
 

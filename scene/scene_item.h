@@ -3,7 +3,7 @@
 #include <vector>
 #include <utility>
 
-#include "geom/box.h"
+#include "geom/aabb.h"
 #include "geom/transform.h"
 
 #include "object.h"

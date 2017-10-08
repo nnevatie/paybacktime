@@ -6,7 +6,7 @@
 #include <glm/mat4x4.hpp>
 
 #include "geom/size.h"
-#include "geom/box.h"
+#include "geom/aabb.h"
 
 #include "gl/primitive.h"
 #include "gl/shaders.h"
