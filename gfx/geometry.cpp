@@ -161,8 +161,8 @@ Geometry& Geometry::operator()(
                                .setUniform("texLight",   1)
                                .setUniform("texGi",      2)
                                .setUniform("texIncid",   3)
-                               .setUniform("boundsMin",  glm::floor(bounds.pos))
-                               .setUniform("boundsSize", glm::ceil(bounds.size))
+                               .setUniform("boundsMin",  glm::floor(bounds.min))
+                               .setUniform("boundsSize", glm::ceil(bounds.size()))
                                .setUniform("viewPos",    camera.position())
                                .setUniform("v",          camera.matrixView())
                                .setUniform("p",          camera.matrixProj());

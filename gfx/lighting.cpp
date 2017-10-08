@@ -68,8 +68,8 @@ Lighting& Lighting::sc(gl::Texture* texDepth,
                  .setUniform("texGi",       1)
                  .setUniform("w",           camera.matrixWorld())
                  .setUniform("camPos",      camera.position())
-                 .setUniform("boundsMin",   glm::floor(bounds.pos))
-                 .setUniform("boundsSize",  glm::ceil(bounds.size))
+                 .setUniform("boundsMin",   glm::floor(bounds.min))
+                 .setUniform("boundsSize",  glm::ceil(bounds.size()))
                  .setUniform("sampleCount", scSampleCount);
 
     const auto size = texSc.size();
@@ -116,8 +116,8 @@ Lighting& Lighting::operator()(
                   .setUniform("aspectRatio", camera.ar)
                   .setUniform("w",           camera.matrixWorld())
                   .setUniform("n",           camera.matrixNormal())
-                  .setUniform("boundsMin",   glm::floor(bounds.pos))
-                  .setUniform("boundsSize",  glm::ceil(bounds.size));
+                  .setUniform("boundsMin",   glm::floor(bounds.min))
+                  .setUniform("boundsSize",  glm::ceil(bounds.size()));
 
     const auto size = texOut.size();
     glViewport(0, 0, size.x, size.y);

@@ -89,7 +89,7 @@ Aabb Scene::bounds() const
 
 glm::ivec3 Scene::cellResolution() const
 {
-    return {glm::ceil(bounds().size.xzy() / c::cell::SIZE.xzy())};
+    return {glm::ceil(bounds().size().xzy() / c::cell::SIZE.xzy())};
 }
 
 Horizon Scene::horizon() const
@@ -232,7 +232,7 @@ Scene& Scene::updateLightmap()
         const auto& obj     = item.obj;
         const auto density  = obj.density();
         const auto emission = obj.emission();
-        const auto pos      = glm::ivec3((item.posMin() - box.pos).xzy() /
+        const auto pos      = glm::ivec3((item.posMin() - box.min).xzy() /
                                           c::cell::SIZE.xzy());
         const auto rot      = Rotation(density.size, item.xform.rot);
 
