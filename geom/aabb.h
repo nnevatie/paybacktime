@@ -80,7 +80,12 @@ struct Aabb
         return *this;
     }
 
-    inline Aabb rotated(const glm::vec3& axis, int r)
+    inline Aabb extended(const glm::vec3& v) const
+    {
+        return {min - v, max + v};
+    }
+
+    inline Aabb rotated(const glm::vec3& axis, int r) const
     {
         const auto c  = glm::vec4(center(), 1.f);
         const auto rt = Transform::rotation(axis, r);
