@@ -184,7 +184,6 @@ gl::Texture* Lightmapper::incidenceTexture() const
 
 Lightmapper& Lightmapper::reset(const glm::ivec3& size)
 {
-    PTLOG(Info) << size.x << "x" << size.y << "x" << size.z;
     if (glm::any(glm::notEqual(d->texLight.size(), size)))
     {
         const std::vector<int> dims = {size.x, size.y, size.z};

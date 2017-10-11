@@ -224,10 +224,6 @@ gl::Texture* Scene::incidence() const
 Scene& Scene::updateLightmap()
 {
     const auto aabb = bounds();
-    PTLOG(Info) << "min: " << glm::to_string(aabb.min)
-                << ", max: " << glm::to_string(aabb.max)
-                << ", size: " << glm::to_string(aabb.size());
-
     d->lightmapper.reset(cellResolution());
     for (const auto& item : d->objectItems)
     {
