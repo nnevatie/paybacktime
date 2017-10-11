@@ -139,10 +139,10 @@ bool Scene::contains(const Aabb& bounds) const
     return false;
 }
 
-ObjectItems Scene::intersect(const ObjectItem& item) const
+ObjectItems Scene::intersect(const ObjectItem& item, float eps) const
 {
     ObjectItems items;
-    const auto bounds = item.bounds();
+    const auto bounds = item.bounds().extended(glm::vec3(-eps));
     for (const auto& i : d->objectItems)
         if (i.bounds().intersect(bounds))
             items.push_back(i);

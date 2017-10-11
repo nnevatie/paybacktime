@@ -51,7 +51,7 @@ struct Scene
 
     bool contains(const Aabb& bounds) const;
 
-    ObjectItems intersect(const ObjectItem& item) const;
+    ObjectItems intersect(const ObjectItem& item, float eps = 0.f) const;
     Intersection intersect(const Ray& ray) const;
 
     gfx::Geometry::Instances objectGeometry(
