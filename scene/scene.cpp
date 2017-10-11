@@ -21,9 +21,11 @@
 
 namespace pt
 {
-using ArchivePosRot   = std::tuple<float, float, float, int>;
-using ArchivePosRots  = std::vector<ArchivePosRot>;
-using ArchiveObjItems = std::unordered_map<Object::Id, ArchivePosRots>;
+using ArchivePosition   = std::tuple<float, float, float>;
+using ArchiveRotation   = std::tuple<int, int>;
+using ArchiveTransform  = std::tuple<ArchivePosition, ArchiveRotation>;
+using ArchiveTransforms = std::vector<ArchiveTransform>;
+using ArchiveObjItems   = std::unordered_map<Object::Id, ArchiveTransforms>;
 
 struct Scene::Data
 {
@@ -66,12 +68,16 @@ Scene::Scene(const fs::path& path,
         for (const auto& objItem : objItems)
             if (Object obj = objectStore.object(objItem.first))
             {
-                for (const auto& pr : objItem.second)
+                for (const auto& xform : objItem.second)
+                {
+                    const auto& position = std::get<0>(xform);
+                    const auto& rotation = std::get<1>(xform);
                     d->objectItems.push_back(
-                        ObjectItem(obj, {glm::vec3(std::get<0>(pr),
-                                                   std::get<1>(pr),
-                                                   std::get<2>(pr)),
-                                                   std::get<3>(pr)}));
+                        ObjectItem(obj, {glm::vec3(std::get<0>(position),
+                                                   std::get<1>(position),
+                                                   std::get<2>(position)),
+                                                   std::get<0>(rotation)}));
+                }
             }
             else
                 PTLOG(Warn) << "object not found: " << objItem.first;
@@ -260,8 +266,10 @@ bool Scene::write(const boost::filesystem::path& path) const
         for (const auto& objItem : d->objectItems)
         {
             const auto& xf = objItem.xform;
+            const auto position = std::make_tuple(xf.pos.x, xf.pos.y, xf.pos.z);
+            const auto rotation = std::make_tuple(xf.rot, c::scene::ROT_TICKS);
             objItems[objItem.obj.id()].push_back(
-                std::make_tuple(xf.pos.x, xf.pos.y, xf.pos.z, xf.rot));
+                std::make_tuple(position, rotation));
         }
         ar(cereal::make_nvp("object_items", objItems));
         PTLOG(Info) << "unique object items: " << objItems.size();
