@@ -34,7 +34,7 @@ struct SceneItem
     Aabb bounds() const
     {
         const auto pos = posMin();
-        return Aabb(pos, pos + obj.dimensions()).rotated(xform.rot);
+        return Aabb(pos, pos + obj.dimensions()).rotated(c::scene::UP, xform.rot);
     }
     operator bool() const
     {

@@ -44,40 +44,79 @@ void accumulate(
     mat::Density& density0,
     mat::Emission& emission0,
     LightSources& lightSources,
-    const glm::ivec3& pos,
-    const Rotation& rot,
+    const Transform& xform,
     const mat::Density& density1,
     const mat::Emission& emission1)
 {
-    PTLOG(Info) << "pos: " << glm::to_string(pos);
+    const auto pos     = xform.pos.xzy() +
+                         glm::vec3(0.f, 0.f, 0.5f * glm::vec3(density1.size).z);
+    const auto rot     = Transform::rotation(c::grid::UP, xform.rot);
+    const auto aabb    = density1.bounds(pos).rotated(c::grid::UP, xform.rot);
+    const auto size0   = glm::ivec3(glm::ceil(aabb.size()));
+    const auto size1   = density1.size;
+    const auto min0    = glm::max(glm::zero<glm::ivec3>(),
+                                  glm::ivec3(glm::floor(aabb.min)));
+    const auto max0    = glm::min(density0.size,
+                                  glm::ivec3(glm::ceil(aabb.max)));
+    const auto origin0 = pos - glm::vec3(0.5f);
+    const auto origin1 = 0.5f * glm::vec3(size1) - glm::vec3(0.5f);
 
-    glm::ivec3 p0;
-    auto const size = density1.size;
-    for (p0.z = 0; p0.z < size.z; ++p0.z)
-        for (p0.y = 0; p0.y < size.y; ++p0.y)
-            for (p0.x = 0; p0.x < size.x; ++p0.x)
+    #if 0
+    PTLOG(Info) << "pos: " << glm::to_string(pos)
+                << ", aabb: " << glm::to_string(aabb.min)
+                << " -> " << glm::to_string(aabb.max)
+                << ", min0: " << glm::to_string(min0)
+                << ", max0: " << glm::to_string(max0)
+                << ", size0: " << glm::to_string(size0)
+                << ", size1: " << glm::to_string(size1)
+                << ", origin0: " << glm::to_string(origin0)
+                << ", origin1: " << glm::to_string(origin1);
+    #endif
+    glm::vec3 p0;
+    for (p0.z = min0.z; p0.z < max0.z; ++p0.z)
+        for (p0.y = min0.y; p0.y < max0.y; ++p0.y)
+            for (p0.x = min0.x; p0.x < max0.x; ++p0.x)
             {
-                const auto p1   = pos + rot(p0);
-                PTLOG(Info) << "p0: "   << glm::to_string(p0)
-                            << ", p1: " << glm::to_string(p1);
+                const auto xv = glm::vec3(rot * glm::vec4(p0 - origin0, 1.f));
+                const auto p1 = glm::ivec3(glm::round(origin1 + xv));
 
-                auto& d0        = density0.at(p1);
-                const auto& d1  = density1.at(p0);
-
-                const auto aMin = std::min(d0.a, d1.a);
-                const auto a    = aMin < 0.f ? aMin : std::min(1.f, d0.a + d1.a);
-                const auto rgb  = 0.5f * (d0.rgb() + d1.rgb());
-
-                d0 = glm::vec4(rgb, a);
-
-                const auto em1 = emission1.at(p0);
-                if (em1 != glm::zero<glm::vec3>())
+                if (glm::all(glm::greaterThanEqual(p1, glm::zero<glm::ivec3>())) &&
+                    glm::all(glm::lessThan(p1, size1)))
                 {
-                    auto em0 = emission0.at(p1);
-                    emission0.at(p1) = em0 + em1;
-                    lightSources.insert(p1);
+                    #if 0
+                    PTLOG(Info) << "p0: "   << glm::to_string(p0)
+                                << ", p1: " << glm::to_string(p1)
+                                << ", " << glm::to_string(origin1 + xv);
+                    #endif
+
+                    auto& d0        = density0.at(p0);
+                    const auto& d1  = density1.at(p1);
+
+                    const auto aMin = std::min(d0.a, d1.a);
+                    const auto a    = aMin < 0.f ? aMin : std::min(1.f, d0.a + d1.a);
+                    const auto rgb  = 0.5f * (d0.rgb() + d1.rgb());
+
+                    d0 = glm::vec4(rgb, a);
+
+                    const auto em1 = emission1.at(p1);
+                    if (em1 != glm::zero<glm::vec3>())
+                    {
+                        auto em0 = emission0.at(p0);
+                        emission0.at(p0) = em0 + em1;
+                        lightSources.insert(p0);
+                    }
                 }
             }
+
+    #if 0
+    for (int z = 0; z < density1.size.z; ++z)
+        image(density1, z).write("c:/temp/density/src_" +
+                                 std::to_string(z) + ".png");
+
+    for (int z = 0; z < density0.size.z; ++z)
+        image(density0, z).write("c:/temp/density/dest_" +
+                                 std::to_string(z) + ".png");
+    #endif
 }
 
 } // namespace
@@ -180,15 +219,12 @@ Lightmapper& Lightmapper::reset(const glm::ivec3& size)
     return *this;
 }
 
-Lightmapper& Lightmapper::add(const glm::ivec3& pos,
-                              const Rotation& rot,
+Lightmapper& Lightmapper::add(const Transform& xform,
                               const mat::Density& density,
                               const mat::Emission& emission)
 {
-    PTLOG(Info) << "pos: " << pos.x << ", " << pos.y << ", " << pos.z;
-    PTLOG(Info) << "size: " << density.size.x << ", " << density.size.y << ", " << density.size.z;
     accumulate(d->density, d->emission, d->lightSources,
-               pos, rot, density, emission);
+               xform, density, emission);
     return *this;
 }
 

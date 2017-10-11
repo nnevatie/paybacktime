@@ -7,8 +7,10 @@
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "ray.h"
 #include "common/log.h"
+
+#include "transform.h"
+#include "ray.h"
 
 namespace pt
 {
@@ -27,7 +29,7 @@ struct Aabb
 
     Aabb(const std::array<V, 8>& vertices) :
         min(std::numeric_limits<float>::max()),
-        max(std::numeric_limits<float>::min())
+        max(std::numeric_limits<float>::lowest())
     {
         for (const auto v : vertices)
         {
@@ -78,9 +80,15 @@ struct Aabb
         return *this;
     }
 
-    inline Aabb rotated(int /*r*/)
+    inline Aabb rotated(const glm::vec3& axis, int r)
     {
-        return Aabb(vertices());
+        const auto c  = glm::vec4(center(), 1.f);
+        const auto rt = Transform::rotation(axis, r);
+        auto verts    = vertices();
+        for (auto& v : verts)
+            v = {c + rt * (glm::vec4(v, 1.f) - c)};
+
+        return Aabb(verts);
     }
 
     inline bool intersect(const Aabb& aabb) const
@@ -113,6 +121,7 @@ struct Aabb
             V(min.x, min.y, max.z),
             V(max.x, min.y, max.z),
             V(max.x, min.y, min.z),
+
             V(max.x, max.y, max.z),
             V(max.x, max.y, min.z),
             V(min.x, max.y, min.z),

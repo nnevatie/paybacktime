@@ -7,7 +7,9 @@
 
 #include "img/image.h"
 #include "img/color.h"
+
 #include "size.h"
+#include "aabb.h"
 
 namespace pt
 {
@@ -25,6 +27,12 @@ struct Grid
     Grid(const glm::ivec3& size) :
         size(size), data(size.x * size.y * size.z)
     {}
+
+    Aabb bounds(const glm::vec3& center) const
+    {
+        const auto hsize = 0.5f * glm::vec3(size);
+        return {center - hsize, center + hsize};
+    }
 
     std::vector<int> dims() const
     {
@@ -95,8 +103,8 @@ struct Grid
         return !data.empty();
     }
 
-    glm::ivec3      size;
-    std::vector<T>  data;
+    glm::ivec3     size;
+    std::vector<T> data;
 };
 
 inline Image image(const Grid<float>& grid, int z = 0, float sat = 1.f)
@@ -108,13 +116,14 @@ inline Image image(const Grid<float>& grid, int z = 0, float sat = 1.f)
     return img;
 }
 
-inline Image image(const Grid<glm::vec3>& grid, int z = 0, float sat = 1.f)
+template<typename T>
+inline Image image(const Grid<T>& grid, int z = 0, float sat = 1.f)
 {
     Image img(grid.size.xy(), 4);
     for (int y = 0; y < grid.size.y; ++y)
         for (int x = 0; x < grid.size.x; ++x)
             *img.bits<uint32_t>(x, y) =
-                argb(255.f * glm::min(glm::vec3(1.f), grid.at(x, y, z) / sat));
+                argb(glm::uvec4(255.f * glm::min(T(1.f), grid.at(x, y, z) / sat)));
     return img;
 }
 

@@ -4,6 +4,8 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "constants.h"
+
 namespace pt
 {
 
@@ -37,7 +39,7 @@ struct Transform
 
     glm::mat4x4 rotation() const
     {
-        return rotation(rot);
+        return rotation(c::scene::UP, rot);
     }
 
     glm::mat4x4 matrix(const glm::vec3& size) const
@@ -51,31 +53,10 @@ struct Transform
         return glm::translate(pos);
     }
 
-    static glm::mat4x4 rotation(int rot)
+    static glm::mat4x4 rotation(const glm::vec3& axis, int rot)
     {
-        const auto a = 0.5f * glm::half_pi<float>() * rot;
-        return glm::rotate(a, glm::vec3(0.f, 1.f, 0.f));
-    }
-};
-
-struct Rotation
-{
-    glm::vec3 dim;
-    int       rot;
-
-    Rotation(const glm::ivec3& dim, int rot) : dim(dim), rot(rot & 0x03)
-    {}
-
-    glm::ivec3 operator()(const glm::ivec3& v) const
-    {
-        switch (rot)
-        {
-            case 0: return    v;
-            case 1: return {  v.y,      -(v.x + 1), v.z};
-            case 2: return {-(v.x + 1), -(v.y + 1), v.z};
-            case 3: return {-(v.y + 1),   v.x, v.z};
-        }
-        return v;
+        const auto a = glm::two_pi<float>() * rot / c::scene::ROT_TICKS;
+        return glm::rotate(a, axis);
     }
 };
 

@@ -25,8 +25,7 @@ struct Lightmapper
 
     Lightmapper& reset(const glm::ivec3& size = {});
 
-    Lightmapper& add(const glm::ivec3& pos,
-                     const Rotation& rot,
+    Lightmapper& add(const Transform& xform,
                      const mat::Density& density,
                      const mat::Emission& emission);
 

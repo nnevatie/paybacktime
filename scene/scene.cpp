@@ -223,20 +223,19 @@ gl::Texture* Scene::incidence() const
 
 Scene& Scene::updateLightmap()
 {
-    const auto box  = bounds();
-    const auto size = cellResolution();
+    const auto aabb = bounds();
+    PTLOG(Info) << "min: " << glm::to_string(aabb.min)
+                << ", max: " << glm::to_string(aabb.max)
+                << ", size: " << glm::to_string(aabb.size());
 
-    d->lightmapper.reset(size);
+    d->lightmapper.reset(cellResolution());
     for (const auto& item : d->objectItems)
     {
-        const auto& obj     = item.obj;
-        const auto density  = obj.density();
-        const auto emission = obj.emission();
-        const auto pos      = glm::ivec3((item.posMin() - box.min).xzy() /
-                                          c::cell::SIZE.xzy());
-        const auto rot      = Rotation(density.size, item.xform.rot);
+        const auto& obj  = item.obj;
+        const auto xform = Transform((item.xform.pos - aabb.min) /
+                                     c::cell::SIZE, item.xform.rot);
 
-        d->lightmapper.add(pos, rot, density, emission);
+        d->lightmapper.add(xform, obj.density(), obj.emission());
     }
     d->lightmapper(d->horizon);
     return *this;

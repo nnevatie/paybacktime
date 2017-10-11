@@ -106,13 +106,17 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             d->intersection = intersection;
 
             // Translation
-            const auto rot  = umod(d->object.xform.rot + mouseWheel, 4);
+            const auto rot  = umod(d->object.xform.rot + mouseWheel,
+                                   c::scene::ROT_TICKS);
+
             const auto dim  = d->object.bounds().size();
             const auto grid = glm::min(dim, c::cell::GRID);
 
             auto& t = intersection.first;
-            t      -= glm::mod(t, grid) + glm::mod(0.5f * dim, grid);
+            auto  r = glm::mod(t, grid) + glm::mod(0.5f * dim, grid);
+            t      -= r;
             t      += c::cell::GRID;
+            t       = glm::round(t);
             t.y     = 0.f;
             t      += object.origin();
 
