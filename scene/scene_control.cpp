@@ -105,28 +105,30 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             // Store intersection
             d->intersection = intersection;
 
+            // Rotation
+            d->object.xform.rot = umod(d->object.xform.rot + mouseWheel,
+                                       c::scene::ROT_TICKS);
             // Translation
-            const auto rot  = umod(d->object.xform.rot + mouseWheel,
-                                   c::scene::ROT_TICKS);
-
-            const auto dim  = d->object.bounds().size();
+            const auto aabb = d->object.bounds();
+            const auto div  = aabb.size() - glm::mod(aabb.size(), c::cell::GRID);
+            const auto dim  = glm::any(glm::equal(div, glm::zero<glm::vec3>())) ?
+                              aabb.size() : div;
             const auto grid = glm::min(dim, c::cell::GRID);
 
             auto& t = intersection.first;
-            auto  r = glm::mod(t, grid) + glm::mod(0.5f * dim, grid);
-            t      -= r;
-            t      += c::cell::GRID;
-            t       = glm::round(t);
+            auto  r = glm::mod(t, grid) - glm::mod(0.5f * dim, grid);
+            t       = glm::round(t - r);
             t.y     = 0.f;
             t      += object.origin();
 
-            const ObjectItem objectItem(object, {intersection.first,
-                                                 d->object.xform.rot});
+            d->object.xform.pos = t;
+
+            const ObjectItem objectItem(object, d->object.xform);
 
             if (d->state == Data::State::Adding)
             {
                 // Add item
-                if (mouseButtons[0] && d->scene->intersect(objectItem).empty())
+                if (mouseButtons[0] && d->scene->intersect(objectItem, 0.1f).empty())
                     d->scene->add(objectItem);
                 else
                 if (mouseButtons[2] && !d->scene->contains(objectItem.bounds()))
@@ -148,9 +150,6 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             if (!mouseButtons[0])
                 // Reset removed object type
                 d->removedObject = {};
-
-            // Store current state
-            d->object.xform = {intersection.first, rot};
         }
     }
     else
