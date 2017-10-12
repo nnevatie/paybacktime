@@ -94,7 +94,7 @@ void accumulate(
 
                     const auto aMin = std::min(d0.a, d1.a);
                     const auto a    = aMin < 0.f ? aMin : std::min(1.f, d0.a + d1.a);
-                    const auto rgb  = 0.5f * (d0.rgb() + d1.rgb());
+                    const auto rgb  = d0.rgb() + d1.rgb();
 
                     d0 = glm::vec4(rgb, a);
 
