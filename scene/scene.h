@@ -49,7 +49,7 @@ struct Scene
 
     Scene& add(const CharacterItem& item);
 
-    bool contains(const Aabb& bounds) const;
+    bool contains(const ObjectItem& item) const;
 
     ObjectItems intersect(const ObjectItem& item, float eps = 0.f) const;
     Intersection intersect(const Ray& ray) const;

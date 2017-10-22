@@ -136,10 +136,10 @@ Scene& Scene::add(const CharacterItem& item)
     return *this;
 }
 
-bool Scene::contains(const Aabb& bounds) const
+bool Scene::contains(const ObjectItem& item) const
 {
     for (const auto& i : d->objectItems)
-        if (i.bounds() == bounds)
+        if (i.obj == item.obj && i.bounds() == item.bounds())
             return true;
 
     return false;

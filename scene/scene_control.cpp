@@ -131,7 +131,7 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
                 if (mouseButtons[0] && d->scene->intersect(objectItem, 0.1f).empty())
                     d->scene->add(objectItem);
                 else
-                if (mouseButtons[2] && !d->scene->contains(objectItem.bounds()))
+                if (mouseButtons[2] && !d->scene->contains(objectItem))
                     d->scene->add(objectItem);
             }
             else
