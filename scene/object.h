@@ -16,11 +16,14 @@
 
 namespace pt
 {
+struct Object;
+using Objects = std::vector<Object>;
 
 struct Object
 {
     // ID
-    using Id = std::string;
+    using Id  = std::string;
+    using Ids = std::vector<Id>;
 
     // Resolver
     using Resolver = std::function<Object(const Id& id,
@@ -38,12 +41,17 @@ struct Object
     bool operator==(const Object& other) const;
     bool operator!=(const Object& other) const;
 
-    Model       model()     const;
+    Object parent() const;
+    Object& setParent(const Object& object);
 
-    std::string id()        const;
-    std::string name()      const;
+    Objects hierarchy() const;
 
-    glm::vec3   origin()    const;
+    Model model() const;
+
+    std::string id() const;
+    std::string name() const;
+
+    glm::vec3 origin() const;
     glm::mat4x4 transform() const;
 
     glm::vec3 dimensions() const;

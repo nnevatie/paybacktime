@@ -22,8 +22,7 @@ namespace pt
 {
 namespace
 {
-
-typedef std::function<glm::vec3(const glm::vec3&)> Projection;
+using Projection = std::function<glm::vec3(const glm::vec3&)>;
 
 void accumulateMaterial(mat::Emission& emission,
                         mat::Density& density,
@@ -125,9 +124,14 @@ struct Meta
                     }
                 }
             }
+            // Origin
             origin = geom.scale *
                      glm::make_vec3(meta.value(c::object::meta::ORIGIN,
                                                std::vector<float>(3)).data());
+            // Children
+            childIds = meta.value(c::object::meta::CHILDREN, Object::Ids());
+            for (auto& childId : childIds)
+                childId = id + "/" + childId;
         }
     }
 
@@ -136,6 +140,7 @@ struct Meta
     std::string name;
     glm::vec3   origin;
     geom::Meta  geom;
+    Object::Ids childIds;
 };
 
 } // namespace
@@ -167,6 +172,8 @@ struct Object::Data
     bool            emissive;
     mat::Density    density;
     mat::Emission   emission;
+    Object          parent;
+    Objects         children;
 };
 
 Object::Object()
@@ -176,6 +183,13 @@ Object::Object(const Path& path, const Resolver& resolver,
                TextureStore& textureStore) :
     d(std::make_shared<Data>(path, resolver, textureStore))
 {
+    // Resolve children
+    for (const auto& childId : d->meta.childIds)
+    {
+        auto child = resolver(childId, textureStore);
+        child.setParent(*this);
+        d->children.emplace_back(child);
+    }
     updateApproximation();
 }
 
@@ -216,7 +230,11 @@ glm::mat4x4 Object::transform() const
 
 glm::vec3 Object::dimensions() const
 {
-    return d->model.dimensions();
+    Aabb aabb(d->model.dimensions());
+    for (const auto& child : d->children)
+        aabb |= Aabb(child.dimensions());
+
+    return aabb.size();
 }
 
 bool Object::transparent() const
@@ -228,6 +246,26 @@ Object& Object::updateTransparency()
 {
     d->transparent = d->model.albedoCube().transparent();
     return *this;
+}
+
+Object Object::parent() const
+{
+    return d->parent;
+}
+
+Object& Object::setParent(const Object& object)
+{
+    d->parent = object;
+    return *this;
+}
+
+Objects Object::hierarchy() const
+{
+    Objects objects;
+    objects.reserve(1 + d->children.size());
+    objects.emplace_back(*this);
+    objects.insert(objects.end(), d->children.begin(), d->children.end());
+    return objects;
 }
 
 Model Object::model() const
