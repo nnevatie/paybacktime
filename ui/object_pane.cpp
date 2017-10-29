@@ -46,30 +46,24 @@ struct ObjectPane::Data
         const Camera camera({0.f, 0.f, 0.f}, 90.f,
                              glm::quarter_pi<float>(), -glm::quarter_pi<float>(),
                              glm::radians(30.f),
-                             previewSize.aspect<float>(), 0.1f, 100.f);
+                             previewSize.aspect<float>(), 0.1f, 200.f);
 
         gfx::Preview preview(previewSize);
 
         ng::ImagePanel::Images nvgImages;
         for (const auto& object : objectStore->objects())
-        {
-            const glm::vec3 dims = object.model().dimensions();
-            const gl::Primitive primitive = object.model().primitive();
+            if (!object.parent())
+            {
+                preview(&textureStore->albedo.texture, camera, object);
 
-            const float s = std::pow(16.f / std::max(
-                                            std::max(dims.x, dims.y), dims.z),
-                                     0.4f);
+                const Image image = preview.output()->image().
+                                    flipped(Image::Axis::X);
+                images.push_back(image);
+                objectIds.push_back(object.id());
 
-            preview(&textureStore->albedo.texture, primitive,
-                    camera.matrix() * glm::scale({}, glm::vec3(s, s, s)) *
-                    glm::translate({}, glm::vec3(-dims.x, 4 - (1 - s) * 60.f, 0)));
-
-            const Image image = preview.output()->image().flipped(Image::Axis::X);
-            images.push_back(image);
-
-            auto nvgImage = image.nvgImage(display->nanoVg());
-            nvgImages.push_back({nvgImage, object.name()});
-        }
+                auto nvgImage = image.nvgImage(display->nanoVg());
+                nvgImages.push_back({nvgImage, object.name()});
+            }
 
         auto& vscroll = widget->add<ng::VScrollPanel>();
         vscroll.setFixedSize({210, widget->fixedHeight() - 36});
@@ -91,6 +85,7 @@ struct ObjectPane::Data
     ng::Widget*        widget;
     ng::ImagePanel*    imagePanel;
     std::vector<Image> images;
+    Object::Ids        objectIds;
 };
 
 ObjectPane::ObjectPane(ng::Widget* parent,
@@ -103,7 +98,7 @@ ObjectPane::ObjectPane(ng::Widget* parent,
 
 Object ObjectPane::selected() const
 {
-    return d->objectStore->object(d->imagePanel->selection());
+    return d->objectStore->object(d->objectIds.at(d->imagePanel->selection()));
 }
 
 } // namespace ui

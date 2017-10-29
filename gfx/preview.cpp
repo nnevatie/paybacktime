@@ -42,14 +42,12 @@ Preview::Preview(const Size<int>& renderSize) :
 
 Preview& Preview::operator()(
     gl::Texture* texAlbedo,
-    const gl::Primitive& primitive,
-    const glm::mat4& mvp)
+    const Camera& camera,
+    const Object& object)
 {
     {
         Binder<gl::Fbo> binder(fboModel);
-        progModel.bind()
-            .setUniform("texAlbedo", 0)
-            .setUniform("mvp",       mvp);
+        progModel.bind().setUniform("texAlbedo", 0);
 
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glDisable(GL_POLYGON_OFFSET_FILL);
@@ -61,7 +59,22 @@ Preview& Preview::operator()(
         glViewport(0, 0, renderSize.w, renderSize.h);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         texAlbedo->bindAs(GL_TEXTURE0);
-        primitive.render();
+
+        const auto dims = object.dimensions() + object.origin();
+        const auto dim  = glm::length(dims);
+        const auto s    = std::pow(32.f / dim, 0.6f);
+        const auto t    = -0.5f * dims;
+
+        for (const auto& obj : object.hierarchy())
+        {
+            const auto mvp = camera.matrix() *
+                             glm::scale({}, glm::vec3(s, s, s)) *
+                             glm::translate({}, t) *
+                             obj.transform();
+
+            progModel.setUniform("mvp", mvp);
+            obj.model().primitive().render();
+        }
     }
     {
         Binder<gl::Fbo> binder(fboDenoise);
