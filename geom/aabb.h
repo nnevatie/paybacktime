@@ -23,6 +23,10 @@ struct Aabb
     Aabb()
     {}
 
+    Aabb(const V& max) :
+        min(glm::zero<V>()), max(max)
+    {}
+
     Aabb(const V& min, const V& max) :
         min(min), max(max)
     {}
