@@ -40,7 +40,8 @@ namespace object
                        ORIGIN   = "origin",
                        SCALE    = "scale",
                        SMOOTH   = "smooth",
-                       SIMPLIFY = "simplify";
+                       SIMPLIFY = "simplify",
+                       CHILDREN = "children";
     }
 }
 
