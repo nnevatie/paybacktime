@@ -54,7 +54,7 @@ struct ObjectPane::Data
         for (const auto& object : objectStore->objects())
             if (!object.parent())
             {
-                preview(&textureStore->albedo.texture, camera, object);
+                preview(&textureStore->albedo.texture, object, camera);
 
                 const Image image = preview.output()->image().
                                     flipped(Image::Axis::X);
