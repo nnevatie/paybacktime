@@ -42,8 +42,8 @@ Preview::Preview(const Size<int>& renderSize) :
 
 Preview& Preview::operator()(
     gl::Texture* texAlbedo,
-    const Camera& camera,
-    const Object& object)
+    const Object& object,
+    const Camera& camera)
 {
     {
         Binder<gl::Fbo> binder(fboModel);

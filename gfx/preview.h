@@ -4,12 +4,13 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "scene/camera.h"
-#include "scene/object.h"
 #include "geom/size.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"
 #include "gl/fbo.h"
+
+#include "scene/camera.h"
+#include "scene/object.h"
 
 #include "anti_alias.h"
 
@@ -43,8 +44,8 @@ struct Preview
     Preview(const Size<int>& renderSize);
 
     Preview& operator()(gl::Texture* texAlbedo,
-                        const Camera& camera,
-                        const Object& object);
+                        const Object& object,
+                        const Camera& camera);
 
     gl::Texture* output();
 };
