@@ -64,7 +64,8 @@ ImageCube::ImageCube(const fs::path& path, int depth, bool fallback)
 
     // Find fallbacks
     // TODO: Clone images
-    const Image imageDefault(Image(Size<int>(2, 2), depth).fill(0x00));
+    const Image imageDefault(Image(Size<int>(2, 2), depth).
+                             fill(depth > 1 ? 0xff000000 : 0x00));
     if (fallback)
         for (int i = 0; i < 6; ++i)
             if (!sideImages[i].image)
