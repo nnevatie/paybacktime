@@ -58,8 +58,8 @@ struct Geometry
                       fboOit,
                       fboComp;
 
-    typedef std::pair<gl::Primitive, glm::mat4> Instance;
-    typedef std::vector<Instance>               Instances;
+    using Instance  = std::pair<gl::Primitive, glm::mat4>;
+    using Instances = std::vector<Instance>;
 
     Geometry(const Size<int>& renderSize);
 
