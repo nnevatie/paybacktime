@@ -3,10 +3,12 @@
 #include <glm/mat4x4.hpp>
 
 #include "geom/size.h"
-#include "gl/primitive.h"
 #include "gl/shaders.h"
 #include "gl/texture.h"
 #include "gl/fbo.h"
+
+#include "scene/object.h"
+#include "scene/camera.h"
 
 namespace pt
 {
@@ -38,8 +40,8 @@ struct Outline
 
     Outline& operator()(gl::Fbo* fboOut,
                         gl::Texture* texColor,
-                        const gl::Primitive& primitive,
-                        const glm::mat4& mvp,
+                        const Object& object,
+                        const glm::mat4& xform,
                         const glm::vec4& color);
 };
 

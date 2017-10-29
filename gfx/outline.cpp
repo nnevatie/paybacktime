@@ -40,8 +40,8 @@ Outline::Outline(const Size<int>& renderSize, const gl::Texture& texDepth) :
 
 Outline& Outline::operator()(gl::Fbo* fboOut,
                              gl::Texture* texColor,
-                             const gl::Primitive& primitive,
-                             const glm::mat4& mvp,
+                             const Object& object,
+                             const glm::mat4& xform,
                              const glm::vec4& color)
 {
     {
@@ -57,10 +57,15 @@ Outline& Outline::operator()(gl::Fbo* fboOut,
         glClear(GL_COLOR_BUFFER_BIT);
         gl::Texture::unbind(GL_TEXTURE_2D, GL_TEXTURE0);
 
-        progModel.bind()
-            .setUniform("mvp", mvp)
-            .setUniform("albedo", glm::vec4(1, 1, 1, 1));
-        primitive.render();
+        progModel.bind().setUniform("albedo", glm::vec4(1, 1, 1, 1));
+
+        for (const auto& obj : object.hierarchy())
+        {
+            const auto mvp = obj.parent() ? xform * obj.transform() :
+                                            xform;
+            progModel.setUniform("mvp", mvp);
+            obj.model().primitive().render();
+        }
     }
     {
         Binder<gl::Fbo> binder(fboDenoise);
