@@ -189,8 +189,17 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 
         if (type == GeometryType::Any || gt == type)
         {
-            auto m = item.xform.matrix(item.obj.dimensions());
-            instances.push_back({item.obj.model().primitive(), m});
+            for (const auto& obj : item.obj.hierarchy())
+            {
+                if (const auto model = obj.model())
+                {
+                    auto xform = item.xform.matrix(item.obj.dimensions());
+                    auto m = obj.parent() ? xform * obj.transform() : xform;
+                    instances.push_back({model.primitive(), m});
+                }
+            }
+            //auto m = item.xform.matrix(item.obj.dimensions());
+            //instances.push_back({item.obj.model().primitive(), m});
         }
     }
     return instances;
