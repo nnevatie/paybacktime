@@ -198,8 +198,6 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
                     instances.push_back({model.primitive(), m});
                 }
             }
-            //auto m = item.xform.matrix(item.obj.dimensions());
-            //instances.push_back({item.obj.model().primitive(), m});
         }
     }
     return instances;
