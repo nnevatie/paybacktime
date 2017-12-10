@@ -19,8 +19,7 @@ struct SceneItem
     T         obj;
     Transform xform;
 
-    SceneItem()
-    {}
+    SceneItem() = default;
 
     SceneItem(const T& obj, const Transform& xform) :
         obj(obj), xform(xform)

@@ -16,7 +16,7 @@ namespace pt
 
 struct Model
 {
-    Model();
+    Model() = default;
     Model(const fs::path& path,
           const Model& base,
           TextureStore& textureStore,

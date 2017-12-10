@@ -41,7 +41,8 @@ struct Outline
     Outline& operator()(gl::Fbo* fboOut,
                         gl::Texture* texColor,
                         const Object& object,
-                        const glm::mat4& xform,
+                        const Camera& camera,
+                        const Transform& xform,
                         const glm::vec4& color);
 };
 

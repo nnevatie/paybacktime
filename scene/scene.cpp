@@ -112,7 +112,13 @@ Scene& Scene::setHorizon(const Horizon& horizon)
 
 Scene& Scene::add(const ObjectItem& item)
 {
-    d->objectItems.emplace_back(item);
+    for (const auto& obj : item.obj.hierarchy())
+        if (const auto model = obj.model())
+        {
+            auto xform = obj.parent() ? item.xform * obj.origin() : item.xform;
+            d->objectItems.emplace_back(obj, xform);
+        }
+
     updateLightmap();
     return *this;
 }
@@ -189,15 +195,9 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 
         if (type == GeometryType::Any || gt == type)
         {
-            for (const auto& obj : item.obj.hierarchy())
-            {
-                if (const auto model = obj.model())
-                {
-                    auto xform = item.xform.matrix(item.obj.dimensions());
-                    auto m = obj.parent() ? xform * obj.transform() : xform;
-                    instances.push_back({model.primitive(), m});
-                }
-            }
+            auto xform = item.xform.matrix(item.obj.dimensions());
+            auto model = item.obj.model();
+            instances.emplace_back(model.primitive(), xform);
         }
     }
     return instances;
@@ -217,7 +217,7 @@ gfx::Geometry::Instances Scene::characterGeometry() const
                 auto mj  = bone.second;
                 mj[3]   *= glm::vec4(s, s, s, 1.f);
                 auto mo  = glm::translate(obj.origin());
-                instances.push_back({obj.model().primitive(), mj * mo});
+                instances.emplace_back(obj.model().primitive(), mj * mo);
             }
         }
     }
@@ -275,7 +275,7 @@ bool Scene::write(const boost::filesystem::path& path) const
             const auto& xf = objItem.xform;
             const auto position = std::make_tuple(xf.pos.x, xf.pos.y, xf.pos.z);
             const auto rotation = std::make_tuple(xf.rot, c::scene::ROT_TICKS);
-            objItems[objItem.obj.id()].push_back(
+            objItems[objItem.obj.id()].emplace_back(
                 std::make_tuple(position, rotation));
         }
         ar(cereal::make_nvp("object_items", objItems));

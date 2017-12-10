@@ -66,15 +66,16 @@ Preview& Preview::operator()(
         const auto t    = -0.5f * dims;
 
         for (const auto& obj : object.hierarchy())
-        {
-            const auto mvp = camera.matrix() *
-                             glm::scale({}, glm::vec3(s, s, s)) *
-                             glm::translate({}, t) *
-                             obj.transform();
+            if (const auto model = obj.model())
+            {
+                const auto mvp = camera.matrix() *
+                                 glm::scale({}, glm::vec3(s, s, s)) *
+                                 glm::translate({}, t) *
+                                 obj.matrix({{-t.x, 0.f, -t.z}});
 
-            progModel.setUniform("mvp", mvp);
-            obj.model().primitive().render();
-        }
+                progModel.setUniform("mvp", mvp);
+                model.primitive().render();
+            }
     }
     {
         Binder<gl::Fbo> binder(fboDenoise);

@@ -15,19 +15,15 @@
 
 namespace pt
 {
-using OutlineTr = std::pair<glm::mat4x4, glm::mat4x4>;
-
 namespace
 {
 
-OutlineTr outlineTransform(Camera* camera, const ObjectItem& object)
+glm::mat4x4 arrowTransform(Camera* camera, const ObjectItem& object)
 {
-    const auto m   = object.xform.matrix(object.obj.dimensions());
-    const auto v   = camera->matrixView();
-    const auto p   = camera->matrixProj();
-    const auto mvp = p * v * m;
-    const auto t   = glm::vec3(0.f, object.obj.dimensions().y, 0.f);
-    return OutlineTr(mvp, mvp * glm::translate(t));
+    const auto d   = object.obj.dimensions();
+    const auto mvp = camera->matrix() * object.xform.matrix(d);
+    const auto t   = glm::vec3(0.5f * d.x - 8.f, d.y, 0.f);
+    return mvp * glm::translate(t);
 }
 
 } // namespace
@@ -169,7 +165,7 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
             if (!d->removedObject)
                 firstObj = d->intersection.second.front();
             else
-                for (const auto intObj : d->intersection.second)
+                for (const auto& intObj : d->intersection.second)
                     if (intObj.obj == d->removedObject)
                     {
                         firstObj = intObj;
@@ -178,9 +174,8 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
 
             if (firstObj.obj)
             {
-                const auto otr = outlineTransform(d->camera, firstObj);
                 d->outline(fboOut, texColor,
-                           firstObj.obj, otr.first,
+                           firstObj.obj, *d->camera, firstObj.xform,
                            glm::vec4(0.75f, 0.f, 0.f, 1.f));
             }
         }
@@ -188,11 +183,10 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
     if (d->state == Data::State::Adding)
         if (d->object)
         {
-            const auto otr = outlineTransform(d->camera, d->object);
             d->outline(fboOut, texColor,
-                       d->object.obj, otr.first,
+                       d->object.obj, *d->camera, d->object.xform,
                        glm::vec4(0.f, 0.5f, 0.75f, 1.f));
-            d->arrow(fboOut, otr.second);
+            d->arrow(fboOut, arrowTransform(d->camera, d->object));
         }
     return *this;
 }

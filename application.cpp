@@ -177,7 +177,7 @@ struct Data
         }
 
         // UI actions
-        if (ui::ScenePane::Action action = scenePane.nextAction())
+        if (auto action = scenePane.nextAction())
             action();
 
         return true;
@@ -321,15 +321,11 @@ struct Data
     }
 };
 
-Application::Application()
-{
-}
-
 bool Application::run(const boost::program_options::variables_map& args)
 {
     platform::Context context;
 
-    const auto fullscreen = args.count("fullscreen");
+    const auto fullscreen = bool(args.count("fullscreen"));
     const Size<int> size(1920, 1080);
 
     platform::Display display("Payback Time - Scene Editor", size, fullscreen,

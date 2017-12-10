@@ -14,10 +14,9 @@ struct Transform
     using V = glm::vec3;
 
     V   pos;
-    int rot;
+    int rot = 0;
 
-    Transform() : rot(0)
-    {}
+    Transform() = default;
 
     Transform(const V& pos, int rot = 0) : pos(pos), rot(rot)
     {}
@@ -30,6 +29,11 @@ struct Transform
     bool operator!=(const Transform& other) const
     {
         return !operator==(other);
+    }
+
+    Transform operator*(const V& v) const
+    {
+        return {pos + V(rotation() * glm::vec4(v, 1.f)), rot};
     }
 
     glm::mat4x4 translation() const

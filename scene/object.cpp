@@ -153,10 +153,12 @@ struct Object::Data
         transparent(false),
         emissive(false)
     {
-        const auto base = baseObject(resolver, textureStore);
-
-        model = Model(path.first, base ? base.model() : Model(),
-                      textureStore, meta.geom);
+        if (meta.childIds.empty())
+        {
+            const auto base = baseObject(resolver, textureStore);
+            model = Model(path.first, base ? base.model() : Model(),
+                          textureStore, meta.geom);
+        }
     }
 
     Object baseObject(const Resolver& resolver,
@@ -166,18 +168,15 @@ struct Object::Data
                 resolver(meta.base, textureStore) : Object();
     }
 
-    Meta            meta;
-    Model           model;
-    bool            transparent;
-    bool            emissive;
-    mat::Density    density;
-    mat::Emission   emission;
-    Object          parent;
-    Objects         children;
+    Meta          meta;
+    Model         model;
+    bool          transparent;
+    bool          emissive;
+    mat::Density  density;
+    mat::Emission emission;
+    Object        parent;
+    Objects       children;
 };
-
-Object::Object()
-{}
 
 Object::Object(const Path& path, const Resolver& resolver,
                TextureStore& textureStore) :
@@ -223,14 +222,14 @@ glm::vec3 Object::origin() const
     return d->meta.origin;
 }
 
-glm::mat4x4 Object::transform() const
+glm::mat4x4 Object::matrix(const Transform& xform) const
 {
-    return glm::translate(d->meta.origin);
+    return (parent() ? (xform * origin()) : xform).matrix(dimensions());
 }
 
 glm::vec3 Object::dimensions() const
 {
-    Aabb aabb(d->model.dimensions());
+    Aabb aabb(d->model ? d->model.dimensions() : glm::zero<glm::vec3>());
     for (const auto& child : d->children)
         aabb |= Aabb(child.dimensions());
 
@@ -244,7 +243,7 @@ bool Object::transparent() const
 
 Object& Object::updateTransparency()
 {
-    d->transparent = d->model.albedoCube().transparent();
+    d->transparent = d->model ? d->model.albedoCube().transparent() : false;
     return *this;
 }
 
@@ -280,6 +279,9 @@ mat::Density Object::density() const
 
 Object& Object::updateDensity()
 {
+    if (!d->model)
+        return *this;
+
     const auto size = dimensions().xzy() / c::cell::SIZE.xzy();
 
     mat::Density map(glm::ceil(size));
@@ -329,12 +331,16 @@ mat::Emission Object::emission() const
 
 Object& Object::updateEmissivity()
 {
-    d->emissive = d->model.lightCube().emissive();
+    if (d->model)
+        d->emissive = d->model.lightCube().emissive();
     return *this;
 }
 
 Object& Object::updateMaterial()
 {
+    if (!d->model)
+        return *this;
+
     const auto size     = dimensions().xzy();
     const auto cellSize = size / c::cell::SIZE.xzy();
 
@@ -402,7 +408,7 @@ bool Object::update(const Resolver& resolver, TextureStore& textureStore)
     auto base = d->baseObject(resolver, textureStore);
     if (base) base.update(resolver, textureStore);
 
-    if (d->model.update(base ? base.d->model : Model(), textureStore))
+    if (d->model && d->model.update(base ? base.d->model : Model(), textureStore))
     {
         updateApproximation();
         return true;
@@ -419,7 +425,8 @@ Object Object::flipped(TextureStore& textureStore) const
         object.d    = std::make_shared<Data>(*d);
 
         // Flip model
-        object.d->model = d->model.flipped(textureStore);
+        if (d->model)
+            object.d->model = d->model.flipped(textureStore);
 
         // Flip origin
         object.d->meta.origin.x = -d->model.dimensions().x - d->meta.origin.x;

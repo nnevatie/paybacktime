@@ -117,9 +117,6 @@ struct Model::Data
     }
 };
 
-Model::Model()
-{}
-
 Model::Model(const fs::path& path, const Model& base,
              TextureStore& textureStore, const geom::Meta& geom) :
     d(std::make_shared<Data>(path, base, textureStore, geom))

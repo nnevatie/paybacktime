@@ -9,6 +9,7 @@
 #include <glm/mat4x4.hpp>
 
 #include "common/file_system.h"
+#include "geom/transform.h"
 
 #include "material_types.h"
 #include "texture_store.h"
@@ -31,7 +32,7 @@ struct Object
     // Object path, store root
     using Path = std::pair<fs::path, fs::path>;
 
-    Object();
+    Object() = default;
     Object(const Path& path,
            const Resolver& resolver,
            TextureStore& textureStore);
@@ -52,7 +53,7 @@ struct Object
     std::string name() const;
 
     glm::vec3 origin() const;
-    glm::mat4x4 transform() const;
+    glm::mat4x4 matrix(const Transform& xform) const;
 
     glm::vec3 dimensions() const;
 

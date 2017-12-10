@@ -10,7 +10,7 @@ namespace pt
 
 struct Application
 {
-    Application();
+    Application() = default;
 
     bool run(const boost::program_options::variables_map& args);
 };
