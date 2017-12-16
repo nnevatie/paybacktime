@@ -31,9 +31,14 @@ struct Transform
         return !operator==(other);
     }
 
-    Transform operator*(const V& v) const
+    Transform operator+(const V& v) const
     {
         return {pos + V(rotation() * glm::vec4(v, 1.f)), rot};
+    }
+
+    Transform operator-(const V& v) const
+    {
+        return operator+(-v);
     }
 
     glm::mat4x4 translation() const
