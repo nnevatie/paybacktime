@@ -222,9 +222,14 @@ glm::vec3 Object::origin() const
     return d->meta.origin;
 }
 
-glm::mat4x4 Object::matrix(const Transform& xform) const
+Transform Object::parentTransform(const Transform& xform) const
 {
-    return (parent() ? (xform * origin()) : xform).matrix(dimensions());
+    return parent() ? (xform - origin()) : xform;
+}
+
+glm::mat4x4 Object::childMatrix(const Transform& xform) const
+{
+    return (parent() ? (xform + origin()) : xform).matrix(dimensions());
 }
 
 glm::vec3 Object::dimensions() const

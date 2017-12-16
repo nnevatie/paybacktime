@@ -53,7 +53,9 @@ struct Object
     std::string name() const;
 
     glm::vec3 origin() const;
-    glm::mat4x4 matrix(const Transform& xform) const;
+
+    Transform parentTransform(const Transform& xform) const;
+    glm::mat4x4 childMatrix(const Transform& xform) const;
 
     glm::vec3 dimensions() const;
 
