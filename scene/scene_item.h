@@ -12,6 +12,8 @@
 
 namespace pt
 {
+template <typename T> struct SceneItem;
+template <typename T> using SceneItems = std::vector<SceneItem<T>>;
 
 template <typename T>
 struct SceneItem
@@ -24,6 +26,17 @@ struct SceneItem
     SceneItem(const T& obj, const Transform& xform) :
         obj(obj), xform(xform)
     {}
+
+    SceneItems<T> hierarchy() const
+    {
+        SceneItems<T> items;
+        const auto children = obj.hierarchy();
+        items.reserve(children.size());
+        for (const auto& child : children)
+            items.emplace_back(child, child.parent() ?
+                                      xform + child.origin() : xform);
+        return items;
+    }
 
     glm::vec3 posMin() const
     {

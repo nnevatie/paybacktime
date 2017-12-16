@@ -115,7 +115,7 @@ Scene& Scene::add(const ObjectItem& item)
     for (const auto& obj : item.obj.hierarchy())
         if (const auto model = obj.model())
         {
-            auto xform = obj.parent() ? item.xform * obj.origin() : item.xform;
+            auto xform = obj.parent() ? item.xform + obj.origin() : item.xform;
             d->objectItems.emplace_back(obj, xform);
         }
 
@@ -125,15 +125,20 @@ Scene& Scene::add(const ObjectItem& item)
 
 bool Scene::remove(const ObjectItem& item)
 {
+    int removeCount = 0;
+    const auto items = item.hierarchy();
     for (int i = 0; i < int(d->objectItems.size()); ++i)
-        if (d->objectItems.at(i) == item)
-        {
-            d->objectItems.erase(d->objectItems.begin() + i);
-            updateLightmap();
-            return true;
-        }
+        for (const auto& child : items)
+            if (d->objectItems.at(i) == child)
+            {
+                d->objectItems.erase(d->objectItems.begin() + i);
+                ++removeCount;
+            }
 
-    return false;
+    if (removeCount > 0)
+        updateLightmap();
+
+    return removeCount > 0;
 }
 
 Scene& Scene::add(const CharacterItem& item)
@@ -155,9 +160,9 @@ ObjectItems Scene::intersect(const ObjectItem& item, float eps) const
 {
     ObjectItems items;
     const auto bounds = item.bounds().extended(glm::vec3(-eps));
-    for (const auto& i : d->objectItems)
-        if (i.bounds().intersect(bounds))
-            items.push_back(i);
+    for (const auto& item : d->objectItems)
+        if (item.bounds().intersect(bounds))
+            items.push_back(item);
 
     return items;
 }
@@ -171,7 +176,13 @@ Intersection Scene::intersect(const Ray& ray) const
     ObjectItems items;
     for (const auto& item : d->objectItems)
         if (item.bounds().intersect(ray))
-            items.emplace_back(item);
+        {
+            // Resolve parent, if any
+            if (const auto parent = item.obj.parent())
+                items.emplace_back(parent, item.obj.parentTransform(item.xform));
+            else
+                items.emplace_back(item);
+        }
 
     // Sort intersections by distance to ray origin
     std::sort(items.begin(), items.end(),
