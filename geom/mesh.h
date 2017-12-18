@@ -19,7 +19,7 @@ namespace pt
 struct VertexSpec
 {
     // Component count, type, size in bytes
-    typedef std::tuple<int, GLenum, std::size_t> Attrib;
+    using Attrib = std::tuple<int, GLenum, std::size_t>;
 
     std::size_t         size;
     std::vector<Attrib> attribs;
@@ -115,10 +115,10 @@ struct Mesh
     }
 };
 
-typedef Mesh<Vertex_P,        uint32_t> Mesh_P;
-typedef Mesh<Vertex_P_UV,     uint32_t> Mesh_P_UV;
-typedef Mesh<Vertex_P_N_UV,   uint32_t> Mesh_P_N_UV;
-typedef Mesh<Vertex_P_N_T_UV, uint32_t> Mesh_P_N_T_UV;
+using Mesh_P        = Mesh<Vertex_P,        uint32_t>;
+using Mesh_P_UV     = Mesh<Vertex_P_UV,     uint32_t>;
+using Mesh_P_N_UV   = Mesh<Vertex_P_N_UV,   uint32_t>;
+using Mesh_P_N_T_UV = Mesh<Vertex_P_N_T_UV, uint32_t>;
 
 inline Mesh_P_UV rectMesh(float halfWidth = 1.f, float halfHeight = 1.f)
 {
