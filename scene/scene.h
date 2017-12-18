@@ -44,8 +44,8 @@ struct Scene
     Horizon horizon() const;
     Scene& setHorizon(const Horizon& horizon);
 
-    Scene& add(const ObjectItem& item, bool computeLighting = true);
-    bool remove(const ObjectItem& item, bool computeLighting = true);
+    Scene& add(const ObjectItem& item);
+    bool remove(const ObjectItem& item);
 
     Scene& add(const CharacterItem& item);
 

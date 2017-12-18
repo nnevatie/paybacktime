@@ -73,11 +73,11 @@ Scene::Scene(const fs::path& path,
                 {
                     const auto& position = std::get<0>(xform);
                     const auto& rotation = std::get<1>(xform);
-                    add(ObjectItem(obj, {glm::vec3(std::get<0>(position),
+                    d->objectItems.emplace_back(
+                        ObjectItem(obj, {glm::vec3(std::get<0>(position),
                                                    std::get<1>(position),
                                                    std::get<2>(position)),
-                                                   std::get<0>(rotation)}),
-                        false);
+                                                   std::get<0>(rotation)}));
                 }
             }
             else
@@ -111,7 +111,7 @@ Scene& Scene::setHorizon(const Horizon& horizon)
     return *this;
 }
 
-Scene& Scene::add(const ObjectItem& item, bool computeLighting)
+Scene& Scene::add(const ObjectItem& item)
 {
     for (const auto& obj : item.obj.hierarchy())
         if (const auto model = obj.model())
@@ -120,13 +120,11 @@ Scene& Scene::add(const ObjectItem& item, bool computeLighting)
             d->objectItems.emplace_back(obj, xform);
         }
 
-    if (computeLighting)
-        updateLightmap();
-
+    updateLightmap();
     return *this;
 }
 
-bool Scene::remove(const ObjectItem& item, bool computeLighting)
+bool Scene::remove(const ObjectItem& item)
 {
     int removeCount = 0;
     const auto items = item.hierarchy();
@@ -138,7 +136,7 @@ bool Scene::remove(const ObjectItem& item, bool computeLighting)
                 ++removeCount;
             }
 
-    if (computeLighting && removeCount > 0)
+    if (removeCount > 0)
         updateLightmap();
 
     return removeCount > 0;
