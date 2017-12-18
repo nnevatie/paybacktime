@@ -68,15 +68,16 @@ Scene::Scene(const fs::path& path,
         for (const auto& objItem : objItems)
             if (Object obj = objectStore.object(objItem.first))
             {
+                PTLOG(Info) << " read obj " << objItem.first;
                 for (const auto& xform : objItem.second)
                 {
                     const auto& position = std::get<0>(xform);
                     const auto& rotation = std::get<1>(xform);
-                    d->objectItems.push_back(
-                        ObjectItem(obj, {glm::vec3(std::get<0>(position),
+                    add(ObjectItem(obj, {glm::vec3(std::get<0>(position),
                                                    std::get<1>(position),
                                                    std::get<2>(position)),
-                                                   std::get<0>(rotation)}));
+                                                   std::get<0>(rotation)}),
+                        false);
                 }
             }
             else
@@ -110,7 +111,7 @@ Scene& Scene::setHorizon(const Horizon& horizon)
     return *this;
 }
 
-Scene& Scene::add(const ObjectItem& item)
+Scene& Scene::add(const ObjectItem& item, bool computeLighting)
 {
     for (const auto& obj : item.obj.hierarchy())
         if (const auto model = obj.model())
@@ -119,11 +120,13 @@ Scene& Scene::add(const ObjectItem& item)
             d->objectItems.emplace_back(obj, xform);
         }
 
-    updateLightmap();
+    if (computeLighting)
+        updateLightmap();
+
     return *this;
 }
 
-bool Scene::remove(const ObjectItem& item)
+bool Scene::remove(const ObjectItem& item, bool computeLighting)
 {
     int removeCount = 0;
     const auto items = item.hierarchy();
@@ -135,7 +138,7 @@ bool Scene::remove(const ObjectItem& item)
                 ++removeCount;
             }
 
-    if (removeCount > 0)
+    if (computeLighting && removeCount > 0)
         updateLightmap();
 
     return removeCount > 0;
