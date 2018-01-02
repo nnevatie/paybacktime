@@ -185,6 +185,9 @@ struct Data
 
     bool render(TimePoint time, float /*a*/)
     {
+        const auto timeSec = boost::chrono::duration<float>(
+                                 time - TimePoint()).count();
+
         const auto detailedStats = config.debug.detailedStats;
 
         TimeTree<GpuClock> timeTree;
@@ -287,9 +290,6 @@ struct Data
 
         stats.accumulate(timeTree);
         stats(throughput(), scene.cellResolution());
-
-        const float timeSec =
-            boost::chrono::duration<float>(time - TimePoint()).count();
 
         fader(1.f - timeSec);
 
