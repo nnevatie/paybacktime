@@ -29,9 +29,9 @@ nanogui::Color color(int luma, int alpha)
 }
 
 Theme::Theme(NVGcontext *ctx) {
-    mStandardFontSize                 = 20;
-    mButtonFontSize                   = 20;
-    mTextBoxFontSize                  = 20;
+    mStandardFontSize                 = 18;
+    mButtonFontSize                   = 18;
+    mTextBoxFontSize                  = 18;
     mWindowCornerRadius               = 2;
     mWindowHeaderHeight               = 30;
     mWindowDropShadowSize             = 10;
@@ -76,8 +76,8 @@ Theme::Theme(NVGcontext *ctx) {
     mWindowPopup                      = color(50, 255);
     mWindowPopupTransparent           = color(50, 0);
 
-    mFontNormal = nvgCreateFont(ctx, "sans",      "data/conradi_square.ttf");
-    mFontBold   = nvgCreateFont(ctx, "sans-bold", "data/conradi_square.ttf");
+    mFontNormal = nvgCreateFont(ctx, "sans",      "data/play_regular.ttf");
+    mFontBold   = nvgCreateFont(ctx, "sans-bold", "data/play_bold.ttf");
 
     #if 0
     mFontNormal = nvgCreateFontMem(ctx, "sans", roboto_regular_ttf,

@@ -24,7 +24,7 @@ struct RenderStats::Data
     explicit Data(NVGcontext* vg) :
         vg(vg)
     {
-        nvgCreateFont(vg, "conradi", "data/conradi_square.ttf");
+        nvgCreateFont(vg, "sans", "data/play_regular.ttf");
     }
 
     NVGcontext* vg;
@@ -55,8 +55,8 @@ RenderStats& RenderStats::operator()(float fps, const glm::ivec3& sceneSize)
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     nvgBeginFrame(d->vg, viewport[2], viewport[3], 1.f);
-    nvgFontSize(d->vg, 22.0f);
-    nvgFontFace(d->vg, "conradi");
+    nvgFontSize(d->vg, 18.0f);
+    nvgFontFace(d->vg, "sans");
     nvgFillColor(d->vg, nvgRGBA(255, 255, 255, 255));
 
     nvgText(d->vg, 10, 20, str(std::stringstream()
