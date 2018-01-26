@@ -165,6 +165,8 @@ struct Lightmapper::Data
                       texDensity,
                       texEmission,
                       texLightSources;
+
+    Lightmap          lightmap;
 };
 
 Lightmapper::Lightmapper() :

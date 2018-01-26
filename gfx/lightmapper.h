@@ -11,6 +11,8 @@
 #include "scene/material_types.h"
 #include "scene/horizon.h"
 
+#include "lightmap.h"
+
 namespace pt
 {
 namespace gfx
