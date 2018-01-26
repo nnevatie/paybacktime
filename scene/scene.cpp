@@ -226,10 +226,11 @@ gfx::Geometry::Instances Scene::characterGeometry() const
         {
             if (const auto& obj = bone.first)
             {
+                auto mw  = glm::translate(item.xform.pos);
                 auto mj  = bone.second;
                 mj[3]   *= glm::vec4(s, s, s, 1.f);
                 auto mo  = glm::translate(obj.origin());
-                instances.emplace_back(obj.model().primitive(), mj * mo);
+                instances.emplace_back(obj.model().primitive(), mw * mj * mo);
             }
         }
     }
