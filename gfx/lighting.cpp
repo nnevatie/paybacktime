@@ -14,11 +14,11 @@ namespace gfx
 
 struct Lighting::Data
 {
-    Data() : texScOut(nullptr)
+    Data()
     {}
 
     // TODO: Move internals here
-    gl::Texture* texScOut;
+    gl::Texture* texScOut = nullptr;
 };
 
 Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
