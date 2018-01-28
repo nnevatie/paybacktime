@@ -159,7 +159,7 @@ Lightmap& Lightmap::update(const mat::Density& density,
                 d->rect.render();
             }
 
-            #if 1
+            #if 0
             const auto elapsed = boost::chrono::duration<float, boost::milli>
                                 (clock.elapsed()).count();
             const auto vol     = size.x * size.y * size.z;
@@ -199,7 +199,7 @@ Lightmap& Lightmap::update(const mat::Density& density,
                 d->rect.render();
             }
 
-            #if 1
+            #if 0
             const auto elapsed = boost::chrono::duration<float, boost::milli>
                                 (clockHq.elapsed()).count();
             const auto vol     = size.x * size.y * size.z;
