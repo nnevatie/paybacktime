@@ -25,13 +25,14 @@ struct Texture
     {
         Texture1d,
         Texture2d,
+        Texture2dMs,
         Texture3d,
         Array1d,
         Array2d,
         Buffer
     };
 
-    Texture(Type type = Type::Texture2d);
+    Texture(Type type = Type::Texture2d, int sampleCount = 1);
 
     operator bool();
 
@@ -40,6 +41,7 @@ struct Texture
 
     glm::ivec3 size();
     int dimensions() const;
+    int sampleCount() const;
 
     Image image();
 

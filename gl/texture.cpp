@@ -15,16 +15,17 @@ namespace
 
 GLenum textureTarget(Texture::Type type)
 {
-    const std::array<GLenum, 6> types =
+    const std::array<GLenum, 7> types =
     {
         GL_TEXTURE_1D,
         GL_TEXTURE_2D,
+        GL_TEXTURE_2D_MULTISAMPLE,
         GL_TEXTURE_3D,
         GL_TEXTURE_1D_ARRAY,
         GL_TEXTURE_2D_ARRAY,
         GL_TEXTURE_BUFFER
     };
-    const std::size_t index = std::size_t(type);
+    const auto index = std::size_t(type);
 
     if (index >= int(types.size()))
         throw std::runtime_error("Invalid texture type " + std::to_string(index));
@@ -36,8 +37,9 @@ GLenum textureTarget(Texture::Type type)
 
 struct Texture::Data
 {
-    explicit Data(Texture::Type type) :
-        id(0), target(textureTarget(type)), type(type)
+    explicit Data(Texture::Type type, int sampleCount) :
+        id(0), target(textureTarget(type)),
+        type(type), sampleCount(sampleCount)
     {
         glGenTextures(1, &id);
     }
@@ -47,13 +49,14 @@ struct Texture::Data
         glDeleteTextures(1, &id);
     }
 
-    GLuint id;
-    GLenum target;
+    GLuint        id;
+    GLenum        target;
     Texture::Type type;
+    int           sampleCount;
 };
 
-Texture::Texture(Type type) :
-    d(std::make_shared<Data>(type))
+Texture::Texture(Type type, int sampleCount) :
+    d(std::make_shared<Data>(type, sampleCount))
 {
 }
 
@@ -86,12 +89,21 @@ int Texture::dimensions() const
 {
     switch (d->target)
     {
-        case GL_TEXTURE_1D: return 1;
-        case GL_TEXTURE_2D: return 2;
-        case GL_TEXTURE_3D: return 3;
+        case GL_TEXTURE_1D:
+            return 1;
+        case GL_TEXTURE_2D:
+        case GL_TEXTURE_2D_MULTISAMPLE:
+            return 2;
+        case GL_TEXTURE_3D:
+            return 3;
         default:
             return 2;
     }
+}
+
+int Texture::sampleCount() const
+{
+    return d->sampleCount;
 }
 
 Image Texture::image()
@@ -163,26 +175,34 @@ Texture& Texture::alloc(int level, const std::vector<int>& dim,
                         GLenum type, const GLvoid* data)
 {
     if (d->target == GL_TEXTURE_1D && dim.size() > 0)
-        glTexImage1D(GL_TEXTURE_1D,
+        glTexImage1D(d->target,
                      level, internalFormat,
                      dim[0], 0, format, type, data);
     else
     if (d->target == GL_TEXTURE_2D && dim.size() > 1)
-        glTexImage2D(GL_TEXTURE_2D,
+        glTexImage2D(d->target,
                      level, internalFormat,
                      dim[0], dim[1], 0, format, type, data);
     else
+    if (d->target == GL_TEXTURE_2D_MULTISAMPLE && dim.size() > 1)
+        glTexImage2DMultisample(d->target, d->sampleCount,
+                                internalFormat,
+                                dim[0], dim[1], GL_TRUE);
+    else
     if (d->target == GL_TEXTURE_3D && dim.size() > 2)
-        glTexImage3D(GL_TEXTURE_3D,
+        glTexImage3D(d->target,
                      level, internalFormat,
                      dim[0], dim[1], dim[2], 0, format, type, data);
 
     // Set default params
-    set(GL_TEXTURE_MIN_FILTER, GLint(GL_NEAREST));
-    set(GL_TEXTURE_MAG_FILTER, GLint(GL_NEAREST));
-    set(GL_TEXTURE_WRAP_S, GLint(GL_CLAMP_TO_EDGE));
-    set(GL_TEXTURE_WRAP_T, GLint(GL_CLAMP_TO_EDGE));
-    set(GL_TEXTURE_WRAP_R, GLint(GL_CLAMP_TO_EDGE));
+    if (d->target != GL_TEXTURE_2D_MULTISAMPLE)
+    {
+        set(GL_TEXTURE_MIN_FILTER, GLint(GL_NEAREST));
+        set(GL_TEXTURE_MAG_FILTER, GLint(GL_NEAREST));
+        set(GL_TEXTURE_WRAP_S,     GLint(GL_CLAMP_TO_EDGE));
+        set(GL_TEXTURE_WRAP_T,     GLint(GL_CLAMP_TO_EDGE));
+        set(GL_TEXTURE_WRAP_R,     GLint(GL_CLAMP_TO_EDGE));
+    }
     return *this;
 }
 

@@ -74,6 +74,9 @@ Fbo& Fbo::attach(const Texture& texture, Attachment attachment,
     if (texture.type() == Texture::Type::Texture2d)
         glFramebufferTexture2D(target, type, GL_TEXTURE_2D, tid, level);
     else
+    if (texture.type() == Texture::Type::Texture2dMs)
+        glFramebufferTexture2D(target, type, GL_TEXTURE_2D_MULTISAMPLE, tid, level);
+    else
     if (texture.type() == Texture::Type::Texture3d)
         glFramebufferTexture3D(target, type, GL_TEXTURE_3D, tid, level, layer);
 
