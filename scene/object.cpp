@@ -128,6 +128,9 @@ struct Meta
             origin = geom.scale *
                      glm::make_vec3(meta.value(c::object::meta::ORIGIN,
                                                std::vector<float>(3)).data());
+            // Pulse
+            pulse = glm::make_vec2(meta.value(c::object::meta::PULSE,
+                                              std::vector<float>(2)).data());
             // Children
             childIds = meta.value(c::object::meta::CHILDREN, Object::Ids());
             for (auto& childId : childIds)
@@ -140,6 +143,7 @@ struct Meta
     std::string name;
     glm::vec3   origin;
     geom::Meta  geom;
+    mat::Pulse  pulse;
     Object::Ids childIds;
 };
 
@@ -343,11 +347,7 @@ Object& Object::updateEmissivity()
 
 mat::Pulse Object::pulse() const
 {
-    return d->meta.id == "screen2" ?
-           mat::Pulse(1.f, 0.5f) :
-           d->meta.id == "screen" ?
-           mat::Pulse(1.f, 1.f) :
-           mat::Pulse(0.f, 0.f);
+    return d->meta.pulse;
 }
 
 Object& Object::updateMaterial()

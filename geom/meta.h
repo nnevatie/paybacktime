@@ -38,10 +38,9 @@ struct Simplify
 
 struct Meta
 {
-    Meta() : scale(1.f)
-    {}
+    Meta() = default;
 
-    float    scale;
+    float    scale = 1.f;
     Smooth   smooth;
     Simplify simplify;
 };

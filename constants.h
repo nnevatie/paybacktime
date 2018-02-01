@@ -39,6 +39,7 @@ namespace object
         constexpr auto BASE     = "base",
                        ORIGIN   = "origin",
                        SCALE    = "scale",
+                       PULSE    = "pulse",
                        SMOOTH   = "smooth",
                        SIMPLIFY = "simplify",
                        CHILDREN = "children";

@@ -74,7 +74,7 @@ void main(void)
                     float a = v * v * att;
                     l      += a * e;
                     i      += a * (w1 - w0);
-                    p.x    += lp.x * a * s;
+                    p.x     = max(p.x, lp.x * a * s);
                 }
             }
         }
