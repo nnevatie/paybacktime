@@ -27,8 +27,8 @@ in Block
 ib;
 
 // Outputs
-out vec3 light;
-out vec3 incidence;
+out vec4 light;
+out vec4 incidence;
 
 // Externals
 float vis(sampler3D tex, ivec3 p0, ivec3 p1, inout vec3 e, float el);
@@ -41,30 +41,20 @@ float distance2(vec3 v0, vec3 v1)
     return d.x * d.x + d.y * d.y + d.z * d.z;
 }
 
-bool intersect(inout vec3 hit, vec3 bbmin, vec3 bbmax, vec3 ro, vec3 rd)
-{
-    vec3 rdi     = 1.f / rd;
-    vec3 t0      = (bbmin - ro) * rdi;
-    vec3 t1      = (bbmax - ro) * rdi;
-    vec3 tMin    = min(t0, t1);
-    vec3 tMax    = max(t0, t1);
-    float cMin   = cmax(tMin);
-    float cMax   = cmin(tMax);
-    hit = ro + rd * cMin;
-    return cMax >= cMin;
-}
-
 void main(void)
 {
-    // Position, light, incidence
+    // Position, light, incidence, pulse
     ivec3 p0 = ivec3(gl_FragCoord.xy, wz);
     vec3 l   = vec3(0);
     vec3 i   = vec3(0);
+    vec4 p   = vec4(0);
 
     // Light sources
+    float dmin = 10e6;
     for (int li = 0; li < lsc; ++li)
     {
         ivec4 ls = texelFetch(lightSrc, li);
+        vec2  lp = vec2((ls.w & 0xff) / 255.0, ((ls.w >> 8) & 0xff) / 255.0);
         ivec3 p1 = ivec3(ls.x, ls.y, ls.z);
         vec3  w0 = cs * vec3(p0);
         vec3  w1 = cs * vec3(p1);
@@ -77,16 +67,32 @@ void main(void)
             if (att > attMin)
             {
                 vec3  e = texelFetch(emission, p1, 0).rgb;
-                float v = vis(density, p1, p0, e, length(e));
+                float s = length(e);
+                float v = vis(density, p1, p0, e, s);
                 if (v > 0.0)
                 {
                     float a = v * v * att;
                     l      += a * e;
                     i      += a * (w1 - w0);
+                    p.x    += lp.x * a * s;
                 }
             }
         }
+        // Pulse freq of closest pulsing emitter
+        if (lp.y > 0.0 && d2 < dmin)
+        {
+            p.y  = lp.y;
+            dmin = d2;
+        }
+        // Keep count of overlapping frequencies
+        if (d2 <= 1.33 * r && lp.y > 0.0 && lp.y != p.w)
+        {
+            p.w = lp.y;
+            p.z += 1.0;
+        }
     }
+    // Normalize pulse depth and suppress overlapping frequencies
+    p.x = p.z > 1.0 ? 0.0 : length(l) > 0.0 ? p.x / length(l) : 0.0;
 
     // Horizon
     int circ     = (size.x - 1) * 2 + (size.y - 1) * 2;
@@ -120,6 +126,6 @@ void main(void)
         }
     }
 
-    light     = l;
-    incidence = i;
+    light     = vec4(l, clamp(5.0 * p.x, 0.0, 1.0));
+    incidence = vec4(i, 5.f * p.y);
 }

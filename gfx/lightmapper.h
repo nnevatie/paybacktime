@@ -29,7 +29,8 @@ struct Lightmapper
 
     Lightmapper& add(const Transform& xform,
                      const mat::Density& density,
-                     const mat::Emission& emission);
+                     const mat::Emission& emission,
+                     const mat::Pulse& pulse);
 
     Lightmapper& operator()(const Horizon& horizon);
 

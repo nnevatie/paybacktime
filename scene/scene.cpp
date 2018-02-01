@@ -257,7 +257,7 @@ Scene& Scene::updateLightmap()
         const auto xform = Transform((item.xform.pos - aabb.min) /
                                      c::cell::SIZE, item.xform.rot);
 
-        d->lightmapper.add(xform, obj.density(), obj.emission());
+        d->lightmapper.add(xform, obj.density(), obj.emission(), obj.pulse());
     }
     d->lightmapper(d->horizon);
     return *this;

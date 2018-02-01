@@ -229,7 +229,8 @@ struct Data
                      scene.lightmap(),
                      scene.incidence(),
                      camera,
-                     scene.bounds());
+                     scene.bounds(),
+                     timeSec);
         }
         {
             auto time = timeTree.scope("env-mips", detailedStats);

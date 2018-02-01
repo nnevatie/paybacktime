@@ -69,6 +69,8 @@ struct Object
     mat::Emission emission() const;
     Object& updateEmissivity();
 
+    mat::Pulse pulse() const;
+
     Object& updateMaterial();
 
     Object& updateApproximation();

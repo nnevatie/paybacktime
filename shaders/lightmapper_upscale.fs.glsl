@@ -17,8 +17,8 @@ in Block
 ib;
 
 // Outputs
-out vec3 light;
-out vec3 incidence;
+out vec4 light;
+out vec4 incidence;
 
 // Externals
 vec4 textureTricubic(sampler3D, vec3, vec3);
@@ -26,6 +26,6 @@ vec4 textureTricubic(sampler3D, vec3, vec3);
 void main(void)
 {
     vec3 uvw  = vec3(ib.uv, z);
-    light     = textureTricubic(texGi,  uvw, sizeTexGi).rgb;
-    incidence = textureTricubic(texInc, uvw, sizeTexGi).rgb;
+    light     = textureTricubic(texGi,  uvw, sizeTexGi);
+    incidence = textureTricubic(texInc, uvw, sizeTexGi);
 }

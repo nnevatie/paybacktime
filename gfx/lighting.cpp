@@ -99,7 +99,8 @@ Lighting& Lighting::operator()(
     gl::Texture* texLightmap,
     gl::Texture* texIncidence,
     const Camera& camera,
-    const Aabb& bounds)
+    const Aabb& bounds,
+    float time)
 {
     // Combine pass
     Binder<gl::Fbo> binder(fboOut);
@@ -117,7 +118,8 @@ Lighting& Lighting::operator()(
                   .setUniform("w",           camera.matrixWorld())
                   .setUniform("n",           camera.matrixNormal())
                   .setUniform("boundsMin",   glm::floor(bounds.min))
-                  .setUniform("boundsSize",  glm::ceil(bounds.size()));
+                  .setUniform("boundsSize",  glm::ceil(bounds.size()))
+                  .setUniform("time",        time);
 
     const auto size = texOut.size();
     glViewport(0, 0, size.x, size.y);

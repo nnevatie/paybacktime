@@ -341,6 +341,15 @@ Object& Object::updateEmissivity()
     return *this;
 }
 
+mat::Pulse Object::pulse() const
+{
+    return d->meta.id == "screen2" ?
+           mat::Pulse(1.f, 0.5f) :
+           d->meta.id == "screen" ?
+           mat::Pulse(1.f, 1.f) :
+           mat::Pulse(0.f, 0.f);
+}
+
 Object& Object::updateMaterial()
 {
     if (!d->model)

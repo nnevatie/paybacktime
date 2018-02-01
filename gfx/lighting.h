@@ -60,7 +60,8 @@ struct Lighting
         gl::Texture* texLightmap,
         gl::Texture* texIncidence,
         const Camera& camera,
-        const Aabb& bounds);
+        const Aabb& bounds,
+        float time);
 
     gl::Texture* output();
 

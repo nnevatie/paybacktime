@@ -18,14 +18,14 @@ namespace gfx
 namespace
 {
 
-struct ivec3_cmp : std::binary_function<glm::ivec3, glm::ivec3, bool>
+struct ivec4_cmp : std::binary_function<glm::ivec4, glm::ivec4, bool>
 {
-    bool operator()(const glm::ivec3& lhs, const glm::ivec3 rhs) const
+    bool operator()(const glm::ivec4& lhs, const glm::ivec4 rhs) const
     {
         return glm::any(glm::lessThan(lhs, rhs));
     }
 };
-using Emitters = std::set<glm::ivec3, ivec3_cmp>;
+using Emitters = std::set<glm::ivec4, ivec4_cmp>;
 
 void accumulate(
     mat::Density& density0,
@@ -33,7 +33,8 @@ void accumulate(
     Emitters& emitters,
     const Transform& xform,
     const mat::Density& density1,
-    const mat::Emission& emission1)
+    const mat::Emission& emission1,
+    const mat::Pulse& pulse1)
 {
     const auto pos     = xform.pos.xzy() +
                          glm::vec3(0.f, 0.f, 0.5f * glm::vec3(density1.size).z);
@@ -47,7 +48,8 @@ void accumulate(
                                   glm::ivec3(glm::ceil(aabb.max)));
     const auto origin0 = pos - glm::vec3(0.5f);
     const auto origin1 = 0.5f * glm::vec3(size1) - glm::vec3(0.5f);
-
+    const auto pulse   = int(pulse1.x * 255 + 0.5f) |
+                        (int(pulse1.y * 255 + 0.5f) << 8);
     #if 0
     PTLOG(Info) << "pos: " << glm::to_string(pos)
                 << ", aabb: " << glm::to_string(aabb.min)
@@ -90,7 +92,7 @@ void accumulate(
                     {
                         auto em0 = emission0.at(p0);
                         emission0.at(p0) = em0 + em1;
-                        emitters.insert(p0);
+                        emitters.insert({p0, pulse});
                     }
                 }
             }
@@ -143,10 +145,11 @@ Lightmapper& Lightmapper::reset(const glm::ivec3& size)
 
 Lightmapper& Lightmapper::add(const Transform& xform,
                               const mat::Density& density,
-                              const mat::Emission& emission)
+                              const mat::Emission& emission,
+                              const mat::Pulse& pulse)
 {
     accumulate(d->density, d->emission, d->emitters,
-               xform, density, emission);
+               xform, density, emission, pulse);
     return *this;
 }
 
@@ -155,7 +158,8 @@ Lightmapper& Lightmapper::operator()(const Horizon& horizon)
     Lightmap::Emitters emitters;
     emitters.reserve(d->emitters.size());
     for (const auto& e : d->emitters)
-        emitters.push_back({int16_t(e.x), int16_t(e.y), int16_t(e.z), 0});
+        emitters.push_back({int16_t(e.x), int16_t(e.y),
+                            int16_t(e.z), int16_t(e.w)});
 
     d->lightmap.update(d->density, d->emission, emitters, horizon);
     return *this;

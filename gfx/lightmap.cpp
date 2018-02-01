@@ -89,14 +89,14 @@ Lightmap& Lightmap::resize(const Size& size)
         const std::vector<int> dimsHq = {sizeHq.x, sizeHq.y, sizeHq.z};
         for (auto texPair : {&d->light, &d->incidence})
         {
-            texPair->first.bind().alloc(dims, GL_RGB16F, GL_RGB, GL_FLOAT)
+            texPair->first.bind().alloc(dims, GL_RGBA16F, GL_RGBA, GL_FLOAT)
                                  .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                                  .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                                 .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
-            texPair->second.bind().alloc(dimsHq, GL_RGB16F, GL_RGB, GL_FLOAT)
+                                 .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            texPair->second.bind().alloc(dimsHq, GL_RGBA16F, GL_RGBA, GL_FLOAT)
                                   .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                                   .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                                  .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+                                  .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         }
     }
     return *this;
@@ -109,9 +109,6 @@ Lightmap& Lightmap::update(const mat::Density& density,
 {
     if (*d)
     {
-        const Time<GpuClock> clock;
-        const auto size = d->light.first.size();
-
         // Create emitter buffer
         gl::Buffer emittersBuf(gl::Buffer::Type::Texture);
         emittersBuf.alloc(emitters.data(), sizeof(Emitter) * emitters.size());
@@ -121,6 +118,9 @@ Lightmap& Lightmap::update(const mat::Density& density,
         d->emission.bind().alloc(emission);
         d->emitters.bind().alloc(GL_RGBA16I, emittersBuf);
         {
+            const Time<GpuClock> clock;
+            const auto size = d->light.first.size();
+
             // Bake pass
             gl::Fbo fbo;
             Binder<gl::Fbo> fboBinder(&fbo);
