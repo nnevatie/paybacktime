@@ -91,11 +91,15 @@ struct Aabb
 
     inline Aabb rotated(const glm::vec3& axis, int r) const
     {
+        return rotated(Transform::rotation(axis, r));
+    }
+
+    inline Aabb rotated(const glm::mat4x4& rot) const
+    {
         const auto c  = glm::vec4(center(), 1.f);
-        const auto rt = Transform::rotation(axis, r);
         auto verts    = vertices();
         for (auto& v : verts)
-            v = {c + rt * (glm::vec4(v, 1.f) - c)};
+            v = {c + rot * (glm::vec4(v, 1.f) - c)};
 
         return Aabb(verts);
     }
