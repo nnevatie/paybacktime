@@ -216,7 +216,7 @@ struct Data
         {
             auto time = timeTree.scope("lighting-sc", detailedStats);
             lighting.sc(&geometry.texDepth,
-                        scene.lightmap(),
+                        &scene.lightmap().light().second,
                         camera,
                         scene.bounds());
         }
@@ -227,8 +227,8 @@ struct Data
                      &geometry.texColor,
                      &geometry.texLight,
                      &ssao.output(),
-                     scene.lightmap(),
-                     scene.incidence(),
+                     &scene.lightmap().light().second,
+                     &scene.lightmap().incidence().second,
                      camera,
                      scene.bounds(),
                      timeSec);
@@ -257,8 +257,8 @@ struct Data
                 envMipmap.output(),
                 &textureStore.albedo.texture,
                 &textureStore.light.texture,
-                scene.lightmap(),
-                scene.incidence(),
+                &scene.lightmap().light().second,
+                &scene.lightmap().incidence().second,
                 scene.bounds(),
                 scene.objectGeometry(Scene::GeometryType::Transparent),
                 camera);
@@ -282,6 +282,12 @@ struct Data
         {
             auto time = timeTree.scope("output", detailedStats);
             output(antiAlias.output());
+            #if 0
+            output(&scene.lightmap().debug(&geometry.texDepth,
+                                           renderSize,
+                                           camera,
+                                           scene.bounds()));
+            #endif
         }
         {
             auto time = timeTree.scope("ui", detailedStats);

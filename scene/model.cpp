@@ -15,8 +15,7 @@ namespace pt
 
 struct Cubes
 {
-    Cubes()
-    {}
+    Cubes() = default;
 
     Cubes(const fs::path& path, bool fallback = true) :
         depth((path / "*.png").generic_string(), 1, fallback),

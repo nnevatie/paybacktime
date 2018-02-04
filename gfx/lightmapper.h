@@ -25,6 +25,8 @@ struct Lightmapper
     gl::Texture* lightTexture() const;
     gl::Texture* incidenceTexture() const;
 
+    Lightmap& map() const;
+
     Lightmapper& reset(const glm::ivec3& size = {});
 
     Lightmapper& add(const Transform& xform,

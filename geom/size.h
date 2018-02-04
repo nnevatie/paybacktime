@@ -8,8 +8,7 @@ namespace pt
 template<typename T>
 struct Size
 {
-    Size()
-    {}
+    Size() = default;
 
     Size(T w, T h) :
         w(w), h(h)

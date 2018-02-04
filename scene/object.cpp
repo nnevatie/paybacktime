@@ -312,7 +312,7 @@ Object& Object::updateDensity()
                 for (int fy = y0; fy < y1; ++fy)
                     for (int fx = fx0; fx <= fx1; ++fx)
                         for (int fz = fy0; fz <= fy1; ++fz)
-                            if (cfield(fx, fy, fz) || cfield(fz, fy, fx))
+                            if (cfield(fx, fy, fz))
                             {
                                 ++sum;
                                 break;

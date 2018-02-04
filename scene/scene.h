@@ -15,6 +15,7 @@
 #include "platform/clock.h"
 #include "img/image.h"
 #include "gfx/geometry.h"
+#include "gfx/lightmap.h"
 #include "gl/texture.h"
 
 #include "horizon_store.h"
@@ -59,8 +60,7 @@ struct Scene
 
     gfx::Geometry::Instances characterGeometry() const;
 
-    gl::Texture* lightmap() const;
-    gl::Texture* incidence() const;
+    gfx::Lightmap& lightmap() const;
 
     Scene& updateLightmap();
 

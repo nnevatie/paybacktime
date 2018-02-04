@@ -237,14 +237,9 @@ gfx::Geometry::Instances Scene::characterGeometry() const
     return instances;
 }
 
-gl::Texture* Scene::lightmap() const
+gfx::Lightmap& Scene::lightmap() const
 {
-    return d->lightmapper.lightTexture();
-}
-
-gl::Texture* Scene::incidence() const
-{
-    return d->lightmapper.incidenceTexture();
+    return d->lightmapper.map();
 }
 
 Scene& Scene::updateLightmap()

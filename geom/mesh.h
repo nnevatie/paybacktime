@@ -95,7 +95,7 @@ struct Mesh
     std::vector<V> vertices;
     std::vector<I> indices;
 
-    Mesh() {}
+    Mesh() = default;
 
     Mesh(const std::vector<V>& vertices,
          const std::vector<I>& indices) :

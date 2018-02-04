@@ -19,10 +19,13 @@ struct Lightmap::Data
         fsVisibility(gl::Shader::path("visibility.fs.glsl")),
         fsUpscale(gl::Shader::path("lightmapper_upscale.fs.glsl")),
         fsCommon(gl::Shader::path("common.fs.glsl")),
+        fsDebug(gl::Shader::path("lightmapper_debug.fs.glsl")),
         prog({vsQuadUv, fsLightmapper, fsVisibility, fsCommon},
              {{0, "position"}, {1, "uv"}}),
         progHq({vsQuadUv, fsUpscale, fsCommon},
                {{0, "position"}, {1, "uv"}}),
+        progDebug({vsQuadUv, fsDebug, fsCommon},
+                  {{0, "position"}, {1, "uv"}}),
         light     {gl::Texture::Type::Texture3d, gl::Texture::Type::Texture3d},
         incidence {gl::Texture::Type::Texture3d, gl::Texture::Type::Texture3d},
         density   {gl::Texture::Type::Texture3d},
@@ -48,17 +51,22 @@ struct Lightmap::Data
                       fsLightmapper,
                       fsVisibility,
                       fsUpscale,
-                      fsCommon;
+                      fsCommon,
+                      fsDebug;
 
     // Shader programs
     gl::ShaderProgram prog,
-                      progHq;
+                      progHq,
+                      progDebug;
 
     // Current lightmap textures, normal/high quality
     mutable Tex       light, incidence;
 
     // Work buffers for lightmap computation
     gl::Texture       density, emission, emitters;
+
+    // Debug texture
+    gl::Texture       debug;
 };
 
 Lightmap::Lightmap() :
@@ -119,8 +127,15 @@ Lightmap& Lightmap::update(const mat::Density& density,
         emittersBuf.alloc(emitters.data(), sizeof(Emitter) * emitters.size());
 
         // Upload buffers
-        d->density.bind().alloc(density);
-        d->emission.bind().alloc(emission);
+        constexpr auto wrap = GL_CLAMP_TO_BORDER;
+        d->density.bind().alloc(density)
+                         .set(GL_TEXTURE_WRAP_S, wrap)
+                         .set(GL_TEXTURE_WRAP_T, wrap)
+                         .set(GL_TEXTURE_WRAP_R, wrap);
+        d->emission.bind().alloc(emission)
+                          .set(GL_TEXTURE_WRAP_S, wrap)
+                          .set(GL_TEXTURE_WRAP_T, wrap)
+                          .set(GL_TEXTURE_WRAP_R, wrap);
         d->emitters.bind().alloc(GL_RGBA16I, emittersBuf);
         {
             const Time<GpuClock> clock;
@@ -215,6 +230,40 @@ Lightmap& Lightmap::update(const mat::Density& density,
         }
     }
     return *this;
+}
+
+gl::Texture& Lightmap::debug(gl::Texture* texDepth,
+                             const pt::Size<int>& size,
+                             const Camera& camera,
+                             const Aabb& bounds)
+{
+    if (!d->debug)
+        d->debug.bind().alloc({size.w, size.h},
+                              GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+
+    gl::Fbo fbo;
+    Binder<gl::Fbo> fboBinder(&fbo);
+    fbo.attach(d->debug, gl::Fbo::Attachment::Color);
+
+    Binder<gl::ShaderProgram> progBinder(&d->progDebug);
+    d->progDebug.setUniform("texDepth",    0)
+                .setUniform("texDensity",  1)
+                .setUniform("w",           camera.matrixWorld())
+                .setUniform("camPos",      camera.position())
+                .setUniform("boundsMin",   glm::floor(bounds.min))
+                .setUniform("boundsSize",  glm::ceil(bounds.size()))
+                .setUniform("sampleCount", int(1000));
+
+    glViewport(0, 0, size.w, size.h);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    texDepth->bindAs(GL_TEXTURE0);
+    d->density.bindAs(GL_TEXTURE1);
+    gl::Primitive rect(squareMesh());
+    rect.render();
+
+    return d->debug;
 }
 
 } // namespace gfx

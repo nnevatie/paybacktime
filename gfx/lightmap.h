@@ -7,9 +7,11 @@
 
 #include <glm/vec3.hpp>
 
+#include "geom/size.h"
 #include "gl/texture.h"
 #include "scene/material_types.h"
 #include "scene/horizon.h"
+#include "scene/camera.h"
 
 namespace pt
 {
@@ -40,6 +42,11 @@ struct Lightmap
                      const mat::Emission& emission,
                      const Emitters& emitters,
                      const Horizon& horizon);
+
+    gl::Texture& debug(gl::Texture* texDepth,
+                       const pt::Size<int>& size,
+                       const Camera& camera,
+                       const Aabb& bounds);
 
 private:
     struct Data;

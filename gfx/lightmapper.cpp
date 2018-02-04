@@ -134,6 +134,11 @@ gl::Texture* Lightmapper::incidenceTexture() const
     return &d->lightmap.incidence().second;
 }
 
+Lightmap& Lightmapper::map() const
+{
+    return d->lightmap;
+}
+
 Lightmapper& Lightmapper::reset(const glm::ivec3& size)
 {
     d->lightmap.resize(size);
