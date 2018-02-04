@@ -89,14 +89,19 @@ Lightmap& Lightmap::resize(const Size& size)
         const std::vector<int> dimsHq = {sizeHq.x, sizeHq.y, sizeHq.z};
         for (auto texPair : {&d->light, &d->incidence})
         {
+            constexpr auto wrap = GL_CLAMP_TO_EDGE;
             texPair->first.bind().alloc(dims, GL_RGBA16F, GL_RGBA, GL_FLOAT)
                                  .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                                  .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                                 .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                                 .set(GL_TEXTURE_WRAP_S, wrap)
+                                 .set(GL_TEXTURE_WRAP_T, wrap)
+                                 .set(GL_TEXTURE_WRAP_R, wrap);
             texPair->second.bind().alloc(dimsHq, GL_RGBA16F, GL_RGBA, GL_FLOAT)
                                   .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                                   .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                                  .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                                  .set(GL_TEXTURE_WRAP_S, wrap)
+                                  .set(GL_TEXTURE_WRAP_T, wrap)
+                                  .set(GL_TEXTURE_WRAP_R, wrap);
         }
     }
     return *this;

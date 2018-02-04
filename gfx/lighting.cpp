@@ -78,7 +78,10 @@ Lighting& Lighting::sc(gl::Texture* texDepth,
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
     texDepth->bindAs(GL_TEXTURE0);
-    texLightmap->bindAs(GL_TEXTURE1);
+    texLightmap->bindAs(GL_TEXTURE1)
+                .set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
+                .set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
+                .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
     rect.render();
 
     d->texScOut = &texSc;
@@ -132,7 +135,10 @@ Lighting& Lighting::operator()(
     texLight->bindAs(GL_TEXTURE3);
     texSsao->bindAs(GL_TEXTURE4);
     d->texScOut->bindAs(GL_TEXTURE5);
-    texLightmap->bindAs(GL_TEXTURE6);
+    texLightmap->bindAs(GL_TEXTURE6)
+                .set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+                .set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+                .set(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     texIncidence->bindAs(GL_TEXTURE7);
     rect.render();
     return *this;

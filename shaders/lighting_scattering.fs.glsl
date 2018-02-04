@@ -36,7 +36,7 @@ vec3 scattering(vec3 start)
     vec3 uvws = (uvw1 - uvw0) / sampleCount;
 
     vec3 scatter = vec3(0.0);
-    for (int i = 0; i < sampleCount && uvw0.z < 1.05; ++i)
+    for (int i = 0; i < sampleCount; ++i)
     {
         vec3 gi  = texture(texGi, uvw0).rgb;
         scatter += pow(gi, vec3(1.50));
