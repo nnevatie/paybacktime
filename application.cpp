@@ -209,7 +209,8 @@ struct Data
         }
         {
             auto time = timeTree.scope("ssao", detailedStats);
-            ssao(&geometry.texDepthLinear, &geometry.texNormalDenoise,
+            ssao(&geometry.texDepthLinear,
+                 &geometry.texNormalDenoise,
                  camera.matrixProj(), camera.fov);
         }
         {
