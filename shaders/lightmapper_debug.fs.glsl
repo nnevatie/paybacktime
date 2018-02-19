@@ -41,7 +41,7 @@ vec3 density(vec3 start)
             s.rgb += abs(d.a) * normalize(d.rgb);
             s.a++;
         }
-        uvw0  += uvws;
+        uvw0 += uvws;
     }
     return s.a > 0.0 ? s.rgb / s.a : vec3(0.0);
 }
