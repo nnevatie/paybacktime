@@ -147,27 +147,16 @@ float g1v(float dotNV, float k)
 
 float ggx(vec3 N, vec3 V, vec3 L, float roughness, float F0)
 {
-    float alpha = roughness * roughness;
-    vec3      H = normalize(V + L);
-    float dotNL = clamp(dot(N, L), 0.0, 1.0);
-    float dotNV = clamp(dot(N, V), 0.0, 1.0);
-    float dotNH = clamp(dot(N, H), 0.0, 1.0);
-    float dotLH = clamp(dot(L, H), 0.0, 1.0);
-
-    // D
-    float alphaSqr = alpha * alpha;
-    float pi       = 3.14159;
-    float denom    = dotNH * dotNH * (alphaSqr - 1.0) + 1.0;
-    float D        = alphaSqr / (pi * denom * denom);
-
-    // F
-    float dotLH5   = pow(1.0 - dotLH, 5);
-    float F        = F0 + (1.0 - F0) * (dotLH5);
-
-    // V
-    float k        = alpha / 2.0;
-    float vis      = g1v(dotNL, k) * g1v(dotNV, k);
-
-    float specular = dotNL * D * F * vis;
-    return specular;
+  float alpha    = roughness * roughness;
+  vec3 H         = normalize(L - V);
+  float dotLH    = max(0.0, dot(L, H));
+  float dotNH    = max(0.0, dot(N, H));
+  float dotNL    = max(0.0, dot(N, L));
+  float alphaSqr = alpha * alpha;
+  float denom    = dotNH * dotNH * (alphaSqr - 1.0) + 1.0;
+  float D        = alphaSqr / (3.141592653589793 * denom * denom);
+  float F        = F0 + (1.0 - F0) * pow(1.0 - dotLH, 5.0);
+  float k        = 0.5 * alpha;
+  float k2       = k * k;
+  return dotNL * D * F / (dotLH * dotLH * (1.0 - k2) + k2);
 }
