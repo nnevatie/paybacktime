@@ -233,7 +233,8 @@ Transform Object::parentTransform(const Transform& xform) const
 
 glm::mat4x4 Object::childMatrix(const Transform& xform) const
 {
-    return (parent() ? (xform + origin()) : xform).matrix(dimensions());
+    const auto& origin = d->meta.origin;
+    return (parent() ? (xform + origin) : xform).matrix(dimensions(), origin);
 }
 
 glm::vec3 Object::dimensions() const
@@ -281,7 +282,7 @@ Model Object::model() const
     return d->model;
 }
 
-mat::Density Object::density() const
+mat::Density& Object::density() const
 {
     return d->density;
 }
@@ -305,7 +306,7 @@ Object& Object::updateDensity()
                 int fx1   = (x + 1) * cfield.width / size.x - 1;
                 int fy1   = (y + 1) * cfield.depth / size.y - 1;
                 int width = fx1 - fx0 + 1;
-                int y0    = -d->meta.origin.y + z * c::cell::SIZE.y;
+                int y0    = /*-d->meta.origin.y*/ + z * c::cell::SIZE.y;
                 int y1    = (z + 1) * c::cell::SIZE.y;
 
                 int sum = 0;
@@ -318,7 +319,7 @@ Object& Object::updateDensity()
                                 break;
                             }
 
-                float a = float(sum) / ((c::cell::SIZE.y + d->meta.origin.y) *
+                float a = float(sum) / ((c::cell::SIZE.y /*+ d->meta.origin.y*/) *
                                          width);
 
                 map.at(x, y, z) = {1.f, 1.f, 1.f, a};
@@ -333,7 +334,7 @@ bool Object::emissive() const
     return d->emissive;
 }
 
-mat::Emission Object::emission() const
+mat::Emission& Object::emission() const
 {
     return d->emission;
 }
@@ -345,7 +346,7 @@ Object& Object::updateEmissivity()
     return *this;
 }
 
-mat::Pulse Object::pulse() const
+mat::Pulse& Object::pulse() const
 {
     return d->meta.pulse;
 }

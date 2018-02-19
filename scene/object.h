@@ -62,14 +62,14 @@ struct Object
     bool transparent() const;
     Object& updateTransparency();
 
-    mat::Density density() const;
+    mat::Density& density() const;
     Object& updateDensity();
 
     bool emissive() const;
-    mat::Emission emission() const;
+    mat::Emission& emission() const;
     Object& updateEmissivity();
 
-    mat::Pulse pulse() const;
+    mat::Pulse& pulse() const;
 
     Object& updateMaterial();
 

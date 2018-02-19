@@ -18,11 +18,12 @@ namespace pt
 namespace
 {
 
-glm::mat4x4 arrowTransform(Camera* camera, const ObjectItem& object)
+glm::mat4x4 arrowTransform(Camera* camera, const ObjectItem& item)
 {
-    const auto d   = object.obj.dimensions();
-    const auto mvp = camera->matrix() * object.xform.matrix(d);
-    const auto t   = glm::vec3(0.5f * d.x - 8.f, d.y, 0.f);
+    const auto& obj = item.obj;
+    const auto d    = obj.dimensions();
+    const auto mvp  = camera->matrix() * item.xform.matrix(d, obj.origin());
+    const auto t    = glm::vec3(0.5f * d.x - 8.f, d.y, 0.f);
     return mvp * glm::translate(t);
 }
 
@@ -115,7 +116,6 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
             auto  r = glm::mod(t, grid) - glm::mod(0.5f * dim, grid);
             t       = glm::round(t - r);
             t.y     = 0.f;
-            t      += object.origin();
 
             d->object.xform.pos = t;
 

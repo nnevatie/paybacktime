@@ -203,12 +203,13 @@ ozz::Skeleton* createSkeleton(const fs::path& path, const json& meta)
     }
     if (skeleton)
     {
+        #if 0
         const auto jointCount = skeleton->num_joints();
         const auto jointNames = skeleton->joint_names();
-
         PTLOG(Info) << "joints: " << jointCount;
         for (int i = 0; i < jointCount; ++i)
             PTLOG(Info) << "joint: '" << jointNames[i] << "'";
+        #endif
     }
     return skeleton;
 }

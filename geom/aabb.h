@@ -35,7 +35,7 @@ struct Aabb
         min(std::numeric_limits<float>::max()),
         max(std::numeric_limits<float>::lowest())
     {
-        for (const auto v : vertices)
+        for (const auto& v : vertices)
         {
             min = glm::min(min, v);
             max = glm::max(max, v);
@@ -89,17 +89,18 @@ struct Aabb
         return {min - v, max + v};
     }
 
-    inline Aabb rotated(const glm::vec3& axis, int r) const
+    inline Aabb rotated(const glm::vec3& axis, int r, const glm::vec3& origin) const
     {
-        return rotated(Transform::rotation(axis, r));
+        return rotated(Transform::rotation(axis, r), origin);
     }
 
-    inline Aabb rotated(const glm::mat4x4& rot) const
+    inline Aabb rotated(const glm::mat4x4& rot, const glm::vec3& origin) const
     {
-        const auto c  = glm::vec4(center(), 1.f);
-        auto verts    = vertices();
+        const auto o = center() + origin;
+        const auto x = glm::translate(o) * rot * glm::translate(-o);
+        auto verts   = vertices();
         for (auto& v : verts)
-            v = {c + rot * (glm::vec4(v, 1.f) - c)};
+            v = x * glm::vec4(v, 1.f);
 
         return Aabb(verts);
     }

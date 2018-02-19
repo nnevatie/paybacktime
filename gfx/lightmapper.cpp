@@ -31,32 +31,40 @@ void accumulate(
     mat::Density& density0,
     mat::Emission& emission0,
     Emitters& emitters,
-    const Transform& xform,
-    const mat::Density& density1,
-    const mat::Emission& emission1,
-    const mat::Pulse& pulse1)
+    const glm::vec3& pos,
+    const glm::mat4& rot,
+    const Object& obj)
 {
-    const auto pos     = xform.pos.xzy() +
-                         glm::vec3(0.f, 0.f, 0.5f * glm::vec3(density1.size).z);
-    const auto rot     = Transform::rotation(c::grid::UP, xform.rot);
-    const auto aabb    = density1.bounds(pos).rotated(c::grid::UP, xform.rot);
-    //const auto size0   = glm::ivec3(glm::ceil(aabb.size()));
-    const auto size1   = density1.size;
-    const auto min0    = glm::max(glm::zero<glm::ivec3>(),
-                                  glm::ivec3(glm::floor(aabb.min)));
-    const auto max0    = glm::min(density0.size,
-                                  glm::ivec3(glm::ceil(aabb.max)));
-    const auto origin0 = pos - glm::vec3(0.5f);
-    const auto origin1 = 0.5f * glm::vec3(size1) - glm::vec3(0.5f);
-    const auto pulse   = int(pulse1.x * 255 + 0.5f) |
-                        (int(pulse1.y * 255 + 0.5f) << 8);
+    const auto  posCell   = pos / c::cell::SIZE;
+    const auto  origin    = obj.origin().xzy() / c::cell::SIZE;
+    const auto& density1  = obj.density();
+    const auto& emission1 = obj.emission();
+    const auto& pulse1    = obj.pulse();
+
+    const auto rotInv     = glm::inverse(rot);
+    const auto aabb       = density1.bounds(posCell, origin)
+                                    .rotated(rotInv, origin);
+    const auto size1      = density1.size;
+    const auto min0       = glm::max(glm::zero<glm::ivec3>(),
+                                     glm::ivec3(glm::round(aabb.min)));
+    const auto max0       = glm::min(density0.size,
+                                     glm::ivec3(glm::round(aabb.max)));
+    const auto origin0    = posCell - 0.5f;
+    const auto origin1    = 0.5f * glm::vec3(size1.x, size1.y, 0.f) + origin - 0.5f;
+
+    const auto xform      = glm::translate(+origin1) *
+                            rot *
+                            glm::translate(-origin0);
+
+    const auto pulse      = int(std::round(pulse1.x * 255)) |
+                           (int(std::round(pulse1.y * 255)) << 8);
     #if 0
     PTLOG(Info) << "pos: " << glm::to_string(pos)
                 << ", aabb: " << glm::to_string(aabb.min)
                 << " -> " << glm::to_string(aabb.max)
                 << ", min0: " << glm::to_string(min0)
                 << ", max0: " << glm::to_string(max0)
-                << ", size0: " << glm::to_string(size0)
+                << ", size0: " << glm::to_string(glm::ceil(aabb.size()))
                 << ", size1: " << glm::to_string(size1)
                 << ", origin0: " << glm::to_string(origin0)
                 << ", origin1: " << glm::to_string(origin1);
@@ -66,8 +74,7 @@ void accumulate(
         for (p0.y = min0.y; p0.y < max0.y; ++p0.y)
             for (p0.x = min0.x; p0.x < max0.x; ++p0.x)
             {
-                const auto xv = glm::vec3(rot * glm::vec4(p0 - origin0, 1.f));
-                const auto p1 = glm::ivec3(glm::round(origin1 + xv));
+                const auto p1 = glm::ivec3(glm::round(xform * glm::vec4(p0, 1.f)));
 
                 if (glm::all(glm::greaterThanEqual(p1, glm::zero<glm::ivec3>())) &&
                     glm::all(glm::lessThan(p1, size1)))
@@ -82,7 +89,8 @@ void accumulate(
                     const auto& d1  = density1.at(p1);
 
                     const auto aMin = std::min(d0.a, d1.a);
-                    const auto a    = aMin < 0.f ? aMin : std::min(1.f, d0.a + d1.a);
+                    const auto a    = aMin < 0.f ? aMin :
+                                      std::min(1.f, d0.a + d1.a);
                     const auto rgb  = d0.rgb() + d1.rgb();
 
                     d0 = glm::vec4(rgb, a);
@@ -95,6 +103,10 @@ void accumulate(
                         emitters.insert({p0, pulse});
                     }
                 }
+                #if 1
+                else
+                    density0.at(p0) = glm::vec4(1.f, 1.f, 0.f, 1.f);
+                #endif
             }
 
     #if 0
@@ -148,14 +160,20 @@ Lightmapper& Lightmapper::reset(const glm::ivec3& size)
     return *this;
 }
 
-Lightmapper& Lightmapper::add(const Transform& xform,
-                              const mat::Density& density,
-                              const mat::Emission& emission,
-                              const mat::Pulse& pulse)
+Lightmapper& Lightmapper::add(const glm::vec3& pos,
+                              const glm::mat4& rot,
+                              const Object& obj)
 {
-    accumulate(d->density, d->emission, d->emitters,
-               xform, density, emission, pulse);
+    accumulate(d->density, d->emission, d->emitters, pos, rot, obj);
     return *this;
+}
+
+Lightmapper& Lightmapper::add(const Transform& xform,
+                              const Object& obj)
+{
+    const auto pos = xform.pos.xzy();
+    const auto rot = Transform::rotation(c::grid::UP, xform.rot);
+    return add(pos, rot, obj);
 }
 
 Lightmapper& Lightmapper::operator()(const Horizon& horizon)

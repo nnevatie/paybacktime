@@ -127,7 +127,7 @@ struct Character::Data
         parts(readParts(path, objectStore, textureStore)),
         bones(createBones(parts))
     {
-        anim.activate("idle_aim");
+        anim.activate("pose");
         anim.animate(TimePoint(), Duration(0));
     }
 

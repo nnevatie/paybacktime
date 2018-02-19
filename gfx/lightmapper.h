@@ -8,6 +8,7 @@
 #include "geom/transform.h"
 #include "gl/texture.h"
 
+#include "scene/object.h"
 #include "scene/material_types.h"
 #include "scene/horizon.h"
 
@@ -29,10 +30,12 @@ struct Lightmapper
 
     Lightmapper& reset(const glm::ivec3& size = {});
 
+    Lightmapper& add(const glm::vec3& pos,
+                     const glm::mat4& rot,
+                     const Object& obj);
+
     Lightmapper& add(const Transform& xform,
-                     const mat::Density& density,
-                     const mat::Emission& emission,
-                     const mat::Pulse& pulse);
+                     const Object& obj);
 
     Lightmapper& operator()(const Horizon& horizon);
 

@@ -51,9 +51,11 @@ struct Transform
         return rotation(c::scene::UP, rot);
     }
 
-    glm::mat4x4 matrix(const glm::vec3& size) const
+    glm::mat4x4 matrix(const glm::vec3& size, const glm::vec3& origin) const
     {
-        auto hwh = glm::vec3(0.5f * size.x, 0.f, 0.5f * size.z);
+        auto hwh = glm::vec3(0.5f * size.x + origin.x,
+                             origin.y,
+                             0.5f * size.z + origin.z);
         return glm::translate(translation() * rotation(), -hwh);
     }
 

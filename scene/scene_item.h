@@ -38,16 +38,16 @@ struct SceneItem
         return items;
     }
 
-    glm::vec3 posMin() const
-    {
-        const auto dim = obj.dimensions();
-        return xform.pos - glm::vec3(0.5f * dim.x, 0.f, 0.5 * dim.z);
-    }
     Aabb bounds() const
     {
-        const auto pos = posMin();
-        return Aabb(pos, pos + obj.dimensions()).rotated(c::scene::UP, xform.rot);
+        const auto dim  = obj.dimensions();
+        const auto hdim = glm::vec3(0.5f * dim.x, 0.f, 0.5f * dim.z);
+        const auto min  = xform.pos - obj.origin() - hdim;
+        const auto max  = min + dim;
+        return Aabb(min, max).
+               rotated(c::scene::UP, xform.rot, obj.origin());
     }
+
     operator bool() const
     {
         return obj;

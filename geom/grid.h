@@ -17,8 +17,7 @@ namespace pt
 template <typename T>
 struct Grid
 {
-    Grid()
-    {}
+    Grid() = default;
 
     Grid(const Size<int>& size) :
         size(size.w, size.h, 1), data(size.w * size.h)
@@ -28,10 +27,18 @@ struct Grid
         size(size), data(size.x * size.y * size.z)
     {}
 
-    Aabb bounds(const glm::vec3& center) const
+    Aabb bounds(const glm::vec3& pos, const glm::vec3& origin) const
     {
-        const auto hsize = 0.5f * glm::vec3(size);
-        return {center - hsize, center + hsize};
+        const auto dim  = glm::vec3(size);
+        const auto hdim = 0.5f * glm::vec3(dim.x, dim.y, 0.f);
+        const auto min  = pos - origin - hdim;
+        const auto max  = min + dim;
+        #if 0
+        PTLOG(Info) << "dim: " << glm::to_string(dim)
+                    << ", pos: " << glm::to_string(pos)
+                    << ", origin: " << glm::to_string(origin);
+        #endif
+        return {min, max};
     }
 
     std::vector<int> dims() const

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <glm/gtc/random.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/transform.hpp>
@@ -202,13 +203,14 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
     instances.reserve(d->objectItems.size());
     for (const auto& item : d->objectItems)
     {
-        auto gt = item.obj.transparent() ? GeometryType::Transparent :
-                                           GeometryType::Opaque;
+        const auto& obj = item.obj;
+        const auto gt   = obj.transparent() ? GeometryType::Transparent :
+                                              GeometryType::Opaque;
 
         if (type == GeometryType::Any || gt == type)
         {
-            auto xform = item.xform.matrix(item.obj.dimensions());
-            auto model = item.obj.model();
+            auto xform = item.xform.matrix(obj.dimensions(), obj.origin());
+            auto model = obj.model();
             instances.emplace_back(model.primitive(), xform);
         }
     }
@@ -221,9 +223,7 @@ gfx::Geometry::Instances Scene::characterGeometry() const
     gfx::Geometry::Instances instances;
     instances.reserve(Character::PART_COUNT * d->charItems.size());
     for (const auto& item : d->charItems)
-    {
         for (const auto& bone : *item.obj.bones())
-        {
             if (const auto& obj = bone.first)
             {
                 auto mw  = glm::translate(item.xform.pos);
@@ -232,8 +232,7 @@ gfx::Geometry::Instances Scene::characterGeometry() const
                 auto mo  = glm::translate(obj.origin());
                 instances.emplace_back(obj.model().primitive(), mw * mj * mo);
             }
-        }
-    }
+
     return instances;
 }
 
@@ -246,13 +245,41 @@ Scene& Scene::updateLightmap()
 {
     const auto aabb = bounds();
     d->lightmapper.reset(cellResolution());
+    #if 0
+    PTLOG(Info) << "bounds: " << glm::to_string(aabb.min) << "->"
+                              << glm::to_string(aabb.max) << ", size: "
+                              << glm::to_string(aabb.size()) << ", cells: "
+                              << glm::to_string(cellResolution());
+    #endif
+
+    // Objects
     for (const auto& item : d->objectItems)
     {
         const auto& obj  = item.obj;
-        const auto xform = Transform((item.xform.pos - aabb.min) /
-                                     c::cell::SIZE, item.xform.rot);
-        d->lightmapper.add(xform, obj.density(), obj.emission(), obj.pulse());
+        const auto xform = Transform(item.xform.pos - aabb.min, item.xform.rot);
+        d->lightmapper.add(xform, obj);
     }
+    // Characters
+    for (const auto& item : d->charItems)
+        for (const auto& bone : *item.obj.bones())
+            if (const auto& obj = bone.first)
+            {
+                PTLOG(Info) << obj.id();
+
+                const auto s = 28.125f;
+                auto mw      = glm::translate(item.xform.pos);
+                auto mj      = bone.second;
+                mj[3]       *= glm::vec4(glm::vec3(s), 1.f);
+                auto mo      = glm::translate(obj.origin());
+                auto xform   = mw * mj /** mo*/;
+                auto pos     = ((glm::vec3(xform[3]) - aabb.min)).xzy();
+                auto rot     = glm::mat3(mj);
+
+                //PTLOG(Info) << glm::to_string(pos);
+
+                d->lightmapper.add(pos, rot, obj);
+            }
+
     d->lightmapper(d->horizon);
     return *this;
 }
