@@ -54,9 +54,6 @@ struct Object
 
     glm::vec3 origin() const;
 
-    Transform parentTransform(const Transform& xform) const;
-    glm::mat4x4 childMatrix(const Transform& xform) const;
-
     glm::vec3 dimensions() const;
 
     bool transparent() const;

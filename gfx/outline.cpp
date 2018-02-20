@@ -63,7 +63,8 @@ Outline& Outline::operator()(gl::Fbo* fboOut,
         for (const auto& obj : object.hierarchy())
             if (const auto model = obj.model())
             {
-                const auto mvp = camera.matrix() * obj.childMatrix(xform);
+                const auto mvp = camera.matrix() *
+                                 xform.matrix(obj.dimensions(), obj.origin());
                 progModel.setUniform("mvp", mvp);
                 model.primitive().render();
             }

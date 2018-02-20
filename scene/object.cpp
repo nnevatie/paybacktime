@@ -226,17 +226,6 @@ glm::vec3 Object::origin() const
     return d->meta.origin;
 }
 
-Transform Object::parentTransform(const Transform& xform) const
-{
-    return parent() ? (xform - origin()) : xform;
-}
-
-glm::mat4x4 Object::childMatrix(const Transform& xform) const
-{
-    const auto& origin = d->meta.origin;
-    return (parent() ? (xform + origin) : xform).matrix(dimensions(), origin);
-}
-
 glm::vec3 Object::dimensions() const
 {
     Aabb aabb(d->model ? d->model.dimensions() : glm::zero<glm::vec3>());

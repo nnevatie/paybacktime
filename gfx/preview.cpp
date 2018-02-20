@@ -71,7 +71,8 @@ Preview& Preview::operator()(
                 const auto mvp = camera.matrix() *
                                  glm::scale({}, glm::vec3(s, s, s)) *
                                  glm::translate({}, t) *
-                                 obj.childMatrix({{-t.x, 0.f, -t.z}});
+                                 Transform({-t.x, 0.f, -t.z}).
+                                 matrix(obj.dimensions(), obj.origin());
 
                 progModel.setUniform("mvp", mvp);
                 model.primitive().render();

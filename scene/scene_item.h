@@ -33,8 +33,7 @@ struct SceneItem
         const auto children = obj.hierarchy();
         items.reserve(children.size());
         for (const auto& child : children)
-            items.emplace_back(child, child.parent() ?
-                                      xform + child.origin() : xform);
+            items.emplace_back(child, xform);
         return items;
     }
 

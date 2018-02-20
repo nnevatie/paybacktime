@@ -115,11 +115,8 @@ Scene& Scene::setHorizon(const Horizon& horizon)
 Scene& Scene::add(const ObjectItem& item)
 {
     for (const auto& obj : item.obj.hierarchy())
-        if (const auto model = obj.model())
-        {
-            auto xform = obj.parent() ? item.xform + obj.origin() : item.xform;
-            d->objectItems.emplace_back(obj, xform);
-        }
+        //if (const auto model = obj.model())
+            d->objectItems.emplace_back(obj, item.xform);
 
     updateLightmap();
     return *this;
@@ -127,16 +124,17 @@ Scene& Scene::add(const ObjectItem& item)
 
 bool Scene::remove(const ObjectItem& item)
 {
-    int removeCount = 0;
+    int removeCount  = d->objectItems.size();
     const auto items = item.hierarchy();
-    for (int i = 0; i < int(d->objectItems.size()); ++i)
-        for (const auto& child : items)
-            if (d->objectItems.at(i) == child)
-            {
-                d->objectItems.erase(d->objectItems.begin() + i);
-                ++removeCount;
-            }
 
+    for (const auto& child : items)
+        d->objectItems.erase(
+            std::remove_if(
+                d->objectItems.begin(), d->objectItems.end(),
+                [&](const ObjectItem& item) {return item == child;}),
+                d->objectItems.end());
+
+    removeCount -= d->objectItems.size();
     if (removeCount > 0)
         updateLightmap();
 
@@ -181,7 +179,7 @@ Intersection Scene::intersect(const Ray& ray) const
         {
             // Resolve parent, if any
             if (const auto parent = item.obj.parent())
-                items.emplace_back(parent, item.obj.parentTransform(item.xform));
+                items.emplace_back(parent, item.xform);
             else
                 items.emplace_back(item);
         }
@@ -210,8 +208,8 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
         if (type == GeometryType::Any || gt == type)
         {
             auto xform = item.xform.matrix(obj.dimensions(), obj.origin());
-            auto model = obj.model();
-            instances.emplace_back(model.primitive(), xform);
+            if (const auto model = obj.model())
+                instances.emplace_back(model.primitive(), xform);
         }
     }
     return instances;
@@ -264,8 +262,6 @@ Scene& Scene::updateLightmap()
         for (const auto& bone : *item.obj.bones())
             if (const auto& obj = bone.first)
             {
-                PTLOG(Info) << obj.id();
-
                 const auto s = 28.125f;
                 auto mw      = glm::translate(item.xform.pos);
                 auto mj      = bone.second;
@@ -274,9 +270,6 @@ Scene& Scene::updateLightmap()
                 auto xform   = mw * mj /** mo*/;
                 auto pos     = ((glm::vec3(xform[3]) - aabb.min)).xzy();
                 auto rot     = glm::mat3(mj);
-
-                //PTLOG(Info) << glm::to_string(pos);
-
                 d->lightmapper.add(pos, rot, obj);
             }
 
