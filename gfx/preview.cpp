@@ -60,7 +60,7 @@ Preview& Preview::operator()(
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         texAlbedo->bindAs(GL_TEXTURE0);
 
-        const auto dims = object.dimensions() + object.origin();
+        const auto dims = object.dimensions() - object.origin();
         const auto dim  = glm::length(dims);
         const auto s    = std::pow(32.f / dim, 0.6f);
         const auto t    = -0.5f * dims;
