@@ -103,7 +103,7 @@ void accumulate(
                         emitters.insert({p0, pulse});
                     }
                 }
-                #if 1
+                #if 0
                 else
                     density0.at(p0) = glm::vec4(1.f, 1.f, 0.f, 1.f);
                 #endif
