@@ -261,15 +261,8 @@ Scene& Scene::updateLightmap()
         d->lightmapper.add(xform, obj);
     }
 
-    // Characters
     #if 0
-    glm::mat4x4 b;
-    b[0] = {c::scene::RIGHT.x, c::scene::FWD.x, c::scene::UP.x, {}};
-    b[1] = {c::scene::RIGHT.y, c::scene::FWD.y, c::scene::UP.y, {}};
-    b[2] = {c::scene::RIGHT.z, c::scene::FWD.z, c::scene::UP.z, {}};
-    PTLOG(Info) << glm::to_string(b);
-    #endif
-
+    // Characters
     for (const auto& item : d->charItems)
         for (const auto& bone : *item.obj.bones())
             if (const auto& obj = bone.first)
@@ -283,7 +276,7 @@ Scene& Scene::updateLightmap()
                 auto rot         = glm::mat3(mj);
                 d->lightmapper.add(pos, rot, obj);
             }
-
+    #endif
     d->lightmapper(d->horizon);
     return *this;
 }
