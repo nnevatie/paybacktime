@@ -281,8 +281,8 @@ struct Data
         }
         {
             auto time = timeTree.scope("output", detailedStats);
-            output(antiAlias.output());
-            #if 0
+            //output(antiAlias.output());
+            #if 1
             output(&scene.lightmap().debug(&geometry.texDepth,
                                            renderSize,
                                            camera,

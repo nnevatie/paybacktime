@@ -9,8 +9,10 @@ namespace c
 
 namespace scene
 {
-    // World-up
-    const auto UP = glm::vec3(0.f, 1.f, 0.f);
+    // World vectors
+    const auto UP    = glm::vec3(0.f, 1.f, 0.f),
+               FWD   = glm::vec3(0.f, 0.f, 1.f),
+               RIGHT = glm::vec3(1.f, 0.f, 0.f);
 
     // Rotation ticks
     const auto ROT_TICKS = 16;
@@ -19,7 +21,7 @@ namespace scene
 namespace cell
 {
     // X/Z form the ground plane, Y points World-up
-    const auto SIZE = glm::vec3(8.f,  8.f, 8.f),
+    const auto SIZE = glm::vec3(1.f,  1.f, 1.f),
                GRID = glm::vec3(16.f, 1.f, 16.f);
 }
 
@@ -49,6 +51,11 @@ namespace object
 namespace character
 {
     constexpr auto METAFILE = "character.json";
+
+    namespace skeleton
+    {
+        constexpr auto SCALE = 28.125f;
+    }
 }
 
 } // namespace c

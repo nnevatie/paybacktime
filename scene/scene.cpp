@@ -217,17 +217,20 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 
 gfx::Geometry::Instances Scene::characterGeometry() const
 {
-    const float s = 28.125f;
+    constexpr auto s = c::character::skeleton::SCALE;
     gfx::Geometry::Instances instances;
     instances.reserve(Character::PART_COUNT * d->charItems.size());
     for (const auto& item : d->charItems)
         for (const auto& bone : *item.obj.bones())
             if (const auto& obj = bone.first)
             {
+                auto dim = obj.dimensions();
+                auto o   = obj.origin();
+                auto hwh = glm::vec3(0.5f * dim.x + o.x, o.y, 0.5f * dim.z + o.z);
                 auto mw  = glm::translate(item.xform.pos);
                 auto mj  = bone.second;
-                mj[3]   *= glm::vec4(s, s, s, 1.f);
-                auto mo  = glm::translate(obj.origin());
+                mj[3]   *= glm::vec4(glm::vec3(s), 1.f);
+                auto mo  = glm::translate(-hwh);
                 instances.emplace_back(obj.model().primitive(), mw * mj * mo);
             }
 
@@ -257,19 +260,27 @@ Scene& Scene::updateLightmap()
         const auto xform = Transform(item.xform.pos - aabb.min, item.xform.rot);
         d->lightmapper.add(xform, obj);
     }
+
     // Characters
+    #if 0
+    glm::mat4x4 b;
+    b[0] = {c::scene::RIGHT.x, c::scene::FWD.x, c::scene::UP.x, {}};
+    b[1] = {c::scene::RIGHT.y, c::scene::FWD.y, c::scene::UP.y, {}};
+    b[2] = {c::scene::RIGHT.z, c::scene::FWD.z, c::scene::UP.z, {}};
+    PTLOG(Info) << glm::to_string(b);
+    #endif
+
     for (const auto& item : d->charItems)
         for (const auto& bone : *item.obj.bones())
             if (const auto& obj = bone.first)
             {
-                const auto s = 28.125f;
-                auto mw      = glm::translate(item.xform.pos);
-                auto mj      = bone.second;
-                mj[3]       *= glm::vec4(glm::vec3(s), 1.f);
-                auto mo      = glm::translate(obj.origin());
-                auto xform   = mw * mj /** mo*/;
-                auto pos     = ((glm::vec3(xform[3]) - aabb.min)).xzy();
-                auto rot     = glm::mat3(mj);
+                constexpr auto s = c::character::skeleton::SCALE;
+                auto mw          = glm::translate(item.xform.pos);
+                auto mj          = bone.second;
+                mj[3]           *= glm::vec4(glm::vec3(s), 1.f);
+                auto xform       = mw * mj;
+                auto pos         = ((glm::vec3(xform[3]) - aabb.min)).xzy();
+                auto rot         = glm::mat3(mj);
                 d->lightmapper.add(pos, rot, obj);
             }
 
