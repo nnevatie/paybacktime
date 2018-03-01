@@ -277,7 +277,7 @@ Animation& Animation::activate(const std::string& name)
     return *this;
 }
 
-Animation& Animation::animate(TimePoint time, Duration step)
+Animation& Animation::animate(TimePoint time, Duration /*step*/)
 {
     if (d->active)
     {

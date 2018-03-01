@@ -49,13 +49,16 @@ struct Character
     using Parts = std::array<Object, PART_COUNT>;
     using Bones = std::array<Bone, PART_COUNT>;
 
-    Character();
+    Character() = default;
     Character(const Id& id,
               ObjectStore& objectStore,
               TextureStore& textureStore);
 
     const Parts* parts() const;
     const Bones* bones() const;
+
+    Object volume() const;
+    Character& updateVolume();
 
     Character& animate(TimePoint time, Duration step);
 

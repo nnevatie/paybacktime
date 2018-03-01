@@ -82,6 +82,8 @@ void accumulateMaterial(mat::Emission& emission,
 
 struct Meta
 {
+    Meta() = default;
+
     Meta(const Object::Path& path) :
         id(Object::pathId(path)),
         name(path.first.filename().string())
@@ -151,6 +153,15 @@ struct Meta
 
 struct Object::Data
 {
+    Data(const glm::vec3& size) :
+        transparent(false),
+        emissive(false),
+        density(glm::ivec3(size + 0.5f)),
+        emission(glm::ivec3(size + 0.5f))
+    {
+        density = glm::vec4(1.f);
+    }
+
     Data(const Path& path, const Resolver& resolver,
          TextureStore& textureStore) :
         meta(path),
@@ -181,6 +192,10 @@ struct Object::Data
     Object        parent;
     Objects       children;
 };
+
+Object::Object(const glm::vec3& size) :
+    d(std::make_shared<Data>(size))
+{}
 
 Object::Object(const Path& path, const Resolver& resolver,
                TextureStore& textureStore) :

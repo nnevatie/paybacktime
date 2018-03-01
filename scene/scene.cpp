@@ -261,22 +261,14 @@ Scene& Scene::updateLightmap()
         d->lightmapper.add(xform, obj);
     }
 
-    #if 0
     // Characters
     for (const auto& item : d->charItems)
-        for (const auto& bone : *item.obj.bones())
-            if (const auto& obj = bone.first)
-            {
-                constexpr auto s = c::character::skeleton::SCALE;
-                auto mw          = glm::translate(item.xform.pos);
-                auto mj          = bone.second;
-                mj[3]           *= glm::vec4(glm::vec3(s), 1.f);
-                auto xform       = mw * mj;
-                auto pos         = ((glm::vec3(xform[3]) - aabb.min)).xzy();
-                auto rot         = glm::mat3(mj);
-                d->lightmapper.add(pos, rot, obj);
-            }
-    #endif
+    {
+        const auto& obj  = item.obj.volume();
+        const auto xform = Transform(item.xform.pos - aabb.min, item.xform.rot);
+        d->lightmapper.add(xform, obj);
+    }
+
     d->lightmapper(d->horizon);
     return *this;
 }

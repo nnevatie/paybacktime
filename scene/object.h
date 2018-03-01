@@ -33,6 +33,7 @@ struct Object
     using Path = std::pair<fs::path, fs::path>;
 
     Object() = default;
+    Object(const glm::vec3& size);
     Object(const Path& path,
            const Resolver& resolver,
            TextureStore& textureStore);

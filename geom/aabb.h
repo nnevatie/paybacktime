@@ -31,7 +31,7 @@ struct Aabb
         min(min), max(max)
     {}
 
-    Aabb(const std::array<V, 8>& vertices) :
+    Aabb(const Vertices& vertices) :
         min(std::numeric_limits<float>::max()),
         max(std::numeric_limits<float>::lowest())
     {

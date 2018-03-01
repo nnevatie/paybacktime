@@ -172,7 +172,7 @@ struct Data
         // Add character
         if (scene.characterGeometry().empty())
         {
-            scene.add(CharacterItem(character, {glm::vec3(0, 0, 64)}));
+            scene.add(CharacterItem(character, {glm::vec3(-64, 0, 64)}));
             scene.updateLightmap();
         }
 
@@ -281,8 +281,8 @@ struct Data
         }
         {
             auto time = timeTree.scope("output", detailedStats);
-            //output(antiAlias.output());
-            #if 1
+            output(antiAlias.output());
+            #if 0
             output(&scene.lightmap().debug(&geometry.texDepth,
                                            renderSize,
                                            camera,

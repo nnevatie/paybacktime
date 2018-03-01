@@ -128,7 +128,6 @@ struct Character::Data
         bones(createBones(parts))
     {
         anim.activate("idle_aim");
-        anim.animate(TimePoint(), Duration(0));
     }
 
     Meta      meta;
@@ -136,16 +135,17 @@ struct Character::Data
     BoneMap   boneMap;
     Parts     parts;
     Bones     bones;
+    Object    volume;
 };
-
-Character::Character()
-{}
 
 Character::Character(const Id& id,
                      ObjectStore& objectStore,
                      TextureStore& textureStore) :
     d(std::make_shared<Data>(id, objectStore, textureStore))
-{}
+{
+    animate(TimePoint(), Duration(0));
+    updateVolume();
+}
 
 const Character::Parts* Character::parts() const
 {
@@ -155,6 +155,29 @@ const Character::Parts* Character::parts() const
 const Character::Bones* Character::bones() const
 {
     return &d->bones;
+}
+
+Object Character::volume() const
+{
+    return d->volume;
+}
+
+Character& Character::updateVolume()
+{
+    glm::vec3 min(std::numeric_limits<float>::max()),
+              max(std::numeric_limits<float>::lowest());
+
+    for (const auto& bone : d->bones)
+    {
+        auto mj  = bone.second;
+        mj[3]   *= glm::vec4(glm::vec3(c::character::skeleton::SCALE), 1.f);
+        auto pos = glm::vec3(mj[3]);
+        min = glm::min(min, pos);
+        max = glm::max(max, pos);
+    }
+    auto dim  = (max - min).xzy() / c::cell::SIZE;
+    d->volume = Object(dim);
+    return *this;
 }
 
 Character& Character::animate(TimePoint time, Duration step)
