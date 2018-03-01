@@ -432,6 +432,9 @@ Object Object::flipped(TextureStore& textureStore) const
         if (d->model)
             object.d->model = d->model.flipped(textureStore);
 
+        // Flip origin
+        object.d->meta.origin.x = -d->meta.origin.x;
+
         return object;
     }
     return Object();
