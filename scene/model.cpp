@@ -86,7 +86,7 @@ struct Model::Data
         if (modified > lastUpdated)
         {
             // Cube updates
-            PTLOG(Info) << path << " base: " << (base ? base.d->path : "none");
+            //PTLOG(Info) << path << " base: " << (base ? base.d->path : "none");
             cubes = base ? base.d->cubes.merged(Cubes(path, false)) :
                            Cubes(path);
 
@@ -109,7 +109,7 @@ struct Model::Data
             primitive   = gl::Primitive(mesh);
             lastUpdated = modified;
 
-            PTLOG(Info) << path.string() << " tris: " << mesh.triangleCount();
+            //PTLOG(Info) << path.string() << " tris: " << mesh.triangleCount();
             return true;
         }
         return false;

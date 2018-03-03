@@ -27,9 +27,11 @@ HorizonStore::HorizonStore(const fs::path& path) :
             d->horizons.begin(), d->horizons.end(), none), d->horizons.end());
         d->horizons.insert(d->horizons.begin(), none);
     }
+    #if 0
     PTLOG(Info) << "Horizons: " << d->horizons.size();
     for (const auto& horz : d->horizons)
         PTLOG(Info) << horz.name();
+    #endif
 }
 
 HorizonStore::Horizons HorizonStore::horizons() const

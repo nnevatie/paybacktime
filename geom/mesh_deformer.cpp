@@ -89,7 +89,7 @@ Neighbors vertexNeighbors(const Mesh& mesh)
 
 UniqueMesh connect(const Mesh_P_N_T_UV& mesh0)
 {
-    PTTIMEU("connect", boost::milli);
+    //PTTIMEU("connect", boost::milli);
     const auto vc0 = int(mesh0.vertices.size());
 
     Locations locations(vc0 / 8);
@@ -133,7 +133,7 @@ Mesh_P_N_T_UV decimate(const Mesh_P_N_T_UV& mesh0,
                        const geom::Simplify& params)
 {
     auto mesh1 = connect(mesh0);
-    PTTIMEU("decimate", boost::milli);
+    //PTTIMEU("decimate", boost::milli);
 
     auto v = meshVertices(mesh1.first);
     auto t = meshTriangles(mesh1.first);
@@ -144,8 +144,10 @@ Mesh_P_N_T_UV decimate(const Mesh_P_N_T_UV& mesh0,
     const int vc0 = int(v.size());
     const int tc0 = int(t.size());
 
+    #if 0
     PTLOG(Info) << mesh1.first.vertices.size() << " / "
                 << mesh1.first.triangleCount() << " -> " << vc0 << " / " << tc0;
+    #endif
 
     Mesh_P_N_T_UV mesh2;
     mesh2.vertices.resize(tc0 * 3);
@@ -224,7 +226,7 @@ Mesh smooth(const Mesh& mesh0, const geom::Smooth& params)
 {
     if (params.iterations > 0)
     {
-        PTTIMEU("smooth", boost::milli);
+        //PTTIMEU("smooth", boost::milli);
         Mesh mesh1(mesh0);
         const auto vc = int(mesh1.vertices.size());
 

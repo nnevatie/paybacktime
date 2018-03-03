@@ -69,9 +69,11 @@ Character::Parts readParts(const fs::path& path,
     {
         const fs::path partPath(path / PART_DIRS[i]);
         parts[i] = objectStore.object(partPath.generic_path().string());
+        #if 0
         PTLOG(Info) << "part " << i << ", "
                     << partPath.generic_path().string()
                     << ": " << bool(parts[i]);
+        #endif
     }
     const int fallbacks[Character::PART_COUNT] =
         {-1, -1, -1, -1, -1, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15, -1};
@@ -88,7 +90,7 @@ BoneMap createBoneMap(const Animation& anim)
     for (int i = 0; i < Character::PART_COUNT; ++i)
     {
         map[i] = anim.jointIndex(JOINT_NAMES[i]);
-        PTLOG(Info) << "'" << JOINT_NAMES[i] << "' -> " << map[i];
+        //PTLOG(Info) << "'" << JOINT_NAMES[i] << "' -> " << map[i];
     }
     return map;
 }

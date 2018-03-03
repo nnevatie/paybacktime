@@ -89,7 +89,7 @@ void setupJoints(ozz::RawSkeleton::Joint::Children& joints, const json& meta)
         auto  name = nameValue.key();
         auto& node = nameValue.value();
 
-        PTLOG(Info) << name << "|" << node;
+        //PTLOG(Info) << name << "|" << node;
 
         // Create joint
         ozz::RawSkeleton::Joint joint = {};
@@ -124,7 +124,7 @@ void setupAnimations(Animations& animations,
         auto  name = nameValue.key();
         auto& node = nameValue.value();
 
-        PTLOG(Info) << name << "|" << node;
+        //PTLOG(Info) << name << "|" << node;
 
         ozz::Animation* animation = nullptr;
         if (node.is_string())
@@ -162,10 +162,12 @@ void setupAnimations(Animations& animations,
                 allocator->AllocateRange<ozz::SoaTransform>(soaJointCount),
                 allocator->AllocateRange<ozz::Float4x4>(jointCount)
             );
+            #if 0
             PTLOG(Info) << name << ", '"
                         << animation->name() << "', "
                         << animation->duration() << ", "
                         << animation->num_tracks();
+            #endif
         }
     }
 }
@@ -195,7 +197,7 @@ ozz::Skeleton* createSkeleton(const fs::path& path, const json& meta)
         // Raw skeleton
         ozz::RawSkeleton rawSkeleton;
         setupJoints(rawSkeleton.roots, node);
-        PTLOG(Info) << "joints: " << rawSkeleton.num_joints();
+        //PTLOG(Info) << "joints: " << rawSkeleton.num_joints();
 
         // Runtime skeleton
         ozz::SkeletonBuilder skeletonBuilder;

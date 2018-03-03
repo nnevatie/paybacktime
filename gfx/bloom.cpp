@@ -63,8 +63,6 @@ Bloom::Bloom(const Size<int>& renderSize) :
         fboBlur[i].bind()
                   .attach(texBlur[i], gl::Fbo::Attachment::Color)
                   .unbind();
-
-        PTLOG(Info) << i << " " << size.w << "x" << size.h;
     }
 }
 

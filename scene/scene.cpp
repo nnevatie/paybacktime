@@ -69,7 +69,7 @@ Scene::Scene(const fs::path& path,
         for (const auto& objItem : objItems)
             if (Object obj = objectStore.object(objItem.first))
             {
-                PTLOG(Info) << " read obj " << objItem.first;
+                //PTLOG(Info) << " read obj " << objItem.first;
                 for (const auto& xform : objItem.second)
                 {
                     const auto& position = std::get<0>(xform);
