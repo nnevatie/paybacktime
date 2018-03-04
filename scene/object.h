@@ -14,6 +14,7 @@
 #include "material_types.h"
 #include "texture_store.h"
 #include "model.h"
+#include "state.h"
 
 namespace pt
 {
@@ -49,6 +50,7 @@ struct Object
     Objects hierarchy() const;
 
     Model model() const;
+    State& state() const;
 
     std::string id() const;
     std::string name() const;

@@ -14,6 +14,7 @@
 #include "common/json.h"
 #include "common/log.h"
 
+#include "state.h"
 #include "constants.h"
 
 namespace bpt = boost::property_tree;
@@ -137,6 +138,9 @@ struct Meta
             childIds = meta.value(c::object::meta::CHILDREN, Object::Ids());
             for (auto& childId : childIds)
                 childId = id + "/" + childId;
+
+            // States
+            state = State(meta.value(c::object::meta::STATES, json()));
         }
     }
 
@@ -147,6 +151,7 @@ struct Meta
     geom::Meta  geom;
     mat::Pulse  pulse;
     Object::Ids childIds;
+    State       state;
 };
 
 } // namespace
@@ -284,6 +289,11 @@ Objects Object::hierarchy() const
 Model Object::model() const
 {
     return d->model;
+}
+
+State& Object::state() const
+{
+    return d->meta.state;
 }
 
 mat::Density& Object::density() const

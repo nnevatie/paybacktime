@@ -24,7 +24,7 @@ struct SceneControl
                  const Size<int>& renderSize,
                  const gl::Texture& texDepth);
 
-    SceneControl& operator()(Duration step, Object object);
+    SceneControl& operator()(TimePoint time, Duration step, Object object);
     SceneControl& operator()(gl::Fbo* fboOut,
                              gl::Texture* texColor);
 

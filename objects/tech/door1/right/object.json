@@ -1,0 +1,7 @@
+{
+    "states":
+    {
+        "closed": {"pos": [0,  0, 0], "next": {"state": "open",   "time": 3}},
+        "open":   {"pos": [16, 0, 0], "next": {"state": "closed", "time": 3}}
+    }
+}

@@ -207,7 +207,8 @@ gfx::Geometry::Instances Scene::objectGeometry(GeometryType type) const
 
         if (type == GeometryType::Any || gt == type)
         {
-            auto xform = item.xform.matrix(obj.dimensions(), obj.origin());
+            auto xform = item.xform.matrix(obj.dimensions(), obj.origin()) *
+                         obj.state().xform();
             if (const auto model = obj.model())
                 instances.emplace_back(model.primitive(), xform);
         }
@@ -275,6 +276,9 @@ Scene& Scene::updateLightmap()
 
 Scene& Scene::animate(TimePoint time, Duration step)
 {
+    for (auto& objItem : d->objectItems)
+        objItem.obj.state().animate(time, step);
+
     for (auto& charItem : d->charItems)
         charItem.obj.animate(time, step);
 

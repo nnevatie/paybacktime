@@ -76,7 +76,8 @@ SceneControl::SceneControl(Scene* scene,
     d(std::make_shared<Data>(scene, camera, display, mouse, renderSize, texDepth))
 {}
 
-SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
+SceneControl& SceneControl::operator()(TimePoint time,
+                                       Duration /*step*/, Object object)
 {
     const auto mouseButtons = d->mouse->buttons();
     const auto mouseWheel   = d->mouse->wheel();
@@ -131,15 +132,23 @@ SceneControl& SceneControl::operator()(Duration /*step*/, Object object)
                     d->scene->add(objectItem);
             }
             else
-            if (d->state == Data::State::Removing && mouseButtons[0] &&
-               !d->intersection.second.empty())
+            if (d->state == Data::State::Removing &&
+                !d->intersection.second.empty())
             {
                 // Remove items
                 const auto firstObj = d->intersection.second.front();
-                if (!d->removedObject || firstObj.obj == d->removedObject)
+                if (mouseButtons[0] &&
+                   (!d->removedObject || firstObj.obj == d->removedObject))
                 {
                     d->removedObject = firstObj.obj;
                     d->scene->remove(firstObj);
+                }
+                else
+                if (mouseButtons[2] &&
+                   (!d->removedObject || firstObj.obj == d->removedObject))
+                {
+                    for (auto& child : firstObj.obj.hierarchy())
+                        child.state().toggle(time);
                 }
             }
             else

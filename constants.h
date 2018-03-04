@@ -44,7 +44,12 @@ namespace object
                        PULSE    = "pulse",
                        SMOOTH   = "smooth",
                        SIMPLIFY = "simplify",
-                       CHILDREN = "children";
+                       CHILDREN = "children",
+                       STATES   = "states";
+    }
+    namespace state
+    {
+        constexpr auto POS = "pos";
     }
 }
 

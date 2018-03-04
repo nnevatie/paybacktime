@@ -13,8 +13,12 @@ namespace pt
 
 struct State
 {
+    State();
     State(const json& meta);
 
+    glm::mat4x4 xform() const;
+
+    State& toggle(TimePoint time);
     State& activate(const std::string& name);
     State& animate(TimePoint time, Duration step);
 

@@ -153,7 +153,7 @@ struct Data
         cameraControl(step);
 
         // Scene control
-        sceneControl(step, objectPane.selected());
+        sceneControl(time, step, objectPane.selected());
 
         // Animate scene
         scene.animate(time, step);
