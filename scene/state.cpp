@@ -133,7 +133,6 @@ State& State::toggle(TimePoint time)
 {
     if (d->active && !d->transition)
     {
-        PTLOG(Info) << time;
         const auto& next = d->active->next;
         d->transition.start(d->active, &d->states[next.first],
                             time, next.second);
