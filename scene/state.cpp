@@ -124,6 +124,17 @@ State::State(const json& meta) :
     d(std::make_shared<Data>(meta))
 {}
 
+bool State::detach()
+{
+    PTLOG(Info) << d.use_count();
+    if (d.use_count() > 1)
+    {
+        d = std::make_shared<Data>(*d);
+        return true;
+    }
+    return false;
+}
+
 glm::mat4x4 State::xform() const
 {
     return d->transition ? d->transition.xform :

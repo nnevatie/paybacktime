@@ -266,6 +266,21 @@ Object& Object::updateTransparency()
     return *this;
 }
 
+bool Object::detach()
+{
+    PTLOG(Info) << d.use_count();
+    if (d.use_count() > 1)
+    {
+        d = std::make_shared<Data>(*d);
+        d->meta.state.detach();
+        for (auto& child : d->children)
+            child.detach();
+
+        return true;
+    }
+    return false;
+}
+
 Object Object::parent() const
 {
     return d->parent;

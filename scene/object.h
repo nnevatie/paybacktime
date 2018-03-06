@@ -44,6 +44,8 @@ struct Object
     bool operator==(const Object& other) const;
     bool operator!=(const Object& other) const;
 
+    bool detach();
+
     Object parent() const;
     Object& setParent(const Object& object);
 

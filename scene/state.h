@@ -16,6 +16,8 @@ struct State
     State();
     State(const json& meta);
 
+    bool detach();
+
     glm::mat4x4 xform() const;
 
     State& toggle(TimePoint time);
