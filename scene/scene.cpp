@@ -72,13 +72,14 @@ Scene::Scene(const fs::path& path,
                 //PTLOG(Info) << " read obj " << objItem.first;
                 for (const auto& xform : objItem.second)
                 {
-                    const auto& position = std::get<0>(xform);
-                    const auto& rotation = std::get<1>(xform);
-                    d->objectItems.emplace_back(
-                        ObjectItem(obj, {glm::vec3(std::get<0>(position),
-                                                   std::get<1>(position),
-                                                   std::get<2>(position)),
-                                                   std::get<0>(rotation)}));
+                    const auto& position  = std::get<0>(xform);
+                    const auto& rotation  = std::get<1>(xform);
+                    const Transform tform = {glm::vec3(std::get<0>(position),
+                                                       std::get<1>(position),
+                                                       std::get<2>(position)),
+                                             std::get<0>(rotation)};
+                    for (const auto& o : obj.clone().hierarchy())
+                        d->objectItems.emplace_back(ObjectItem(o, tform));
                 }
             }
             else
@@ -301,8 +302,9 @@ bool Scene::write(const boost::filesystem::path& path) const
             const auto& xf = objItem.xform;
             const auto position = std::make_tuple(xf.pos.x, xf.pos.y, xf.pos.z);
             const auto rotation = std::make_tuple(xf.rot, c::scene::ROT_TICKS);
-            objItems[objItem.obj.id()].emplace_back(
-                std::make_tuple(position, rotation));
+            if (!objItem.obj.parent())
+                objItems[objItem.obj.id()].emplace_back(
+                    std::make_tuple(position, rotation));
         }
         ar(cereal::make_nvp("object_items", objItems));
         PTLOG(Info) << "unique object items: " << objItems.size();
