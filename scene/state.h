@@ -16,6 +16,7 @@ struct State
     State();
     State(const json& meta);
 
+    State clone() const;
     bool detach();
 
     glm::mat4x4 xform() const;

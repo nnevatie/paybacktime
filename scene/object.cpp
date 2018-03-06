@@ -266,6 +266,17 @@ Object& Object::updateTransparency()
     return *this;
 }
 
+Object Object::clone() const
+{
+    Object obj;
+    obj.d = std::make_shared<Data>(*d);
+    obj.d->meta.state = obj.d->meta.state.clone();
+    for (auto& child : obj.d->children)
+        child = child.clone();
+
+    return obj;
+}
+
 bool Object::detach()
 {
     PTLOG(Info) << d.use_count();

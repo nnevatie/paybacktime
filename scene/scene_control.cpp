@@ -121,15 +121,14 @@ SceneControl& SceneControl::operator()(TimePoint time,
             d->object.xform.pos = t;
 
             const ObjectItem objectItem(object, d->object.xform);
-
             if (d->state == Data::State::Adding)
             {
                 // Add item
                 if (mouseButtons[0] && d->scene->intersect(objectItem, 0.1f).empty())
-                    d->scene->add(objectItem);
+                    d->scene->add(objectItem.clone());
                 else
                 if (mouseButtons[2] && !d->scene->contains(objectItem))
-                    d->scene->add(objectItem);
+                    d->scene->add(objectItem.clone());
             }
             else
             if (d->state == Data::State::Removing &&
@@ -138,24 +137,22 @@ SceneControl& SceneControl::operator()(TimePoint time,
                 // Remove items
                 const auto firstObj = d->intersection.second.front();
                 if (mouseButtons[0] &&
-                   (!d->removedObject || firstObj.obj == d->removedObject))
+                   (!d->removedObject || firstObj.obj.id() == d->removedObject.id()))
                 {
                     d->removedObject = firstObj.obj;
                     d->scene->remove(firstObj);
                 }
                 else
                 if (mouseButtons[2] &&
-                   (!d->removedObject || firstObj.obj == d->removedObject))
+                   (!d->removedObject || firstObj.obj.id() == d->removedObject.id()))
                 {
                     for (auto& child : firstObj.obj.hierarchy())
                         child.state().toggle(time);
                 }
             }
-            else
-            if (!mouseButtons[0])
-                // Reset removed object type
-                d->removedObject = {};
         }
+        else
+            d->removedObject = {};
     }
     else
         d->state = Data::State::Idle;
@@ -175,7 +172,7 @@ SceneControl& SceneControl::operator()(gl::Fbo* fboOut, gl::Texture* texColor)
                 firstObj = d->intersection.second.front();
             else
                 for (const auto& intObj : d->intersection.second)
-                    if (intObj.obj == d->removedObject)
+                    if (intObj.obj.id() == d->removedObject.id())
                     {
                         firstObj = intObj;
                         break;

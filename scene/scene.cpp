@@ -115,8 +115,7 @@ Scene& Scene::setHorizon(const Horizon& horizon)
 Scene& Scene::add(const ObjectItem& item)
 {
     for (const auto& obj : item.obj.hierarchy())
-        //if (const auto model = obj.model())
-            d->objectItems.emplace_back(obj, item.xform);
+        d->objectItems.emplace_back(obj, item.xform);
 
     updateLightmap();
     return *this;
@@ -150,7 +149,7 @@ Scene& Scene::add(const CharacterItem& item)
 bool Scene::contains(const ObjectItem& item) const
 {
     for (const auto& i : d->objectItems)
-        if (i.obj == item.obj && i.bounds() == item.bounds())
+        if (i.obj.id() == item.obj.id() && i.bounds() == item.bounds())
             return true;
 
     return false;

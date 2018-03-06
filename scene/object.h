@@ -44,6 +44,7 @@ struct Object
     bool operator==(const Object& other) const;
     bool operator!=(const Object& other) const;
 
+    Object clone() const;
     bool detach();
 
     Object parent() const;

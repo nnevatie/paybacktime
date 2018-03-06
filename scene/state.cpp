@@ -20,6 +20,7 @@ struct StateItem
     using Ptr  = StateItem*;
     using Next = std::pair<std::string, Seconds>;
 
+    std::string id;
     glm::mat4x4 xform;
     Next        next;
 };
@@ -93,7 +94,7 @@ States createStates(const json& meta, StateItem*& initial)
 
         const auto xform     = glm::translate({}, pos);
         const auto next      = StateItem::Next(nextState, nextTime);
-        StateItem state      = {xform, next};
+        StateItem state      = {name, xform, next};
         states[name]         = state;
 
         if (!initial)
@@ -123,6 +124,16 @@ State::State() :
 State::State(const json& meta) :
     d(std::make_shared<Data>(meta))
 {}
+
+State State::clone() const
+{
+    State state;
+    state.d = std::make_shared<Data>(*d);
+    if (d->active)
+        state.d->active = &state.d->states[d->active->id];
+
+    return state;
+}
 
 bool State::detach()
 {

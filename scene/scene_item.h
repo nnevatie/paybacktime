@@ -27,6 +27,11 @@ struct SceneItem
         obj(obj), xform(xform)
     {}
 
+    SceneItem<T> clone() const
+    {
+        return {obj.clone(), xform};
+    }
+
     SceneItems<T> hierarchy() const
     {
         SceneItems<T> items;
