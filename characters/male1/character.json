@@ -7,9 +7,10 @@
         "idle": "idle.ozz",
         "idle_aim": "idle_aiming.ozz",
         "walk_forward": "walk_forward.ozz",
+        "walk_crouching": "walk_crouching_forward.ozz",
         "run_forward_inplace": "run_forward_inPlace.ozz",
         "death": "death_from_front_headshot.ozz",
         "death_crouching": "death_crouching_headshot_front.ozz",
         "jump_loop": "jump_loop.ozz"
-    } 
+    }
 }
