@@ -60,6 +60,7 @@ struct Character
     Object volume() const;
     Character& updateVolume();
 
+    Character& activate(const std::string& name);
     Character& animate(TimePoint time, Duration step);
 
 private:

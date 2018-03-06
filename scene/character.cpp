@@ -129,7 +129,7 @@ struct Character::Data
         parts(readParts(path, objectStore, textureStore)),
         bones(createBones(parts))
     {
-        anim.activate("idle_aim");
+        anim.activate("run_forward_inplace");
     }
 
     Meta      meta;
@@ -179,6 +179,12 @@ Character& Character::updateVolume()
     }
     auto dim  = (max - min).xzy() / c::cell::SIZE;
     d->volume = Object(dim);
+    return *this;
+}
+
+Character& Character::activate(const std::string& name)
+{
+    d->anim.activate(name);
     return *this;
 }
 
