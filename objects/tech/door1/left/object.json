@@ -2,7 +2,7 @@
     "origin": [8, 0, 0],
     "states":
     {
-        "closed": {"pos": [0,   0, 0], "next": {"state": "open",   "time": 3}},
-        "open":   {"pos": [-16, 0, 0], "next": {"state": "closed", "time": 3}}
+        "closed": {"pos": [0,   0, 0], "next": {"state": "open",   "time": 2}},
+        "open":   {"pos": [-16, 0, 0], "next": {"state": "closed", "time": 2}}
     }
 }
