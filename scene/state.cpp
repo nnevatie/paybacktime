@@ -59,7 +59,8 @@ struct Transition
         const auto e0 = t - time;
         const auto e1 = boost::chrono::duration_cast<Seconds>(e0);
         const auto f  = e1.count() / duration.count();
-        xform = glm::interpolate(state0->xform, state1->xform, f);
+        const auto s  = glm::smoothstep(0.f, 1.f, f);
+        xform = glm::interpolate(state0->xform, state1->xform, s);
         return f;
     }
 
