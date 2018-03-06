@@ -172,7 +172,7 @@ struct Data
         // Add character
         if (scene.characterGeometry().empty())
         {
-            scene.add(CharacterItem(character, {glm::vec3(-64, 0, 64)}));
+            scene.add(CharacterItem(character, {glm::vec3(-80, 0, -48)}));
             scene.updateLightmap();
         }
 
