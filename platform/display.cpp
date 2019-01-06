@@ -43,11 +43,7 @@ struct Display::Data
         title(title), size(size), fullscreen(fullscreen), icon(icon),
         window(nullptr), glContext(nullptr),
         nvgContext(nullptr), nanoGuiScreen(nullptr)
-    {
-    }
-    ~Data()
-    {
-    }
+    {}
 
     std::string      title;
     Size<int>        size;
