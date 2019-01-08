@@ -136,25 +136,6 @@ bool Display::open()
         // Init GLAD
         gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress);
 
-        //gladLoadGL();
-
-        /*
-        // Init glbinding
-        glbinding::GetProcAddress resolver;
-        glbinding::Binding::initialize(resolver);
-
-        // Error logging
-        glbinding::Binding::setCallbackMaskExcept(glbinding::CallbackMask::After,
-                                                 {"glGetError"});
-        glbinding::Binding::setAfterCallback([](const glbinding::FunctionCall &)
-        {
-            const auto error = glGetError();
-            if (error != GL_NO_ERROR)
-                PTLOG(Error) << "GL error: "
-                             << std::hex << int(error) << std::endl;
-        });
-        */
-
         // Debug callback
         glDebugMessageCallbackARB(debugCallback, 0);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
