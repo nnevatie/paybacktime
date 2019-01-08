@@ -20,7 +20,7 @@ namespace
 
 struct ivec4_cmp : std::binary_function<glm::ivec4, glm::ivec4, bool>
 {
-    bool operator()(const glm::ivec4& lhs, const glm::ivec4 rhs) const
+    bool operator()(const glm::ivec4& lhs, const glm::ivec4& rhs) const
     {
         return glm::any(glm::lessThan(lhs, rhs));
     }

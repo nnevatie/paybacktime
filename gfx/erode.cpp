@@ -24,8 +24,8 @@ struct Erode::Data
         auto dim = {size.w, size.h};
         for (int i = 0; i < 2; ++i)
             texErode[i].bind().alloc(dim, GL_RGBA16F, GL_RGBA, GL_FLOAT)
-                             .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                             .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                              .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                              .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
     Size<int>         size;
