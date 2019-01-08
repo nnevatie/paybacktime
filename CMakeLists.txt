@@ -6,6 +6,9 @@ project(paybacktime DESCRIPTION "Payback Time" LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Install prefix
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
+
 # Package dependencies
 find_package(Boost REQUIRED COMPONENTS filesystem program_options)
 find_package(cereal CONFIG REQUIRED)
@@ -50,7 +53,7 @@ file(GLOB SHADER_FILES
     )
 
 file(GLOB RESOURCE_FILES
-    #res/*.rc
+    res/*.rc
     )
 
 # OpenGL dependencies
@@ -78,7 +81,6 @@ add_definitions(-DEIGEN_NO_DEBUG
                 -DEIGEN_DONT_PARALLELIZE
                 -DGL_GLEXT_PROTOTYPES
                 -DNANOVG_GL3_IMPLEMENTATION
-                -DBOOST_THREAD_VERSION=4
                 -DGLM_FORCE_CXX14
                 -DGLM_FORCE_SWIZZLE
                 -DGLM_FORCE_CTOR_INIT
@@ -86,7 +88,7 @@ add_definitions(-DEIGEN_NO_DEBUG
                 )
 
 # Compile options
-add_compile_options(-Wno-pragma-pack -Wno-deprecated-declarations)
+add_compile_options(/MT -Wno-pragma-pack -Wno-deprecated-declarations)
 
 add_executable(${PROJECT_NAME} ${HEADER_FILES}
                                ${SOURCE_FILES} ${EXT_SOURCE_FILES}
@@ -98,8 +100,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
                       Boost::program_options
                       nanovg::nanovg
                       Eigen3::Eigen
-                      SDL2::SDL2
-                      SDL2::SDL2main
+                      SDL2::SDL2main SDL2::SDL2-static
                       cereal
                       glm
                       )
@@ -107,8 +108,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 ################################################################################
 # Installation
 ################################################################################
-set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
-
 function(install_files path dst)
     file(GLOB entries ${path})
     foreach(entry ${entries})
