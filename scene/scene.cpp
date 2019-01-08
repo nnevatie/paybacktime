@@ -247,7 +247,7 @@ Scene& Scene::updateLightmap()
 {
     const auto aabb = bounds();
     d->lightmapper.reset(cellResolution());
-    #if 0
+    #if 1
     PTLOG(Info) << "bounds: " << glm::to_string(aabb.min) << "->"
                               << glm::to_string(aabb.max) << ", size: "
                               << glm::to_string(aabb.size()) << ", cells: "

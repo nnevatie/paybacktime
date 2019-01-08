@@ -10,7 +10,7 @@
 */
 
 #include <nanogui/button.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <nanogui/theme.h>
 #include <nanogui/opengl.h>
 

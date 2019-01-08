@@ -1,7 +1,5 @@
 #include "fbo.h"
 
-#include <glbinding/gl/functions.h>
-
 namespace pt
 {
 namespace gl

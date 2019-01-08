@@ -1,19 +1,18 @@
 #pragma once
 
 #include <unordered_map>
+#include <chrono>
+#include <thread>
 
-#include <boost/chrono.hpp>
-#include <boost/thread/thread.hpp>
-
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "common/common.h"
 #include "common/log.h"
 
 namespace pt
 {
-using ChronoClock = boost::chrono::high_resolution_clock;
-using TimePoint   = boost::chrono::time_point<ChronoClock>;
+using ChronoClock = std::chrono::high_resolution_clock;
+using TimePoint   = std::chrono::time_point<ChronoClock>;
 using Duration    = ChronoClock::duration;
 
 template <typename T>
@@ -40,7 +39,7 @@ struct Time
     }
     Time& sleep(const Duration& duration)
     {
-        boost::this_thread::sleep_for(duration);
+        std::this_thread::sleep_for(duration);
         return *this;
     }
 
@@ -128,7 +127,7 @@ struct Throughput
 private:
     float now() const
     {
-        return boost::chrono::duration<float>(time.elapsed()).count();
+        return std::chrono::duration<float>(time.elapsed()).count();
     }
 
     Time<T> time;
@@ -149,11 +148,11 @@ using ThroughputCpu = Throughput<ChronoClock>;
 template <typename T>
 inline std::string durationSuffix() {return {};}
 template <>
-inline std::string durationSuffix<boost::milli>() {return "ms";}
+inline std::string durationSuffix<std::milli>() {return "ms";}
 template <>
-inline std::string durationSuffix<boost::micro>() {return "us";}
+inline std::string durationSuffix<std::micro>() {return "us";}
 
-template <typename T, typename U = boost::micro>
+template <typename T, typename U = std::micro>
 struct ScopedClock
 {
     ScopedClock(const SourceLocation& source, const std::string& message) :
@@ -162,7 +161,7 @@ struct ScopedClock
 
     ~ScopedClock()
     {
-        const float us = boost::chrono::duration
+        const float us = std::chrono::duration
                          <float, U>(clock_.elapsed()).count();
 
         Logger(Logger::Info, source_)

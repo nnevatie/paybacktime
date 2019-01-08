@@ -14,7 +14,7 @@
 #include <windows.h>
 #endif
 #include <nanogui/opengl.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <map>
 #include <thread>
 #include <chrono>

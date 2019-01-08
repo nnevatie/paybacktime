@@ -2,8 +2,7 @@
 
 #include <memory>
 
-#include <glbinding/gl/types.h>
-using namespace gl;
+#include <glad/glad.h>
 
 namespace pt
 {

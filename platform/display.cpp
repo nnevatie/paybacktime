@@ -1,12 +1,6 @@
 #include "display.h"
 
-#include <glbinding/gl/types.h>
-#include <glbinding/gl/enum.h>
-#include <glbinding/gl/bitfield.h>
-#include <glbinding/gl/functions.h>
-#include <glbinding/Binding.h>
-#include <glbinding/CallbackMask.h>
-using namespace gl;
+#include <glad/glad.h>
 
 #include <nanovg.h>
 #include <nanovg_gl.h>
@@ -108,8 +102,8 @@ bool Display::open()
         // Set GL context attributes
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                             SDL_GL_CONTEXT_PROFILE_CORE);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
                             SDL_GL_CONTEXT_DEBUG_FLAG |
                             SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -139,18 +133,27 @@ bool Display::open()
         // Create OpenGL context
         d->glContext = SDL_GL_CreateContext(d->window);
 
+        // Init GLAD
+        gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress);
+
+        //gladLoadGL();
+
+        /*
         // Init glbinding
-        glbinding::Binding::initialize();
+        glbinding::GetProcAddress resolver;
+        glbinding::Binding::initialize(resolver);
 
         // Error logging
-        glbinding::setCallbackMaskExcept(glbinding::CallbackMask::After,
-                                        {"glGetError"});
-        glbinding::setAfterCallback([](const glbinding::FunctionCall &)
+        glbinding::Binding::setCallbackMaskExcept(glbinding::CallbackMask::After,
+                                                 {"glGetError"});
+        glbinding::Binding::setAfterCallback([](const glbinding::FunctionCall &)
         {
             const auto error = glGetError();
             if (error != GL_NO_ERROR)
-                PTLOG(Error) << "GL error: " << std::hex << error << std::endl;
+                PTLOG(Error) << "GL error: "
+                             << std::hex << int(error) << std::endl;
         });
+        */
 
         // Debug callback
         glDebugMessageCallbackARB(debugCallback, 0);

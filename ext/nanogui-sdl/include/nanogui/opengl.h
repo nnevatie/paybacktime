@@ -13,7 +13,7 @@
 #ifndef __NGSDL_OPENGL_INCLUDE_H__
 #define __NGSDL_OPENGL_INCLUDE_H__
 
-#include <SDL2/SDL_opengl.h>
+#include <SDL_opengl.h>
 #include <nanogui/common.h>
 #include <nanovg.h>
 

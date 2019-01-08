@@ -15,7 +15,7 @@
 #include <nanogui/theme.h>
 #include <nanogui/opengl.h>
 #include <nanogui/entypo.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <numeric>
 
 NAMESPACE_BEGIN(nanogui)

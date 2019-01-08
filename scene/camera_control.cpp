@@ -50,7 +50,7 @@ CameraControl& CameraControl::operator()(Duration step)
     using namespace glm;
 
     // Timestep
-    const float t      = boost::chrono::duration<float>(step).count();
+    const float t      = std::chrono::duration<float>(step).count();
 
     // Position
     d->pos[0]         += t * d->pos[1];

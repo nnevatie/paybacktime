@@ -2,7 +2,7 @@
 
 #include <sstream>
 #include <cmath>
-#include <gsl.h>
+#include <gsl-lite.hpp>
 
 #include "file_system.h"
 

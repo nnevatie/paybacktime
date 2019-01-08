@@ -17,7 +17,7 @@
 #include <nanogui/textbox.h>
 #include <nanogui/opengl.h>
 #include <nanogui/theme.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <regex>
 
 NAMESPACE_BEGIN(nanogui)

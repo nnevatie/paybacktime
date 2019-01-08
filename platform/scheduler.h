@@ -14,8 +14,8 @@ class Scheduler
 {
 public:
 
-    typedef std::function<bool(TimePoint, Duration)> Simulation;
-    typedef std::function<bool(TimePoint, float)>    Renderer;
+    using Simulation = std::function<bool(TimePoint, Duration)>;
+    using Renderer   = std::function<bool(TimePoint, float)>;
 
     enum State
     {

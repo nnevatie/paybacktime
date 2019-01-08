@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cmath>
+
+#include <boost/type_traits/is_assignable.hpp>
 #include <boost/circular_buffer.hpp>
 
 namespace pt

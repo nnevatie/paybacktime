@@ -1,21 +1,18 @@
-cmake_minimum_required(VERSION 2.8.4)
-project(paybacktime)
+# General
+cmake_minimum_required(VERSION 3.1)
+project(paybacktime DESCRIPTION "Payback Time" LANGUAGES C CXX)
 
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-endif()
+# Language standard
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
-    -Wall \
-    -Wno-unused-function \
-    -Wno-ignored-attributes \
-    -Wno-deprecated-declarations \
-    -Wno-misleading-indentation \
-    -fopenmp -ffast-math -march=core2")
-
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}
-    -Wl,--stack,16777216")
+# Package dependencies
+find_package(Boost REQUIRED COMPONENTS filesystem program_options)
+find_package(cereal CONFIG REQUIRED)
+find_package(Eigen3 CONFIG REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(nanovg CONFIG REQUIRED)
 
 file(GLOB HEADER_FILES
     *.h
@@ -41,10 +38,8 @@ file(GLOB SOURCE_FILES
     gl/*.cpp
     )
 
-file(GLOB EXT_HEADER_FILES
-    )
-
 file(GLOB EXT_SOURCE_FILES
+    ext/glad/src/*.c
     ext/nanovg/src/*.c
     ext/nanogui-sdl/src/*.cpp
     ext/ozz-animation/src_fused/*.cc
@@ -55,50 +50,26 @@ file(GLOB SHADER_FILES
     )
 
 file(GLOB RESOURCE_FILES
-    res/*.rc
-    )
-
-# System dependencies
-set(SYS_LIBS
-    mingw32
-    )
-
-# Boost dependencies
-set(BOOST_LIBS
-    boost_system
-    boost_chrono
-    boost_thread
-    boost_filesystem
-    boost_program_options
-    )
-
-# SDL dependencies
-set(SDL_LIBS
-    SDL2main
-    SDL2
-    SDL2_image
+    #res/*.rc
     )
 
 # OpenGL dependencies
 set(OPENGL_LIBS
-    glbinding
     opengl32
     )
 
-# Project include paths
-include_directories(
-    ${CMAKE_SOURCE_DIR}
-    )
+# Include paths
+include_directories(${CMAKE_SOURCE_DIR})
 
-# External include paths
+find_path(NANOVG_INCLUDE_DIR nanovg.h)
+include_directories(${NANOVG_INCLUDE_DIR})
+
 include_directories(
-    SYSTEM
     ${CMAKE_SOURCE_DIR}/ext
-    ${CMAKE_SOURCE_DIR}/ext/stb
-    ${CMAKE_SOURCE_DIR}/ext/eigen
-    ${CMAKE_SOURCE_DIR}/ext/nanovg/src
+    ${CMAKE_SOURCE_DIR}/ext/glad/include
+    ${CMAKE_SOURCE_DIR}/ext/glad/include/glad
+    ${CMAKE_SOURCE_DIR}/ext/glad/include/KHR
     ${CMAKE_SOURCE_DIR}/ext/nanogui-sdl/include
-    ${CMAKE_SOURCE_DIR}/ext/gsl-lite/include
     ${CMAKE_SOURCE_DIR}/ext/ozz-animation/include
     )
 
@@ -108,19 +79,29 @@ add_definitions(-DEIGEN_NO_DEBUG
                 -DGL_GLEXT_PROTOTYPES
                 -DNANOVG_GL3_IMPLEMENTATION
                 -DBOOST_THREAD_VERSION=4
-                -DGLM_FORCE_SWIZZLE)
+                -DGLM_FORCE_CXX14
+                -DGLM_FORCE_SWIZZLE
+                -DGLM_FORCE_CTOR_INIT
+                -DGLM_ENABLE_EXPERIMENTAL
+                )
 
-add_library(${PROJECT_NAME}_ext ${EXT_HEADER_FILES} ${EXT_SOURCE_FILES})
+# Compile options
+add_compile_options(-Wno-pragma-pack -Wno-deprecated-declarations)
 
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
+add_executable(${PROJECT_NAME} ${HEADER_FILES}
+                               ${SOURCE_FILES} ${EXT_SOURCE_FILES}
                                ${SHADER_FILES} ${RESOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME}
-                      ${PROJECT_NAME}_ext
-                      ${SYS_LIBS}
-                      ${BOOST_LIBS}
-                      ${SDL_LIBS}
+target_link_libraries(${PROJECT_NAME} PRIVATE
                       ${OPENGL_LIBS}
+                      Boost::filesystem
+                      Boost::program_options
+                      nanovg::nanovg
+                      Eigen3::Eigen
+                      SDL2::SDL2
+                      SDL2::SDL2main
+                      cereal
+                      glm
                       )
 
 ################################################################################

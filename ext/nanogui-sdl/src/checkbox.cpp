@@ -11,7 +11,7 @@
 
 #include <nanogui/checkbox.h>
 #include <nanovg.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <nanogui/theme.h>
 #include <nanogui/entypo.h>
 

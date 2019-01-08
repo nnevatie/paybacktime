@@ -7,7 +7,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "geom/size.h"
 #include "img/image.h"

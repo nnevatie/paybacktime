@@ -3,8 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <glbinding/gl/types.h>
-using namespace gl;
+#include <glad/glad.h>
 
 #include "common/file_system.h"
 

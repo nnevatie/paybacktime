@@ -3,9 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <glbinding/gl/types.h>
-#include <glbinding/gl/enum.h>
-using namespace gl;
+#include <glad/glad.h>
 
 #include <glm/vec3.hpp>
 

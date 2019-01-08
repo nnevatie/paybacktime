@@ -104,7 +104,7 @@
   PFNGLUNIFORM2FVPROC glUniform2fv;
 #endif
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 NAMESPACE_BEGIN(nanogui)
 static bool __glInit = false;

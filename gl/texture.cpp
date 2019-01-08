@@ -1,7 +1,5 @@
 #include "texture.h"
 
-#include <glbinding/gl/functions.h>
-
 #include <glm/gtc/constants.hpp>
 
 #include "common/log.h"
@@ -210,8 +208,8 @@ Texture& Texture::alloc(const Image& image, bool srgb)
 {
     struct Format
     {
-        GLenum internalFormat;
-        GLenum format;
+        int internalFormat;
+        int format;
     }
     const formats[] =
     {
@@ -247,7 +245,7 @@ Texture& Texture::alloc(const Grid<glm::vec4>& grid)
 float Texture::anisotropyMax()
 {
     GLfloat f = 0.f;
-    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &f);
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &f);
     return f;
 }
 

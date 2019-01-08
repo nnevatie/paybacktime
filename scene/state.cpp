@@ -13,7 +13,7 @@ namespace pt
 {
 namespace
 {
-using Seconds = boost::chrono::duration<float>;
+using Seconds = std::chrono::duration<float>;
 
 struct StateItem
 {
@@ -58,7 +58,7 @@ struct Transition
     float animate(TimePoint t, Duration /*step*/)
     {
         const auto e0 = t - time;
-        const auto e1 = boost::chrono::duration_cast<Seconds>(e0);
+        const auto e1 = std::chrono::duration_cast<Seconds>(e0);
         const auto f  = e1.count() / duration.count();
         const auto s  = glm::smoothstep(0.f, 1.f, f);
         xform = glm::interpolate(state0->xform, state1->xform, s);

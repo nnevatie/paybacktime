@@ -1,8 +1,5 @@
 #include "rbo.h"
 
-#include <glbinding/gl/functions.h>
-#include <glbinding/gl/enum.h>
-
 namespace pt
 {
 namespace gl

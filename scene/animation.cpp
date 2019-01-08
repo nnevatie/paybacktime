@@ -283,7 +283,7 @@ Animation& Animation::animate(TimePoint time, Duration /*step*/)
 {
     if (d->active)
     {
-        const auto t0 = boost::chrono::duration<float>
+        const auto t0 = std::chrono::duration<float>
                        (time.time_since_epoch()).count();
 
         ozz::SamplingJob     sampJob;

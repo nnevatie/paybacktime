@@ -1,6 +1,6 @@
 #include "context.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "platform/clock.h"
 

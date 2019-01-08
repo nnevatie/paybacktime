@@ -1118,23 +1118,23 @@ OZZ_INLINE ozz::math::SimdFloat4 TransformVector(const ozz::math::Float4x4& _m,
 
 #if !defined(__GNUC__) || defined(OZZ_SIMD_REF)
 // Returns per element addition of _a and _b.
-OZZ_INLINE ozz::math::SimdFloat4 operator+(ozz::math::_SimdFloat4 _a,
-                                           ozz::math::_SimdFloat4 _b);
+OZZ_INLINE ozz::math::SimdFloat4 add(ozz::math::_SimdFloat4 _a,
+                                     ozz::math::_SimdFloat4 _b);
 
 // Returns per element subtraction of _a and _b.
-OZZ_INLINE ozz::math::SimdFloat4 operator-(ozz::math::_SimdFloat4 _a,
-                                           ozz::math::_SimdFloat4 _b);
+OZZ_INLINE ozz::math::SimdFloat4 sub(ozz::math::_SimdFloat4 _a,
+                                     ozz::math::_SimdFloat4 _b);
 
 // Returns per element negation of _v.
-OZZ_INLINE ozz::math::SimdFloat4 operator-(ozz::math::_SimdFloat4 _v);
+OZZ_INLINE ozz::math::SimdFloat4 neg(ozz::math::_SimdFloat4 _v);
 
 // Returns per element multiplication of _a and _b.
-OZZ_INLINE ozz::math::SimdFloat4 operator*(ozz::math::_SimdFloat4 _a,
-                                           ozz::math::_SimdFloat4 _b);
+OZZ_INLINE ozz::math::SimdFloat4 mul(ozz::math::_SimdFloat4 _a,
+                                    ozz::math::_SimdFloat4 _b);
 
 // Returns per element division of _a and _b.
-OZZ_INLINE ozz::math::SimdFloat4 operator/(ozz::math::_SimdFloat4 _a,
-                                           ozz::math::_SimdFloat4 _b);
+OZZ_INLINE ozz::math::SimdFloat4 div(ozz::math::_SimdFloat4 _a,
+                                     ozz::math::_SimdFloat4 _b);
 #endif  // !defined(__GNUC__) || defined(OZZ_SIMD_REF)
 
 // Computes the multiplication of matrix Float4x4 and vector _v.

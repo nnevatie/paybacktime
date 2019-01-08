@@ -1,7 +1,5 @@
 #include "shaders.h"
 
-#include <glbinding/gl/enum.h>
-
 #include "common/common.h"
 #include "common/log.h"
 #include "uniforms.h"

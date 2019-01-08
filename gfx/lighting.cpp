@@ -1,7 +1,5 @@
 #include "lighting.h"
 
-#include <glbinding/gl/bitfield.h>
-
 #include <glm/matrix.hpp>
 
 #include "common/common.h"
@@ -22,7 +20,6 @@ struct Lighting::Data
 };
 
 Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
-    d(std::make_shared<Data>()),
     rect(squareMesh()),
     vsQuad(gl::Shader::path("quad_uv.vs.glsl")),
     fsSc(gl::Shader::path("lighting_scattering.fs.glsl")),
@@ -33,7 +30,8 @@ Lighting::Lighting(const cfg::Video& config, const gl::Texture& texDepth) :
     progOut({vsQuad, fsOut, fsCommon},
             {{0, "position"}, {1, "uv"}}),
     blurSc(Size<int>(config.sc.scale * config.output.renderSize())),
-    scSampleCount(config.sc.samples)
+    scSampleCount(config.sc.samples),
+    d(std::make_shared<Data>())
 {
     // Texture and FBO
     auto size    = config.output.renderSize();

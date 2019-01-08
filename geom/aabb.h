@@ -20,7 +20,8 @@ struct Aabb
     using V = glm::vec3;
     using Vertices = std::array<V, 8>;
 
-    Aabb()
+    Aabb() :
+        min(glm::zero<V>()), max(glm::zero<V>())
     {}
 
     Aabb(const V& max) :

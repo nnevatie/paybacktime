@@ -4,9 +4,7 @@
 #include <vector>
 #include <iostream>
 
-#include <glbinding/gl/types.h>
-#include <glbinding/gl/enum.h>
-using namespace gl;
+#include <glad/glad.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>

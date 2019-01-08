@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glbinding/gl/functions.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 

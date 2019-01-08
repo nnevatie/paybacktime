@@ -180,7 +180,7 @@ Lightmap& Lightmap::update(const mat::Density& density,
             }
 
             #if 0
-            const auto elapsed = boost::chrono::duration<float, boost::milli>
+            const auto elapsed = std::chrono::duration<float, boost::milli>
                                 (clock.elapsed()).count();
             const auto vol     = size.x * size.y * size.z;
             PTLOG(Info) << "elapsed " << elapsed << " ms, "
@@ -220,7 +220,7 @@ Lightmap& Lightmap::update(const mat::Density& density,
             }
 
             #if 0
-            const auto elapsed = boost::chrono::duration<float, boost::milli>
+            const auto elapsed = std::chrono::duration<float, boost::milli>
                                 (clockHq.elapsed()).count();
             const auto vol     = size.x * size.y * size.z;
             PTLOG(Info) << "HQ elapsed " << elapsed << " ms, "

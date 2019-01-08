@@ -4,8 +4,6 @@
 #include <iomanip>
 #include <unordered_map>
 
-#include <glbinding/gl/functions.h>
-
 #include <nanovg.h>
 
 #include "common/common.h"
@@ -38,7 +36,7 @@ RenderStats::RenderStats(NVGcontext* vg) :
 
 void RenderStats::accumulate(const Time& frameTime)
 {
-    using Milli = boost::chrono::duration<float, boost::milli>;
+    using Milli = std::chrono::duration<float, std::milli>;
     for (const auto& t : frameTime.map())
     {
         auto it = d->times.find(t.first);

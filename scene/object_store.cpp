@@ -14,7 +14,7 @@ struct ObjectStore::Data
     Data(const fs::path& path, TextureStore& textureStore) :
         path(path)
     {
-        PTTIMEU("create objects", boost::milli);
+        PTTIMEU("create objects", std::milli);
         const auto objectCount = createObjects({path, path}, *this, textureStore);
         PTLOG(Info) << std::to_string(objectCount) + " objects";
     }

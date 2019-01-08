@@ -14,6 +14,9 @@ struct Output
     float     scale;
     glm::vec2 size;
 
+    Output(float scale) : scale(scale)
+    {}
+
     glm::vec2 renderSize() const
     {
         return scale * size;
@@ -67,13 +70,12 @@ struct Config
 namespace preset
 {
 
-static constexpr Video
-    ULTRA = {{1.00f, {}}, {1.00f, 32}, {1.00f}, {1.00f}, {1.00f, 20}},
-    HIGH  = {{1.00f, {}}, {1.00f, 24}, {0.50f}, {1.00f}, {0.50f, 15}},
-    LOW   = {{1.00f, {}}, {0.50f, 16}, {0.25f}, {0.50f}, {0.25f, 10}};
+static const Video
+    ULTRA = {{1.00f}, {1.00f, 32}, {1.00f}, {1.00f}, {1.00f, 20}},
+    HIGH  = {{1.00f}, {1.00f, 24}, {0.50f}, {1.00f}, {0.50f, 15}},
+    LOW   = {{1.00f}, {0.50f, 16}, {0.25f}, {0.50f}, {0.25f, 10}};
 
-static constexpr Config config = {HIGH,
-                                 {false}};
+static const Config config = {HIGH, {false}};
 
 } // namespace preset
 

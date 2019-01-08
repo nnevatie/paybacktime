@@ -23,9 +23,9 @@ bool Scheduler::start()
     state = StateRunning;
     Time<ChronoClock> clock;
 
-    TimePoint timeSim;
-    TimePoint timePrev = clock.now();
-    Duration  durAcc;
+    TimePoint timeSim  = clock.now();
+    TimePoint timePrev = timeSim;
+    Duration  durAcc(0);
 
     while (state == StateRunning)
     {
@@ -46,7 +46,7 @@ bool Scheduler::start()
         renderer(timeSim, float(durAcc.count()) / timeStep.count());
 
         if (options & OptionPreserveCpu)
-            clock.sleep(boost::chrono::milliseconds(1));
+            clock.sleep(std::chrono::milliseconds(1));
     }
     state = StateStopped;
     return true;

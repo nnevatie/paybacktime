@@ -1,5 +1,7 @@
 #include "texture_atlas.h"
 
+#include <glad/glad.h>
+
 #include "platform/clock.h"
 #include "common/log.h"
 
@@ -20,7 +22,7 @@ void TextureAtlas::update()
     texture.bind().alloc(atlas.image(), srgb)
                   .set(GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                   .set(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                  .set(GL_TEXTURE_MAX_ANISOTROPY_EXT, Texture::anisotropyMax());
+                  .set(GL_TEXTURE_MAX_ANISOTROPY, Texture::anisotropyMax());
 }
 
 TextureAtlas::EntryCube TextureAtlas::insert(const ImageCube& imageCube)

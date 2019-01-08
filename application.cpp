@@ -1,5 +1,6 @@
 #include "application.h"
 
+#include <boost/type_traits/is_assignable.hpp>
 #include <boost/format.hpp>
 
 #include <glm/vec4.hpp>
@@ -159,8 +160,8 @@ struct Data
         scene.animate(time, step);
 
         // Update object store
-        if (boost::chrono::duration<float, boost::milli>
-           (time - lastLiveUpdate).count() > 1000.f)
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(
+            time - lastLiveUpdate).count() > 1000)
         {
             if (objectStore.update(textureStore))
                 scene.updateLightmap();
@@ -185,9 +186,7 @@ struct Data
 
     bool render(TimePoint time, float /*a*/)
     {
-        const auto timeSec = boost::chrono::duration<float>(
-                                 time - TimePoint()).count();
-
+        const auto timeSec = std::chrono::duration<float>(time.time_since_epoch()).count();
         const auto detailedStats = config.debug.detailedStats;
 
         TimeTree<GpuClock> timeTree;
@@ -322,7 +321,7 @@ struct Data
     bool run()
     {
         namespace arg = std::placeholders;
-        Scheduler scheduler(boost::chrono::milliseconds(20),
+        Scheduler scheduler(std::chrono::milliseconds(20),
                             std::bind(&Data::simulate, this, arg::_1, arg::_2),
                             std::bind(&Data::render,   this, arg::_1, arg::_2));
         return scheduler.start();

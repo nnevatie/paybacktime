@@ -1,8 +1,5 @@
 #include "buffers.h"
 
-#include <glbinding/gl/enum.h>
-#include <glbinding/gl/functions.h>
-
 #include "common/log.h"
 
 namespace pt

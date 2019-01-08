@@ -1,8 +1,5 @@
 #include "object.h"
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
@@ -16,8 +13,6 @@
 
 #include "state.h"
 #include "constants.h"
-
-namespace bpt = boost::property_tree;
 
 namespace pt
 {
