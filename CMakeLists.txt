@@ -94,6 +94,9 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES}
                                ${SOURCE_FILES} ${EXT_SOURCE_FILES}
                                ${SHADER_FILES} ${RESOURCE_FILES})
 
+# Link options
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
                       ${OPENGL_LIBS}
                       Boost::filesystem
