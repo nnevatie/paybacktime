@@ -1,6 +1,0 @@
-[submodule "ext/gsl-lite"]
-	path = ext/gsl-lite
-	url = git@github.com:martinmoene/gsl-lite.git
-[submodule "ext/eigen"]
-	path = ext/eigen
-	url = git@github.com:libigl/eigen.git
